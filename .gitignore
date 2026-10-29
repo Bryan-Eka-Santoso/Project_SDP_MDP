@@ -1,33 +1,7 @@
-# Dependencies & Packages
 node_modules/
-.pnp
-.pnp.js
-
-# Environment Variables
 .env
-.env.local
-.env.*.local
-
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-logs/
-*.log
-
-# Android & Gradle
-.gradle/
 build/
-app/build/
-*.iml
-.idea/
+.gradle/
 local.properties
-.cxx/
+.idea/
 *.apk
-*.aab
-
-# OS & Editor
-.DS_Store
-Thumbs.db
-*.swp
-*.swo
