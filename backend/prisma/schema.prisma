@@ -1,8 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// Skema database SIM Akademik SMAK Santa Agnes.
+// ADR-017: struktur mengikuti PDM v2 (laporan BAB III). Nama model/field memakai bahasa Inggris
+// sesuai docs/GLOSSARY.md, sedangkan nama tabel/kolom fisik tetap nama PDM dalam snake_case huruf kecil.
 
 // ADR-016: prisma-client-js agar bisa di-require dari CommonJS lewat @prisma/client.
 generator client {
@@ -12,4 +10,756 @@ generator client {
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
+}
+
+// =====================================================================
+// ENUM
+// =====================================================================
+
+enum Role {
+  STUDENT
+  TEACHER
+  GUARDIAN
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+}
+
+enum SemesterType {
+  ODD
+  EVEN
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+}
+
+enum FacilityType {
+  ROOM
+  ITEM
+}
+
+enum ScheduleChangeType {
+  SUBSTITUTE
+  RESCHEDULE
+  CANCEL
+}
+
+enum AttendanceStatus {
+  PRESENT
+  SICK
+  EXCUSED
+  ABSENT
+}
+
+enum LeaveRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum AnnouncementScope {
+  SCHOOL
+  CLASS
+}
+
+enum AcademicEventType {
+  EXAM
+  HOLIDAY
+  ACTIVITY
+}
+
+enum BookingStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  RETURNED
+}
+
+enum BillStatus {
+  PAID
+  UNPAID
+}
+
+enum SurveyStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+}
+
+enum NotificationType {
+  SCHEDULE_CHANGE
+  ANNOUNCEMENT
+  VIOLATION
+  LEAVE_REQUEST
+  BOOKING
+  BILL_OVERDUE
+}
+
+// =====================================================================
+// A. PENGGUNA DAN HAK AKSES
+// =====================================================================
+
+// Satu akun satu role; wali kelas bukan role (ADR-004), melainkan ClassGroup.homeroomTeacherId.
+model User {
+  id           Int        @id @default(autoincrement()) @map("id_akun")
+  email        String     @unique @db.VarChar(100)
+  passwordHash String     @map("password") @db.VarChar(255)
+  role         Role
+  status       UserStatus @default(ACTIVE)
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  admin                  Admin?
+  teacher                Teacher?
+  student                Student?
+  guardian               Guardian?
+  announcements          Announcement[]
+  facilityBookings       FacilityBooking[]
+  notificationRecipients NotificationRecipient[]
+  deviceTokens           DeviceToken[]
+  refreshTokens          RefreshToken[]
+
+  @@map("akun")
+}
+
+model Admin {
+  id        Int      @id @default(autoincrement()) @map("id_admin")
+  userId    Int      @unique @map("id_akun")
+  name      String   @map("nama") @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user             User              @relation(fields: [userId], references: [id])
+  verifiedBookings FacilityBooking[]
+
+  @@map("admin")
+}
+
+model Teacher {
+  id             Int      @id @default(autoincrement()) @map("id_guru")
+  userId         Int      @unique @map("id_akun")
+  employeeNumber String   @unique @map("nip") @db.VarChar(30)
+  name           String   @map("nama") @db.VarChar(100)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  user                  User                 @relation(fields: [userId], references: [id])
+  homeroomClasses       ClassGroup[]
+  teachingAssignments   TeachingAssignment[]
+  substituteChanges     ScheduleChange[]
+  verifiedLeaveRequests LeaveRequest[]
+  reportedViolations    Violation[]
+  liaisonNotes          LiaisonNote[]
+
+  @@map("guru")
+}
+
+model Student {
+  id        Int      @id @default(autoincrement()) @map("id_siswa")
+  userId    Int      @unique @map("id_akun")
+  nis       String   @unique @db.VarChar(30)
+  name      String   @map("nama") @db.VarChar(100)
+  birthDate DateTime @map("tanggal_lahir") @db.Date
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user              User                     @relation(fields: [userId], references: [id])
+  guardians         StudentGuardian[]
+  classMemberships  ClassMember[]
+  surveyResponses   ElectiveSurveyResponse[]
+  packageSelections PackageSelection[]
+  attendances       Attendance[]
+  leaveRequests     LeaveRequest[]
+  scores            Score[]
+  progressNotes     ProgressNote[]
+  violations        Violation[]
+  liaisonNotes      LiaisonNote[]
+  bills             Bill[]
+
+  @@map("siswa")
+}
+
+model Guardian {
+  id        Int      @id @default(autoincrement()) @map("id_wali_murid")
+  userId    Int      @unique @map("id_akun")
+  name      String   @map("nama") @db.VarChar(100)
+  phone     String   @map("no_telp") @db.VarChar(20)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user          User              @relation(fields: [userId], references: [id])
+  students      StudentGuardian[]
+  leaveRequests LeaveRequest[]
+
+  @@map("wali_murid")
+}
+
+// [M:N] Siswa <-> WaliMurid
+model StudentGuardian {
+  studentId    Int      @map("id_siswa")
+  guardianId   Int      @map("id_wali_murid")
+  relationship String   @map("hubungan") @db.VarChar(30)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  student  Student  @relation(fields: [studentId], references: [id])
+  guardian Guardian @relation(fields: [guardianId], references: [id])
+
+  @@id([studentId, guardianId])
+  @@map("siswa_wali_murid")
+}
+
+// Refresh token disimpan dalam bentuk hash agar bisa dicabut saat logout/blokir.
+model RefreshToken {
+  id        Int       @id @default(autoincrement()) @map("id_refresh_token")
+  userId    Int       @map("id_akun")
+  tokenHash String    @unique @map("token_hash") @db.VarChar(255)
+  expiresAt DateTime  @map("kedaluwarsa_pada")
+  revokedAt DateTime? @map("dicabut_pada")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_token")
+}
+
+model DeviceToken {
+  id        Int      @id @default(autoincrement()) @map("id_token_perangkat")
+  userId    Int      @map("id_akun")
+  token     String   @unique @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("token_perangkat")
+}
+
+// =====================================================================
+// B. DATA MASTER AKADEMIK
+// =====================================================================
+
+model AcademicYear {
+  id        Int      @id @default(autoincrement()) @map("id_tahun_ajaran")
+  name      String   @unique @map("nama") @db.VarChar(30)
+  startDate DateTime @map("tanggal_mulai") @db.Date
+  endDate   DateTime @map("tanggal_selesai") @db.Date
+  isActive  Boolean  @default(false) @map("is_aktif")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  semesters       Semester[]
+  classGroups     ClassGroup[]
+  subjectPackages SubjectPackage[]
+  electiveSurveys ElectiveSurvey[]
+
+  @@map("tahun_ajaran")
+}
+
+// Dipisah dari TahunAjaran (ADR-005): kelas terikat tahun ajaran, sedangkan penugasan,
+// komponen nilai, dan turunannya terikat semester.
+model Semester {
+  id             Int          @id @default(autoincrement()) @map("id_semester")
+  academicYearId Int          @map("id_tahun_ajaran")
+  type           SemesterType @map("jenis")
+  startDate      DateTime     @map("tanggal_mulai") @db.Date
+  endDate        DateTime     @map("tanggal_selesai") @db.Date
+  isActive       Boolean      @default(false) @map("is_aktif")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+
+  academicYear        AcademicYear         @relation(fields: [academicYearId], references: [id])
+  teachingAssignments TeachingAssignment[]
+  gradeComponents     GradeComponent[]
+
+  @@unique([academicYearId, type])
+  @@map("semester")
+}
+
+model ClassGroup {
+  id                Int      @id @default(autoincrement()) @map("id_kelas")
+  academicYearId    Int      @map("id_tahun_ajaran")
+  // Opsional karena kelas hasil pembagian paket (F-MPP-05) dibuat sebelum wali kelasnya diatur.
+  homeroomTeacherId Int?     @map("id_wali_kelas")
+  name              String   @map("nama_kelas") @db.VarChar(30)
+  gradeLevel        String   @map("tingkat") @db.VarChar(10)
+  capacity          Int      @map("kapasitas")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  academicYear        AcademicYear         @relation(fields: [academicYearId], references: [id])
+  homeroomTeacher     Teacher?             @relation(fields: [homeroomTeacherId], references: [id])
+  members             ClassMember[]
+  teachingAssignments TeachingAssignment[]
+  announcements       Announcement[]
+
+  @@unique([academicYearId, name])
+  @@map("kelas")
+}
+
+// [M:N] Siswa <-> Kelas
+model ClassMember {
+  studentId    Int      @map("id_siswa")
+  classGroupId Int      @map("id_kelas")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  student    Student    @relation(fields: [studentId], references: [id])
+  classGroup ClassGroup @relation(fields: [classGroupId], references: [id])
+
+  @@id([studentId, classGroupId])
+  @@map("siswa_kelas")
+}
+
+model Subject {
+  id        Int      @id @default(autoincrement()) @map("id_mapel")
+  code      String   @unique @map("kode_mapel") @db.VarChar(20)
+  name      String   @map("nama_mapel") @db.VarChar(100)
+  type      String   @map("jenis") @db.VarChar(30)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  teachingAssignments TeachingAssignment[]
+  gradeComponents     GradeComponent[]
+  packageItems        SubjectPackageItem[]
+  surveyResponses     ElectiveSurveyResponse[]
+
+  @@map("mata_pelajaran")
+}
+
+// Guru x mapel x kelas x semester
+model TeachingAssignment {
+  id           Int      @id @default(autoincrement()) @map("id_penugasan")
+  teacherId    Int      @map("id_guru")
+  subjectId    Int      @map("id_mapel")
+  classGroupId Int      @map("id_kelas")
+  semesterId   Int      @map("id_semester")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  teacher       Teacher        @relation(fields: [teacherId], references: [id])
+  subject       Subject        @relation(fields: [subjectId], references: [id])
+  classGroup    ClassGroup     @relation(fields: [classGroupId], references: [id])
+  semester      Semester       @relation(fields: [semesterId], references: [id])
+  scheduleSlots ScheduleSlot[]
+  scores        Score[]
+  progressNotes ProgressNote[]
+
+  @@unique([teacherId, subjectId, classGroupId, semesterId])
+  @@map("penugasan_guru")
+}
+
+// Per mapel per semester (PO-01); bobot dalam persen bulat, total satu mapel = 100.
+model GradeComponent {
+  id         Int      @id @default(autoincrement()) @map("id_komponen")
+  subjectId  Int      @map("id_mapel")
+  semesterId Int      @map("id_semester")
+  name       String   @map("nama_komponen") @db.VarChar(50)
+  weight     Int      @map("bobot")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  subject  Subject  @relation(fields: [subjectId], references: [id])
+  semester Semester @relation(fields: [semesterId], references: [id])
+  scores   Score[]
+
+  @@unique([subjectId, semesterId, name])
+  @@map("komponen_penilaian")
+}
+
+model ViolationType {
+  id        Int      @id @default(autoincrement()) @map("id_jenis_pelanggaran")
+  name      String   @map("nama") @db.VarChar(100)
+  points    Int      @map("bobot_poin")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  violations Violation[]
+
+  @@map("jenis_pelanggaran")
+}
+
+model Facility {
+  id        Int          @id @default(autoincrement()) @map("id_fasilitas")
+  name      String       @map("nama") @db.VarChar(100)
+  type      FacilityType @map("jenis")
+  quantity  Int          @map("jumlah")
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at")
+
+  scheduleSlots      ScheduleSlot[]
+  rescheduledChanges ScheduleChange[]
+  bookings           FacilityBooking[]
+
+  @@map("fasilitas")
+}
+
+// =====================================================================
+// C. MATA PELAJARAN PILIHAN
+// =====================================================================
+
+model SubjectPackage {
+  id             Int      @id @default(autoincrement()) @map("id_paket_mapel")
+  academicYearId Int      @map("id_tahun_ajaran")
+  name           String   @map("nama_paket") @db.VarChar(100)
+  capacity       Int      @map("kapasitas")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  academicYear AcademicYear         @relation(fields: [academicYearId], references: [id])
+  items        SubjectPackageItem[]
+  selections   PackageSelection[]
+
+  @@map("paket_mata_pelajaran")
+}
+
+// [M:N] PaketMataPelajaran <-> MataPelajaran
+model SubjectPackageItem {
+  packageId Int      @map("id_paket_mapel")
+  subjectId Int      @map("id_mapel")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  package SubjectPackage @relation(fields: [packageId], references: [id])
+  subject Subject        @relation(fields: [subjectId], references: [id])
+
+  @@id([packageId, subjectId])
+  @@map("paket_mapel_detail")
+}
+
+model ElectiveSurvey {
+  id             Int          @id @default(autoincrement()) @map("id_survei")
+  academicYearId Int          @map("id_tahun_ajaran")
+  gradeLevel     String       @map("tingkat") @db.VarChar(10)
+  title          String       @map("judul") @db.VarChar(100)
+  openDate       DateTime     @map("tanggal_buka") @db.Date
+  closeDate      DateTime     @map("tanggal_tutup") @db.Date
+  status         SurveyStatus @default(DRAFT)
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+
+  academicYear AcademicYear             @relation(fields: [academicYearId], references: [id])
+  responses    ElectiveSurveyResponse[]
+
+  @@map("survei_mapel_pilihan")
+}
+
+// [M:N] pada satu survei: Siswa <-> MataPelajaran yang diminati
+model ElectiveSurveyResponse {
+  surveyId   Int      @map("id_survei")
+  studentId  Int      @map("id_siswa")
+  subjectId  Int      @map("id_mapel")
+  filledDate DateTime @map("tanggal_isi") @db.Date
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  survey  ElectiveSurvey @relation(fields: [surveyId], references: [id])
+  student Student        @relation(fields: [studentId], references: [id])
+  subject Subject        @relation(fields: [subjectId], references: [id])
+
+  @@id([surveyId, studentId, subjectId])
+  @@map("jawaban_survei")
+}
+
+// [M:N] Siswa <-> PaketMataPelajaran
+model PackageSelection {
+  studentId    Int      @map("id_siswa")
+  packageId    Int      @map("id_paket_mapel")
+  selectedDate DateTime @map("tanggal_pilih") @db.Date
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  student Student        @relation(fields: [studentId], references: [id])
+  package SubjectPackage @relation(fields: [packageId], references: [id])
+
+  @@id([studentId, packageId])
+  @@map("pemilihan_mapel")
+}
+
+// =====================================================================
+// D. JADWAL, JURNAL MENGAJAR, DAN PRESENSI
+// =====================================================================
+
+model ScheduleSlot {
+  id                   Int       @id @default(autoincrement()) @map("id_jadwal")
+  teachingAssignmentId Int       @map("id_penugasan")
+  roomId               Int       @map("id_fasilitas")
+  dayOfWeek            DayOfWeek @map("hari")
+  startTime            DateTime  @map("jam_mulai") @db.Time(0)
+  endTime              DateTime  @map("jam_selesai") @db.Time(0)
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+
+  teachingAssignment TeachingAssignment @relation(fields: [teachingAssignmentId], references: [id])
+  room               Facility           @relation(fields: [roomId], references: [id])
+  changes            ScheduleChange[]
+  sessions           LessonSession[]
+
+  @@map("jadwal")
+}
+
+// Override slot untuk satu tanggal; slot asli tidak diubah (ADR-006).
+model ScheduleChange {
+  id                  Int                @id @default(autoincrement()) @map("id_perubahan")
+  scheduleSlotId      Int                @map("id_jadwal")
+  type                ScheduleChangeType @map("jenis")
+  date                DateTime           @map("tanggal") @db.Date
+  substituteTeacherId Int?               @map("id_guru_pengganti")
+  // Diisi untuk RESCHEDULE; null berarti tetap memakai jam/ruangan slot asli.
+  newRoomId           Int?               @map("id_fasilitas_baru")
+  newStartTime        DateTime?          @map("jam_mulai_baru") @db.Time(0)
+  newEndTime          DateTime?          @map("jam_selesai_baru") @db.Time(0)
+  description         String             @map("keterangan") @db.VarChar(255)
+  createdAt           DateTime           @default(now()) @map("created_at")
+  updatedAt           DateTime           @updatedAt @map("updated_at")
+
+  scheduleSlot      ScheduleSlot @relation(fields: [scheduleSlotId], references: [id])
+  substituteTeacher Teacher?     @relation(fields: [substituteTeacherId], references: [id])
+  newRoom           Facility?    @relation(fields: [newRoomId], references: [id])
+
+  @@unique([scheduleSlotId, date])
+  @@map("perubahan_jadwal")
+}
+
+// Satu pertemuan; journal berisi materi (jurnal mengajar).
+model LessonSession {
+  id             Int      @id @default(autoincrement()) @map("id_sesi")
+  scheduleSlotId Int      @map("id_jadwal")
+  date           DateTime @map("tanggal") @db.Date
+  journal        String   @map("materi") @db.VarChar(255)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  scheduleSlot ScheduleSlot @relation(fields: [scheduleSlotId], references: [id])
+  attendances  Attendance[]
+
+  @@unique([scheduleSlotId, date])
+  @@map("sesi_mengajar")
+}
+
+// [M:N] SesiMengajar <-> Siswa
+model Attendance {
+  sessionId Int              @map("id_sesi")
+  studentId Int              @map("id_siswa")
+  status    AttendanceStatus
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+
+  session LessonSession @relation(fields: [sessionId], references: [id])
+  student Student       @relation(fields: [studentId], references: [id])
+
+  @@id([sessionId, studentId])
+  @@map("presensi")
+}
+
+model LeaveRequest {
+  id                 Int                @id @default(autoincrement()) @map("id_izin")
+  studentId          Int                @map("id_siswa")
+  guardianId         Int                @map("id_wali_murid")
+  verifierId         Int?               @map("id_verifikator")
+  startDate          DateTime           @map("tanggal_mulai") @db.Date
+  endDate            DateTime           @map("tanggal_selesai") @db.Date
+  reason             String             @map("alasan") @db.VarChar(255)
+  attachmentUrl      String?            @map("lampiran_url") @db.VarChar(255)
+  attachmentPublicId String?            @map("lampiran_public_id") @db.VarChar(255)
+  status             LeaveRequestStatus @default(PENDING)
+  createdAt          DateTime           @default(now()) @map("created_at")
+  updatedAt          DateTime           @updatedAt @map("updated_at")
+
+  student  Student  @relation(fields: [studentId], references: [id])
+  guardian Guardian @relation(fields: [guardianId], references: [id])
+  verifier Teacher? @relation(fields: [verifierId], references: [id])
+
+  @@map("pengajuan_izin")
+}
+
+// =====================================================================
+// E. NILAI, PELANGGARAN, DAN PERKEMBANGAN SISWA
+// =====================================================================
+
+// Nilai akhir tidak disimpan, dihitung dari Score x bobot (ADR-007).
+model Score {
+  id                   Int      @id @default(autoincrement()) @map("id_nilai")
+  studentId            Int      @map("id_siswa")
+  teachingAssignmentId Int      @map("id_penugasan")
+  gradeComponentId     Int      @map("id_komponen")
+  value                Decimal  @map("nilai") @db.Decimal(5, 2)
+  inputDate            DateTime @map("tanggal_input") @db.Date
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  student            Student            @relation(fields: [studentId], references: [id])
+  teachingAssignment TeachingAssignment @relation(fields: [teachingAssignmentId], references: [id])
+  gradeComponent     GradeComponent     @relation(fields: [gradeComponentId], references: [id])
+
+  @@unique([studentId, gradeComponentId])
+  @@map("nilai")
+}
+
+model ProgressNote {
+  id                   Int      @id @default(autoincrement()) @map("id_catatan")
+  studentId            Int      @map("id_siswa")
+  teachingAssignmentId Int      @map("id_penugasan")
+  date                 DateTime @map("tanggal") @db.Date
+  content              String   @map("isi") @db.VarChar(500)
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  student            Student            @relation(fields: [studentId], references: [id])
+  teachingAssignment TeachingAssignment @relation(fields: [teachingAssignmentId], references: [id])
+
+  @@map("catatan_perkembangan")
+}
+
+model Violation {
+  id              Int      @id @default(autoincrement()) @map("id_pelanggaran")
+  studentId       Int      @map("id_siswa")
+  violationTypeId Int      @map("id_jenis_pelanggaran")
+  reporterId      Int      @map("id_guru")
+  date            DateTime @map("tanggal") @db.Date
+  // Salinan bobot_poin saat dicatat agar riwayat tidak berubah (ADR-008).
+  points          Int      @map("poin")
+  description     String?  @map("keterangan") @db.VarChar(255)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  student       Student       @relation(fields: [studentId], references: [id])
+  violationType ViolationType @relation(fields: [violationTypeId], references: [id])
+  reporter      Teacher       @relation(fields: [reporterId], references: [id])
+
+  @@map("pelanggaran")
+}
+
+model LiaisonNote {
+  id                Int      @id @default(autoincrement()) @map("id_bp")
+  studentId         Int      @map("id_siswa")
+  homeroomTeacherId Int      @map("id_wali_kelas")
+  date              DateTime @map("tanggal") @db.Date
+  content           String   @map("isi") @db.VarChar(500)
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  student         Student @relation(fields: [studentId], references: [id])
+  homeroomTeacher Teacher @relation(fields: [homeroomTeacherId], references: [id])
+
+  @@map("buku_penghubung")
+}
+
+// =====================================================================
+// F. INFORMASI SEKOLAH DAN NOTIFIKASI
+// =====================================================================
+
+model Announcement {
+  id                 Int               @id @default(autoincrement()) @map("id_pengumuman")
+  authorId           Int               @map("id_akun_pembuat")
+  // Diisi hanya jika scope = CLASS.
+  classGroupId       Int?              @map("id_kelas")
+  title              String            @map("judul") @db.VarChar(100)
+  content            String            @map("isi") @db.VarChar(500)
+  scope              AnnouncementScope @map("target")
+  date               DateTime          @map("tanggal") @db.Date
+  attachmentUrl      String?           @map("lampiran_url") @db.VarChar(255)
+  attachmentPublicId String?           @map("lampiran_public_id") @db.VarChar(255)
+  createdAt          DateTime          @default(now()) @map("created_at")
+  updatedAt          DateTime          @updatedAt @map("updated_at")
+
+  author     User        @relation(fields: [authorId], references: [id])
+  classGroup ClassGroup? @relation(fields: [classGroupId], references: [id])
+
+  @@map("pengumuman")
+}
+
+model AcademicEvent {
+  id          Int               @id @default(autoincrement()) @map("id_agenda")
+  title       String            @map("judul") @db.VarChar(100)
+  type        AcademicEventType @map("jenis")
+  startDate   DateTime          @map("tanggal_mulai") @db.Date
+  endDate     DateTime          @map("tanggal_selesai") @db.Date
+  description String?           @map("keterangan") @db.VarChar(255)
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
+
+  @@map("kalender_akademik")
+}
+
+model Notification {
+  id          Int              @id @default(autoincrement()) @map("id_notifikasi")
+  title       String           @map("judul") @db.VarChar(100)
+  body        String           @map("isi") @db.VarChar(255)
+  type        NotificationType @map("tipe")
+  // ID data yang dirujuk (mis. id_perubahan) agar Android bisa membuka layar yang tepat.
+  referenceId Int?             @map("id_referensi")
+  date        DateTime         @map("tanggal") @db.Date
+  createdAt   DateTime         @default(now()) @map("created_at")
+
+  recipients NotificationRecipient[]
+
+  @@map("notifikasi")
+}
+
+// [M:N] Notifikasi <-> Akun
+model NotificationRecipient {
+  notificationId Int      @map("id_notifikasi")
+  userId         Int      @map("id_akun")
+  isRead         Boolean  @default(false) @map("is_read")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  notification Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([notificationId, userId])
+  @@map("notifikasi_penerima")
+}
+
+// =====================================================================
+// G. PEMINJAMAN FASILITAS DAN PEMBAYARAN
+// =====================================================================
+
+model FacilityBooking {
+  id          Int           @id @default(autoincrement()) @map("id_peminjaman")
+  facilityId  Int           @map("id_fasilitas")
+  requesterId Int           @map("id_akun_pemohon")
+  verifierId  Int?          @map("id_admin_verifikator")
+  bookingDate DateTime      @map("tanggal_pinjam") @db.Date
+  startTime   DateTime      @map("jam_mulai") @db.Time(0)
+  endTime     DateTime      @map("jam_selesai") @db.Time(0)
+  purpose     String        @map("keperluan") @db.VarChar(255)
+  status      BookingStatus @default(PENDING)
+  returnDate  DateTime?     @map("tanggal_kembali") @db.Date
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  facility  Facility @relation(fields: [facilityId], references: [id])
+  requester User     @relation(fields: [requesterId], references: [id])
+  verifier  Admin?   @relation(fields: [verifierId], references: [id])
+
+  @@map("peminjaman")
+}
+
+// Informasi tagihan dari rekap yayasan, bukan transaksi pembayaran.
+model Bill {
+  id          Int        @id @default(autoincrement()) @map("id_pembayaran")
+  studentId   Int        @map("id_siswa")
+  // Kunci pencocokan saat impor ulang rekap yayasan (upsert per NIS + kode tagihan).
+  billCode    String     @map("kode_tagihan") @db.VarChar(50)
+  paymentType String     @map("jenis_pembayaran") @db.VarChar(50)
+  amount      Decimal    @map("nominal") @db.Decimal(12, 2)
+  dueDate     DateTime   @map("jatuh_tempo") @db.Date
+  status      BillStatus @default(UNPAID)
+  paidDate    DateTime?  @map("tanggal_bayar") @db.Date
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  student Student @relation(fields: [studentId], references: [id])
+
+  @@unique([studentId, billCode])
+  @@map("pembayaran")
 }

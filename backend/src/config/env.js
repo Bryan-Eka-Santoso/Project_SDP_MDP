@@ -15,6 +15,13 @@ const env = {
   },
   firebaseServiceAccountPath: process.env.FIREBASE_SERVICE_ACCOUNT_PATH,
   tzDisplay: process.env.TZ_DISPLAY || 'Asia/Jakarta',
+  // Hanya dipakai prisma/seed.js.
+  seed: {
+    adminEmail: process.env.SEED_ADMIN_EMAIL || 'admin@santaagnes.test',
+    adminPassword: process.env.SEED_ADMIN_PASSWORD,
+    demoPassword: process.env.SEED_DEMO_PASSWORD,
+    demoData: process.env.SEED_DEMO_DATA !== 'false',
+  },
 };
 
 module.exports = env;

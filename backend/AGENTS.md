@@ -54,8 +54,8 @@ Daftar modul: `auth`, `users`, `master` (siswa, guru, kelas, mapel, fasilitas, k
 
 ## Prisma
 
-- Nama model `PascalCase` tunggal (`Student`), field `camelCase`, tabel dipetakan ke `snake_case` jamak dengan `@@map("students")`, kolom dengan `@map("created_at")`.
-- Setiap model punya `id Int @id @default(autoincrement())`, `createdAt`, `updatedAt`.
+- Nama model `PascalCase` tunggal bahasa Inggris (`Student`), field `camelCase`. Tabel dan kolom fisik memakai nama PDM laporan dalam `snake_case` huruf kecil: `@@map("siswa")`, `@map("id_siswa")`, `@map("created_at")` (ADR-017, daftar di `docs/GLOSSARY.md`).
+- Setiap model punya `id Int @id @default(autoincrement()) @map("id_<tabel>")`, `createdAt`, `updatedAt`. Tabel penghubung many-to-many memakai primary key gabungan (`@@id`).
 - Enum ditulis di `schema.prisma` dalam `UPPER_SNAKE_CASE` dan harus sesuai `docs/GLOSSARY.md`.
 - Setelah mengubah schema: jalankan `npx prisma format` dan `npx prisma validate` (boleh). **Jangan** menjalankan `migrate`/`db push`; tulis perintah yang disarankan di ringkasan akhir.
 - Hindari N+1 query: gunakan `include`/`select` atau satu query agregat.
