@@ -43,12 +43,14 @@ Fragment  →  ViewModel  →  Repository  →  Api (Retrofit) / Dao (Room)
 - **Tampilan per role**: menu dan tombol disembunyikan sesuai role dan status wali kelas, tetapi **backend tetap sumber otorisasi**. Jangan mengandalkan penyembunyian UI sebagai keamanan.
 - **Wali murid**: wajib ada pemilih anak aktif (`activeStudentId` disimpan di DataStore). Semua layar wali murid memakai anak aktif tersebut.
 - **Token**: access token dan refresh token disimpan di DataStore. Interceptor menambah header `Authorization`; authenticator OkHttp memperbarui token saat 401. Jika refresh gagal, logout dan kembali ke layar login.
-- **Cache offline (Room)**: wajib untuk jadwal, pengumuman, dan notifikasi. Data lain boleh online saja. Tampilkan data cache lebih dulu, lalu perbarui dari server.
+- **Cache offline (Room)**: wajib untuk jadwal dan pengumuman. Data lain boleh online saja. Tampilkan data cache lebih dulu, lalu perbarui dari server.
+- **Data lokal (Room) tanpa server**: riwayat notifikasi (`NotificationEntity`, disimpan dari `onMessageReceived`) dan to-do list siswa (`TodoItem`, opsional `subjectId`). Keduanya hilang saat aplikasi di-uninstall; itu disengaja (ADR-010, F-JDW-07).
 - **Teks**: semua teks UI di `res/values/strings.xml` dalam bahasa Indonesia. Jangan hardcode string di layout atau kode.
 - **Tanggal**: terima ISO 8601 UTC dari API, tampilkan dalam WIB. Gunakan helper di `core/` (java.time melalui desugaring karena min SDK 24).
 - **Ukuran layar**: layar admin harus tetap nyaman di tablet. Hindari tabel lebar; gunakan list + filter + detail.
-- **Kalender**: sinkronisasi pengingat siswa memakai `CalendarContract` dengan izin `READ_CALENDAR`/`WRITE_CALENDAR` yang diminta saat runtime, **bukan** Google Calendar API.
-- **Notifikasi**: buat channel per jenis (jadwal, pengumuman, nilai/presensi, peminjaman, pembayaran). Minta izin `POST_NOTIFICATIONS` di Android 13+. Kirim token FCM ke backend setelah login dan saat token berganti.
+- **Kalender**: sinkronisasi memakai `CalendarContract` dengan izin `READ_CALENDAR`/`WRITE_CALENDAR` yang diminta saat runtime, **bukan** Google Calendar API. Yang disinkron hanya agenda kalender akademik dan peminjaman yang disetujui milik pengguna; jadwal pelajaran tidak disinkron.
+- **Notifikasi**: backend mengirim data message; aplikasi sendiri yang menampilkan notifikasi lewat channel per jenis (jadwal, pengumuman, nilai/presensi, peminjaman, pembayaran) dan menyimpannya ke Room. Minta izin `POST_NOTIFICATIONS` di Android 13+. Kirim token FCM ke backend setelah login dan saat token berganti; hapus token saat logout.
+- **Menu wali kelas**: tampilkan berdasarkan `isHomeroomTeacher` dari profil guru; backend tetap memeriksa hak aksesnya.
 - **Upload/unduh file**: pilih file lewat Storage Access Framework, kirim sebagai multipart. Ekspor laporan disimpan lewat `CreateDocument`.
 
 ## Penamaan

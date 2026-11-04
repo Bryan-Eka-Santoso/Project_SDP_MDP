@@ -18,7 +18,7 @@ Android hanya menyembunyikan menu sesuai role; itu bukan pengaman.
 | `OWN` | Data yang dibuat oleh user itu sendiri (mis. pengajuan peminjaman) |
 | `ALL` | Semua data |
 
-"Wali kelas" = user `TEACHER` yang menjadi `homeroomTeacherId` di sebuah `ClassGroup` tahun ajaran aktif. Wali kelas juga memiliki semua hak guru biasa.
+"Wali kelas" = user `TEACHER` yang menjadi `homeroomTeacherId` di sebuah `ClassGroup` tahun ajaran aktif. Wali kelas juga memiliki semua hak guru biasa. `Teacher.isHomeroomTeacher` hanya untuk menampilkan menu di Android; pemeriksaan hak akses di backend tetap memakai `homeroomTeacherId`.
 
 ## Matriks fitur
 
@@ -27,7 +27,7 @@ Tanda `—` berarti tidak punya akses (backend mengembalikan 403).
 | Fitur | Siswa | Guru | Wali kelas (tambahan) | Wali murid | Admin |
 |---|---|---|---|---|---|
 | Login, logout, profil, ubah password | ✓ | ✓ | | ✓ | ✓ |
-| Notifikasi | milik sendiri | milik sendiri | | milik sendiri | milik sendiri |
+| Notifikasi (riwayat di perangkat sendiri) | milik sendiri | milik sendiri | | milik sendiri | milik sendiri |
 | Lihat pengumuman | `SCHOOL` + `CLASS` kelasnya | `SCHOOL` + `CLASS` kelas yang diampu | `CLASS` kelas binaan | `SCHOOL` + `CLASS` kelas anak | `ALL` |
 | Kelola pengumuman sekolah | — | — | — | — | ✓ |
 | Kirim pengumuman kelas | — | — | `HOMEROOM` | — | — |

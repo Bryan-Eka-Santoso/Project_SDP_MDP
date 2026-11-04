@@ -56,16 +56,20 @@ Error di mana pun → AppError → errorHandler → JSON envelope error
 
 ```
 Service (mis. simpan perubahan jadwal)
-  └─ dalam transaksi: simpan data + baris Notification untuk setiap penerima
-  └─ setelah commit: jobs/notificationDispatcher
-        ├─ ambil DeviceToken penerima
-        ├─ kirim FCM per batch ≤ 500 token
+  └─ dalam transaksi: simpan data
+  └─ setelah commit: jobs/notificationDispatcher (tanpa tabel notifikasi, ADR-010)
+        ├─ tentukan penerima (userId) + ambil DeviceToken mereka
+        ├─ kirim FCM data message per batch ≤ 500 token
         └─ hapus token yang dilaporkan tidak valid oleh FCM
+
+Android (FirebaseMessagingService.onMessageReceived)
+  ├─ tampilkan notifikasi di channel yang sesuai
+  └─ simpan ke Room (NotificationEntity) → layar daftar notifikasi
 ```
 
 - Request admin selesai tanpa menunggu FCM.
-- Daftar notifikasi di aplikasi selalu dibaca dari tabel `Notification`, jadi tetap lengkap walaupun push gagal.
-- Payload FCM berisi `type` dan `referenceId` agar Android bisa membuka layar yang tepat.
+- Payload data berisi `type` (enum `NotificationType`), `title`, `body`, `referenceId`, dan `sentAt` agar Android bisa menyimpan riwayat dan membuka layar yang tepat.
+- Riwayat hanya ada di perangkat; layar asal data (jadwal, pengumuman, izin, dll.) tetap menjadi sumber yang lengkap.
 
 ## 5. Alur data di Android
 
@@ -76,7 +80,7 @@ Layar dibuka → ViewModel minta data → Repository
 Error jaringan → tampilkan data cache + pesan "Tidak dapat terhubung"
 ```
 
-Notifikasi perubahan jadwal yang diterima memicu refresh cache jadwal dan memperbarui event di kalender perangkat (jika siswa mengaktifkan sinkronisasi).
+Notifikasi perubahan jadwal yang diterima memicu refresh cache jadwal. Kalender perangkat (CalendarContract) hanya berisi agenda kalender akademik dan peminjaman yang disetujui (jika pengguna mengaktifkan sinkronisasi). To-do list siswa disimpan di Room saja.
 
 ## 6. Keamanan
 
@@ -94,6 +98,8 @@ Notifikasi perubahan jadwal yang diterima memicu refresh cache jadwal dan memper
 | `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Upload file |
 | `FIREBASE_SERVICE_ACCOUNT_PATH` | Kredensial Firebase Admin SDK |
 | `TZ_DISPLAY` | `Asia/Jakarta`, untuk perhitungan tanggal lokal |
+| `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD` | Akun admin pertama yang dibuat `prisma/seed.js` |
+| `SEED_DEMO_PASSWORD`, `SEED_DEMO_DATA` | Password akun demo; `SEED_DEMO_DATA=false` di server produksi |
 
 ## 7. Lingkungan
 
