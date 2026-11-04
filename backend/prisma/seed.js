@@ -23,11 +23,11 @@ async function findOrCreate(model, where, data) {
   return existing ?? model.create({ data: { ...where, ...data } });
 }
 
-async function upsertUser(email, role, passwordHash) {
+async function upsertUser(email, role, name, passwordHash) {
   return prisma.user.upsert({
     where: { email },
     update: {},
-    create: { email, role, passwordHash },
+    create: { email, role, name, passwordHash },
   });
 }
 
@@ -40,12 +40,7 @@ async function seedAdmin() {
     requirePassword('SEED_ADMIN_PASSWORD', env.seed.adminPassword),
     BCRYPT_ROUNDS,
   );
-  const user = await upsertUser(env.seed.adminEmail, 'ADMIN', passwordHash);
-  return prisma.admin.upsert({
-    where: { userId: user.id },
-    update: {},
-    create: { userId: user.id, name: 'Administrator' },
-  });
+  return upsertUser(env.seed.adminEmail, 'ADMIN', 'Administrator', passwordHash);
 }
 
 async function seedPeriod() {
@@ -177,12 +172,12 @@ async function seedDemo({ admin, academicYear, semester }) {
 
   const teachers = [];
   for (const [i, teacher] of TEACHERS.entries()) {
-    const user = await upsertUser(`guru${i + 1}@${DEMO_EMAIL_DOMAIN}`, 'TEACHER', passwordHash);
+    const user = await upsertUser(`guru${i + 1}@${DEMO_EMAIL_DOMAIN}`, 'TEACHER', teacher.name, passwordHash);
     teachers.push(
       await prisma.teacher.upsert({
         where: { employeeNumber: teacher.employeeNumber },
         update: {},
-        create: { ...teacher, userId: user.id },
+        create: { employeeNumber: teacher.employeeNumber, userId: user.id },
       }),
     );
   }
@@ -192,13 +187,17 @@ async function seedDemo({ admin, academicYear, semester }) {
   for (const cls of CLASSES) {
     for (const student of cls.students) {
       studentNo += 1;
-      const user = await upsertUser(`siswa${studentNo}@${DEMO_EMAIL_DOMAIN}`, 'STUDENT', passwordHash);
+      const user = await upsertUser(
+        `siswa${studentNo}@${DEMO_EMAIL_DOMAIN}`,
+        'STUDENT',
+        student.name,
+        passwordHash,
+      );
       studentsByNis[student.nis] = await prisma.student.upsert({
         where: { nis: student.nis },
         update: {},
         create: {
           nis: student.nis,
-          name: student.name,
           birthDate: date(student.birthDate),
           userId: user.id,
         },
@@ -207,11 +206,11 @@ async function seedDemo({ admin, academicYear, semester }) {
   }
 
   for (const [i, guardian] of GUARDIANS.entries()) {
-    const user = await upsertUser(`wali${i + 1}@${DEMO_EMAIL_DOMAIN}`, 'GUARDIAN', passwordHash);
+    const user = await upsertUser(`wali${i + 1}@${DEMO_EMAIL_DOMAIN}`, 'GUARDIAN', guardian.name, passwordHash);
     const saved = await prisma.guardian.upsert({
       where: { userId: user.id },
       update: {},
-      create: { userId: user.id, name: guardian.name, phone: guardian.phone },
+      create: { userId: user.id, phone: guardian.phone },
     });
     for (const [nis, relationship] of guardian.children) {
       const studentId = studentsByNis[nis].id;
@@ -296,6 +295,15 @@ async function seedDemo({ admin, academicYear, semester }) {
     }
   }
 
+  // Aturan yang sama dengan backend: is_wali_kelas = tercantum sebagai wali kelas di tahun ajaran aktif.
+  await prisma.$transaction([
+    prisma.teacher.updateMany({ data: { isHomeroomTeacher: false } }),
+    prisma.teacher.updateMany({
+      where: { homeroomClasses: { some: { academicYear: { isActive: true } } } },
+      data: { isHomeroomTeacher: true },
+    }),
+  ]);
+
   const violationTypes = [
     { name: 'Terlambat', points: 5 },
     { name: 'Atribut tidak lengkap', points: 10 },
@@ -323,7 +331,7 @@ async function seedDemo({ admin, academicYear, semester }) {
     prisma.announcement,
     { title: 'Selamat datang di SIM Akademik' },
     {
-      authorId: admin.userId,
+      authorId: admin.id,
       scope: 'SCHOOL',
       content: 'Aplikasi SIM Akademik SMAK Santa Agnes kini dapat digunakan oleh siswa, guru, dan wali murid.',
       date: date('2026-07-13'),

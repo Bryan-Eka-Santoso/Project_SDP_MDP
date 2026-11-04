@@ -22,15 +22,17 @@ Prasyarat: [Git](https://git-scm.com/download/win), [Node.js](https://nodejs.org
    cd backend
    npm install
    ```
-3. **Siapkan file environment.** Salin `.env.example` menjadi `.env`, lalu isi nilainya (minimal `DATABASE_URL` sesuai user, password, dan nama database MySQL Anda):
+3. **Siapkan file environment.** Salin `.env.example` menjadi `.env`, lalu isi nilainya (minimal `DATABASE_URL` sesuai user, password, dan nama database MySQL Anda, serta `SEED_ADMIN_PASSWORD` dan `SEED_DEMO_PASSWORD` minimal 8 karakter):
    ```powershell
    Copy-Item .env.example .env
    ```
    File `.env` tidak boleh di-commit.
-4. **Generate Prisma Client:**
+4. **Buat tabel dan isi data awal** (sekaligus generate Prisma Client):
    ```powershell
-   npx prisma generate
+   npx prisma migrate dev
+   npx prisma db seed
    ```
+   Seeder membuat akun admin (`SEED_ADMIN_EMAIL`), tahun ajaran 2026/2027 semester ganjil aktif, dan data demo: akun `guru1`–`guru5`, `siswa1`–`siswa6`, `wali1`–`wali5` `@santaagnes.test` dengan password `SEED_DEMO_PASSWORD`. Seeder aman dijalankan berulang.
 5. **Jalankan backend:**
    ```powershell
    npm run dev

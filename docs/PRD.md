@@ -52,7 +52,7 @@ Format ID: `F-<MODUL>-<nomor>`. Gunakan ID ini di prompt, tiket, commit, dan pen
 | F-AUTH-01 | Login dengan email dan password; menu sesuai role | Semua |
 | F-AUTH-02 | Logout | Semua |
 | F-AUTH-03 | Lihat profil dan ubah password | Semua |
-| F-NTF-01 | Daftar notifikasi (perubahan jadwal, pengumuman, pelanggaran, tunggakan, status peminjaman, status izin) dan tandai sudah dibaca | Semua |
+| F-NTF-01 | Daftar notifikasi (perubahan jadwal, pengumuman, pelanggaran, tunggakan, status peminjaman, status izin) dan tandai sudah dibaca. Riwayat disimpan di perangkat (Room), bukan di server | Semua |
 | F-NTF-02 | Push notification FCM | Semua |
 
 ### 5.2 Data master dan pengguna (`MST`) — Admin
@@ -81,7 +81,8 @@ Format ID: `F-<MODUL>-<nomor>`. Gunakan ID ini di prompt, tiket, commit, dan pen
 | F-JDW-03 | Cek bentrok otomatis (guru, kelas, ruangan) saat simpan dan impor | Sistem |
 | F-JDW-04 | Catat perubahan jadwal per tanggal (guru pengganti, pindah waktu/ruang, batal) + notifikasi ke pihak terdampak | Admin |
 | F-JDW-05 | Lihat jadwal beserta perubahannya, sesuai cakupan role | Siswa, Guru, Wali kelas, Wali murid |
-| F-JDW-06 | Sinkronkan jadwal dan agenda ke kalender perangkat (pengingat) | Siswa |
+| F-JDW-06 | Sinkronkan agenda kalender akademik dan peminjaman yang disetujui ke kalender perangkat. Jadwal pelajaran **tidak** disinkron | Semua (kalender akademik); Siswa, Guru (peminjaman miliknya) |
+| F-JDW-07 | To-do list pribadi di halaman jadwal (judul, catatan, tenggat, opsional mapel, tandai selesai). Disimpan di perangkat (Room) | Siswa |
 
 ### 5.4 Nilai (`NIL`)
 

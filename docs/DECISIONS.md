@@ -25,6 +25,7 @@ Format menambah keputusan baru: nomor berikutnya, judul, status, konteks, keputu
 - **Status:** Diterima
 - **Keputusan:** Wali kelas = `Teacher` yang menjadi `homeroomTeacherId` pada `ClassGroup` di tahun ajaran tertentu.
 - **Alasan:** Satu guru tidak perlu dua akun, dan wali kelas otomatis berganti setiap tahun ajaran.
+- **Tambahan (30/10/2026):** `Teacher.isHomeroomTeacher` (`guru.is_wali_kelas`) dipakai sebagai penanda cepat untuk menu Android. Nilainya **diturunkan** dari `homeroomTeacherId` pada tahun ajaran aktif dan diperbarui backend setiap admin mengatur wali kelas atau mengganti tahun ajaran aktif; tidak diubah manual. Hak akses wali kelas tetap dicek dari `ClassGroup.homeroomTeacherId`.
 
 ### ADR-005 Semua data akademik terikat periode
 - **Status:** Diterima
@@ -48,13 +49,14 @@ Format menambah keputusan baru: nomor berikutnya, judul, status, konteks, keputu
 
 ### ADR-009 Kalender perangkat lewat CalendarContract
 - **Status:** Diterima
-- **Keputusan:** Sinkronisasi pengingat siswa menulis langsung ke kalender perangkat lewat `CalendarContract`, bukan Google Calendar API.
+- **Keputusan:** Sinkronisasi menulis langsung ke kalender perangkat lewat `CalendarContract`, bukan Google Calendar API. Yang disinkron hanya agenda kalender akademik dan peminjaman yang disetujui; jadwal pelajaran tidak disinkron (diganti to-do list lokal, F-JDW-07).
 - **Alasan:** Scope Google Calendar API termasuk sensitif dan membutuhkan verifikasi OAuth dari Google. Event di kalender perangkat yang terhubung ke akun Google tetap tersinkron ke Google Calendar.
 
-### ADR-010 Notifikasi disimpan dulu, dikirim asinkron
-- **Status:** Diterima
-- **Keputusan:** Simpan `Notification` di database dalam transaksi, kirim FCM setelah commit di proses latar (in-process), batch ≤ 500 token.
-- **Alasan:** Satu perubahan jadwal bisa mengenai ratusan penerima; admin tidak boleh menunggu. Tidak memakai Redis/antrian eksternal agar infrastruktur tetap sederhana.
+### ADR-010 Notifikasi lewat FCM, riwayat di perangkat
+- **Status:** Diterima (diubah 30/10/2026; sebelumnya notifikasi disimpan di tabel `notifikasi`)
+- **Keputusan:** Notifikasi **tidak disimpan di database server**. Setelah transaksi data selesai, backend mengirim FCM di proses latar (in-process), batch ≤ 500 token, ke `DeviceToken` milik penerima. Pesan dikirim sebagai **data message** (tanpa blok `notification`) agar `onMessageReceived` selalu terpanggil, termasuk saat aplikasi di latar belakang; Android lalu menampilkan notifikasi dan menyimpannya ke Room sebagai riwayat (F-NTF-01).
+- **Alasan:** Mengikuti arsitektur sistem tim (Express → FCM → Android) dan mengurangi tabel. Satu perubahan jadwal bisa mengenai ratusan penerima; admin tidak boleh menunggu. Tidak memakai Redis/antrian eksternal.
+- **Konsekuensi:** Riwayat notifikasi hanya ada di perangkat yang menerimanya; hilang saat aplikasi di-uninstall atau ganti HP. Notifikasi untuk user yang belum punya token aktif (belum pernah login di HP) tidak terkirim. Data aslinya (jadwal, pengumuman, izin, dll.) tetap bisa dilihat dari layar masing-masing.
 
 ### ADR-011 File di Cloudinary
 - **Status:** Diterima
@@ -84,3 +86,19 @@ Format menambah keputusan baru: nomor berikutnya, judul, status, konteks, keputu
 - **Status:** Diterima
 - **Keputusan:** `prisma` dan `@prisma/client` memakai versi 6 dengan generator `prisma-client-js` (diimpor dari `@prisma/client`).
 - **Alasan:** Prisma 8 belum mendukung MySQL; Prisma 7 berorientasi TypeScript/ESM, sedangkan backend memakai JavaScript CommonJS.
+
+### ADR-017 Skema database mengikuti PDM v2 laporan
+- **Status:** Diterima
+- **Konteks:** Laporan (BAB III dan lampiran CDM/PDM) memakai rancangan 36 tabel dengan nama Indonesia (`query_database_v2.sql`), sedangkan dokumen di repo memakai nama Inggris.
+- **Keputusan:** `schema.prisma` mengikuti struktur PDM v2. Nama model/field tetap bahasa Inggris sesuai `docs/GLOSSARY.md`; nama tabel/kolom fisik memakai nama PDM dalam `snake_case` huruf kecil lewat `@@map`/`@map`. Huruf kecil dipakai karena MySQL di Windows mengubah nama tabel menjadi huruf kecil, sehingga nama campuran (`TahunAjaran`) berbeda antara laptop Windows dan server Linux.
+- **Penyesuaian terhadap PDM v2** (agar aturan bisnis bisa dijalankan; PDM dan BAB III perlu diperbarui):
+  1. `Role` + `AkunRole` dihapus; `akun.role` berisi satu role (lihat ADR-004). `nama` disimpan di `akun`; tabel `admin` dihapus karena admin tidak punya data khusus (30/10/2026). `guru.is_wali_kelas` ditambahkan (ADR-004).
+  2. Tabel `semester` dipisah dari `tahun_ajaran`; `penugasan_guru` dan `komponen_penilaian` merujuk `id_semester`.
+  3. `komponen_penilaian` per mapel per semester (`id_mapel`, `id_semester`), bobot persen bulat (PO-01).
+  4. `pelanggaran.poin` menyimpan salinan bobot (ADR-008).
+  5. `perubahan_jadwal` untuk satu `tanggal` + `jenis` + jam/ruangan baru untuk `RESCHEDULE` (ADR-006).
+  6. `pengajuan_izin` memakai `tanggal_mulai`–`tanggal_selesai`; lampiran memakai `lampiran_url` + `lampiran_public_id` (ADR-011), juga pada `pengumuman`.
+  7. Tabel baru `refresh_token` dan `token_perangkat`.
+  8. Kolom baru: `pembayaran.kode_tagihan`, `survei_mapel_pilihan.tingkat` dan `status`, `kalender_akademik.jenis`, `notifikasi.id_referensi`, `created_at`/`updated_at`.
+  9. `kelas.id_wali_kelas` boleh kosong (kelas hasil pembagian paket dibuat sebelum wali kelas diatur).
+- **Konsekuensi:** Tabel `notifikasi` + `notifikasi_penerima` dari PDM v2 sempat dibuat lalu dihapus (ADR-010). Jam pelajaran memakai `jam_mulai`/`jam_selesai` sampai PO-09 dijawab. Total skema: 34 tabel (lihat `query_database_v4.sql`).

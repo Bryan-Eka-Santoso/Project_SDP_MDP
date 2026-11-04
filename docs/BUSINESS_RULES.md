@@ -7,12 +7,13 @@ Aturan di dokumen ini wajib diikuti dan diuji. Contoh angka di setiap bagian dip
 - Hanya ada **satu** `AcademicYear` aktif dan **satu** `Semester` aktif pada satu waktu. Mengaktifkan yang baru menonaktifkan yang lama dalam satu transaksi.
 - Kelas (`ClassGroup`), anggota kelas, wali kelas, dan paket mapel terikat tahun ajaran. Jadwal, penugasan mengajar, komponen nilai, nilai, sesi, dan presensi terikat semester.
 - Data periode lama tidak dihapus; hanya bisa dibaca (kecuali oleh admin untuk koreksi).
+- `Teacher.isHomeroomTeacher` = guru tersebut menjadi `homeroomTeacherId` di sebuah `ClassGroup` pada tahun ajaran aktif. Dihitung ulang dalam transaksi yang sama setiap kali wali kelas diatur/diubah, kelas dihapus, atau tahun ajaran aktif diganti. Tidak bisa diubah manual lewat API.
 
 ## 2. Jadwal
 
 ### 2.1 Slot jadwal
-- Satu `ScheduleSlot` = satu `TeachingAssignment` (guru × mapel × kelas) pada `dayOfWeek`, `startPeriod`–`endPeriod`, dan satu ruangan (`Facility` bertipe `ROOM`).
-- `startPeriod ≤ endPeriod`, dan keduanya harus ada di master `LessonPeriod`.
+- Satu `ScheduleSlot` = satu `TeachingAssignment` (guru × mapel × kelas × semester) pada `dayOfWeek`, `startTime`–`endTime`, dan satu ruangan (`Facility` bertipe `ROOM`).
+- `startTime < endTime`. (Master `LessonPeriod` belum dipakai sampai PO-09 dijawab; lihat ADR-017.)
 
 ### 2.2 Cek bentrok (F-JDW-03)
 Dua slot pada semester yang sama **bentrok** jika harinya sama, rentang jamnya tumpang tindih, **dan** salah satu berikut sama:
@@ -22,9 +23,9 @@ Dua slot pada semester yang sama **bentrok** jika harinya sama, rentang jamnya t
 3. ruangan, atau
 4. ada siswa yang menjadi anggota kedua kelas (mis. kelas reguler dan kelas paket).
 
-Rentang `[a1, a2]` dan `[b1, b2]` tumpang tindih jika `a1 ≤ b2` **dan** `b1 ≤ a2`.
+Karena slot memakai jam mulai–selesai, rentang `[a1, a2)` dan `[b1, b2)` tumpang tindih jika `a1 < b2` **dan** `b1 < a2` (slot yang bersambung tidak bentrok).
 
-Contoh: slot A Senin jam 1–2, slot B Senin jam 2–3, guru sama → `1 ≤ 3` dan `2 ≤ 2` → **bentrok**. Slot C Senin jam 3–4 dengan guru sama vs A → `1 ≤ 4` tetapi `3 ≤ 2` salah → **tidak bentrok**.
+Contoh: slot A Senin 07.00–08.30, slot B Senin 08.00–09.30, guru sama → `07.00 < 09.30` dan `08.00 < 08.30` → **bentrok**. Slot C Senin 08.30–10.00 dengan guru sama vs A → `08.30 < 08.30` salah → **tidak bentrok**.
 
 - Saat simpan manual: tolak dengan `409 SCHEDULE_CONFLICT` dan sebutkan slot yang bentrok serta penyebabnya (guru/kelas/ruangan/siswa).
 - Saat impor: periksa bentrok antarbaris di file **dan** terhadap data yang sudah ada.
@@ -41,7 +42,7 @@ Contoh: slot A Senin jam 1–2, slot B Senin jam 2–3, guru sama → `1 ≤ 3` 
 - `RESCHEDULE` dan `SUBSTITUTE` juga melalui cek bentrok untuk tanggal tersebut (termasuk dengan perubahan lain di tanggal itu).
 - Tanggal harus berada dalam semester slot tersebut dan hari tanggalnya harus sama dengan `dayOfWeek` slot.
 - Maksimal satu `ScheduleChange` per slot per tanggal; perubahan berikutnya memperbarui yang ada.
-- Pihak yang dinotifikasi: semua siswa anggota kelas, wali murid mereka, guru asli, dan guru pengganti (jika ada).
+- Pihak yang dinotifikasi: semua siswa anggota kelas, wali murid mereka, guru asli, dan guru pengganti (jika ada). Penerima dihitung saat pengiriman; notifikasi tidak disimpan di server (ADR-010).
 - Tampilan jadwal untuk tanggal tertentu = slot asli yang ditimpa oleh perubahan pada tanggal itu.
 
 ## 3. Nilai
@@ -118,7 +119,7 @@ Contoh: 40 sesi, 36 hadir, 2 sakit, 1 izin, 1 alpa → 36/40 × 100 = **90%**.
 
 ## 9. Peminjaman fasilitas
 
-- Diajukan siswa atau guru: `facilityId`, `startAt`, `endAt`, `purpose`. Syarat: `startAt < endAt` dan `startAt` di masa depan.
+- Diajukan siswa atau guru: `facilityId`, `bookingDate`, `startTime`, `endTime`, `purpose` (satu hari). Syarat: `startTime < endTime` dan waktu mulai di masa depan. Pada rumus di bawah, `startAt`/`endAt` = `bookingDate` + jam.
 - Alur status: `PENDING` → `APPROVED` / `REJECTED`; `APPROVED` → `RETURNED` (oleh admin).
 - Saat admin menyetujui, cek tumpang tindih dengan peminjaman `APPROVED` lain untuk fasilitas yang sama: bentrok jika `startAt < other.endAt` **dan** `other.startAt < endAt`. Untuk ruangan, cek juga slot jadwal (memperhitungkan perubahan jadwal) pada waktu tersebut. Jika bentrok → `409 BOOKING_CONFLICT`.
 - Pengajuan `PENDING` boleh saling tumpang tindih; yang disetujui lebih dulu yang berlaku.
@@ -144,7 +145,7 @@ Tanyakan ke pengguna sebelum mengimplementasikan bagian yang bergantung pada poi
 
 | Kode | Pertanyaan |
 |---|---|
-| PO-01 | Apakah komponen penilaian sama untuk semua mapel dalam satu semester, atau bisa berbeda per mapel? (Dokumen ini sementara memakai per mapel.) |
+| ~~PO-01~~ | **Terjawab:** komponen penilaian bisa berbeda per mapel, dibuat per mapel per semester (ADR-017). |
 | PO-02 | Bagaimana nilai remedial dicatat dan dihitung (Yosefu menampilkan nilai asli, remidi, dan nilai akhir)? |
 | PO-03 | Apakah semua guru boleh mencatat pelanggaran siswa mana pun, atau hanya siswa di kelas yang diampu? |
 | PO-04 | Batas waktu pengajuan izin: boleh untuk tanggal yang sudah lewat? Berapa hari ke belakang? |

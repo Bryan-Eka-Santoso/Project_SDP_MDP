@@ -95,62 +95,43 @@ enum SurveyStatus {
   CLOSED
 }
 
-enum NotificationType {
-  SCHEDULE_CHANGE
-  ANNOUNCEMENT
-  VIOLATION
-  LEAVE_REQUEST
-  BOOKING
-  BILL_OVERDUE
-}
-
 // =====================================================================
 // A. PENGGUNA DAN HAK AKSES
 // =====================================================================
 
 // Satu akun satu role; wali kelas bukan role (ADR-004), melainkan ClassGroup.homeroomTeacherId.
+// Admin tidak punya tabel profil sendiri; data umum (nama) ada di akun.
 model User {
   id           Int        @id @default(autoincrement()) @map("id_akun")
   email        String     @unique @db.VarChar(100)
   passwordHash String     @map("password") @db.VarChar(255)
+  name         String     @map("nama") @db.VarChar(100)
   role         Role
   status       UserStatus @default(ACTIVE)
   createdAt    DateTime   @default(now()) @map("created_at")
   updatedAt    DateTime   @updatedAt @map("updated_at")
 
-  admin                  Admin?
-  teacher                Teacher?
-  student                Student?
-  guardian               Guardian?
-  announcements          Announcement[]
-  facilityBookings       FacilityBooking[]
-  notificationRecipients NotificationRecipient[]
-  deviceTokens           DeviceToken[]
-  refreshTokens          RefreshToken[]
+  teacher          Teacher?
+  student          Student?
+  guardian         Guardian?
+  announcements    Announcement[]
+  facilityBookings FacilityBooking[] @relation("BookingRequester")
+  verifiedBookings FacilityBooking[] @relation("BookingVerifier")
+  deviceTokens     DeviceToken[]
+  refreshTokens    RefreshToken[]
 
   @@map("akun")
 }
 
-model Admin {
-  id        Int      @id @default(autoincrement()) @map("id_admin")
-  userId    Int      @unique @map("id_akun")
-  name      String   @map("nama") @db.VarChar(100)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  user             User              @relation(fields: [userId], references: [id])
-  verifiedBookings FacilityBooking[]
-
-  @@map("admin")
-}
-
 model Teacher {
-  id             Int      @id @default(autoincrement()) @map("id_guru")
-  userId         Int      @unique @map("id_akun")
-  employeeNumber String   @unique @map("nip") @db.VarChar(30)
-  name           String   @map("nama") @db.VarChar(100)
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+  id                Int      @id @default(autoincrement()) @map("id_guru")
+  userId            Int      @unique @map("id_akun")
+  employeeNumber    String   @unique @map("nip") @db.VarChar(30)
+  // Penanda cepat untuk menu Android; diisi backend dari ClassGroup.homeroomTeacherId pada
+  // tahun ajaran aktif. Hak akses wali kelas tetap dicek dari ClassGroup (ADR-004).
+  isHomeroomTeacher Boolean  @default(false) @map("is_wali_kelas")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
 
   user                  User                 @relation(fields: [userId], references: [id])
   homeroomClasses       ClassGroup[]
@@ -167,7 +148,6 @@ model Student {
   id        Int      @id @default(autoincrement()) @map("id_siswa")
   userId    Int      @unique @map("id_akun")
   nis       String   @unique @db.VarChar(30)
-  name      String   @map("nama") @db.VarChar(100)
   birthDate DateTime @map("tanggal_lahir") @db.Date
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -191,7 +171,6 @@ model Student {
 model Guardian {
   id        Int      @id @default(autoincrement()) @map("id_wali_murid")
   userId    Int      @unique @map("id_akun")
-  name      String   @map("nama") @db.VarChar(100)
   phone     String   @map("no_telp") @db.VarChar(20)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -689,35 +668,8 @@ model AcademicEvent {
   @@map("kalender_akademik")
 }
 
-model Notification {
-  id          Int              @id @default(autoincrement()) @map("id_notifikasi")
-  title       String           @map("judul") @db.VarChar(100)
-  body        String           @map("isi") @db.VarChar(255)
-  type        NotificationType @map("tipe")
-  // ID data yang dirujuk (mis. id_perubahan) agar Android bisa membuka layar yang tepat.
-  referenceId Int?             @map("id_referensi")
-  date        DateTime         @map("tanggal") @db.Date
-  createdAt   DateTime         @default(now()) @map("created_at")
-
-  recipients NotificationRecipient[]
-
-  @@map("notifikasi")
-}
-
-// [M:N] Notifikasi <-> Akun
-model NotificationRecipient {
-  notificationId Int      @map("id_notifikasi")
-  userId         Int      @map("id_akun")
-  isRead         Boolean  @default(false) @map("is_read")
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
-
-  notification Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@id([notificationId, userId])
-  @@map("notifikasi_penerima")
-}
+// Notifikasi tidak disimpan di database: dikirim lewat FCM dan riwayatnya disimpan di Room
+// pada perangkat (ADR-010). Server hanya menyimpan token perangkat (DeviceToken).
 
 // =====================================================================
 // G. PEMINJAMAN FASILITAS DAN PEMBAYARAN
@@ -727,7 +679,7 @@ model FacilityBooking {
   id          Int           @id @default(autoincrement()) @map("id_peminjaman")
   facilityId  Int           @map("id_fasilitas")
   requesterId Int           @map("id_akun_pemohon")
-  verifierId  Int?          @map("id_admin_verifikator")
+  verifierId  Int?          @map("id_akun_verifikator")
   bookingDate DateTime      @map("tanggal_pinjam") @db.Date
   startTime   DateTime      @map("jam_mulai") @db.Time(0)
   endTime     DateTime      @map("jam_selesai") @db.Time(0)
@@ -738,8 +690,9 @@ model FacilityBooking {
   updatedAt   DateTime      @updatedAt @map("updated_at")
 
   facility  Facility @relation(fields: [facilityId], references: [id])
-  requester User     @relation(fields: [requesterId], references: [id])
-  verifier  Admin?   @relation(fields: [verifierId], references: [id])
+  requester User     @relation("BookingRequester", fields: [requesterId], references: [id])
+  // Admin yang memverifikasi (akun ber-role ADMIN).
+  verifier  User?    @relation("BookingVerifier", fields: [verifierId], references: [id])
 
   @@map("peminjaman")
 }

@@ -46,11 +46,12 @@ Daftar modul: `auth`, `users`, `master` (siswa, guru, kelas, mapel, fasilitas, k
 4. **Response** selalu lewat helper (`sendSuccess`, `sendPaginated`) dengan format di `docs/API_CONVENTIONS.md`.
 5. **Transaksi**: operasi yang mengubah lebih dari satu tabel (impor Excel, ACC izin yang mengubah presensi, pembagian kelas) wajib memakai `prisma.$transaction`.
 6. **Jangan mengembalikan field sensitif** (`passwordHash`, token) ke client. Gunakan `select` eksplisit.
-7. **Notifikasi**: simpan dulu ke tabel `Notification`, lalu kirim FCM lewat `jobs/` setelah transaksi selesai. Request API tidak boleh menunggu pengiriman FCM. Batch maksimal 500 token per panggilan.
+7. **Notifikasi**: tidak disimpan di database (ADR-010). Setelah transaksi selesai, kirim FCM **data message** lewat `jobs/` ke `DeviceToken` penerima. Request API tidak boleh menunggu pengiriman FCM. Batch maksimal 500 token per panggilan.
 8. **Upload file**: Multer `memoryStorage`, batasi ukuran dan tipe file, unggah ke Cloudinary, simpan `url` dan `publicId`.
 9. **Impor Excel**: validasi semua baris dulu. Jika ada baris tidak valid, batalkan seluruh impor dan kembalikan daftar error per baris (nomor baris + alasan). Lihat `docs/BUSINESS_RULES.md`.
 10. **Query daftar** wajib berpaginasi dan difilter periode (tahun ajaran/semester) bila datanya akademik.
 11. **Bahasa**: `message` error untuk pengguna dalam bahasa Indonesia; `code` error dalam bahasa Inggris `UPPER_SNAKE_CASE`.
+12. **Wali kelas**: setiap perubahan `ClassGroup.homeroomTeacherId` atau tahun ajaran aktif wajib menghitung ulang `Teacher.isHomeroomTeacher` dalam transaksi yang sama. Otorisasi wali kelas tetap memakai `homeroomTeacherId`.
 
 ## Prisma
 
