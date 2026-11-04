@@ -1,4 +1,4 @@
-package com.example.android
+package id.sch.santaagnes.sim
 
 import org.junit.Test
 
