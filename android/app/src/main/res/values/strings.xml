@@ -1,3 +1,19 @@
 <resources>
     <string name="app_name">SIM SMA Santa Agnes</string>
+
+    <string name="login_title">SIM Santa Agnes</string>
+    <string name="login_subtitle">Sistem Informasi Akademik</string>
+    <string name="login_email">Email</string>
+    <string name="login_password">Password</string>
+    <string name="login_button">Masuk</string>
+    <string name="login_welcome">Silakan masuk menggunakan akun Anda</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="login_success">Login berhasil</string>
+    <string name="login_required">Email dan password wajib diisi</string>
+    <string name="login_connection_error">Tidak dapat terhubung ke server. Periksa koneksi.</string>
+    <string name="login_invalid_credentials">Email atau password salah</string>
+
+
 </resources>
