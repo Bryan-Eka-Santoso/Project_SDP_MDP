@@ -4,7 +4,10 @@ const { errorHandler, notFoundHandler } = require('./middlewares/errorHandler');
 
 const app = express();
 
-app.use(express.json());
+// Jangan umumkan versi Express di header response.
+app.disable('x-powered-by');
+// Batas body JSON; upload file lewat multipart (Multer), bukan JSON.
+app.use(express.json({ limit: '1mb' }));
 
 const api = express.Router();
 
@@ -12,7 +15,9 @@ api.get('/health', (req, res) => {
   sendSuccess(res, { status: 'ok' });
 });
 
-// Router modul dipasang di sini, mis. api.use('/auth', require('./modules/auth/auth.routes'));
+// Router modul. Router auth memuat path /auth/* dan /me sekaligus.
+api.use(require('./modules/auth/auth.routes'));
+
 
 app.use('/api/v1', api);
 
