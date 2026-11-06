@@ -4,13 +4,16 @@ function notFoundHandler(req, res, next) {
   next(new AppError(404, 'NOT_FOUND', 'Halaman atau data tidak ditemukan.'));
 }
 
-// Ubah error dari library menjadi AppError agar format response selalu sama.
+// Ubah error dari library menjadi AppError agar format response selalu sama. 
 function toAppError(err) {
   if (err instanceof AppError) return err;
 
   // JSON body rusak dari express.json()
   if (err.type === 'entity.parse.failed') {
     return new AppError(400, 'VALIDATION_ERROR', 'Format JSON tidak valid.');
+  }
+  if (err.type === 'entity.too.large') {
+    return new AppError(413, 'PAYLOAD_TOO_LARGE', 'Data yang dikirim terlalu besar.');
   }
 
   // Dicek lewat nama agar middleware ini tidak bergantung pada Prisma Client.

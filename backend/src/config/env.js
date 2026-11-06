@@ -4,7 +4,7 @@ const env = {
   databaseUrl: process.env.DATABASE_URL,
   jwt: {
     accessSecret: process.env.JWT_ACCESS_SECRET,
-    refreshSecret: process.env.JWT_REFRESH_SECRET,
+    // Refresh token berupa string acak yang disimpan hash-nya, jadi tidak butuh secret.
     accessTtl: process.env.JWT_ACCESS_TTL || '15m',
     refreshTtl: process.env.JWT_REFRESH_TTL || '7d',
   },

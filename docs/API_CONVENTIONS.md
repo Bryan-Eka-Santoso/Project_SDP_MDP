@@ -83,6 +83,7 @@ Gagal:
 | 409 | `INVALID_STATE` | Aksi tidak sesuai status (mis. menyetujui izin yang sudah ditolak) |
 | 409 | `DUPLICATE` | Melanggar data unik (email, NIS, dll.) |
 | 413 | `FILE_TOO_LARGE` | File melebihi batas |
+| 413 | `PAYLOAD_TOO_LARGE` | Body JSON melebihi 1 MB |
 | 415 | `UNSUPPORTED_FILE_TYPE` | Tipe file tidak diizinkan |
 | 422 | `IMPORT_INVALID` | Impor Excel ada baris tidak valid; `details` = `[{ row, column, message }]` |
 | 500 | `INTERNAL_ERROR` | Error tak terduga (detail hanya di log server) |
@@ -91,9 +92,12 @@ Menambah kode error baru: tambahkan ke tabel ini.
 
 ## 6. Autentikasi
 
-- `POST /auth/login` → `{ accessToken, refreshToken, user }`.
-- `POST /auth/refresh` → `{ accessToken, refreshToken }` (refresh token dirotasi).
-- `POST /auth/logout` → menghapus refresh token dan device token perangkat tersebut.
+- `POST /auth/login` `{ email, password }` → `{ accessToken, refreshToken, user }`. `user` sama dengan respons `GET /me`.
+- `POST /auth/refresh` `{ refreshToken }` → `{ accessToken, refreshToken }`. Refresh token dirotasi: token lama langsung tidak berlaku. Memakai ulang token lama mencabut semua sesi user (dianggap dicuri).
+- `POST /auth/logout` `{ refreshToken, deviceToken? }` → mencabut refresh token dan menghapus device token perangkat tersebut. Tidak butuh access token; selalu sukses.
+- `GET /me` → profil: `{ id, email, name, role, teacher, student, guardian }`. Hanya objek sesuai role yang terisi, lainnya `null`. `teacher.isHomeroomTeacher` untuk menu wali kelas; `guardian.children` = daftar anak `{ id, name, nis, relationship }`.
+- `PATCH /me/password` `{ currentPassword, newPassword }` → `{ accessToken, refreshToken }` baru. Sesi di perangkat lain dicabut.
+- Akun `BLOCKED` ditolak `403 ACCOUNT_BLOCKED` saat login, refresh, dan setiap request ber-token.
 - Header: `Authorization: Bearer <accessToken>`.
 - Masa berlaku: access token 15 menit, refresh token 7 hari. Nilai diatur lewat env.
 - `POST /me/device-tokens` `{ token, platform: "ANDROID" }` untuk mendaftarkan token FCM.

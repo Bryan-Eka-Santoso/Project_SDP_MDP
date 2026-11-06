@@ -93,8 +93,8 @@ Notifikasi perubahan jadwal yang diterima memicu refresh cache jadwal. Kalender 
 |---|---|
 | `DATABASE_URL` | Koneksi MySQL untuk Prisma |
 | `PORT` | Port API |
-| `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET` | Kunci tanda tangan token |
-| `JWT_ACCESS_TTL`, `JWT_REFRESH_TTL` | Masa berlaku token |
+| `JWT_ACCESS_SECRET` | Kunci tanda tangan access token (minimal 32 karakter). Refresh token berupa string acak, bukan JWT, jadi tidak butuh secret |
+| `JWT_ACCESS_TTL`, `JWT_REFRESH_TTL` | Masa berlaku token (`15m`, `7d`) |
 | `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Upload file |
 | `FIREBASE_SERVICE_ACCOUNT_PATH` | Kredensial Firebase Admin SDK |
 | `TZ_DISPLAY` | `Asia/Jakarta`, untuk perhitungan tanggal lokal |
