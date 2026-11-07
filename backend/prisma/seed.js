@@ -78,6 +78,21 @@ async function seedPeriod() {
     prisma.semester.update({ where: { id: odd.id }, data: { isActive: true } }),
   ]);
 
+  // Skala predikat bawaan; admin bisa mengubahnya per tahun ajaran (F-NIL-06).
+  const predicates = [
+    { label: 'A', minScore: '90', description: 'Sangat Baik' },
+    { label: 'B', minScore: '80', description: 'Baik' },
+    { label: 'C', minScore: '70', description: 'Cukup' },
+    { label: 'D', minScore: '0', description: 'Perlu Bimbingan' },
+  ];
+  for (const predicate of predicates) {
+    await prisma.gradePredicate.upsert({
+      where: { academicYearId_label: { academicYearId: academicYear.id, label: predicate.label } },
+      update: {},
+      create: { ...predicate, academicYearId: academicYear.id },
+    });
+  }
+
   return { academicYear, semester: odd };
 }
 
@@ -102,7 +117,8 @@ const TEACHERS = [
   { employeeNumber: '199002252014021005', name: 'Agustinus Hartono' },
 ];
 
-// Komponen per mapel per semester (PO-01). Seni Budaya sengaja berbeda.
+// Komponen per penugasan guru (ADR-018); di data demo semua kelas memakai set yang sama
+// per mapel. Seni Budaya sengaja berbeda.
 const DEFAULT_COMPONENTS = [
   { name: 'Tugas', weight: 20 },
   { name: 'Ulangan Harian', weight: 30 },
@@ -123,9 +139,9 @@ const CLASSES = [
     room: 'Ruang X-1',
     homeroomIndex: 0,
     students: [
-      { nis: '2026001', name: 'Angela Putri', birthDate: '2010-03-14' },
-      { nis: '2026002', name: 'Benediktus Santoso', birthDate: '2010-06-02' },
-      { nis: '2026003', name: 'Clara Wijaya', birthDate: '2010-09-21' },
+      { nis: '2026001', name: 'Angela Putri', birthDate: '2010-03-14', phone: '085712340001' },
+      { nis: '2026002', name: 'Benediktus Santoso', birthDate: '2010-06-02', phone: '085712340002' },
+      { nis: '2026003', name: 'Clara Wijaya', birthDate: '2010-09-21', phone: null },
     ],
   },
   {
@@ -134,9 +150,9 @@ const CLASSES = [
     room: 'Ruang XI-1',
     homeroomIndex: 1,
     students: [
-      { nis: '2025001', name: 'Dominikus Halim', birthDate: '2009-01-30' },
-      { nis: '2025002', name: 'Elisabeth Tanoto', birthDate: '2009-04-17' },
-      { nis: '2025003', name: 'Fransiskus Gunawan', birthDate: '2009-11-05' },
+      { nis: '2025001', name: 'Dominikus Halim', birthDate: '2009-01-30', phone: '085712340004' },
+      { nis: '2025002', name: 'Elisabeth Tanoto', birthDate: '2009-04-17', phone: '085712340005' },
+      { nis: '2025003', name: 'Fransiskus Gunawan', birthDate: '2009-11-05', phone: null },
     ],
   },
 ];
@@ -199,6 +215,7 @@ async function seedDemo({ admin, academicYear, semester }) {
         create: {
           nis: student.nis,
           birthDate: date(student.birthDate),
+          phone: student.phone,
           userId: user.id,
         },
       });
@@ -218,19 +235,6 @@ async function seedDemo({ admin, academicYear, semester }) {
         where: { studentId_guardianId: { studentId, guardianId: saved.id } },
         update: {},
         create: { studentId, guardianId: saved.id, relationship },
-      });
-    }
-  }
-
-  for (const subject of subjects) {
-    const components = COMPONENTS_BY_SUBJECT[subject.code] ?? DEFAULT_COMPONENTS;
-    for (const component of components) {
-      await prisma.gradeComponent.upsert({
-        where: {
-          subjectId_semesterId_name: { subjectId: subject.id, semesterId: semester.id, name: component.name },
-        },
-        update: {},
-        create: { ...component, subjectId: subject.id, semesterId: semester.id },
       });
     }
   }
@@ -273,12 +277,31 @@ async function seedDemo({ admin, academicYear, semester }) {
         classGroupId: classGroup.id,
         semesterId: semester.id,
       };
-      assignments.push(
-        await prisma.teachingAssignment.upsert({
-          where: { teacherId_subjectId_classGroupId_semesterId: key },
+      const assignment = await prisma.teachingAssignment.upsert({
+        where: { teacherId_subjectId_classGroupId_semesterId: key },
+        update: {},
+        create: key,
+      });
+      assignments.push(assignment);
+
+      const components = COMPONENTS_BY_SUBJECT[subject.code] ?? DEFAULT_COMPONENTS;
+      for (const component of components) {
+        await prisma.gradeComponent.upsert({
+          where: {
+            teachingAssignmentId_name: { teachingAssignmentId: assignment.id, name: component.name },
+          },
           update: {},
-          create: key,
-        }),
+          create: { ...component, teachingAssignmentId: assignment.id },
+        });
+      }
+    }
+
+    // Contoh tugas dari guru (F-JDW-08) untuk dua mapel pertama kelas ini.
+    for (const [i, title] of ['Kerjakan LKS bab 3', 'Rangkum materi pertemuan 5'].entries()) {
+      await findOrCreate(
+        prisma.task,
+        { teachingAssignmentId: assignments[i].id, title },
+        { description: 'Dikerjakan di buku tulis.', dueDate: date(`2026-11-${20 + i}`) },
       );
     }
 

@@ -149,6 +149,7 @@ model Student {
   userId    Int      @unique @map("id_akun")
   nis       String   @unique @db.VarChar(30)
   birthDate DateTime @map("tanggal_lahir") @db.Date
+  phone     String?  @map("no_telp") @db.VarChar(20)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -240,6 +241,7 @@ model AcademicYear {
   classGroups     ClassGroup[]
   subjectPackages SubjectPackage[]
   electiveSurveys ElectiveSurvey[]
+  gradePredicates GradePredicate[]
 
   @@map("tahun_ajaran")
 }
@@ -258,7 +260,6 @@ model Semester {
 
   academicYear        AcademicYear         @relation(fields: [academicYearId], references: [id])
   teachingAssignments TeachingAssignment[]
-  gradeComponents     GradeComponent[]
 
   @@unique([academicYearId, type])
   @@map("semester")
@@ -307,7 +308,6 @@ model Subject {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   teachingAssignments TeachingAssignment[]
-  gradeComponents     GradeComponent[]
   packageItems        SubjectPackageItem[]
   surveyResponses     ElectiveSurveyResponse[]
 
@@ -324,34 +324,70 @@ model TeachingAssignment {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  teacher       Teacher        @relation(fields: [teacherId], references: [id])
-  subject       Subject        @relation(fields: [subjectId], references: [id])
-  classGroup    ClassGroup     @relation(fields: [classGroupId], references: [id])
-  semester      Semester       @relation(fields: [semesterId], references: [id])
-  scheduleSlots ScheduleSlot[]
-  scores        Score[]
-  progressNotes ProgressNote[]
+  teacher         Teacher          @relation(fields: [teacherId], references: [id])
+  subject         Subject          @relation(fields: [subjectId], references: [id])
+  classGroup      ClassGroup       @relation(fields: [classGroupId], references: [id])
+  semester        Semester         @relation(fields: [semesterId], references: [id])
+  scheduleSlots   ScheduleSlot[]
+  scores          Score[]
+  progressNotes   ProgressNote[]
+  gradeComponents GradeComponent[]
+  tasks           Task[]
 
   @@unique([teacherId, subjectId, classGroupId, semesterId])
   @@map("penugasan_guru")
 }
 
-// Per mapel per semester (PO-01); bobot dalam persen bulat, total satu mapel = 100.
+// Per penugasan guru (guru x mapel x kelas x semester): tiap guru mengatur komponen dan bobot
+// untuk kelas yang ia ajar sendiri (ADR-018). Bobot persen bulat, total satu penugasan = 100.
 model GradeComponent {
-  id         Int      @id @default(autoincrement()) @map("id_komponen")
-  subjectId  Int      @map("id_mapel")
-  semesterId Int      @map("id_semester")
-  name       String   @map("nama_komponen") @db.VarChar(50)
-  weight     Int      @map("bobot")
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
+  id                   Int      @id @default(autoincrement()) @map("id_komponen")
+  teachingAssignmentId Int      @map("id_penugasan")
+  name                 String   @map("nama_komponen") @db.VarChar(50)
+  weight               Int      @map("bobot")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
 
-  subject  Subject  @relation(fields: [subjectId], references: [id])
-  semester Semester @relation(fields: [semesterId], references: [id])
-  scores   Score[]
+  teachingAssignment TeachingAssignment @relation(fields: [teachingAssignmentId], references: [id])
+  scores             Score[]
 
-  @@unique([subjectId, semesterId, name])
+  @@unique([teachingAssignmentId, name])
   @@map("komponen_penilaian")
+}
+
+// Skala predikat per tahun ajaran, diatur admin. Predikat nilai akhir = baris dengan
+// minScore tertinggi yang <= nilai akhir; wajib ada baris minScore 0 (BUSINESS_RULES 3).
+model GradePredicate {
+  id             Int      @id @default(autoincrement()) @map("id_predikat")
+  academicYearId Int      @map("id_tahun_ajaran")
+  label          String   @map("predikat") @db.VarChar(5)
+  minScore       Decimal  @map("nilai_minimum") @db.Decimal(5, 2)
+  description    String?  @map("keterangan") @db.VarChar(50)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  academicYear AcademicYear @relation(fields: [academicYearId], references: [id])
+
+  @@unique([academicYearId, label])
+  @@unique([academicYearId, minScore])
+  @@map("predikat_nilai")
+}
+
+// Tugas/pengingat dari guru untuk satu kelas yang ia ajar (F-JDW-08). Tidak ada pengumpulan;
+// tanda "selesai" milik siswa hanya disimpan di perangkat (Room).
+model Task {
+  id                   Int      @id @default(autoincrement()) @map("id_tugas")
+  teachingAssignmentId Int      @map("id_penugasan")
+  title                String   @map("judul") @db.VarChar(150)
+  description          String?  @map("catatan") @db.Text
+  dueDate              DateTime @map("tenggat") @db.Date
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  teachingAssignment TeachingAssignment @relation(fields: [teachingAssignmentId], references: [id])
+
+  @@index([teachingAssignmentId, dueDate])
+  @@map("tugas")
 }
 
 model ViolationType {

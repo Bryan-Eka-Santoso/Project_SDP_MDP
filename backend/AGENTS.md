@@ -27,7 +27,7 @@ backend/
 └── tests/
 ```
 
-Daftar modul: `auth`, `users`, `master` (siswa, guru, kelas, mapel, fasilitas, komponen nilai, jenis pelanggaran), `schedules`, `grades`, `attendance` (sesi, jurnal, presensi, izin), `discipline` (pelanggaran, buku penghubung, catatan perkembangan), `announcements`, `calendar`, `elective` (survei, paket, pilihan), `bookings`, `bills`, `reports`, `notifications`. Jangan membuat modul baru tanpa persetujuan.
+Daftar modul: `auth`, `users`, `master` (siswa, guru, kelas, mapel, fasilitas, predikat nilai, jenis pelanggaran), `schedules` (jadwal, perubahan jadwal, tugas dari guru), `grades` (komponen nilai, nilai), `attendance` (sesi, jurnal, presensi, izin), `discipline` (pelanggaran, buku penghubung, catatan perkembangan), `announcements`, `calendar`, `elective` (survei, paket, pilihan), `bookings`, `bills`, `reports`, `notifications`. Jangan membuat modul baru tanpa persetujuan.
 
 ## Pembagian tanggung jawab layer
 
