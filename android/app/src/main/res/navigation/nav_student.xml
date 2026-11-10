@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/student_graph"
+    app:startDestination="@id/studentHomeFragment">
+
+    <fragment
+        android:id="@+id/studentHomeFragment"
+        android:name="id.sch.santaagnes.sim.ui.home.HomeFragment">
+
+        <argument
+            android:name="role"
+            android:defaultValue="STUDENT"
+            app:argType="string" />
+    </fragment>
+</navigation>
