@@ -2,4 +2,8 @@ node_modules
 # Keep environment variables out of version control
 .env
 
+# Kredensial Firebase Admin SDK (jaga-jaga jika tersimpan di folder repo)
+*firebase-adminsdk*.json
+service-account*.json
+
 /generated/prisma
