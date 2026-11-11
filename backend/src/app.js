@@ -17,6 +17,8 @@ api.get('/health', (req, res) => {
 
 // Router modul. Router auth memuat path /auth/* dan /me sekaligus.
 api.use(require('./modules/auth/auth.routes'));
+api.use('/users', require('./modules/users/users.routes'));
+api.use(require('./modules/master/master.routes'));
 
 
 app.use('/api/v1', api);
