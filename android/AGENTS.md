@@ -44,7 +44,7 @@ Fragment  →  ViewModel  →  Repository  →  Api (Retrofit) / Dao (Room)
 - **Wali murid**: wajib ada pemilih anak aktif (`activeStudentId` disimpan di DataStore). Semua layar wali murid memakai anak aktif tersebut.
 - **Token**: access token dan refresh token disimpan di DataStore. Interceptor menambah header `Authorization`; authenticator OkHttp memperbarui token saat 401. Jika refresh gagal, logout dan kembali ke layar login.
 - **Cache offline (Room)**: wajib untuk jadwal dan pengumuman. Data lain boleh online saja. Tampilkan data cache lebih dulu, lalu perbarui dari server.
-- **Data lokal (Room) tanpa server**: riwayat notifikasi (`NotificationEntity`, disimpan dari `onMessageReceived`) dan to-do list siswa (`TodoItem`, opsional `subjectId`). Keduanya hilang saat aplikasi di-uninstall; itu disengaja (ADR-010, F-JDW-07).
+- **Data lokal (Room) tanpa server**: riwayat notifikasi (`NotificationEntity`, disimpan dari `onMessageReceived`) to-do list siswa (`TodoItem`, opsional `subjectId`), dan tanda selesai tugas dari guru (`TaskDoneEntity`, berisi `taskId`). Semuanya hilang saat aplikasi di-uninstall; itu disengaja (ADR-010, ADR-018, F-JDW-07, F-JDW-09).
 - **Teks**: semua teks UI di `res/values/strings.xml` dalam bahasa Indonesia. Jangan hardcode string di layout atau kode.
 - **Tanggal**: terima ISO 8601 UTC dari API, tampilkan dalam WIB. Gunakan helper di `core/` (java.time melalui desugaring karena min SDK 24).
 - **Ukuran layar**: layar admin harus tetap nyaman di tablet. Hindari tabel lebar; gunakan list + filter + detail.

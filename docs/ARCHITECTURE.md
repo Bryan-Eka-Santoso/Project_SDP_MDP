@@ -28,9 +28,9 @@ Detail struktur folder: `backend/AGENTS.md` dan `android/AGENTS.md`.
 | Modul backend | Feature Android | ID PRD |
 |---|---|---|
 | `auth`, `users` | `auth`, `profile`, `admin/user` | AUTH, MST-01..03 |
-| `master` | `admin/*` | MST-04..12, NIL-01, PLG-01 |
+| `master` | `admin/*` | MST-04..12, NIL-06, PLG-01 |
 | `schedules` | `schedule`, `admin/schedule` | JDW |
-| `grades` | `grades` | NIL |
+| `grades` | `grades` | NIL-01..05 |
 | `attendance` | `attendance` | ABS, IZN |
 | `discipline` | `discipline` | PLG, BKP |
 | `announcements` | `announcement` | PGM |
@@ -80,7 +80,7 @@ Layar dibuka → ViewModel minta data → Repository
 Error jaringan → tampilkan data cache + pesan "Tidak dapat terhubung"
 ```
 
-Notifikasi perubahan jadwal yang diterima memicu refresh cache jadwal. Kalender perangkat (CalendarContract) hanya berisi agenda kalender akademik dan peminjaman yang disetujui (jika pengguna mengaktifkan sinkronisasi). To-do list siswa disimpan di Room saja.
+Notifikasi perubahan jadwal yang diterima memicu refresh cache jadwal. Kalender perangkat (CalendarContract) hanya berisi agenda kalender akademik dan peminjaman yang disetujui (jika pengguna mengaktifkan sinkronisasi). To-do list pribadi siswa disimpan di Room saja. Tugas dari guru diambil dari API (bisa di-cache); tanda selesai siswa disimpan di Room.
 
 ## 6. Keamanan
 

@@ -65,6 +65,7 @@ Agent **tidak boleh** menjalankan perintah berikut. Tuliskan perintahnya di ring
 - Semua perintah **git** yang mengubah state: `commit`, `push`, `pull`, `merge`, `rebase`, `reset`, `checkout`, `switch`, `stash`, `branch -d`, `tag`. (`git status`, `git diff`, `git log` boleh.)
 - Semua perintah **migrasi Prisma** dan perubahan database: `prisma migrate dev`, `prisma migrate deploy`, `prisma migrate reset`, `prisma db push`, `prisma db seed`. (`prisma format`, `prisma validate`, `prisma generate` boleh.)
 - Menghapus file/folder di luar yang diminta, menghapus data database, atau mengubah file `.env`.
+- **Membaca atau mengakses file `.env`** (`backend/.env`, `android/local.properties`, dan sejenisnya yang berisi secret): dilarang total, termasuk lewat `cat`, `grep`, `type`, Read, atau menjalankan skrip yang mencetak isinya. Hanya `.env.example` yang boleh dibaca. Jika butuh nilai dari `.env`, minta pengguna yang mengisi atau memeriksanya sendiri.
 - Memasang dependency baru (`npm install <pkg>`, menambah dependency Gradle) tanpa persetujuan.
 
 Jika mengubah `schema.prisma`, cukup ubah file-nya, lalu jelaskan nama migrasi yang disarankan dan dampaknya.
