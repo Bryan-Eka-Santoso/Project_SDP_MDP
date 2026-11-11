@@ -1,6 +1,9 @@
 // Satu-satunya tempat membaca process.env. Modul lain mengimpor dari sini.
 const env = {
   port: Number(process.env.PORT) || 3000,
+  // Jumlah proxy (reverse proxy/load balancer) di depan server; 0 = klien langsung. Dipakai agar
+  // `req.ip` (pembatas laju) berisi IP klien, bukan IP proxy.
+  trustProxy: Number(process.env.TRUST_PROXY) || 0,
   databaseUrl: process.env.DATABASE_URL,
   jwt: {
     accessSecret: process.env.JWT_ACCESS_SECRET,

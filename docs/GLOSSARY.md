@@ -33,9 +33,10 @@ Nama tabel fisik mengikuti PDM v2 di laporan (ADR-017): bahasa Indonesia, `snake
 | Jurnal mengajar | `journal` | — | Field teks (`materi`) di `LessonSession` |
 | Presensi / absensi | `Attendance` | `presensi` | Status satu siswa di satu sesi |
 | Pengajuan izin | `LeaveRequest` | `pengajuan_izin` | Diajukan wali murid, diverifikasi wali kelas |
-| Komponen penilaian | `GradeComponent` | `komponen_penilaian` | Per mapel per semester. Contoh: Tugas, UH, UTS, UAS |
+| Komponen penilaian | `GradeComponent` | `komponen_penilaian` | Per penugasan guru, diatur guru. Contoh: Tugas, UH, UTS, UAS |
 | Nilai | `Score` | `nilai` | Nilai satu siswa pada satu komponen |
 | Nilai akhir | `finalScore` | — | **Dihitung**, tidak disimpan |
+| Predikat nilai | `GradePredicate` | `predikat_nilai` | Skala per tahun ajaran (`label`, `minScore`), diatur admin |
 | Catatan perkembangan (rapor) | `ProgressNote` | `catatan_perkembangan` | Ditulis guru per mapel |
 | Jenis pelanggaran | `ViolationType` | `jenis_pelanggaran` | Punya bobot `points` |
 | Pelanggaran (kejadian) | `Violation` | `pelanggaran` | Menyimpan salinan `points` saat dicatat |
@@ -51,6 +52,7 @@ Nama tabel fisik mengikuti PDM v2 di laporan (ADR-017): bahasa Indonesia, `snake
 | Tagihan / pembayaran | `Bill` | `pembayaran` | Informasi dari yayasan, bukan transaksi |
 | Notifikasi | `Notification` (pesan FCM), `NotificationEntity` (Room) | — | Tidak disimpan di server; riwayat disimpan di perangkat |
 | To-do pribadi siswa | `TodoItem` (Room) | — | Hanya di Android; opsional `subjectId` |
+| Tugas dari guru | `Task` | `tugas` | Per penugasan guru; tanpa pengumpulan. Tanda selesai siswa di Room (`TaskDoneEntity`) |
 | NIS / NISN | `nis` / `nisn` | — | Nomor induk siswa |
 | NIP / kode guru | `employeeNumber` | — | |
 
@@ -71,6 +73,6 @@ Nama tabel fisik mengikuti PDM v2 di laporan (ADR-017): bahasa Indonesia, `snake
 | `BookingStatus` | `PENDING`, `APPROVED`, `REJECTED`, `RETURNED` | Diajukan, disetujui, ditolak, sudah dikembalikan |
 | `BillStatus` | `PAID`, `UNPAID` | Menunggak = `UNPAID` dan sudah lewat jatuh tempo (dihitung) |
 | `SurveyStatus` | `DRAFT`, `PUBLISHED`, `CLOSED` | |
-| `NotificationType` | `SCHEDULE_CHANGE`, `ANNOUNCEMENT`, `VIOLATION`, `LEAVE_REQUEST`, `BOOKING`, `BILL_OVERDUE` | Field `type` di payload FCM; tidak ada di `schema.prisma` karena notifikasi tidak disimpan di database (ADR-010) |
+| `NotificationType` | `SCHEDULE_CHANGE`, `ANNOUNCEMENT`, `VIOLATION`, `LEAVE_REQUEST`, `BOOKING`, `BILL_OVERDUE`, `TASK` | Field `type` di payload FCM; tidak ada di `schema.prisma` karena notifikasi tidak disimpan di database (ADR-010) |
 
 Menambah atau mengubah nilai enum termasuk perubahan kontrak: perbarui tabel ini, `schema.prisma`, dan model di Android.

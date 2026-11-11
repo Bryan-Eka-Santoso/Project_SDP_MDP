@@ -12,6 +12,7 @@ const nodeGlobals = {
   clearTimeout: 'readonly',
   setInterval: 'readonly',
   clearInterval: 'readonly',
+  setImmediate: 'readonly',
 };
 
 const jestGlobals = {

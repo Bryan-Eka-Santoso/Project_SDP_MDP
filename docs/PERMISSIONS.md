@@ -35,9 +35,13 @@ Tanda `—` berarti tidak punya akses (backend mengembalikan 403).
 | Kelola kalender akademik | — | — | — | — | ✓ |
 | Lihat jadwal | `SELF` (kelas reguler + kelas paket) | jadwal mengajarnya | `HOMEROOM` | `CHILD` | `ALL` (lewat master jadwal) |
 | Kelola jadwal, impor, perubahan jadwal | — | — | — | — | ✓ |
+| Kelola tugas dari guru | — | `TAUGHT` (penugasan miliknya) | | — | — |
+| Lihat tugas dari guru | `SELF` (kelasnya) | `TAUGHT` | | — | — |
+| To-do pribadi (di perangkat) | milik sendiri | — | | — | — |
 | Lihat nilai + rekap | `SELF` | `TAUGHT` | `HOMEROOM` (semua mapel) | `CHILD` | `ALL` (lewat laporan) |
 | Input/edit nilai | — | `TAUGHT` | | — | — |
-| Kelola komponen penilaian | — | — | — | — | ✓ |
+| Kelola komponen penilaian dan bobot | — | `TAUGHT` (penugasan miliknya) | | — | lihat |
+| Kelola skala predikat nilai | — | — | — | — | ✓ |
 | Catatan perkembangan (rapor) | — | tulis `TAUGHT` | baca `HOMEROOM` | — | baca |
 | Lihat presensi + rekap | `SELF` | `TAUGHT` | `HOMEROOM` | `CHILD` | `ALL` (lewat laporan) |
 | Input presensi + jurnal | — | sesi miliknya (termasuk sebagai guru pengganti) | | — | — |
@@ -66,5 +70,6 @@ Tanda `—` berarti tidak punya akses (backend mengembalikan 403).
 - Akun `BLOCKED` ditolak saat login dan saat refresh token.
 - Guru pengganti mendapat hak input presensi + jurnal **hanya** untuk sesi pada tanggal penggantian tersebut.
 - Data yang tidak boleh diakses dikembalikan sebagai **404** jika keberadaannya sendiri sensitif (mis. siswa kelas lain), atau **403** untuk fitur yang tidak boleh diakses role tersebut. Lihat `docs/API_CONVENTIONS.md`.
-- Admin tidak menginput nilai, presensi, atau pelanggaran. Admin memantau lewat laporan.
+- Admin tidak menginput nilai, komponen penilaian, presensi, atau pelanggaran. Admin memantau lewat laporan.
+- `TAUGHT (penugasan miliknya)` berarti `TeachingAssignment.teacherId` = guru yang login. Guru lain yang mengajar mapel sama di kelas lain tidak bisa mengubahnya.
 - Baris "Input pelanggaran" untuk guru dibatasi pada siswa di kelas yang diampu; jika sekolah ingin semua guru bisa mencatat pelanggaran siswa mana pun, ubah baris ini dan `docs/BUSINESS_RULES.md` (pertanyaan terbuka PO-03).

@@ -40,7 +40,7 @@ Format menambah keputusan baru: nomor berikutnya, judul, status, konteks, keputu
 ### ADR-007 Nilai akhir dihitung, tidak disimpan
 - **Status:** Diterima
 - **Keputusan:** `finalScore` dihitung dari `Score` × bobot saat dibaca.
-- **Alasan:** Perubahan bobot oleh admin langsung berlaku tanpa sinkronisasi data.
+- **Alasan:** Perubahan bobot oleh guru langsung berlaku tanpa sinkronisasi data.
 
 ### ADR-008 Poin pelanggaran disalin saat dicatat
 - **Status:** Diterima
@@ -93,12 +93,23 @@ Format menambah keputusan baru: nomor berikutnya, judul, status, konteks, keputu
 - **Keputusan:** `schema.prisma` mengikuti struktur PDM v2. Nama model/field tetap bahasa Inggris sesuai `docs/GLOSSARY.md`; nama tabel/kolom fisik memakai nama PDM dalam `snake_case` huruf kecil lewat `@@map`/`@map`. Huruf kecil dipakai karena MySQL di Windows mengubah nama tabel menjadi huruf kecil, sehingga nama campuran (`TahunAjaran`) berbeda antara laptop Windows dan server Linux.
 - **Penyesuaian terhadap PDM v2** (agar aturan bisnis bisa dijalankan; PDM dan BAB III perlu diperbarui):
   1. `Role` + `AkunRole` dihapus; `akun.role` berisi satu role (lihat ADR-004). `nama` disimpan di `akun`; tabel `admin` dihapus karena admin tidak punya data khusus (30/10/2026). `guru.is_wali_kelas` ditambahkan (ADR-004).
-  2. Tabel `semester` dipisah dari `tahun_ajaran`; `penugasan_guru` dan `komponen_penilaian` merujuk `id_semester`.
-  3. `komponen_penilaian` per mapel per semester (`id_mapel`, `id_semester`), bobot persen bulat (PO-01).
+  2. Tabel `semester` dipisah dari `tahun_ajaran`; `penugasan_guru` merujuk `id_semester`.
+  3. `komponen_penilaian` per penugasan guru (`id_penugasan`), bobot persen bulat (ADR-018; sebelumnya per mapel per semester).
   4. `pelanggaran.poin` menyimpan salinan bobot (ADR-008).
   5. `perubahan_jadwal` untuk satu `tanggal` + `jenis` + jam/ruangan baru untuk `RESCHEDULE` (ADR-006).
   6. `pengajuan_izin` memakai `tanggal_mulai`–`tanggal_selesai`; lampiran memakai `lampiran_url` + `lampiran_public_id` (ADR-011), juga pada `pengumuman`.
   7. Tabel baru `refresh_token` dan `token_perangkat`.
   8. Kolom baru: `pembayaran.kode_tagihan`, `survei_mapel_pilihan.tingkat` dan `status`, `kalender_akademik.jenis`, `notifikasi.id_referensi`, `created_at`/`updated_at`.
   9. `kelas.id_wali_kelas` boleh kosong (kelas hasil pembagian paket dibuat sebelum wali kelas diatur).
-- **Konsekuensi:** Tabel `notifikasi` + `notifikasi_penerima` dari PDM v2 sempat dibuat lalu dihapus (ADR-010). Jam pelajaran memakai `jam_mulai`/`jam_selesai` sampai PO-09 dijawab. Total skema: 34 tabel (lihat `query_database_v4.sql`).
+  10. Tabel baru `tugas` (ADR-018) dan `predikat_nilai`; kolom baru `siswa.no_telp` (07/11/2026).
+- **Konsekuensi:** Tabel `notifikasi` + `notifikasi_penerima` dari PDM v2 sempat dibuat lalu dihapus (ADR-010). Jam pelajaran memakai `jam_mulai`/`jam_selesai` sampai PO-09 dijawab. Total skema: 36 tabel; `query_database_v4.sql` (34 tabel) perlu diperbarui.
+
+### ADR-018 Bobot nilai oleh guru per penugasan; tugas dari guru tanpa pengumpulan
+- **Status:** Diterima (07/11/2026)
+- **Konteks:** Prototype Figma menampilkan tugas dari guru, dan tim memutuskan bobot nilai diatur guru mapel, bukan admin.
+- **Keputusan:**
+  1. `GradeComponent` terikat `TeachingAssignment`. Setiap guru mengatur komponen dan bobot kelas yang ia ajar; mapel sama di kelas lain boleh berbeda.
+  2. `Task` (tabel `tugas`) dibuat guru per `TeachingAssignment` dan dilihat siswa kelas itu. Tidak ada pengumpulan atau penilaian tugas; tanda selesai siswa hanya di perangkat.
+  3. Skala predikat (`GradePredicate`) per tahun ajaran, diatur admin.
+- **Alasan:** Guru yang paling tahu proporsi penilaian kelasnya. Tanpa pengumpulan, fitur tugas tetap kecil dan cukup sebagai pengingat. Skala per tahun ajaran menjaga predikat rapor lama tidak berubah saat skala baru diatur.
+- **Konsekuensi:** Rekap nilai lintas kelas untuk mapel yang sama bisa memakai bobot berbeda. Endpoint tugas ditempatkan di modul `schedules`, komponen nilai di modul `grades`, predikat di modul `master`.

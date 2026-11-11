@@ -34,6 +34,20 @@ function todayLocal(now = new Date(), timeZone = env.tzDisplay) {
   }).format(now);
 }
 
+const TIME_OF_DAY = /^([01]\d|2[0-3]):([0-5]\d)$/;
+
+// 'HH:mm' → Date 1970-01-01 UTC, cocok untuk kolom `@db.Time` (sama dengan seed.js).
+function parseTimeOfDay(value) {
+  const match = TIME_OF_DAY.exec(value);
+  if (!match) throw new RangeError(`Jam tidak valid: ${value}`);
+  return new Date(Date.UTC(1970, 0, 1, Number(match[1]), Number(match[2])));
+}
+
+// Nilai kolom `@db.Time` dari Prisma → 'HH:mm' untuk response API.
+function formatTimeOfDay(date) {
+  return date.toISOString().slice(11, 16);
+}
+
 const DURATION_UNITS = { s: 1000, m: 60 * 1000, h: 60 * 60 * 1000, d: 24 * 60 * 60 * 1000 };
 
 // Durasi dari env, mis. '15m', '7d' → milidetik. Angka tanpa satuan ditolak agar tidak ambigu.
@@ -43,4 +57,12 @@ function parseDuration(value) {
   return Number(match[1]) * DURATION_UNITS[match[2]];
 }
 
-module.exports = { parseDateOnly, formatDateOnly, todayLocal, parseDuration };
+module.exports = {
+  parseDateOnly,
+  formatDateOnly,
+  parseTimeOfDay,
+  formatTimeOfDay,
+  TIME_OF_DAY,
+  todayLocal,
+  parseDuration,
+};
