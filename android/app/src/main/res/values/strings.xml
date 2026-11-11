@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">SIM SMA Santa Agnes</string>
+    <string name="login_title">Masuk</string>
+    <string name="login_subtitle">Silahkan masuk dengan akun sekolah Anda.</string>
+    <string name="login_email">Email / NIS</string>
+    <string name="login_password">Password</string>
+    <string name="login_button">Masuk</string>
+    <string name="login_remember">Ingat saya</string>
+    <string name="login_forgot">Lupa Password?</string>
+    <string name="login_brand">Agnesian</string>
+    <string name="login_brand_subtitle">Sistem Informasi Akademik Siswa</string>
+    <string name="login_help">Butuh bantuan? Hubungi admin sekolah</string>
+    <string name="login_footer">© 2024 Agnesian — SMA St. Agnes</string>
+    <string name="home_welcome">Login berhasil! Role: %1$s</string>
+    <string name="check_session">Cek Sesi</string>
 </resources>
