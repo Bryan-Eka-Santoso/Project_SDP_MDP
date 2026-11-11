@@ -2,4 +2,8 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="agnesian_blue">#1E50CA</color>
+    <color name="agnesian_button">#3262D6</color>
+    <color name="agnesian_background">#F0F0F0</color>
+    <color name="agnesian_muted">#9299A5</color>
 </resources>
