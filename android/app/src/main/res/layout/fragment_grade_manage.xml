@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:background="#F3F4F6">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="152dp" android:orientation="vertical"
+        android:background="#1853C8" android:padding="18dp">
+        <TextView android:id="@+id/btnBack" android:layout_width="wrap_content" android:layout_height="44dp"
+            android:text="‹ Kembali ke Halaman Kelas" android:textColor="#FFFFFF" android:gravity="center_vertical" android:textSize="13sp" />
+        <TextView android:id="@+id/tvTitle" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="Nilai Siswa" android:textColor="#FFFFFF" android:textSize="24sp" android:textStyle="bold" />
+        <TextView android:id="@+id/tvSubheading" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textColor="#E8EEFF" android:textSize="12sp" />
+    </LinearLayout>
+    <ScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
+        android:fillViewport="true">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="16dp"
+            android:orientation="vertical">
+            <ProgressBar android:id="@+id/progressBar" android:layout_width="wrap_content" android:layout_height="wrap_content" android:visibility="gone" />
+            <TextView android:id="@+id/tvError" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="#B42318" />
+            <TextView android:id="@+id/tvMessage" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="#067647" />
+            <LinearLayout android:id="@+id/listPanel" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+                <EditText android:id="@+id/etSearch" android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:hint="Cari nama siswa / NIS" android:inputType="text" android:singleLine="true" />
+                <Button android:id="@+id/btnReload" android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="Cari / Muat ulang" android:textAllCaps="false" android:backgroundTint="#245CCB" />
+                <Button android:id="@+id/btnShowComponents" android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="Atur Komponen dan Bobot Nilai" android:textAllCaps="false" />
+                <TextView android:id="@+id/tvEmpty" android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="8dp" />
+                <LinearLayout android:id="@+id/studentsContainer" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" />
+            </LinearLayout>
+            <LinearLayout android:id="@+id/editPanel" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+                <TextView android:id="@+id/tvEditStudent" android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:padding="14dp" android:textStyle="bold" android:textSize="16sp" android:textColor="#20304A" android:background="#FFFFFF" />
+                <LinearLayout android:id="@+id/editFieldsContainer" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" />
+                <Button android:id="@+id/btnSaveScores" android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="Ubah Nilai" android:textAllCaps="false" android:backgroundTint="#245CCB" />
+                <Button android:id="@+id/btnCancelEdit" android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="Kembali ke Daftar Siswa" android:textAllCaps="false" />
+            </LinearLayout>
+            <LinearLayout android:id="@+id/componentsPanel" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+                <TextView android:id="@+id/tvWeight" android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:textColor="#233A5F" android:textStyle="bold" android:padding="8dp" />
+                <LinearLayout android:id="@+id/componentsContainer" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" />
+                <EditText android:id="@+id/etComponentName" android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:hint="Nama komponen (Tugas / UTS / UAS)" android:inputType="textCapWords" android:maxLength="50" />
+                <EditText android:id="@+id/etWeight" android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:hint="Bobot (%)" android:inputType="number" />
+                <Button android:id="@+id/btnSaveComponent" android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="Simpan Komponen" android:textAllCaps="false" android:backgroundTint="#245CCB" />
+                <Button android:id="@+id/btnAddComponent" android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="Komponen Baru" android:textAllCaps="false" />
+                <Button android:id="@+id/btnBackToGrades" android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="Kembali ke Nilai Siswa" android:textAllCaps="false" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

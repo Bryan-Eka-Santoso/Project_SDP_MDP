@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F4F5F8">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="18dp" android:background="#1E50C1">
+        <TextView android:id="@+id/btnBack" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="‹ Kembali" android:textColor="#FFFFFF" android:padding="6dp" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="14dp" android:text="Izin Wali Murid" android:textSize="23sp" android:textStyle="bold" android:textColor="#FFFFFF" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="Ajukan izin dan cek status" android:textColor="#E5ECFF" />
+    </LinearLayout>
+
+    <ScrollView android:layout_width="match_parent" android:layout_height="match_parent" android:fillViewport="true">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:padding="18dp">
+            <ProgressBar android:id="@+id/progressBar" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:layout_gravity="center" android:visibility="gone" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Pilih anak" android:textColor="#1C2945" android:textStyle="bold" />
+            <Spinner android:id="@+id/spinnerChild" android:layout_width="match_parent" android:layout_height="48dp" />
+            <Button android:id="@+id/btnStart" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Tanggal mulai" android:layout_marginTop="10dp" android:textAllCaps="false" />
+            <Button android:id="@+id/btnEnd" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Tanggal selesai" android:textAllCaps="false" />
+            <EditText android:id="@+id/etReason" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="12dp" android:hint="Alasan izin (minimal 5 karakter)"
+                android:inputType="textMultiLine" android:minLines="3" android:maxLines="5" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" android:text="Lampiran JPG/PNG/PDF belum tersedia pada batch ini (opsional)."
+                android:textSize="12sp" android:textColor="#686E7C" />
+            <Button android:id="@+id/btnSubmit" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="10dp" android:text="Ajukan Izin" android:textAllCaps="false" android:backgroundTint="#245CCB" />
+            <TextView android:id="@+id/tvFeedback" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" android:textColor="#1C7549" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="24dp" android:text="Riwayat Pengajuan Izin" android:textSize="18sp"
+                android:textStyle="bold" android:textColor="#1C2945" />
+            <Button android:id="@+id/btnReload" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Muat ulang status" android:textAllCaps="false" android:backgroundTint="#6650A4" />
+            <TextView android:id="@+id/tvEmpty" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" android:text="Belum ada pengajuan izin." android:textColor="#6E7485" />
+            <LinearLayout android:id="@+id/listRequests" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="vertical" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

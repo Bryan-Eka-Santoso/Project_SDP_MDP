@@ -14,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import androidx.navigation.fragment.findNavController
 
 @AndroidEntryPoint
 class HomeFragment : Fragment() {
@@ -43,6 +44,40 @@ class HomeFragment : Fragment() {
         val role = arguments
             ?.getString("role")
             ?: "UNKNOWN"
+
+        binding.btnOpenLeave.visibility =
+            if (role == "GUARDIAN") View.VISIBLE else View.GONE
+
+        binding.btnOpenLeave.setOnClickListener {
+            findNavController().navigate(
+                R.id.guardianLeaveFragment
+            )
+        }
+
+        binding.btnOpenGradeReport.visibility =
+            if (role == "ADMIN") View.GONE else View.VISIBLE
+
+        binding.btnOpenGradeReport.setOnClickListener {
+            val destination = when (role) {
+                "TEACHER" -> R.id.teacherGradeReportFragment
+                "STUDENT" -> R.id.studentGradeReportFragment
+                "GUARDIAN" -> R.id.guardianGradeReportFragment
+                else -> null
+            }
+
+            destination?.let {
+                findNavController().navigate(it)
+            }
+        }
+
+        binding.btnOpenClasses.visibility =
+            if (role == "TEACHER") View.VISIBLE else View.GONE
+
+        binding.btnOpenClasses.setOnClickListener {
+            findNavController().navigate(
+                R.id.teacherClassesFragment
+            )
+        }
 
         binding.tvWelcome.text = getString(
             R.string.home_welcome,

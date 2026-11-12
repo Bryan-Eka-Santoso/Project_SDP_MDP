@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="#F3F4F6">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="140dp"
+        android:orientation="vertical" android:background="#1853C8" android:padding="20dp">
+        <TextView android:id="@+id/btnBack" android:layout_width="wrap_content"
+            android:layout_height="42dp" android:gravity="center_vertical"
+            android:text="‹ Kembali ke Kelas" android:textColor="#FFFFFF" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="Absensi Siswa" android:textColor="#FFFFFF" android:textSize="24sp" android:textStyle="bold" />
+        <TextView android:id="@+id/tvSubtitle" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textColor="#E0E9FF" android:textSize="12sp" />
+    </LinearLayout>
+    <ScrollView android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1" android:fillViewport="true">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:padding="16dp">
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Pilih sesi mengajar" android:textColor="#20293B" android:textStyle="bold" />
+            <Spinner android:id="@+id/spinnerSlots" android:layout_width="match_parent"
+                android:layout_height="52dp" />
+            <Button android:id="@+id/btnDate" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:text="Pilih tanggal" android:textAllCaps="false"
+                android:backgroundTint="#245CCB" />
+            <Button android:id="@+id/btnReload" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:text="Muat ulang presensi" android:textAllCaps="false"
+                android:backgroundTint="#6650A4" />
+            <ProgressBar android:id="@+id/progressBar" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:visibility="gone" />
+            <TextView android:id="@+id/tvFeedback" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:textColor="#AD2828" android:padding="5dp" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="14dp" android:text="Jurnal mengajar / materi"
+                android:textColor="#20293B" android:textStyle="bold" />
+            <EditText android:id="@+id/etJournal" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:minHeight="72dp"
+                android:inputType="textCapSentences|textMultiLine" android:gravity="top"
+                android:maxLength="255" android:hint="Materi yang diajarkan pada sesi ini" />
+            <TextView android:id="@+id/tvCount" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginTop="18dp"
+                android:text="Daftar siswa" android:textColor="#20293B" android:textStyle="bold" />
+            <LinearLayout android:id="@+id/studentsContainer" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="vertical" android:layout_marginTop="10dp" />
+            <Button android:id="@+id/btnSave" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginTop="16dp"
+                android:text="Simpan Absensi dan Jurnal" android:textAllCaps="false"
+                android:backgroundTint="#245CCB" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

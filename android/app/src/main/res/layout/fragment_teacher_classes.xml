@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="#F3F4F6">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="152dp" android:background="#1853C8"
+        android:orientation="vertical" android:padding="20dp">
+        <TextView android:id="@+id/btnBack" android:layout_width="wrap_content" android:layout_height="48dp"
+            android:gravity="center_vertical" android:text="‹ Kembali" android:textColor="#FFFFFF" android:textSize="14sp" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="Kelas yang Diajar" android:textStyle="bold" android:textSize="24sp" android:textColor="#FFFFFF" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="Semester aktif" android:textSize="12sp" android:textColor="#DEE9FF" />
+    </LinearLayout>
+    <ScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
+        android:fillViewport="true">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:padding="16dp" android:orientation="vertical">
+            <ProgressBar android:id="@+id/progressBar" android:layout_width="wrap_content" android:layout_height="wrap_content" android:visibility="gone" />
+            <TextView android:id="@+id/tvStatus" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="#AD2828" />
+            <Button android:id="@+id/btnReload" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Muat ulang kelas" android:textAllCaps="false" />
+            <LinearLayout android:id="@+id/classesContainer" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
