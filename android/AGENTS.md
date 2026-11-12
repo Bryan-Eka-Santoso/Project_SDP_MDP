@@ -32,7 +32,7 @@ Fragment  →  ViewModel  →  Repository  →  Api (Retrofit) / Dao (Room)
 1. **Fragment** hanya merender `UiState` dan meneruskan aksi pengguna ke ViewModel. Tidak ada pemanggilan API atau logika bisnis di Fragment.
 2. **ViewModel** mengekspos satu `StateFlow<XxxUiState>` dan, bila perlu, `SharedFlow` untuk event sekali jalan (navigasi, snackbar). Pakai `viewModelScope`.
 3. **UiState** berupa `data class` yang memuat `isLoading`, data, dan `errorMessage`, atau `sealed interface` (`Loading`, `Success`, `Error`, `Empty`). Pilih satu pola per layar dan konsisten.
-4. **Repository** mengembalikan `Result`/`Resource` yang sudah ada di `core/`, memetakan DTO → domain model, dan mengubah error HTTP menjadi pesan bahasa Indonesia.
+4. **Repository** mengembalikan `Resource` (`core/Resource.kt`), memetakan DTO → domain model, dan mengubah error menjadi pesan bahasa Indonesia. Bungkus panggilan API dengan `ApiErrorMapper.call { ... }` (`core/`): pesan dari server (`error.message`) dipakai bila ada, selain itu teks bawaan di `strings.xml`. Tanggal dan jam tampil lewat `DateTimeWib` (`core/`).
 5. **DTO tidak boleh sampai ke UI.** Selalu dipetakan ke domain model.
 6. Collect flow di Fragment memakai `viewLifecycleOwner.lifecycleScope` + `repeatOnLifecycle(Lifecycle.State.STARTED)`.
 
@@ -52,6 +52,8 @@ Fragment  →  ViewModel  →  Repository  →  Api (Retrofit) / Dao (Room)
 - **Notifikasi**: backend mengirim data message; aplikasi sendiri yang menampilkan notifikasi lewat channel per jenis (jadwal, pengumuman, nilai/presensi, peminjaman, pembayaran) dan menyimpannya ke Room. Minta izin `POST_NOTIFICATIONS` di Android 13+. Kirim token FCM ke backend setelah login dan saat token berganti; hapus token saat logout.
 - **Menu wali kelas**: tampilkan berdasarkan `isHomeroomTeacher` dari profil guru; backend tetap memeriksa hak aksesnya.
 - **Upload/unduh file**: pilih file lewat Storage Access Framework, kirim sebagai multipart. Ekspor laporan disimpan lewat `CreateDocument`.
+- **Profil, ubah password, tagihan (F-AUTH-03, F-BYR-01/02)**: tab Profil (`ui/profile/`) menampilkan profil dan menjadi pintu masuk ke ubah password dan Tagihan. Layar bersama ini tujuan tingkat atas di `nav_graph.xml` (`changePasswordFragment`, `billListFragment`, `billImportFragment`) dengan aksi global `action_global_changePassword` dan `action_global_bills`, jadi layar lain (mis. dashboard Home/Akademik milik tim lain) cukup memanggil aksi itu. Tagihan hanya online dan hanya informasi; tidak ada pembayaran di aplikasi. Impor Excel (jadwal dan tagihan) memakai `core/UploadFiles`.
+- **Admin kelola jadwal (F-JDW-01..04)**: `ui/admin/schedule/` (daftar slot, formulir slot, impor Excel, daftar dan formulir perubahan jadwal), hanya online lewat `AdminScheduleRepository`. Pilihan penugasan/semester memakai endpoint master milik MST (`GET /semesters/active`, `GET /teaching-assignments` di `MasterLookupApi`); ruangan sementara diturunkan dari slot yang sudah ada sampai endpoint fasilitas (MST-12) tersedia. Ganti ke endpoint itu di `AdminScheduleRepositoryImpl.lookups()` saat sudah ada.
 
 ## Penamaan
 
@@ -79,4 +81,4 @@ Nama model mengikuti `docs/GLOSSARY.md`.
 | Unit test | `./gradlew testDebugUnitTest` |
 | Lint | `./gradlew lintDebug` |
 
-Base URL API diambil dari `BuildConfig` (diatur per build type), jangan di-hardcode di kode.
+Base URL API diambil dari `BuildConfig.BASE_URL`, jangan di-hardcode di kode. Nilainya dari `api.baseUrl` di `android/local.properties` (tidak masuk git, per orang); bila kosong, bawaannya `http://10.0.2.2:3000/api/v1/` (emulator → localhost komputer). Contoh bila backend jalan di port 3001: `api.baseUrl=http://10.0.2.2:3001/api/v1/`. HP fisik: pakai IP LAN komputer atau `adb reverse`.

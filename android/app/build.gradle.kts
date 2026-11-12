@@ -1,9 +1,22 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
     alias(libs.plugins.navigation.safe.args)
+    alias(libs.plugins.google.services)
 }
+
+// Alamat API per orang: isi `api.baseUrl` di local.properties (tidak masuk git). Bawaan 10.0.2.2
+// = localhost komputer dari emulator Android; port 3000 = port bawaan backend.
+val localProperties = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
+}
+val apiBaseUrl = (localProperties.getProperty("api.baseUrl") ?: "http://10.0.2.2:3000/api/v1/")
+    .trim()
+    .let { if (it.endsWith("/")) it else "$it/" } // Retrofit mewajibkan akhiran "/"
 
 android {
     namespace = "id.sch.santaagnes.sim"
@@ -23,7 +36,7 @@ android {
         buildConfigField(
             "String",
             "BASE_URL",
-            "\"http://127.0.0.1:3000/api/v1/\""
+            "\"$apiBaseUrl\""
         )
     }
 
@@ -40,6 +53,8 @@ android {
         }
     }
     compileOptions {
+        // java.time dipakai di semua API; min SDK 24 belum memilikinya secara bawaan
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
@@ -51,7 +66,10 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.core.ktx)
     implementation(libs.material)
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
+    implementation(libs.androidx.recyclerview)
     testImplementation(libs.junit)
+    testImplementation(libs.coroutines.test)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
 
@@ -62,6 +80,10 @@ dependencies {
     // Local session storage
     implementation("androidx.datastore:datastore-preferences:1.1.1")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+    // Firebase Cloud Messaging (NTF-02); versi diatur BoM
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging)
 
     // Hilt
     implementation(libs.hilt.android)

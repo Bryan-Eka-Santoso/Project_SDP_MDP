@@ -2,15 +2,55 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/student_graph"
-    app:startDestination="@id/studentHomeFragment">
+    app:startDestination="@id/studentScheduleFragment">
 
     <fragment
         android:id="@+id/studentHomeFragment"
-        android:name="id.sch.santaagnes.sim.ui.home.HomeFragment">
+        android:name="id.sch.santaagnes.sim.ui.home.ComingSoonFragment">
 
         <argument
-            android:name="role"
-            android:defaultValue="STUDENT"
-            app:argType="string" />
+            android:name="titleRes"
+            android:defaultValue="@string/tab_home"
+            app:argType="reference" />
     </fragment>
+
+    <fragment
+        android:id="@+id/studentScheduleFragment"
+        android:name="id.sch.santaagnes.sim.ui.schedule.ScheduleListFragment">
+
+        <action
+            android:id="@+id/action_schedule_to_studentTasks"
+            app:destination="@id/studentTasksFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/studentTasksFragment"
+        android:name="id.sch.santaagnes.sim.ui.task.StudentTaskFragment">
+
+        <action
+            android:id="@+id/action_studentTasks_to_todoForm"
+            app:destination="@id/todoFormFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/todoFormFragment"
+        android:name="id.sch.santaagnes.sim.ui.task.TodoFormFragment" />
+
+    <fragment
+        android:id="@+id/studentGradesFragment"
+        android:name="id.sch.santaagnes.sim.ui.home.ComingSoonFragment">
+
+        <argument
+            android:name="titleRes"
+            android:defaultValue="@string/tab_grades"
+            app:argType="reference" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/studentNotificationsFragment"
+        android:name="id.sch.santaagnes.sim.ui.notification.NotificationListFragment" />
+
+    <fragment
+        android:id="@+id/studentProfileFragment"
+        android:name="id.sch.santaagnes.sim.ui.profile.ProfileFragment" />
 </navigation>

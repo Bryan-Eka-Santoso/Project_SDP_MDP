@@ -2,15 +2,85 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/teacher_graph"
-    app:startDestination="@id/teacherHomeFragment">
+    app:startDestination="@id/teacherScheduleFragment">
 
     <fragment
         android:id="@+id/teacherHomeFragment"
-        android:name="id.sch.santaagnes.sim.ui.home.HomeFragment">
+        android:name="id.sch.santaagnes.sim.ui.home.ComingSoonFragment">
 
         <argument
-            android:name="role"
-            android:defaultValue="TEACHER"
-            app:argType="string" />
+            android:name="titleRes"
+            android:defaultValue="@string/tab_home"
+            app:argType="reference" />
     </fragment>
+
+    <fragment
+        android:id="@+id/teacherScheduleFragment"
+        android:name="id.sch.santaagnes.sim.ui.schedule.ScheduleListFragment">
+
+        <action
+            android:id="@+id/action_schedule_to_taskForm"
+            app:destination="@id/teacherTaskFormFragment" />
+
+        <action
+            android:id="@+id/action_schedule_to_taskList"
+            app:destination="@id/teacherTaskListFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/teacherTaskListFragment"
+        android:name="id.sch.santaagnes.sim.ui.task.TeacherTaskListFragment">
+
+        <action
+            android:id="@+id/action_taskList_to_taskForm"
+            app:destination="@id/teacherTaskFormFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/teacherTaskFormFragment"
+        android:name="id.sch.santaagnes.sim.ui.task.TeacherTaskFormFragment">
+
+        <argument
+            android:name="taskId"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <argument
+            android:name="title"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="description"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="dueDate"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="label"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/teacherClassesFragment"
+        android:name="id.sch.santaagnes.sim.ui.home.ComingSoonFragment">
+
+        <argument
+            android:name="titleRes"
+            android:defaultValue="@string/tab_classes"
+            app:argType="reference" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/teacherNotificationsFragment"
+        android:name="id.sch.santaagnes.sim.ui.notification.NotificationListFragment" />
+
+    <fragment
+        android:id="@+id/teacherProfileFragment"
+        android:name="id.sch.santaagnes.sim.ui.profile.ProfileFragment" />
 </navigation>

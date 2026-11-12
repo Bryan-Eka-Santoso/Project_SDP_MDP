@@ -62,10 +62,13 @@ class LoginFragment : Fragment() {
                     binding.btnLogin.isEnabled =
                         !state.isLoading
 
-                    if (state.errorMessage != null) {
+                    val errorText = state.errorMessage
+                        ?: state.errorRes?.let { getString(it) }
+
+                    if (errorText != null) {
                         Toast.makeText(
                             requireContext(),
-                            state.errorMessage,
+                            errorText,
                             Toast.LENGTH_LONG
                         ).show()
                     }
@@ -73,20 +76,14 @@ class LoginFragment : Fragment() {
 
                     if (state.isLoginSuccess && !navigated) {
 
-                        val destination = when (state.role) {
-                            "ADMIN" -> R.id.admin_graph
-                            "TEACHER" -> R.id.teacher_graph
-                            "STUDENT" -> R.id.student_graph
-                            "GUARDIAN" -> R.id.guardian_graph
-                            else -> null
-                        }
+                        val destination = roleGraphId(state.role)
 
                         if (destination == null) {
                             navigated = false
 
                             Toast.makeText(
                                 requireContext(),
-                                "Role pengguna tidak dikenal.",
+                                R.string.error_unknown_role,
                                 Toast.LENGTH_LONG
                             ).show()
                         } else {

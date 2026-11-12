@@ -1,18 +1,21 @@
 
 package id.sch.santaagnes.sim.data.remote
 
+import id.sch.santaagnes.sim.core.SessionEvents
 import id.sch.santaagnes.sim.data.local.SessionManager
 import kotlinx.coroutines.runBlocking
 import okhttp3.Authenticator
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.Route
+import retrofit2.HttpException
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class TokenAuthenticator(
     private val sessionManager: SessionManager,
-    private val baseUrl: String
+    private val baseUrl: String,
+    private val sessionEvents: SessionEvents
 ) : Authenticator {
 
     private val lock = Any()
@@ -87,6 +90,7 @@ class TokenAuthenticator(
                         tokens == null
                     ) {
                         sessionManager.clearSession()
+                        sessionEvents.notifyExpired()
                         return@runBlocking null
                     }
 
@@ -103,6 +107,14 @@ class TokenAuthenticator(
                         )
                         .build()
 
+                } catch (exception: HttpException) {
+                    // Refresh token ditolak server (dicabut/kedaluwarsa/akun diblokir):
+                    // keluarkan pengguna.
+                    if (exception.code() in 400..403) {
+                        sessionManager.clearSession()
+                        sessionEvents.notifyExpired()
+                    }
+                    null
                 } catch (exception: Exception) {
                     // Jangan hapus sesi jika hanya
                     // terjadi gangguan jaringan.

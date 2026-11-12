@@ -1,9 +1,9 @@
-
 package id.sch.santaagnes.sim.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import id.sch.santaagnes.sim.core.Resource
 import id.sch.santaagnes.sim.data.repository.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,17 +27,13 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = HomeUiState(isLoading = true)
 
-            val result = repository.getProfile()
-
             _uiState.value = HomeUiState(
-                result = result.fold(
-                    onSuccess = {
-                        "Sesi valid: ${it.name} (${it.role})"
-                    },
-                    onFailure = {
-                        "Gagal: ${it.message}"
-                    }
-                )
+                result = when (val result = repository.getProfile()) {
+                    is Resource.Success ->
+                        "Sesi valid: ${result.data.name} (${result.data.role})"
+                    is Resource.Error ->
+                        "Gagal: ${result.message}"
+                }
             )
         }
     }

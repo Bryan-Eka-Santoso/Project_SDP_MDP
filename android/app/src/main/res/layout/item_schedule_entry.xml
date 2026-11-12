@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="6dp"
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/tvSubject"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/agnesian_text"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            tools:text="Matematika" />
+
+        <TextView
+            android:id="@+id/tvTeacher"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textColor="@color/agnesian_muted"
+            android:textSize="14sp"
+            tools:text="Guru Satu" />
+
+        <TextView
+            android:id="@+id/tvTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/agnesian_blue"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            tools:text="07:00 – 08:30" />
+
+        <TextView
+            android:id="@+id/tvRoom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/agnesian_muted"
+            android:textSize="13sp"
+            tools:text="Ruang 101" />
+
+        <TextView
+            android:id="@+id/tvChange"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_badge"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="2dp"
+            android:textAppearance="?attr/textAppearanceLabelMedium"
+            android:textColor="@color/white"
+            android:visibility="gone"
+            tools:text="Diganti guru"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/tvOriginal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:visibility="gone"
+            tools:text="Guru semula: Guru Dua"
+            tools:visibility="visible" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

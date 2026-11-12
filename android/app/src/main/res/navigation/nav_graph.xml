@@ -3,11 +3,41 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/loginFragment">
+    app:startDestination="@id/splashFragment">
+
+    <fragment
+        android:id="@+id/splashFragment"
+        android:name="id.sch.santaagnes.sim.ui.auth.SplashFragment" />
 
     <fragment
         android:id="@+id/loginFragment"
         android:name="id.sch.santaagnes.sim.ui.auth.LoginFragment" />
+
+    <!-- Layar bersama lintas role. Tujuan tingkat atas: bottom nav tersembunyi dan Kembali ke tab asal. -->
+    <fragment
+        android:id="@+id/changePasswordFragment"
+        android:name="id.sch.santaagnes.sim.ui.profile.ChangePasswordFragment" />
+
+    <fragment
+        android:id="@+id/billListFragment"
+        android:name="id.sch.santaagnes.sim.ui.bill.BillListFragment">
+
+        <action
+            android:id="@+id/action_bills_to_import"
+            app:destination="@id/billImportFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/billImportFragment"
+        android:name="id.sch.santaagnes.sim.ui.bill.BillImportFragment" />
+
+    <action
+        android:id="@+id/action_global_changePassword"
+        app:destination="@id/changePasswordFragment" />
+
+    <action
+        android:id="@+id/action_global_bills"
+        app:destination="@id/billListFragment" />
 
     <include app:graph="@navigation/nav_admin" />
     <include app:graph="@navigation/nav_teacher" />
