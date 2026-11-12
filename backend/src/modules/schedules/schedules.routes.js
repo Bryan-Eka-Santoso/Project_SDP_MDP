@@ -34,6 +34,8 @@ router.get(
 
 // F-JDW-08/09. Guru mengelola tugas penugasannya sendiri; siswa melihat tugas kelasnya.
 const teacher = [authenticate, authorize('TEACHER')];
+// Pilihan kelas + mapel untuk form tugas; hanya penugasan milik guru yang login.
+router.get('/me/teaching-assignments', ...teacher, controller.listMyTeachingAssignments);
 router.get('/tasks', authenticate, authorize('TEACHER', 'STUDENT'), validate({ query: listTasksQuery }), controller.listTasks);
 router.get('/tasks/:id', authenticate, authorize('TEACHER', 'STUDENT'), validate({ params: idParams }), controller.getTask);
 router.post('/tasks', ...teacher, validate({ body: createTaskBody }), controller.createTask);

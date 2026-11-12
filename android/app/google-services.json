@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "962761962743",
+    "project_id": "sim-santa-agnes",
+    "storage_bucket": "sim-santa-agnes.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:962761962743:android:bf10ce5c4886784abe8ff2",
+        "android_client_info": {
+          "package_name": "id.sch.santaagnes.sim"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJkhuow8cv_poxtX1oxXvlK0Arcw5ypNA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

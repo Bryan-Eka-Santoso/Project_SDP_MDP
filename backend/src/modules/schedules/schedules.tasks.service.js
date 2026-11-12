@@ -156,4 +156,23 @@ async function deleteTask(user, id) {
   await prisma.task.delete({ where: { id } });
 }
 
-module.exports = { createTask, listTasks, getTask, updateTask, deleteTask };
+/**
+ * Penugasan mengajar milik guru pada semester aktif: pilihan kelas + mapel saat membuat tugas
+ * (`teachingAssignmentId`). Daftar kecil dan terbatas per guru, jadi tidak berpaginasi.
+ */
+async function listMyTeachingAssignments(user) {
+  const semesterId = await activeSemesterId();
+  if (semesterId === null) return [];
+
+  return prisma.teachingAssignment.findMany({
+    where: { semesterId, teacher: { userId: user.id } },
+    select: {
+      id: true,
+      subject: { select: { id: true, code: true, name: true } },
+      classGroup: { select: { id: true, name: true } },
+    },
+    orderBy: [{ classGroup: { name: 'asc' } }, { subject: { name: 'asc' } }],
+  });
+}
+
+module.exports = { createTask, listTasks, getTask, updateTask, deleteTask, listMyTeachingAssignments };

@@ -115,6 +115,31 @@ describe('POST /api/v1/auth/login', () => {
     });
   });
 
+  it('guru: profil memuat kelas binaan tahun ajaran aktif (kosong bila bukan wali kelas)', async () => {
+    const teacherRow = (homeroomClasses) =>
+      studentRow({
+        role: 'TEACHER',
+        student: null,
+        teacher: { id: 2, employeeNumber: '1980', isHomeroomTeacher: homeroomClasses.length > 0, homeroomClasses },
+      });
+
+    prisma.user.findUnique.mockResolvedValue(teacherRow([{ id: 7, name: 'X-1' }]));
+    const homeroom = await login({ email: 'guru1@santaagnes.test', password: PASSWORD });
+    expect(homeroom.body.data.user.teacher).toEqual({
+      id: 2,
+      employeeNumber: '1980',
+      isHomeroomTeacher: true,
+      homeroomClassGroups: [{ id: 7, name: 'X-1' }],
+    });
+    // hanya kelas tahun ajaran aktif yang diminta ke database
+    const select = prisma.user.findUnique.mock.calls[0][0].select;
+    expect(select.teacher.select.homeroomClasses.where).toEqual({ academicYear: { isActive: true } });
+
+    prisma.user.findUnique.mockResolvedValue(teacherRow([]));
+    const plain = await login({ email: 'guru2@santaagnes.test', password: PASSWORD });
+    expect(plain.body.data.user.teacher.homeroomClassGroups).toEqual([]);
+  });
+
   it('401 jika password salah', async () => {
     prisma.user.findUnique.mockResolvedValue(studentRow());
     const res = await login({ email: 'siswa1@santaagnes.test', password: 'salah12345' });

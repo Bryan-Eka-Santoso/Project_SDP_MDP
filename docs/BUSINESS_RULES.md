@@ -68,7 +68,7 @@ Contoh: slot A Senin 07.00–08.30, slot B Senin 08.00–09.30, guru sama → `0
 - Hari libur di kalender akademik tidak menyembunyikan entri; kalender dan jadwal ditampilkan terpisah.
 
 ### 2.5 Tugas dari guru (F-JDW-08, F-JDW-09)
-- Guru membuat `Task` pada `TeachingAssignment` miliknya. Tugas terlihat oleh siswa anggota kelas penugasan itu, dikelompokkan per mapel.
+- Guru membuat `Task` pada `TeachingAssignment` miliknya; pilihan penugasan (kelas + mapel) diambil dari `GET /me/teaching-assignments` (semester aktif, hanya miliknya). Tugas terlihat oleh siswa anggota kelas penugasan itu, dikelompokkan per mapel.
 - `dueDate` saat dibuat tidak boleh sebelum hari ini (WIB).
 - Tidak ada pengumpulan atau penilaian tugas. Tanda "selesai" milik siswa hanya disimpan di perangkat (Room) dan tidak dikirim ke server.
 - Tugas baru → notifikasi `TASK` ke siswa kelas tersebut. Ubah dan hapus tidak mengirim notifikasi.
