@@ -19,6 +19,7 @@ import com.google.android.material.timepicker.TimeFormat
 import dagger.hilt.android.AndroidEntryPoint
 import id.sch.santaagnes.sim.R
 import id.sch.santaagnes.sim.core.DateTimeWib
+import id.sch.santaagnes.sim.core.clearErrorOnEdit
 import id.sch.santaagnes.sim.databinding.FragmentChangeFormBinding
 import id.sch.santaagnes.sim.domain.model.AdminSlot
 import id.sch.santaagnes.sim.domain.model.ChangeType
@@ -58,6 +59,9 @@ class ChangeFormFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.tvHeading.setText(if (isEdit) R.string.change_form_title_edit else R.string.change_form_title_new)
         binding.btnBack.setOnClickListener { findNavController().popBackStack() }
+        listOf(
+            binding.layoutSlot, binding.layoutDate, binding.layoutType, binding.layoutDescription, binding.layoutTeacher
+        ).forEach { it.clearErrorOnEdit() }
 
         binding.inputType.setAdapter(
             ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, ChangeType.entries.map(::typeLabel))

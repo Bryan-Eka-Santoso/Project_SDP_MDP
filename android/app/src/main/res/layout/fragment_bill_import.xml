@@ -47,64 +47,8 @@
         android:layout_weight="1"
         android:fillViewport="true">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/bill_import_info"
-                android:textColor="@color/agnesian_text"
-                android:textSize="14sp" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnPick"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="@string/import_pick" />
-
-            <TextView
-                android:id="@+id/tvFileName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:textColor="@color/agnesian_blue"
-                android:textStyle="bold"
-                android:visibility="gone" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnImport"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:backgroundTint="@color/agnesian_button"
-                android:text="@string/import_start"
-                android:textColor="@color/white" />
-
-            <TextView
-                android:id="@+id/tvSuccess"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:textColor="@color/agnesian_blue"
-                android:textSize="15sp"
-                android:textStyle="bold"
-                android:visibility="gone" />
-
-            <!-- Impor ditolak: satu baris per kesalahan (baris, kolom, alasan); semua baris diperiksa dulu. -->
-            <TextView
-                android:id="@+id/tvError"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:textColor="@color/change_cancel"
-                android:textIsSelectable="true"
-                android:visibility="gone" />
-        </LinearLayout>
+        <include
+            android:id="@+id/body"
+            layout="@layout/include_import_body" />
     </ScrollView>
 </LinearLayout>

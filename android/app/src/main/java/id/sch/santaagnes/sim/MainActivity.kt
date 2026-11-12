@@ -64,6 +64,7 @@ class MainActivity : AppCompatActivity() {
         R.id.adminNotificationsFragment
     )
     private var inflatedMenu: Int? = null
+    private var notificationPermissionAsked = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -115,7 +116,6 @@ class MainActivity : AppCompatActivity() {
     private fun setupPush() {
         lifecycleScope.launch {
             if (!sessionManager.hasSession()) return@launch
-            requestNotificationPermission()
             pushTokenRegistrar.register()
         }
         lifecycleScope.launch {
@@ -165,6 +165,11 @@ class MainActivity : AppCompatActivity() {
                 return@addOnDestinationChangedListener
             }
             showMenu(menu)
+            // Izin diminta sekali setelah pengguna masuk ke aplikasi (login baru maupun auto-login).
+            if (!notificationPermissionAsked) {
+                notificationPermissionAsked = true
+                requestNotificationPermission()
+            }
             // Layar turunan (mis. form tugas) bukan tab: bottom nav disembunyikan.
             val tab = binding.bottomNav.menu.findItem(destination.id)
             binding.bottomNav.isVisible = tab != null

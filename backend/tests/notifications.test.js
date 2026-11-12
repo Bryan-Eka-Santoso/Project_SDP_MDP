@@ -24,11 +24,14 @@ const payload = { type: 'SCHEDULE_CHANGE', title: 'Perubahan jadwal', body: 'Mat
 function fakeMessaging() {
   return {
     sendEachForMulticast: jest.fn(async ({ tokens }) => {
-      const responses = tokens.map((t) =>
-        t.startsWith('stale')
-          ? { success: false, error: { code: 'messaging/registration-token-not-registered' } }
-          : { success: true },
-      );
+      const responses = tokens.map((t) => {
+        if (t.startsWith('stale')) {
+          return { success: false, error: { code: 'messaging/registration-token-not-registered' } };
+        }
+        // Token berawalan "bad" ditolak FCM sebagai malformed.
+        if (t.startsWith('bad')) return { success: false, error: { code: 'messaging/invalid-argument' } };
+        return { success: true };
+      });
       const failureCount = responses.filter((r) => !r.success).length;
       return { responses, successCount: tokens.length - failureCount, failureCount };
     }),
@@ -118,6 +121,28 @@ describe('dispatch', () => {
 
     expect(prisma.deviceToken.deleteMany).toHaveBeenCalledWith({ where: { token: { in: ['stale-1'] } } });
     expect(result).toMatchObject({ sent: 1, failed: 1, removed: 1 });
+  });
+
+  it('menghapus token malformed (invalid-argument) bila batch punya pengiriman sukses', async () => {
+    getFcm.mockReturnValue(fakeMessaging());
+    prisma.deviceToken.findMany.mockResolvedValue([{ token: 'ok' }, { token: 'bad-1' }, { token: 'bad-2' }]);
+
+    const result = await dispatch([1], payload);
+
+    expect(prisma.deviceToken.deleteMany).toHaveBeenCalledWith({
+      where: { token: { in: ['bad-1', 'bad-2'] } },
+    });
+    expect(result).toMatchObject({ sent: 1, failed: 2, removed: 2 });
+  });
+
+  it('tidak menghapus token bila semua gagal invalid-argument (payload bisa jadi penyebab)', async () => {
+    getFcm.mockReturnValue(fakeMessaging());
+    prisma.deviceToken.findMany.mockResolvedValue([{ token: 'bad-1' }, { token: 'bad-2' }]);
+
+    const result = await dispatch([1], payload);
+
+    expect(prisma.deviceToken.deleteMany).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ sent: 0, failed: 2, removed: 0 });
   });
 
   it('mode log jika Firebase belum dikonfigurasi', async () => {

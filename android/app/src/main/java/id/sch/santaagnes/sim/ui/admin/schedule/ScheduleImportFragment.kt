@@ -12,9 +12,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import id.sch.santaagnes.sim.R
 import id.sch.santaagnes.sim.databinding.FragmentScheduleImportBinding
+import id.sch.santaagnes.sim.ui.common.ImportBodyView
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -22,12 +24,17 @@ class ScheduleImportFragment : Fragment() {
 
     private var _binding: FragmentScheduleImportBinding? = null
     private val binding get() = _binding!!
+    private lateinit var body: ImportBodyView
 
     private val viewModel: ScheduleImportViewModel by viewModels()
 
     // Storage Access Framework: tanpa izin penyimpanan, hanya berkas yang dipilih pengguna yang terbaca.
     private val pickFile = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri?.let { viewModel.onFilePicked(it.toString()) }
+    }
+
+    private val saveTemplate = registerForActivityResult(ActivityResultContracts.CreateDocument(XLSX)) { uri ->
+        uri?.let { viewModel.onTemplateDestinationPicked(it.toString()) }
     }
 
     override fun onCreateView(
@@ -40,30 +47,40 @@ class ScheduleImportFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        body = ImportBodyView(binding.body, R.string.import_info, R.array.import_schedule_columns)
         binding.btnBack.setOnClickListener { findNavController().popBackStack() }
-        binding.btnPick.setOnClickListener { pickFile.launch(arrayOf(XLSX, ANY_FILE)) }
-        binding.btnImport.setOnClickListener { viewModel.import() }
+        body.setOnTemplateClick { saveTemplate.launch(TEMPLATE_NAME) }
+        body.setOnPickClick { pickFile.launch(arrayOf(XLSX, ANY_FILE)) }
+        body.setOnImportClick { viewModel.import() }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect(::render)
+                launch { viewModel.uiState.collect(::render) }
+                launch {
+                    viewModel.templateSaved.collect { saved ->
+                        Snackbar.make(
+                            binding.root,
+                            if (saved) R.string.import_template_saved else R.string.import_template_failed,
+                            Snackbar.LENGTH_SHORT
+                        ).show()
+                    }
+                }
             }
         }
     }
 
     private fun render(state: ScheduleImportUiState) {
         binding.progress.isVisible = state.isUploading
-        binding.btnImport.isEnabled = state.canImport
-        binding.btnPick.isEnabled = !state.isUploading
-
-        binding.tvFileName.isVisible = state.fileUri != null
-        binding.tvFileName.text = state.fileName ?: getString(R.string.import_file_selected)
-
-        binding.tvSuccess.isVisible = state.importedCount != null
-        binding.tvSuccess.text = state.importedCount?.let { getString(R.string.import_success, it) }
-
-        binding.tvError.isVisible = state.errorMessage != null
-        binding.tvError.text = state.errorMessage
+        body.render(
+            isUploading = state.isUploading,
+            canImport = state.canImport,
+            fileUri = state.fileUri,
+            fileName = state.fileName,
+            successText = state.importedCount?.let { getString(R.string.import_success, it) },
+            errorMessage = state.errorMessage,
+            importErrors = state.importErrors,
+            errorRowCount = state.errorRowCount
+        )
     }
 
     override fun onDestroyView() {
@@ -75,5 +92,6 @@ class ScheduleImportFragment : Fragment() {
         const val XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         // Sebagian penyimpanan melaporkan .xlsx sebagai tipe umum; server tetap memeriksa isi berkas.
         const val ANY_FILE = "application/octet-stream"
+        const val TEMPLATE_NAME = "template-jadwal.xlsx"
     }
 }

@@ -31,6 +31,13 @@ interface MasterLookupApi {
     @GET("semesters/active")
     suspend fun getActiveSemester(): ApiResponse<LookupSemesterDto>
 
+    // Semua guru (F-MST-05), termasuk yang belum punya penugasan; dipakai filter laporan.
+    @GET("teachers")
+    suspend fun getTeachers(
+        @Query("page") page: Int,
+        @Query("limit") limit: Int
+    ): ApiResponse<List<LookupTeacherDto>>
+
     @GET("teaching-assignments")
     suspend fun getTeachingAssignments(
         @Query("page") page: Int,

@@ -6,6 +6,7 @@ import id.sch.santaagnes.sim.domain.model.ScheduleEntry
 import id.sch.santaagnes.sim.domain.model.ScheduleScope
 import id.sch.santaagnes.sim.domain.model.ScheduleViewer
 import id.sch.santaagnes.sim.domain.model.ScopeOption
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -45,6 +46,9 @@ class ScheduleListViewModelTest {
         val refreshed = mutableListOf<Pair<ScheduleScope, LocalDate>>()
         val remembered = mutableListOf<ScheduleScope>()
 
+        // Bila diisi, refresh menunggu sampai gate selesai (mensimulasikan muat yang masih berjalan).
+        var gate: CompletableDeferred<Unit>? = null
+
         override suspend fun viewer(): ScheduleViewer = viewer
 
         override suspend fun remember(scope: ScheduleScope) {
@@ -56,6 +60,7 @@ class ScheduleListViewModelTest {
 
         override suspend fun refresh(scope: ScheduleScope, from: LocalDate, to: LocalDate): Resource<Unit> {
             refreshed += scope to from
+            gate?.await()
             return refreshResult
         }
     }
@@ -183,7 +188,47 @@ class ScheduleListViewModelTest {
     }
 
     @Test
-    fun guardianSwitchesChildAndRemembersIt() = runTest(dispatcher) {
+    fun refreshIfIdleReloadsAfterInitialLoadFinished() = runTest(dispatcher) {
+        val repository = FakeScheduleRepository()
+        val viewModel = viewModel(repository)
+        backgroundScope.launch(dispatcher) { viewModel.uiState.collect { } }
+        val before = repository.refreshed.size
+
+        viewModel.refreshIfIdle()
+
+        assertEquals(before + 1, repository.refreshed.size)
+        assertFalse(viewModel.uiState.value.isLoading)
+    }
+
+    @Test
+    fun refreshIfIdleDoesNothingWhileRefreshIsRunning() = runTest(dispatcher) {
+        val repository = FakeScheduleRepository()
+        repository.gate = CompletableDeferred()
+        val viewModel = viewModel(repository)
+        backgroundScope.launch(dispatcher) { viewModel.uiState.collect { } }
+        assertTrue(viewModel.uiState.value.isLoading)
+        val before = repository.refreshed.size
+
+        viewModel.refreshIfIdle()
+
+        assertEquals(before, repository.refreshed.size)
+        repository.gate?.complete(Unit)
+        assertFalse(viewModel.uiState.value.isLoading)
+    }
+
+    @Test
+    fun refreshIfIdleDoesNothingWithoutOptions() = runTest(dispatcher) {
+        val repository = FakeScheduleRepository(ScheduleViewer(role = "GUARDIAN", options = emptyList()))
+        val viewModel = viewModel(repository)
+        backgroundScope.launch(dispatcher) { viewModel.uiState.collect { } }
+
+        viewModel.refreshIfIdle()
+
+        assertTrue(repository.refreshed.isEmpty())
+    }
+
+    @Test
+    fun guardianSwitchesChildAndRemembersIt()= runTest(dispatcher) {
         val repository = FakeScheduleRepository(
             ScheduleViewer(
                 role = "GUARDIAN",

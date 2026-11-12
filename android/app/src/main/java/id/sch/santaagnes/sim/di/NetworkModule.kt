@@ -15,6 +15,7 @@ import id.sch.santaagnes.sim.data.remote.BillApi
 import id.sch.santaagnes.sim.data.remote.DeviceTokenApi
 import id.sch.santaagnes.sim.data.remote.AuthInterceptor
 import id.sch.santaagnes.sim.data.remote.MasterLookupApi
+import id.sch.santaagnes.sim.data.remote.ReportApi
 import id.sch.santaagnes.sim.data.remote.ScheduleApi
 import id.sch.santaagnes.sim.data.remote.TaskApi
 import id.sch.santaagnes.sim.data.remote.TokenAuthenticator
@@ -118,6 +119,14 @@ object NetworkModule {
         retrofit: Retrofit
     ): BillApi {
         return retrofit.create(BillApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideReportApi(
+        retrofit: Retrofit
+    ): ReportApi {
+        return retrofit.create(ReportApi::class.java)
     }
 
     @Provides

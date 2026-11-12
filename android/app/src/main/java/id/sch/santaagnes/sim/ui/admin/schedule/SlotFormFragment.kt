@@ -18,6 +18,7 @@ import com.google.android.material.timepicker.TimeFormat
 import dagger.hilt.android.AndroidEntryPoint
 import id.sch.santaagnes.sim.R
 import id.sch.santaagnes.sim.core.DateTimeWib
+import id.sch.santaagnes.sim.core.clearErrorOnEdit
 import id.sch.santaagnes.sim.databinding.FragmentSlotFormBinding
 import id.sch.santaagnes.sim.domain.model.AssignmentOption
 import id.sch.santaagnes.sim.domain.model.RoomOption
@@ -55,6 +56,9 @@ class SlotFormFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.tvHeading.setText(if (isEdit) R.string.slot_form_title_edit else R.string.slot_form_title_new)
         binding.btnBack.setOnClickListener { findNavController().popBackStack() }
+        listOf(
+            binding.layoutAssignment, binding.layoutRoom, binding.layoutDay, binding.layoutStart, binding.layoutEnd
+        ).forEach { it.clearErrorOnEdit() }
 
         binding.inputDay.setAdapter(
             ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, days.map(DateTimeWib::dayName))

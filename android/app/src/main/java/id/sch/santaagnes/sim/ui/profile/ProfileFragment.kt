@@ -44,6 +44,7 @@ class ProfileFragment : Fragment() {
             findNavController().navigate(R.id.action_global_changePassword)
         }
         binding.btnBills.setOnClickListener { findNavController().navigate(R.id.action_global_bills) }
+        binding.btnReports.setOnClickListener { findNavController().navigate(R.id.action_global_reports) }
         observeLogout(sessionViewModel)
 
         viewLifecycleOwner.lifecycleScope.launch {
@@ -62,6 +63,7 @@ class ProfileFragment : Fragment() {
         binding.tvName.text = profile.name
         binding.tvRole.text = roleLabel(profile.role)
         binding.btnBills.isVisible = profile.canViewBills
+        binding.btnReports.isVisible = profile.canViewReports
 
         val lines = buildList {
             profile.email?.let { add(getString(R.string.profile_email, it)) }

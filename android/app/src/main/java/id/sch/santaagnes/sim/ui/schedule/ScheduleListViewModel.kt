@@ -125,6 +125,16 @@ class ScheduleListViewModel @Inject constructor(
         viewModelScope.launch { refresh(s, weekStart.value) }
     }
 
+    /**
+     * Dipanggil saat layar tampil lagi (kembali dari tab lain atau dari latar belakang) supaya
+     * perubahan jadwal terbaru muncul. Dilewati bila muat awal atau muat ulang masih berjalan.
+     */
+    fun refreshIfIdle() {
+        if (refreshState.value.isLoading) return
+        val s = viewer.value?.options?.getOrNull(selectedOption.value)?.scope ?: return
+        viewModelScope.launch { refresh(s, weekStart.value) }
+    }
+
     private suspend fun refresh(scope: ScheduleScope, start: LocalDate) {
         refreshState.value = RefreshState(isLoading = true)
         refreshState.value = when (val result = repository.refresh(scope, start, DateTimeWib.weekEnd(start))) {

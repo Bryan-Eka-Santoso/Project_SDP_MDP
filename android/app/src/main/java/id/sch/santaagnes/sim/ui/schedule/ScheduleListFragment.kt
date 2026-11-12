@@ -68,6 +68,7 @@ class ScheduleListFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.refreshIfIdle()
                 viewModel.uiState.collect(::render)
             }
         }

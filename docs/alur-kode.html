@@ -1,0 +1,718 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alur Kode SIM Santa Agnes</title>
+<style>
+  :root {
+    --bg: #fbfaf7; --panel: #ffffff; --ink: #1d1f24; --muted: #5d636e; --line: #e3e0d8;
+    --accent: #7a1f2b; --accent-soft: #f6e9ea; --code-bg: #f3f1ec; --code-ink: #23262d;
+    --c-kw: #8a2b9c; --c-str: #2a7a3b; --c-com: #7b8190; --c-num: #b25b00; --c-fn: #1b5fa8;
+    --be: #1b5fa8; --be-soft: #e7f0fa; --an: #2a7a3b; --an-soft: #e8f4ea; --ext: #b25b00; --ext-soft: #fbf0e0;
+  }
+  :root[data-theme="dark"] {
+    --bg: #15171b; --panel: #1d2026; --ink: #e8e9ec; --muted: #9ba1ad; --line: #2e323b;
+    --accent: #e08a95; --accent-soft: #33202a; --code-bg: #14161a; --code-ink: #dfe2e8;
+    --c-kw: #c792ea; --c-str: #8bd49c; --c-com: #6f7686; --c-num: #f0a860; --c-fn: #82aaff;
+    --be: #82aaff; --be-soft: #1e2a3d; --an: #8bd49c; --an-soft: #1f3125; --ext: #f0a860; --ext-soft: #3a2c1a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #15171b; --panel: #1d2026; --ink: #e8e9ec; --muted: #9ba1ad; --line: #2e323b;
+      --accent: #e08a95; --accent-soft: #33202a; --code-bg: #14161a; --code-ink: #dfe2e8;
+      --c-kw: #c792ea; --c-str: #8bd49c; --c-com: #6f7686; --c-num: #f0a860; --c-fn: #82aaff;
+      --be: #82aaff; --be-soft: #1e2a3d; --an: #8bd49c; --an-soft: #1f3125; --ext: #f0a860; --ext-soft: #3a2c1a;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 16px; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 0; max-width: 1180px; margin: 0 auto; }
+  nav.toc { position: sticky; top: 0; align-self: start; height: 100vh; overflow-y: auto;
+    padding: 28px 16px 28px 20px; border-right: 1px solid var(--line); font-size: 14px; }
+  nav.toc h2 { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+  nav.toc a { display: block; color: var(--muted); text-decoration: none; padding: 5px 8px; border-radius: 6px; }
+  nav.toc a:hover { background: var(--accent-soft); color: var(--accent); }
+  nav.toc a .n { display: inline-block; width: 1.6em; color: var(--accent); font-weight: 600; }
+  main { padding: 36px 32px 80px; min-width: 0; }
+  header.hero { margin-bottom: 28px; }
+  header.hero h1 { font-size: 2rem; line-height: 1.2; margin: 0 0 8px; }
+  header.hero p { color: var(--muted); margin: 0; max-width: 62ch; }
+  .meta { margin-top: 14px; font-size: 13px; color: var(--muted); display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+  button.theme { border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; font: inherit; font-size: 13px; }
+  section { margin-top: 56px; }
+  section > h2 { font-size: 1.45rem; margin: 0 0 6px; padding-top: 8px; }
+  section > h2 .n { color: var(--accent); margin-right: 8px; }
+  .feat { display: inline-block; font-size: 12px; font-weight: 600; color: var(--accent); background: var(--accent-soft);
+    padding: 2px 9px; border-radius: 99px; margin: 0 6px 10px 0; }
+  h3 { font-size: 1.05rem; margin: 28px 0 6px; }
+  p { margin: 8px 0; max-width: 72ch; }
+  ul, ol { max-width: 72ch; padding-left: 1.3em; }
+  li { margin: 4px 0; }
+  code.i { background: var(--code-bg); padding: 1px 6px; border-radius: 5px; font: 0.88em ui-monospace, Consolas, monospace; }
+  .file { font: 12.5px ui-monospace, Consolas, monospace; color: var(--muted); margin: 18px 0 0;
+    padding: 6px 12px; background: var(--code-bg); border: 1px solid var(--line); border-bottom: 0; border-radius: 8px 8px 0 0; }
+  .file + pre { margin-top: 0; border-radius: 0 0 8px 8px; }
+  pre { background: var(--code-bg); color: var(--code-ink); border: 1px solid var(--line); border-radius: 8px;
+    padding: 14px 16px; overflow-x: auto; font: 13px/1.55 ui-monospace, Consolas, "Cascadia Mono", monospace; margin: 12px 0; tab-size: 2; }
+  pre code { font: inherit; }
+  .k { color: var(--c-kw); } .s { color: var(--c-str); } .c { color: var(--c-com); font-style: italic; } .d { color: var(--c-num); }
+  .callout { border-left: 4px solid var(--accent); background: var(--accent-soft); padding: 10px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; max-width: 72ch; }
+  .callout b { color: var(--accent); }
+  /* diagram alur: kotak berurutan */
+  .flow { display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px 6px; margin: 16px 0; }
+  .flow .box { border: 1px solid var(--line); background: var(--panel); border-radius: 10px; padding: 8px 12px; font-size: 13.5px; min-width: 120px; }
+  .flow .box small { display: block; color: var(--muted); font-size: 12px; }
+  .flow .box.be { background: var(--be-soft); border-color: var(--be); }
+  .flow .box.an { background: var(--an-soft); border-color: var(--an); }
+  .flow .box.ext { background: var(--ext-soft); border-color: var(--ext); }
+  .flow .arr { align-self: center; color: var(--muted); font-size: 18px; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin: 8px 0; }
+  .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; border: 1px solid; }
+  .legend .an { background: var(--an-soft); border-color: var(--an); }
+  .legend .be { background: var(--be-soft); border-color: var(--be); }
+  .legend .ext { background: var(--ext-soft); border-color: var(--ext); }
+  table.paths { max-width: 100%; }
+  table.paths td:first-child { width: 24%; font-weight: 600; }
+  table.paths code.i { display: block; margin: 3px 0; word-break: break-all; }
+  table { border-collapse: collapse; width: 100%; max-width: 760px; font-size: 14.5px; margin: 12px 0; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 13px; }
+  .steps { counter-reset: s; list-style: none; padding: 0; max-width: 72ch; }
+  .steps li { counter-increment: s; position: relative; padding-left: 38px; margin: 10px 0; }
+  .steps li::before { content: counter(s); position: absolute; left: 0; top: 1px; width: 26px; height: 26px; border-radius: 50%;
+    background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; display: grid; place-items: center; }
+  footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: 1fr; }
+    nav.toc { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); padding: 16px; }
+    main { padding: 24px 16px 64px; }
+    header.hero h1 { font-size: 1.6rem; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="toc" aria-label="Daftar isi">
+  <h2>Daftar isi</h2>
+  <a href="#gambaran"><span class="n">1</span>Gambaran besar</a>
+  <a href="#pola"><span class="n">2</span>Pola di dua sisi</a>
+  <a href="#auth"><span class="n">3</span>Login &amp; sesi</a>
+  <a href="#jadwal"><span class="n">4</span>Melihat jadwal</a>
+  <a href="#admin-jadwal"><span class="n">5</span>Admin jadwal &amp; bentrok</a>
+  <a href="#impor"><span class="n">6</span>Impor Excel</a>
+  <a href="#perubahan"><span class="n">7</span>Perubahan jadwal &amp; push</a>
+  <a href="#tagihan"><span class="n">8</span>Tagihan</a>
+  <a href="#laporan"><span class="n">9</span>Laporan</a>
+  <a href="#ringkas"><span class="n">10</span>Pola lintas fitur</a>
+  <a href="#peta"><span class="n">11</span>Peta lokasi file</a>
+</nav>
+
+<main>
+<header class="hero">
+  <h1>Alur kode SIM Akademik SMAK Santa Agnes</h1>
+  <p>Penjelasan bagaimana satu permintaan berjalan dari layar Android sampai database, dan balik lagi, untuk fitur-fitur Vinc: AUTH, NTF, JDW, BYR, dan LAP. Potongan kode di bawah diambil dari repo, dipendekkan seperlunya.</p>
+  <div class="meta">
+    <span>Backend: Express 5 + Prisma + MySQL</span><span>Android: Kotlin MVVM + Hilt + Room</span>
+    <button class="theme" id="themeBtn" type="button">Ganti tema</button>
+  </div>
+</header>
+
+<!-- ===================================================== 1 -->
+<section id="gambaran">
+  <h2><span class="n">1</span>Gambaran besar</h2>
+  <p>Aplikasi terdiri dari dua bagian yang hanya bicara lewat HTTP JSON: aplikasi Android dan API Express. Tidak ada web admin; admin memakai aplikasi Android yang sama dengan menu berbeda.</p>
+
+  <div class="legend"><span><i class="an"></i>Android</span><span><i class="be"></i>Backend</span><span><i class="ext"></i>Layanan luar</span></div>
+  <div class="flow">
+    <div class="box an">Fragment<small>tampil &amp; tangkap aksi</small></div><div class="arr">→</div>
+    <div class="box an">ViewModel<small>StateFlow&lt;UiState&gt;</small></div><div class="arr">→</div>
+    <div class="box an">Repository<small>Resource, cache Room</small></div><div class="arr">→</div>
+    <div class="box an">Retrofit Api<small>+ AuthInterceptor</small></div><div class="arr">⇄</div>
+    <div class="box be">routes<small>authenticate · authorize · validate</small></div><div class="arr">→</div>
+    <div class="box be">controller</div><div class="arr">→</div>
+    <div class="box be">service<small>aturan bisnis, Prisma</small></div><div class="arr">→</div>
+    <div class="box ext">MySQL</div>
+  </div>
+  <div class="flow">
+    <div class="box be">service<small>setelah data tersimpan</small></div><div class="arr">→</div>
+    <div class="box be">notify()</div><div class="arr">→</div>
+    <div class="box be">notificationDispatcher</div><div class="arr">→</div>
+    <div class="box ext">Firebase Cloud Messaging</div><div class="arr">→</div>
+    <div class="box an">SimFirebaseMessagingService<small>simpan ke Room + tampilkan</small></div>
+  </div>
+
+  <h3>Router utama backend</h3>
+  <p>Semua endpoint ada di bawah <code class="i">/api/v1</code>. Path lengkap tiap endpoint ditulis di file <code class="i">*.routes.js</code> modulnya. Tiap modul punya folder sendiri dengan <code class="i">routes → controller → service</code> (+ <code class="i">validation</code> dan kadang <code class="i">policy</code>).</p>
+  <div class="file">backend/src/app.js (ringkas)</div>
+<pre><code>app.use(express.json({ limit: '1mb' }));
+
+const api = express.Router();
+// /health dipakai untuk cek koneksi dari HP
+// Setiap router modul memuat path lengkapnya sendiri (mis. '/schedule-slots', '/reports/:type')
+api.use(require('./modules/auth/auth.routes'));            // /auth/* dan /me
+api.use(require('./modules/notifications/notifications.routes'));
+api.use(require('./modules/schedules/schedules.routes'));
+api.use(require('./modules/bills/bills.routes'));
+api.use(require('./modules/reports/reports.routes'));
+api.use('/users', require('./modules/users/users.routes'));
+api.use(require('./modules/master/master.routes'));
+
+app.use('/api/v1', api);          // semua endpoint berawalan /api/v1
+app.use(notFoundHandler);
+app.use(errorHandler);            // satu-satunya tempat error jadi JSON</code></pre>
+</section>
+
+<!-- ===================================================== 2 -->
+<section id="pola">
+  <h2><span class="n">2</span>Pola di dua sisi</h2>
+  <p>Hampir semua fitur memakai tiga pola yang sama. Kalau pola ini sudah dipahami, kode fitur baru terasa familiar.</p>
+
+  <h3>2.1 Rantai middleware backend</h3>
+  <p>Setiap route dilindungi tiga lapis sebelum controller dijalankan. Urutannya penting.</p>
+  <ol class="steps">
+    <li><b><code class="i">authenticate</code></b>: baca header <code class="i">Authorization: Bearer …</code>, verifikasi JWT, lalu ambil role dan status akun dari database <i>setiap request</i> (bukan dari isi token), sehingga akun yang diblokir langsung ditolak (<code class="i">ACCOUNT_BLOCKED</code>). Token kedaluwarsa menghasilkan <code class="i">TOKEN_EXPIRED</code> agar Android tahu harus refresh.</li>
+    <li><b><code class="i">authorize(...roles)</code></b>: cek role, kalau tidak cocok <code class="i">403 FORBIDDEN</code>.</li>
+    <li><b><code class="i">validate({ params, query, body })</code></b>: Zod memvalidasi input, hasilnya ditaruh di <code class="i">req.validated</code> (Express 5 tidak mengizinkan <code class="i">req.query</code> ditimpa). Gagal → <code class="i">400 VALIDATION_ERROR</code> dengan <code class="i">details</code> per kolom.</li>
+  </ol>
+  <p>Setelah itu <b>controller</b> hanya memanggil service dan membalas lewat <code class="i">sendSuccess</code> / <code class="i">sendPaginated</code>. Query Prisma dan aturan bisnis hanya ada di <b>service</b>.</p>
+
+  <h3>2.2 Format response dan error yang seragam</h3>
+<div class="file">backend/src/utils/response.js</div>
+<pre><code>function sendSuccess(res, data, statusCode = 200) {
+  return res.status(statusCode).json({ success: true, data });
+}
+
+function sendPaginated(res, data, { page, limit, total }) {
+  return res.status(200).json({
+    success: true, data,
+    meta: { page, limit, total, totalPages: Math.ceil(total / limit) },
+  });
+}</code></pre>
+  <p>Service tidak pernah menulis response error sendiri; ia melempar <code class="i">AppError(status, code, message, details?)</code>, dan <code class="i">errorHandler</code> mengubahnya jadi <code class="i">{ success:false, error:{code,message,details?} }</code>. Error tak terduga jadi <code class="i">500 INTERNAL_ERROR</code> tanpa membocorkan detail.</p>
+<div class="file">backend/src/middlewares/errorHandler.js (inti)</div>
+<pre><code>const appError = toAppError(err);
+if (!appError) {
+  console.error(err);                       // detail hanya di log server
+  return res.status(500).json({ success: false,
+    error: { code: 'INTERNAL_ERROR', message: 'Terjadi kesalahan pada server.' } });
+}
+const error = { code: appError.code, message: appError.message };
+if (appError.details !== undefined) error.details = appError.details;
+return res.status(appError.statusCode).json({ success: false, error });</code></pre>
+
+  <h3>2.3 Sisi Android: MVVM dan <code class="i">Resource</code></h3>
+  <p>Fragment hanya merender <code class="i">UiState</code> dan meneruskan klik ke ViewModel. ViewModel memanggil Repository. Repository membungkus panggilan Retrofit dengan <code class="i">errors.call { … }</code> (<code class="i">ApiErrorMapper</code>) sehingga hasilnya selalu <code class="i">Resource.Success(data)</code> atau <code class="i">Resource.Error(pesanIndonesia)</code>; tidak ada exception yang bocor ke UI. Untuk <code class="i">IMPORT_INVALID</code>, daftar kesalahan per baris ikut dibawa di <code class="i">Resource.Error.importErrors</code>.</p>
+</section>
+
+<!-- ===================================================== 3 -->
+<section id="auth">
+  <h2><span class="n">3</span>Login, sesi, dan ubah password</h2>
+  <span class="feat">F-AUTH-01</span><span class="feat">F-AUTH-02</span><span class="feat">F-AUTH-03</span>
+  <p>Sesi memakai dua token: <b>access token</b> (JWT pendek, dikirim di setiap request) dan <b>refresh token</b> (string acak panjang, hanya dipakai untuk meminta access token baru).</p>
+
+  <div class="flow">
+    <div class="box an">LoginViewModel<small>email + password</small></div><div class="arr">→</div>
+    <div class="box an">AuthRepository.login</div><div class="arr">→</div>
+    <div class="box be">POST /auth/login</div><div class="arr">→</div>
+    <div class="box be">auth.service.login<small>bcrypt compare</small></div><div class="arr">→</div>
+    <div class="box an">SessionManager<small>simpan token (DataStore)</small></div><div class="arr">→</div>
+    <div class="box an">PushTokenRegistrar<small>kirim token FCM</small></div>
+  </div>
+
+  <h3>3.1 Sisi backend</h3>
+  <ul>
+    <li><b>Anti-penebakan akun.</b> Jika email tidak ada, server tetap menjalankan <code class="i">bcrypt.compare</code> terhadap hash palsu (<code class="i">DUMMY_HASH</code>) supaya waktu respons tidak membedakan "akun tidak ada" dan "password salah".</li>
+    <li><b>Refresh token tidak disimpan mentah.</b> Yang disimpan di database adalah hash SHA-256-nya; token asli (48 byte acak) hanya dikirim ke perangkat.</li>
+    <li><b>Rotasi + deteksi pemakaian ulang.</b> Setiap refresh menerbitkan pasangan token baru dan mencabut yang lama. Kalau token yang sudah dicabut dipakai lagi (tanda token bocor), <i>semua</i> sesi akun itu dicabut.</li>
+    <li><b>Logout idempotent</b>: mencabut refresh token dan menghapus token perangkat FCM supaya akun lama tidak lagi menerima push di HP itu.</li>
+    <li><b>Ubah password</b> mencabut sesi di perangkat lain, lalu menerbitkan token baru untuk perangkat yang sedang dipakai.</li>
+  </ul>
+
+  <h3>3.2 Sisi Android: token otomatis diperbarui</h3>
+  <p><code class="i">AuthInterceptor</code> menambahkan header <code class="i">Authorization</code> ke semua request kecuali <code class="i">/auth/login</code>, <code class="i">/auth/refresh</code>, dan <code class="i">/auth/logout</code>. Bila server membalas 401, OkHttp memanggil <code class="i">TokenAuthenticator</code> secara otomatis:</p>
+<div class="file">android/…/data/remote/TokenAuthenticator.kt (inti)</div>
+<pre><code>override fun authenticate(route: Route?, response: Response): Request? {
+    if (responseCount(response) &gt;= 2) return null          // jangan loop tanpa akhir
+    // ... endpoint auth tidak di-refresh ...
+    return synchronized(lock) { runBlocking {
+        val current = sessionManager.getAccessToken()
+        val used = response.request.header("Authorization")?.removePrefix("Bearer ")
+        // request lain sudah refresh duluan: pakai token terbaru saja
+        if (!current.isNullOrBlank() &amp;&amp; used != current) return@runBlocking retryWith(current)
+
+        val refreshToken = sessionManager.getRefreshToken() ?: return@runBlocking null
+        try {
+            val tokens = refreshApi.refresh(RefreshRequest(refreshToken)).data!!
+            sessionManager.saveTokens(tokens.accessToken, tokens.refreshToken)
+            retryWith(tokens.accessToken)                       // ulangi request asli
+        } catch (e: HttpException) {
+            if (e.code() in 400..403) {                         // refresh ditolak server
+                sessionManager.clearSession()
+                sessionEvents.notifyExpired()                   // MainActivity kembali ke login
+            }
+            null
+        } catch (e: Exception) { null }                         // gangguan jaringan: sesi JANGAN dihapus
+    } }
+}</code></pre>
+  <div class="callout"><b>Kenapa <code class="i">synchronized</code>?</b> Kalau tiga request gagal 401 bersamaan, hanya yang pertama benar-benar refresh. Dua lainnya melihat token sudah berubah dan langsung memakainya. Tanpa ini, refresh kedua akan memakai refresh token lama dan dianggap pemakaian ulang, sehingga semua sesi dicabut.</div>
+
+  <h3>3.3 Login di repository</h3>
+<div class="file">android/…/data/repository/AuthRepository.kt (inti)</div>
+<pre><code>suspend fun login(email: String, password: String): Resource&lt;AuthUser&gt; = errors.call {
+    val response = authApi.login(LoginRequest(email, password))
+    val data = checkNotNull(response.data) { "Data login tidak tersedia." }
+    sessionManager.saveTokens(data.accessToken, data.refreshToken)
+    data.user.toDomain().also {
+        saveUser(it)                       // nama, role, wali kelas, anak (untuk wali murid)
+        // gagal daftar token FCM tidak menggagalkan login; dicoba lagi saat app dibuka
+        withTimeoutOrNull(TOKEN_TIMEOUT_MS) { pushTokens.register() }
+    }
+}</code></pre>
+  <p>Role yang tersimpan di <code class="i">SessionManager</code> dipakai untuk memilih menu (siswa/guru/wali/admin). Ini hanya merapikan tampilan; yang menjaga data tetap <code class="i">authenticate</code> + <code class="i">authorize</code> di backend.</p>
+</section>
+
+<!-- ===================================================== 4 -->
+<section id="jadwal">
+  <h2><span class="n">4</span>Melihat jadwal (semua role) dengan cache offline</h2>
+  <span class="feat">F-JDW-05</span>
+  <p>Jadwal wajib bisa dilihat offline (aturan proyek), jadi tampilannya mengikuti pola <b>cache dulu, lalu perbarui dari server</b>. Layar tidak membaca hasil API langsung; layar mengamati Room, dan API hanya mengisi Room.</p>
+  <div class="flow">
+    <div class="box an">Fragment<small>collect uiState</small></div><div class="arr">←</div>
+    <div class="box an">ViewModel</div><div class="arr">←</div>
+    <div class="box an">repository.observe()<small>Flow dari Room</small></div><div class="arr">←</div>
+    <div class="box an">Room<small>ScheduleEntity</small></div><div class="arr">←</div>
+    <div class="box an">repository.refresh()</div><div class="arr">←</div>
+    <div class="box be">GET /schedules?from&amp;to</div>
+  </div>
+<div class="file">android/…/data/repository/ScheduleRepository.kt (inti)</div>
+<pre><code>override fun observe(scope: ScheduleScope, from: LocalDate, to: LocalDate) = flow {
+    val accountId = session.getUserId() ?: run { emit(emptyList()); return@flow }
+    val source = dao.observeSchedules(accountId, cacheScope(scope), from.toString(), to.toString())
+    emitAll(source.map { rows -&gt; rows.map { it.toDomain() } })   // tampil ulang tiap cache berubah
+}
+
+override suspend fun refresh(scope: ScheduleScope, from: LocalDate, to: LocalDate) = errors.call {
+    val accountId = checkNotNull(session.getUserId())
+    val response = api.getSchedule(from.toString(), to.toString(), studentId, classGroupId)
+    val rows = response.data.orEmpty().map { it.toDomain().toEntity(accountId, cacheScope(scope)) }
+    database.withTransaction {                              // ganti isi rentang secara atomik
+        dao.deleteSchedulesInRange(accountId, cacheScope(scope), from.toString(), to.toString())
+        dao.insertSchedules(rows)
+    }
+}
+
+// Kunci cache: id siswa (siswa/wali murid), 0 (jadwal mengajar guru), -id kelas (kelas binaan)
+private suspend fun cacheScope(scope: ScheduleScope): Int = ...</code></pre>
+  <ul>
+    <li><b>Ganti dalam satu transaksi</b>: hapus rentang lama lalu isi yang baru, jadi layar tidak pernah melihat setengah data. Bila refresh gagal (offline), cache lama tetap tampil.</li>
+    <li><b>Cakupan per role</b> ditentukan di <code class="i">viewer()</code>: siswa hanya miliknya sendiri; guru jadwal mengajarnya (+ kelas binaan kalau wali kelas); wali murid memilih anak. Server tetap memeriksa hak akses setiap kali.</li>
+    <li>Cache terikat <code class="i">accountId</code>, jadi dua akun di satu HP tidak saling melihat jadwal.</li>
+    <li>Jadwal yang dikirim server sudah <i>setelah</i> perubahan jadwal per tanggal diterapkan (dibatalkan, dipindah, guru pengganti), lihat bagian 7.</li>
+  </ul>
+</section>
+
+<!-- ===================================================== 5 -->
+<section id="admin-jadwal">
+  <h2><span class="n">5</span>Admin: kelola slot jadwal dan cek bentrok</h2>
+  <span class="feat">F-JDW-01</span><span class="feat">F-JDW-03</span>
+  <p>Admin membuat <b>slot mingguan</b> (hari + jam + ruang untuk satu penugasan guru-mapel-kelas). Sebelum disimpan, slot dicek bentrok. Aturan bentrok dipisah ke satu file murni (<code class="i">schedules.conflicts.js</code>) agar dipakai ulang oleh impor Excel dan perubahan jadwal.</p>
+
+  <h3>5.1 Apa itu bentrok</h3>
+  <p>Dua slot pada hari yang sama dengan jam yang beririsan dianggap bentrok bila salah satu terpenuhi:</p>
+  <table>
+    <tr><th>Alasan</th><th>Arti</th></tr>
+    <tr><td><code class="i">TEACHER</code></td><td>Guru yang sama mengajar di dua tempat sekaligus</td></tr>
+    <tr><td><code class="i">CLASS</code></td><td>Kelas yang sama punya dua pelajaran sekaligus</td></tr>
+    <tr><td><code class="i">STUDENT</code></td><td>Ada siswa yang sama di dua kelas berbeda (mis. kelas reguler + kelas paket)</td></tr>
+    <tr><td><code class="i">ROOM</code></td><td>Ruangan dipakai dua kegiatan sekaligus</td></tr>
+  </table>
+  <p>Jam yang bersambung tidak bentrok: selesai 08.30 dan mulai 08.30 aman, karena rentangnya setengah terbuka <code class="i">[mulai, selesai)</code>.</p>
+<div class="file">backend/src/modules/schedules/schedules.conflicts.js</div>
+<pre><code>function overlaps(a, b) {
+  return a.startTime.getTime() &lt; b.endTime.getTime() &amp;&amp; b.startTime.getTime() &lt; a.endTime.getTime();
+}
+
+function detectConflicts(candidate, others, sharedClassIds = new Set()) {
+  const details = [];
+  for (const other of others) {
+    if (other.dayOfWeek !== candidate.dayOfWeek || !overlaps(candidate, other)) continue;
+
+    const reasons = [];
+    if (other.teacherId === candidate.teacherId) reasons.push('TEACHER');
+    if (other.classGroupId === candidate.classGroupId) reasons.push('CLASS');
+    else if (sharedClassIds.has(other.classGroupId)) reasons.push('STUDENT');
+    if (other.roomId === candidate.roomId) reasons.push('ROOM');
+
+    for (const reason of reasons) {
+      details.push({ field: FIELD_BY_REASON[reason], reason, slotId: other.id,
+                     message: describe(reason, other) });   // kalimat Indonesia untuk admin
+    }
+  }
+  return details;
+}</code></pre>
+  <p>Fungsi ini <b>murni</b> (tidak menyentuh database), jadi mudah diuji. Pembungkusnya yang melakukan query:</p>
+<div class="file">backend/src/modules/schedules/schedules.conflicts.js</div>
+<pre><code>async function findSlotConflicts(db, candidate, { semesterId, excludeSlotId } = {}) {
+  const rows = await db.scheduleSlot.findMany({
+    where: {
+      ...(excludeSlotId ? { id: { not: excludeSlotId } } : {}),  // saat edit: jangan bandingkan dgn diri sendiri
+      dayOfWeek: candidate.dayOfWeek,
+      startTime: { lt: candidate.endTime },     // filter irisan jam langsung di SQL
+      endTime: { gt: candidate.startTime },
+      teachingAssignment: { semesterId },
+    },
+    select: slotForConflict,
+  });
+  return conflictsAgainst(db, candidate, rows.map(flatten));
+}</code></pre>
+  <p>Jika ada bentrok, service melempar <code class="i">AppError(409, 'SCHEDULE_CONFLICT', …, details)</code>. Android memetakan <code class="i">details</code> menjadi daftar pesan di formulir (<code class="i">ApiErrorMapper.DETAIL_CODES</code> memuat <code class="i">SCHEDULE_CONFLICT</code>), sehingga admin tahu persis slot mana yang bentrok.</p>
+</section>
+
+<!-- ===================================================== 6 -->
+<section id="impor">
+  <h2><span class="n">6</span>Impor Excel (jadwal dan tagihan)</h2>
+  <span class="feat">F-JDW-02</span><span class="feat">F-BYR-01</span>
+  <p>Aturan impor: <b>semua atau tidak sama sekali</b>. File divalidasi seluruhnya; bila ada satu baris salah, tidak ada yang disimpan dan admin menerima daftar kesalahan per baris.</p>
+  <div class="flow">
+    <div class="box an">Pilih file (SAF)<small>core/UploadFiles</small></div><div class="arr">→</div>
+    <div class="box be">upload.js<small>Multer memoryStorage, .xlsx saja</small></div><div class="arr">→</div>
+    <div class="box be">lib/excel.readSheet</div><div class="arr">→</div>
+    <div class="box be">validasi tiap baris<small>+ cek bentrok batch</small></div><div class="arr">→</div>
+    <div class="box be">ada error?<small>ya: 422 IMPORT_INVALID</small></div><div class="arr">→</div>
+    <div class="box be">$transaction<small>simpan semua</small></div>
+  </div>
+<div class="file">backend/src/lib/excel.js dan pemakaiannya (ringkas)</div>
+<pre><code>// service impor: kumpulkan SEMUA kesalahan dulu
+const errors = [];
+rows.forEach((row) =&gt; {
+  // setiap pemeriksaan: errors.push({ row: nomorBarisExcel, column: 'Kelas', message: '...' })
+});
+errors.push(...findConflictsInBatch(candidates, existing, peers)
+  .map(({ row, message }) =&gt; ({ row, column: null, message })));
+if (errors.length &gt; 0) throw importInvalid(errors);   // 422 IMPORT_INVALID, dibatasi MAX_REPORTED_ERRORS</code></pre>
+
+  <h3>6.1 Cek bentrok untuk banyak baris tanpa query per baris</h3>
+  <p><code class="i">findConflictsInBatch</code> memuat semua slot semester satu kali (<code class="i">loadSemesterSlots</code>), mengelompokkannya per hari, lalu memeriksa kandidat <i>berurutan</i>. Setiap kandidat yang lolos dimasukkan ke daftar pembanding, jadi baris 7 yang bentrok dengan baris 3 dilaporkan di baris 7. Jadwal yang persis sama dengan yang ada dilaporkan sekali sebagai <code class="i">DUPLICATE</code>, bukan sebagai tiga bentrok sekaligus.</p>
+<div class="file">backend/src/modules/schedules/schedules.conflicts.js</div>
+<pre><code>for (const candidate of candidates) {
+  const twin = identities.get(identityKey(candidate));
+  if (twin) { found.push({ row: candidate.row, reason: 'DUPLICATE', message: ... }); continue; }
+
+  const others = byDay.get(candidate.dayOfWeek) ?? [];
+  for (const { reason, message } of detectConflicts(candidate, others, peers.get(candidate.classGroupId))) {
+    found.push({ row: candidate.row, reason, message });
+  }
+  remember(candidate);        // baris berikutnya dibandingkan juga dengan baris ini
+}</code></pre>
+
+  <h3>6.2 Menampilkan kesalahan di Android</h3>
+  <p>Server membalas 422 dengan <code class="i">details: [{row, column, message}]</code>. <code class="i">ApiErrorMapper</code> mengubahnya jadi <code class="i">ImportRowError</code> dan menaruhnya di <code class="i">Resource.Error.importErrors</code>. Layar impor (<code class="i">ui/common/ImportBodyView</code>, dipakai bersama oleh impor jadwal dan tagihan) menampilkannya sebagai daftar "Baris 7 · Kelas: …". Tombol <b>Unduh template</b> menyimpan berkas dari <code class="i">docs/import-templates/</code> lewat <code class="i">core/TemplateFiles</code>.</p>
+</section>
+
+<!-- ===================================================== 7 -->
+<section id="perubahan">
+  <h2><span class="n">7</span>Perubahan jadwal per tanggal dan notifikasi push</h2>
+  <span class="feat">F-JDW-04</span><span class="feat">F-NTF-01</span><span class="feat">F-NTF-02</span>
+  <p>Perubahan tidak mengubah slot mingguan; ia menempel pada <i>satu slot di satu tanggal</i> (<code class="i">ScheduleChange</code>, maksimal satu per slot per tanggal). Menghapus perubahan = jadwal tanggal itu kembali normal. Ada tiga jenis:</p>
+  <table>
+    <tr><th>Jenis</th><th>Efek pada tanggal itu</th></tr>
+    <tr><td><code class="i">CANCEL</code></td><td>Slot hilang dari jadwal</td></tr>
+    <tr><td><code class="i">SUBSTITUTE</code></td><td>Guru diganti <code class="i">substituteTeacher</code></td></tr>
+    <tr><td><code class="i">RESCHEDULE</code></td><td>Jam dan/atau ruangan diganti</td></tr>
+  </table>
+
+  <h3>7.1 <code class="i">saveChange</code>: urutan pemeriksaan</h3>
+  <ol class="steps">
+    <li>Muat slot; kalau tidak ada → <code class="i">400</code> pada kolom <code class="i">scheduleSlotId</code>.</li>
+    <li><code class="i">ensureDateMatchesSlot</code>: tanggal harus di dalam semester <i>dan</i> jatuh pada hari yang sama dengan hari slot (hari Senin, bukan Selasa).</li>
+    <li>SUBSTITUTE: guru pengganti harus ada, aktif, dan bukan guru asli. RESCHEDULE: ruangan harus valid dan harus benar-benar berbeda dari jadwal asli.</li>
+    <li><code class="i">ensureNoConflictOnDate</code>: cek bentrok <i>pada tanggal itu</i>, dengan jadwal lain yang sudah diubah ikut dihitung (lihat 7.2). CANCEL tidak perlu dicek.</li>
+    <li><code class="i">upsert</code> berdasarkan kunci gabungan <code class="i">(scheduleSlotId, date)</code> → membuat atau memperbarui.</li>
+    <li>Kirim notifikasi (tidak ditunggu).</li>
+  </ol>
+<div class="file">backend/src/modules/schedules/schedules.changes.service.js (inti)</div>
+<pre><code>const columns = changeColumns(input);       // kolom yang tak relevan dikosongkan (null)
+await ensureNoConflictOnDate(slot, columns, date);
+
+const key = { scheduleSlotId_date: { scheduleSlotId: slot.id, date } };
+const previous = await prisma.scheduleChange.findUnique({ where: key, select: {...} });
+
+const change = await prisma.scheduleChange.upsert({
+  where: key,
+  create: { scheduleSlotId: slot.id, date, ...columns },
+  update: columns,
+  select: changeSelect,
+});
+
+sendChangeNotification({
+  classGroupId: slot.teachingAssignment.classGroupId,
+  teacherUserIds: [
+    slot.teachingAssignment.teacher.userId,   // guru asli
+    change.substituteTeacher?.userId,         // guru pengganti baru
+    previous?.substituteTeacher?.userId,      // guru pengganti LAMA, supaya tidak datang sia-sia
+  ],
+  change, detail: describeChange(change), referenceId: change.id,
+});
+return { change: toChangeDto(change), created: previous === null };   // 201 bila baru, 200 bila update</code></pre>
+
+  <h3>7.2 Cek bentrok pada satu tanggal</h3>
+  <p><code class="i">findConflictsOnDate</code> mengambil <i>semua</i> slot di hari itu (tanpa filter jam, karena jam slot lain bisa saja sudah dipindah), menerapkan perubahan tanggal itu ke masing-masing lewat <code class="i">applyChange</code>, lalu membandingkan:</p>
+<div class="file">backend/src/modules/schedules/schedules.conflicts.js</div>
+<pre><code>function applyChange(slot, change) {
+  if (!change) return slot;
+  if (change.type === 'CANCEL') return null;               // slot dibatalkan: tidak bisa bentrok
+  if (change.type === 'SUBSTITUTE')
+    return { ...slot, teacherId: change.substituteTeacherId, teacherName: change.substituteTeacher.user.name };
+  return { ...slot,                                          // RESCHEDULE
+    startTime: change.newStartTime ?? slot.startTime,
+    endTime: change.newEndTime ?? slot.endTime,
+    roomId: change.newRoomId ?? slot.roomId, roomName: change.newRoom?.name ?? slot.roomName };
+}
+
+const others = rows.map((row) =&gt; applyChange(flatten(row), row.changes[0])).filter(Boolean);
+return conflictsAgainst(db, candidate, others);</code></pre>
+
+  <h3>7.3 Dari <code class="i">notify()</code> ke layar HP</h3>
+  <div class="flow">
+    <div class="box be">sendChangeNotification<small>cari penerima</small></div><div class="arr">→</div>
+    <div class="box be">notify()<small>setImmediate</small></div><div class="arr">→</div>
+    <div class="box be">dispatch()<small>ambil DeviceToken</small></div><div class="arr">→</div>
+    <div class="box ext">FCM sendEachForMulticast</div><div class="arr">→</div>
+    <div class="box an">onMessageReceived</div><div class="arr">→</div>
+    <div class="box an">PushMessageHandler<small>simpan Room + tampilkan</small></div>
+  </div>
+  <ul>
+    <li><b>Penerima</b> (<code class="i">notifications.recipients.js</code>): semua siswa kelas itu, wali murid mereka, guru asli, guru pengganti. Dihitung saat dikirim, tidak disimpan.</li>
+    <li><b>Tidak menghambat response.</b> <code class="i">notify()</code> hanya menjadwalkan <code class="i">setImmediate</code>; kegagalan pengiriman cuma masuk log. Karena itu ia dipanggil <i>setelah</i> data tersimpan, bukan di dalam transaksi, agar tidak ada push untuk data yang batal.</li>
+    <li><b>Data message, bukan notification message.</b> Payload hanya berisi <code class="i">type, title, body, referenceId, sentAt</code> (semua string). Dengan begitu Android <i>selalu</i> menerima <code class="i">onMessageReceived</code>, juga saat aplikasi di latar belakang, sehingga bisa menyimpan riwayat ke Room sebelum menampilkan notifikasi.</li>
+    <li><b>Pembersihan token.</b> Token yang dilaporkan FCM <code class="i">not-registered</code> atau tidak valid dihapus dari tabel <code class="i">DeviceToken</code>. Batch maksimal 500 token per panggilan.</li>
+    <li>Bila <code class="i">FIREBASE_SERVICE_ACCOUNT_PATH</code> kosong, notifikasi hanya dicatat di log (aman untuk teman yang tidak punya kunci Firebase).</li>
+  </ul>
+<div class="file">backend/src/jobs/notificationDispatcher.js (inti)</div>
+<pre><code>const rows = await prisma.deviceToken.findMany({ where: { userId: { in: ids } }, select: { token: true } });
+const fcm = getFcm();
+if (!fcm) { console.info(`[notifikasi] ${data.type} → ${tokens.length} perangkat: ...`); return result; }
+
+for (let i = 0; i &lt; tokens.length; i += BATCH_SIZE) {
+  const response = await fcm.sendEachForMulticast({
+    tokens: tokens.slice(i, i + BATCH_SIZE),
+    data,                              // data message
+    android: { priority: 'high' },
+  });
+  // token rusak dikumpulkan lalu dihapus: deviceToken.deleteMany(...)
+}</code></pre>
+
+  <h3>7.4 Sisi Android</h3>
+<div class="file">android/…/notification/SimFirebaseMessagingService.kt dan PushMessageHandler.kt</div>
+<pre><code>override fun onMessageReceived(message: RemoteMessage) {
+    scope.launch { handler.handle(message.data) }
+}
+override fun onNewToken(token: String) {
+    scope.launch { registrar.register(token) }       // token berganti: kirim ke backend
+}
+
+suspend fun handle(data: Map&lt;String, String&gt;): Boolean {
+    val payload = PushPayload.from(data) ?: return false   // bukan pesan aplikasi: abaikan
+    val saved = repository.save(payload) ?: return false   // tidak ada akun login: abaikan
+    presenter.show(saved)                                  // channel per jenis (jadwal, tagihan, ...)
+    return true
+}</code></pre>
+  <p>Riwayat notifikasi hanya hidup di Room perangkat (ADR-010), terikat <code class="i">accountId</code>. Token FCM didaftarkan setelah login, dikirim ulang saat berganti, dan dihapus saat logout. Satu token hanya boleh milik satu akun: bila HP dipakai login akun lain, <code class="i">registerDeviceToken</code> memindahkan token itu (<code class="i">upsert</code> pada kolom <code class="i">token</code>).</p>
+  <div class="callout"><b>Catatan:</b> mengetuk notifikasi baru membuka aplikasi; belum ada deep link ke layar tujuan.</div>
+</section>
+
+<!-- ===================================================== 8 -->
+<section id="tagihan">
+  <h2><span class="n">8</span>Tagihan</h2>
+  <span class="feat">F-BYR-01</span><span class="feat">F-BYR-02</span><span class="feat">F-BYR-03</span>
+  <p>Tagihan <b>hanya informasi</b>: tidak ada pembayaran di aplikasi. Admin mengunggah Excel berisi tagihan per siswa; siswa, wali murid, dan wali kelas (untuk kelasnya) bisa melihat sesuai cakupan datanya.</p>
+  <ul>
+    <li><b>Impor</b> (<code class="i">bills.import.service.js</code>) memakai kerangka yang sama dengan impor jadwal: validasi semua baris, <code class="i">importInvalid</code> bila ada yang salah, simpan dalam satu <code class="i">$transaction</code> (batas 20.000 baris). Bedanya, ini <i>upsert</i>: tagihan dengan pasangan NIS + kode tagihan yang belum ada dibuat, yang sudah ada diperbarui, dan yang tidak berubah dihitung <code class="i">unchanged</code>. Response berisi <code class="i">created, updated, unchanged, notifiedStudents</code>, sehingga mengunggah file yang sama dua kali aman.</li>
+    <li><b>Status "terlambat" tidak disimpan.</b> Ia dihitung saat dibaca: <code class="i">isOverdue = status === 'UNPAID' &amp;&amp; dueDate &lt; today</code>. Filter <code class="i">?overdue=true</code> menerjemahkannya ke kondisi Prisma <code class="i">{ status:'UNPAID', dueDate:{ lt: todayDate } }</code>. Dengan begitu tidak perlu cron untuk mengubah status.</li>
+    <li><b>Pemberitahuan keterlambatan (F-BYR-03).</b> Setelah transaksi impor berhasil, tagihan <code class="i">UNPAID</code> yang sudah lewat jatuh tempo dikelompokkan per siswa (<code class="i">overdueByStudent</code>) dan dikirim satu notifikasi <code class="i">BILL_OVERDUE</code> per siswa ke siswa itu dan wali muridnya lewat <code class="i">notify()</code>. Seperti notifikasi lain, tidak ditunggu. Bila impor tidak mengubah apa pun (<code class="i">operations.length === 0</code>), tidak ada notifikasi, supaya orang tua tidak menerima pengingat ganda dari file yang sama.</li>
+    <li><b>Cakupan data</b> ada di <code class="i">bills.policy.js</code>: siswa = diri sendiri, wali murid = anaknya, wali kelas = siswa di kelas yang <code class="i">homeroomTeacherId</code>-nya dia pada tahun ajaran aktif (bukan flag <code class="i">isHomeroomTeacher</code>), admin = semua.</li>
+  </ul>
+<div class="file">backend/src/modules/bills/bills.service.js (inti)</div>
+<pre><code>isOverdue: bill.status === 'UNPAID' &amp;&amp; dueDate &lt; today,
+...
+if (overdue === true)  and.push({ status: 'UNPAID', dueDate: { lt: todayDate } });
+if (overdue === false) and.push({ OR: [{ status: 'PAID' }, { dueDate: { gte: todayDate } }] });</code></pre>
+  <p>Di Android, tab Profil menjadi pintu masuk (<code class="i">Profile.canViewBills</code> bergantung role dan cakupan), lalu <code class="i">billListFragment</code> memuat daftar berpaginasi (online saja). Admin juga melihat tombol impor.</p>
+</section>
+
+<!-- ===================================================== 9 -->
+<section id="laporan">
+  <h2><span class="n">9</span>Laporan admin dan ekspor Excel</h2>
+  <span class="feat">F-LAP-07</span><span class="feat">F-LAP-09</span><span class="feat">F-LAP-11</span>
+  <p>Dua laporan: <b>Perubahan Jadwal</b> dan <b>Beban Mengajar Guru</b>. Keduanya memakai kerangka generik di kedua sisi, jadi laporan baru tinggal mendaftar.</p>
+
+  <h3>9.1 Backend: registri laporan</h3>
+  <p>Endpoint cuma dua pola: <code class="i">GET /reports/:type</code> (daftar berpaginasi) dan <code class="i">GET /reports/:type/export</code> (berkas .xlsx). Hanya <code class="i">ADMIN</code>. <code class="i">:type</code> dicari di registri <code class="i">REPORTS</code> di <code class="i">reports.service.js</code>; tiap laporan menyediakan fungsi query, pemetaan baris, dan definisi kolom Excel.</p>
+  <div class="flow">
+    <div class="box an">ReportViewModel.refresh()</div><div class="arr">→</div>
+    <div class="box an">ReportRepository</div><div class="arr">→</div>
+    <div class="box be">GET /reports/schedule-changes?…</div><div class="arr">→</div>
+    <div class="box be">REPORTS[type]<small>reports.scheduleChanges.js</small></div><div class="arr">→</div>
+    <div class="box ext">MySQL</div>
+  </div>
+  <div class="flow">
+    <div class="box an">tombol Ekspor Excel<small>CreateDocument</small></div><div class="arr">→</div>
+    <div class="box an">ViewModel.exportTo(uri)</div><div class="arr">→</div>
+    <div class="box be">GET /reports/:type/export<small>filter yang sama</small></div><div class="arr">→</div>
+    <div class="box an">core/ExportFiles<small>tulis ke uri tujuan</small></div>
+  </div>
+  <p>Ekspor memakai <b>filter yang sedang tampil</b>, sehingga isi berkas selalu sama dengan layar. Jika data melebihi batas baris, server membalas <code class="i">422</code> dan pesannya ditampilkan di Snackbar.</p>
+
+  <h3>9.2 Android: <code class="i">ReportViewModel</code> generik</h3>
+  <p>Kelas dasar ini menangani filter, halaman, total, dan ekspor. Turunannya (<code class="i">ScheduleChangeReportViewModel</code>, <code class="i">TeachingLoadReportViewModel</code>) hanya mengisi empat fungsi abstrak.</p>
+<div class="file">android/…/ui/admin/report/ReportViewModel.kt (inti)</div>
+<pre><code>abstract class ReportViewModel&lt;R : Any, F : Any&gt;(initialFilter: F) : ViewModel() {
+
+    protected abstract suspend fun fetch(page: Int, filter: F): Resource&lt;ReportPage&lt;R&gt;&gt;
+    protected abstract suspend fun export(filter: F, destination: String): Resource&lt;Boolean&gt;
+    protected abstract suspend fun fetchOptions(): Resource&lt;ReportOptions&gt;
+    protected abstract fun idOf(row: R): Int          // untuk membuang duplikat antar halaman
+
+    fun refresh() {
+        loadJob?.cancel()                              // pemuatan lama dibatalkan
+        loadOptionsOnce()                              // pilihan filter (guru, kelas) cukup sekali
+        loadJob = viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+            when (val result = fetch(1, _uiState.value.filter)) {
+                is Resource.Success -&gt; { nextPage = 2; _uiState.update { it.copy(rows = result.data.items, ...) } }
+                is Resource.Error   -&gt; _uiState.update { it.copy(isLoading = false, errorMessage = result.message) }
+            }
+        }
+    }
+
+    /** Ubah filter lalu muat ulang; tidak melakukan apa-apa bila hasilnya sama. */
+    protected fun updateFilter(transform: (F) -&gt; F) {
+        val current = _uiState.value.filter
+        val changed = transform(current)
+        if (changed == current) return
+        // daftar lama dikosongkan: bila gagal, tidak ada baris dari filter sebelumnya yang tersisa
+        _uiState.update { it.copy(filter = changed, rows = emptyList(), total = 0, hasMore = false, isLoading = true) }
+        refresh()
+    }
+}</code></pre>
+  <ul>
+    <li><b>Halaman berikutnya</b> (<code class="i">loadMore</code>) dimuat saat daftar digulir ke bawah; baris yang sudah ada dibuang berdasarkan <code class="i">idOf</code>, karena data bisa bergeser antar halaman.</li>
+    <li><b>Layar kosong vs error</b> dibedakan: <code class="i">isEmpty = rows.isEmpty() &amp;&amp; !isLoading &amp;&amp; errorMessage == null</code>. Gagal memuat tidak pernah tampil sebagai "tidak ada data".</li>
+    <li><b>Layar lebar</b>: kartu tampil 2 kolom di tablet lewat <code class="i">values-sw600dp/integers.xml</code>.</li>
+    <li>Tombol <b>Laporan</b> hanya muncul di Profil bila <code class="i">Profile.canViewReports</code> (role ADMIN); backend tetap yang menjaga hak akses.</li>
+  </ul>
+</section>
+
+<!-- ===================================================== 10 -->
+<section id="ringkas">
+  <h2><span class="n">10</span>Pola lintas fitur (ringkas)</h2>
+  <table>
+    <tr><th>Pola</th><th>Di mana</th><th>Kenapa</th></tr>
+    <tr><td>Semua-atau-tidak-sama-sekali</td><td>Impor jadwal, impor tagihan</td><td>Admin tidak perlu membersihkan data setengah masuk</td></tr>
+    <tr><td>Nilai turunan dihitung, bukan disimpan</td><td><code class="i">isOverdue</code>, jadwal setelah perubahan</td><td>Tidak butuh cron atau sinkronisasi status</td></tr>
+    <tr><td>Notifikasi setelah commit, tanpa await</td><td><code class="i">notify()</code></td><td>Push tidak menunda API, dan tidak ada push untuk data yang batal</td></tr>
+    <tr><td>Role dibaca dari DB tiap request</td><td><code class="i">authenticate</code></td><td>Akun yang diblokir langsung kehilangan akses</td></tr>
+    <tr><td>Cache dulu, lalu server</td><td>Jadwal (Room)</td><td>Bisa dibuka offline</td></tr>
+    <tr><td><code class="i">Resource</code> + pesan Indonesia</td><td>Semua repository Android</td><td>UI tidak pernah menangani exception</td></tr>
+    <tr><td>Kerangka generik</td><td><code class="i">ReportViewModel</code>, <code class="i">ImportBodyView</code>, <code class="i">REPORTS</code></td><td>Fitur baru = isi beberapa fungsi, bukan menulis ulang</td></tr>
+    <tr><td>Backend sumber otorisasi</td><td>Semua endpoint</td><td>Menyembunyikan tombol di UI hanyalah kenyamanan, bukan keamanan</td></tr>
+  </table>
+
+  <h3>Untuk menelusuri sendiri</h3>
+  <p>Mulai dari endpoint: cari di <code class="i">backend/src/modules/&lt;modul&gt;/&lt;modul&gt;.routes.js</code>, ikuti ke controller lalu service. Di Android, cari nama <code class="i">*Api</code> yang memanggil path itu di <code class="i">data/remote/</code>, lalu repository yang memakainya, lalu ViewModel dan Fragment di <code class="i">ui/&lt;fitur&gt;/</code>. Aturan bisnis lengkap ada di <code class="i">docs/BUSINESS_RULES.md</code>, hak akses di <code class="i">docs/PERMISSIONS.md</code>.</p>
+</section>
+
+<!-- ===================================================== 11 -->
+<section id="peta">
+  <h2><span class="n">11</span>Peta lokasi file</h2>
+  <p>Semua path relatif terhadap root repo <code class="i">Project_SDP_MDP/</code>. Untuk Android, folder kode Kotlin adalah <code class="i">android/app/src/main/java/id/sch/santaagnes/sim/</code>; di tabel ditulis <code class="i">sim/</code> agar singkat.</p>
+
+  <h3>Dokumen</h3>
+  <table class="paths">
+    <tr><th>Isi</th><th>File</th></tr>
+    <tr><td>Halaman ini</td><td><code class="i">docs/alur-kode.html</code></td></tr>
+    <tr><td>Aturan bisnis, hak akses, kontrak API</td><td><code class="i">docs/BUSINESS_RULES.md</code><code class="i">docs/PERMISSIONS.md</code><code class="i">docs/API_CONVENTIONS.md</code></td></tr>
+    <tr><td>Template impor Excel</td><td><code class="i">docs/import-templates/</code></td></tr>
+    <tr><td>Aturan untuk AI agent</td><td><code class="i">AGENTS.md</code><code class="i">backend/AGENTS.md</code><code class="i">android/AGENTS.md</code></td></tr>
+  </table>
+
+  <h3>Backend (<code class="i">backend/src/</code>)</h3>
+  <table class="paths">
+    <tr><th>Topik</th><th>File</th></tr>
+    <tr><td>Router dan server</td><td><code class="i">backend/src/app.js</code><code class="i">backend/src/server.js</code><code class="i">backend/src/config/env.js</code><code class="i">backend/src/config/constants.js</code></td></tr>
+    <tr><td>Middleware</td><td><code class="i">backend/src/middlewares/authenticate.js</code><code class="i">backend/src/middlewares/authorize.js</code><code class="i">backend/src/middlewares/validate.js</code><code class="i">backend/src/middlewares/errorHandler.js</code><code class="i">backend/src/middlewares/upload.js</code><code class="i">backend/src/middlewares/rateLimit.js</code></td></tr>
+    <tr><td>Helper umum</td><td><code class="i">backend/src/utils/response.js</code><code class="i">backend/src/utils/AppError.js</code><code class="i">backend/src/utils/pagination.js</code><code class="i">backend/src/utils/date.js</code></td></tr>
+    <tr><td>Login dan sesi (bagian 3)</td><td><code class="i">backend/src/modules/auth/auth.service.js</code><code class="i">backend/src/modules/auth/auth.routes.js</code><code class="i">backend/src/modules/auth/auth.controller.js</code><code class="i">backend/src/modules/auth/auth.validation.js</code><code class="i">backend/src/lib/jwt.js</code></td></tr>
+    <tr><td>Jadwal dilihat (bagian 4)</td><td><code class="i">backend/src/modules/schedules/schedules.view.service.js</code><code class="i">backend/src/modules/schedules/schedules.policy.js</code></td></tr>
+    <tr><td>Slot dan bentrok (bagian 5)</td><td><code class="i">backend/src/modules/schedules/schedules.service.js</code><code class="i">backend/src/modules/schedules/schedules.conflicts.js</code></td></tr>
+    <tr><td>Impor Excel (bagian 6)</td><td><code class="i">backend/src/modules/schedules/schedules.import.service.js</code><code class="i">backend/src/modules/bills/bills.import.service.js</code><code class="i">backend/src/lib/excel.js</code></td></tr>
+    <tr><td>Perubahan jadwal (bagian 7)</td><td><code class="i">backend/src/modules/schedules/schedules.changes.service.js</code></td></tr>
+    <tr><td>Notifikasi (bagian 7)</td><td><code class="i">backend/src/modules/notifications/notifications.service.js</code><code class="i">backend/src/modules/notifications/notifications.recipients.js</code><code class="i">backend/src/jobs/notificationDispatcher.js</code><code class="i">backend/src/lib/fcm.js</code></td></tr>
+    <tr><td>Tagihan (bagian 8)</td><td><code class="i">backend/src/modules/bills/bills.service.js</code><code class="i">backend/src/modules/bills/bills.policy.js</code><code class="i">backend/src/modules/bills/bills.import.service.js</code></td></tr>
+    <tr><td>Laporan (bagian 9)</td><td><code class="i">backend/src/modules/reports/reports.service.js</code><code class="i">backend/src/modules/reports/reports.scheduleChanges.js</code><code class="i">backend/src/modules/reports/reports.teachingLoad.js</code></td></tr>
+    <tr><td>Database</td><td><code class="i">backend/prisma/schema.prisma</code><code class="i">backend/src/lib/prisma.js</code></td></tr>
+    <tr><td>Test</td><td><code class="i">backend/tests/</code></td></tr>
+  </table>
+  <p>Setiap modul di <code class="i">backend/src/modules/&lt;modul&gt;/</code> juga punya <code class="i">&lt;modul&gt;.routes.js</code>, <code class="i">&lt;modul&gt;.controller.js</code>, dan <code class="i">&lt;modul&gt;.validation.js</code>.</p>
+
+  <h3>Android (<code class="i">sim/</code> = <code class="i">android/app/src/main/java/id/sch/santaagnes/sim/</code>)</h3>
+  <table class="paths">
+    <tr><th>Topik</th><th>File</th></tr>
+    <tr><td>Token dan refresh (bagian 3)</td><td><code class="i">sim/data/remote/AuthInterceptor.kt</code><code class="i">sim/data/remote/TokenAuthenticator.kt</code><code class="i">sim/data/remote/AuthApi.kt</code><code class="i">sim/data/local/SessionManager.kt</code><code class="i">sim/core/SessionEvents.kt</code></td></tr>
+    <tr><td><code class="i">Resource</code> dan pemetaan error</td><td><code class="i">sim/core/Resource.kt</code><code class="i">sim/core/ApiErrorMapper.kt</code><code class="i">sim/data/remote/ApiResponse.kt</code></td></tr>
+    <tr><td>Login, splash, sesi</td><td><code class="i">sim/ui/auth/LoginViewModel.kt</code><code class="i">sim/ui/auth/LoginFragment.kt</code><code class="i">sim/ui/auth/SplashViewModel.kt</code><code class="i">sim/ui/auth/SessionViewModel.kt</code><code class="i">sim/data/repository/AuthRepository.kt</code></td></tr>
+    <tr><td>Ubah password dan profil</td><td><code class="i">sim/ui/profile/ChangePasswordViewModel.kt</code><code class="i">sim/ui/profile/ProfileViewModel.kt</code><code class="i">sim/ui/profile/ProfileFragment.kt</code><code class="i">sim/data/repository/AccountRepository.kt</code></td></tr>
+    <tr><td>Jadwal dan cache (bagian 4)</td><td><code class="i">sim/data/repository/ScheduleRepository.kt</code><code class="i">sim/data/remote/ScheduleApi.kt</code><code class="i">sim/data/local/ScheduleEntity.kt</code><code class="i">sim/data/local/LocalDao.kt</code><code class="i">sim/data/local/AppDatabase.kt</code><code class="i">sim/ui/schedule/ScheduleListViewModel.kt</code><code class="i">sim/ui/schedule/ScheduleListFragment.kt</code></td></tr>
+    <tr><td>Admin jadwal (bagian 5 dan 7)</td><td><code class="i">sim/ui/admin/schedule/AdminScheduleViewModel.kt</code><code class="i">sim/ui/admin/schedule/SlotFormViewModel.kt</code><code class="i">sim/ui/admin/schedule/ChangeListViewModel.kt</code><code class="i">sim/ui/admin/schedule/ChangeFormViewModel.kt</code><code class="i">sim/data/repository/AdminScheduleRepository.kt</code><code class="i">sim/data/remote/AdminScheduleApi.kt</code></td></tr>
+    <tr><td>Impor Excel (bagian 6)</td><td><code class="i">sim/ui/admin/schedule/ScheduleImportViewModel.kt</code><code class="i">sim/ui/bill/BillImportViewModel.kt</code><code class="i">sim/ui/common/ImportBodyView.kt</code><code class="i">sim/ui/common/ImportErrorAdapter.kt</code><code class="i">sim/core/UploadFiles.kt</code><code class="i">sim/core/TemplateFiles.kt</code></td></tr>
+    <tr><td>Push notifikasi (bagian 7)</td><td><code class="i">sim/notification/SimFirebaseMessagingService.kt</code><code class="i">sim/notification/PushMessageHandler.kt</code><code class="i">sim/notification/PushTokenRegistrar.kt</code><code class="i">sim/notification/NotificationPresenter.kt</code><code class="i">sim/notification/NotificationChannels.kt</code><code class="i">sim/data/repository/NotificationRepository.kt</code><code class="i">sim/data/local/NotificationEntity.kt</code></td></tr>
+    <tr><td>Tagihan (bagian 8)</td><td><code class="i">sim/ui/bill/BillListViewModel.kt</code><code class="i">sim/ui/bill/BillListFragment.kt</code><code class="i">sim/data/repository/BillRepository.kt</code><code class="i">sim/data/remote/BillApi.kt</code></td></tr>
+    <tr><td>Laporan (bagian 9)</td><td><code class="i">sim/ui/admin/report/ReportViewModel.kt</code> (kerangka generik)<code class="i">sim/ui/admin/report/ReportFragment.kt</code><code class="i">sim/ui/admin/report/ScheduleChangeReportViewModel.kt</code><code class="i">sim/ui/admin/report/TeachingLoadReportViewModel.kt</code><code class="i">sim/data/repository/ReportRepository.kt</code><code class="i">sim/data/remote/ReportApi.kt</code><code class="i">sim/core/ExportFiles.kt</code></td></tr>
+    <tr><td>Navigasi dan layout</td><td><code class="i">android/app/src/main/res/navigation/nav_graph.xml</code><code class="i">android/app/src/main/res/layout/</code><code class="i">android/app/src/main/res/values/strings.xml</code></td></tr>
+    <tr><td>Injeksi dependency (Hilt)</td><td><code class="i">sim/di/NetworkModule.kt</code><code class="i">sim/di/RepositoryModule.kt</code><code class="i">sim/di/DatabaseModule.kt</code><code class="i">sim/di/NotificationModule.kt</code></td></tr>
+    <tr><td>Test</td><td><code class="i">android/app/src/test/java/id/sch/santaagnes/sim/</code></td></tr>
+  </table>
+</section>
+
+<footer>Dokumen ini ringkasan untuk belajar, bukan spesifikasi. Bila kode berubah, kode yang benar; perbarui halaman ini bila alurnya bergeser.</footer>
+</main>
+</div>
+
+<script>
+(function () {
+  // Tema: ikuti sistem, bisa diganti manual (disimpan bila browser mengizinkan).
+  var root = document.documentElement;
+  try { var saved = localStorage.getItem('alur-theme'); if (saved) root.setAttribute('data-theme', saved); } catch (e) {}
+  document.getElementById('themeBtn').addEventListener('click', function () {
+    var dark = root.getAttribute('data-theme') === 'dark' ||
+      (!root.getAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches);
+    var next = dark ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('alur-theme', next); } catch (e) {}
+  });
+
+  // Pewarnaan sintaks sederhana (JS/Kotlin): komentar, string, kata kunci, angka.
+  var KW = 'const|let|var|function|return|if|else|for|of|in|await|async|throw|new|require|module|exports|continue|switch|case|default|class|abstract|protected|override|fun|suspend|val|when|is|try|catch|null|true|false|undefined|private|object|this|it|return@runBlocking|return@flow|typealias|interface|data';
+  var re = new RegExp('(\\/\\/[^\\n]*)|(`(?:[^`\\\\]|\\\\.)*`|\'(?:[^\'\\\\\\n]|\\\\.)*\'|"(?:[^"\\\\\\n]|\\\\.)*")|\\b(' + KW + ')\\b|\\b(\\d+)\\b', 'g');
+  document.querySelectorAll('pre code').forEach(function (el) {
+    var text = el.textContent;
+    var out = '', last = 0, m;
+    function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    re.lastIndex = 0;
+    while ((m = re.exec(text))) {
+      out += esc(text.slice(last, m.index));
+      var cls = m[1] ? 'c' : m[2] ? 's' : m[3] ? 'k' : 'd';
+      out += '<span class="' + cls + '">' + esc(m[0]) + '</span>';
+      last = m.index + m[0].length;
+    }
+    out += esc(text.slice(last));
+    el.innerHTML = out;
+  });
+})();
+</script>
+</body>
+</html>

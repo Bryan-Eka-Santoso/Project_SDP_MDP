@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.core
 
+import id.sch.santaagnes.sim.domain.model.ImportRowError
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -49,5 +50,33 @@ class ApiErrorTest {
         assertNull(parseApiError("<html>502 Bad Gateway</html>"))
         assertNull(parseApiError("""{"success":true,"data":[]}"""))
         assertNull(parseApiError("\"teks biasa\""))
+    }
+
+    @Test
+    fun importErrorsKeepServerOrderForImportInvalid() {
+        val body = """{"success":false,"error":{"code":"IMPORT_INVALID","message":"Berkas tidak valid.",
+            "details":[{"row":3,"column":"Hari","message":"Hari tidak dikenal."},{"row":5,"column":null,"message":"Guru tidak ditemukan."},
+            {"row":null,"message":"Kolom NIS tidak ada."},{"row":6,"column":"","message":""}]}}"""
+
+        val errors = importErrorsOf(parseApiError(body))
+
+        // entri tanpa pesan dibuang; kolom kosong dianggap tidak ada
+        assertEquals(
+            listOf(
+                ImportRowError(3, "Hari", "Hari tidak dikenal."),
+                ImportRowError(5, null, "Guru tidak ditemukan."),
+                ImportRowError(null, null, "Kolom NIS tidak ada.")
+            ),
+            errors
+        )
+    }
+
+    @Test
+    fun importErrorsAreEmptyForOtherCodesAndMissingBody() {
+        val validation = """{"success":false,"error":{"code":"VALIDATION_ERROR","message":"x",
+            "details":[{"row":3,"message":"Tidak valid."}]}}"""
+
+        assertEquals(emptyList<ImportRowError>(), importErrorsOf(parseApiError(validation)))
+        assertEquals(emptyList<ImportRowError>(), importErrorsOf(null))
     }
 }

@@ -8,6 +8,7 @@ import id.sch.santaagnes.sim.domain.model.AssignmentOption
 import id.sch.santaagnes.sim.domain.model.ChangeInput
 import id.sch.santaagnes.sim.domain.model.ChangeType
 import id.sch.santaagnes.sim.domain.model.ImportResult
+import id.sch.santaagnes.sim.domain.model.ImportRowError
 import id.sch.santaagnes.sim.domain.model.PageResult
 import id.sch.santaagnes.sim.domain.model.RoomOption
 import id.sch.santaagnes.sim.domain.model.ScheduleLookups
@@ -25,6 +26,8 @@ class FakeAdminScheduleRepository : AdminScheduleRepository {
     var saveError: String? = null
     var deleteError: String? = null
     var importError: String? = null
+    var importErrorRows: List<ImportRowError> = emptyList()
+    var templateSaveResult = true
     var importedCount = 0
     var fileName: String? = "jadwal.xlsx"
     var lookupsResult: Resource<ScheduleLookups> = Resource.Success(sampleLookups())
@@ -32,6 +35,7 @@ class FakeAdminScheduleRepository : AdminScheduleRepository {
     val requestedSlotFilters = mutableListOf<Pair<Int, SlotFilter>>()
     val requestedChangePages = mutableListOf<Pair<Int, ChangeType?>>()
     val createdSlots = mutableListOf<SlotInput>()
+    val savedTemplates = mutableListOf<String>()
     val updatedSlots = mutableListOf<Pair<Int, SlotInput>>()
     val deletedSlots = mutableListOf<Int>()
     val savedChanges = mutableListOf<ChangeInput>()
@@ -70,9 +74,14 @@ class FakeAdminScheduleRepository : AdminScheduleRepository {
     override suspend fun fileName(uri: String): String? = fileName
 
     override suspend fun importSlots(uri: String): Resource<ImportResult> {
-        importError?.let { return Resource.Error(it) }
+        importError?.let { return Resource.Error(it, importErrorRows) }
         imports += uri
         return Resource.Success(ImportResult(importedCount))
+    }
+
+    override suspend fun saveTemplate(destination: String): Boolean {
+        savedTemplates += destination
+        return templateSaveResult
     }
 
     override suspend fun changes(page: Int, type: ChangeType?): Resource<PageResult<AdminChange>> {

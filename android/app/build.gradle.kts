@@ -45,6 +45,16 @@ android {
         buildConfig = true
     }
 
+    sourceSets {
+        // Template impor Excel diunduh dari aplikasi; sumbernya satu: docs/import-templates
+        getByName("main").assets.srcDir("../../docs/import-templates")
+    }
+
+    androidResources {
+        // Pola bawaan AGP + berkas kunci Excel (~$...) dan README yang ikut dari docs/import-templates
+        ignoreAssetsPattern = "!.svn:!.git:!.ds_store:!*.scc:.*:<dir>_*:CVS:thumbs.db:picasa.ini:*~:~*:README.md"
+    }
+
     buildTypes {
         release {
             optimization {

@@ -2,7 +2,6 @@ package id.sch.santaagnes.sim.data.repository
 
 import id.sch.santaagnes.sim.core.ApiErrorMapper
 import id.sch.santaagnes.sim.core.Resource
-import id.sch.santaagnes.sim.data.local.AppDatabase
 import id.sch.santaagnes.sim.data.local.SessionManager
 import id.sch.santaagnes.sim.data.remote.AuthApi
 import id.sch.santaagnes.sim.data.remote.ChangePasswordRequest
@@ -13,15 +12,12 @@ import id.sch.santaagnes.sim.domain.model.AuthUser
 import id.sch.santaagnes.sim.domain.model.NamedId
 import id.sch.santaagnes.sim.notification.PushTokenProvider
 import id.sch.santaagnes.sim.notification.PushTokenRegistrar
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 
 class AuthRepository @Inject constructor(
     private val authApi: AuthApi,
     private val sessionManager: SessionManager,
-    private val database: AppDatabase,
     private val errors: ApiErrorMapper,
     private val pushTokens: PushTokenRegistrar,
     private val tokenProvider: PushTokenProvider
@@ -57,8 +53,10 @@ class AuthRepository @Inject constructor(
     }
 
     /**
-     * Keluar selalu menghapus sesi dan data lokal, meskipun server tidak terjangkau; kegagalan
-     * mencabut token di server tidak boleh membuat pengguna terjebak di aplikasi.
+     * Keluar selalu menghapus sesi, meskipun server tidak terjangkau; kegagalan mencabut token di
+     * server tidak boleh membuat pengguna terjebak di aplikasi. Data Room tidak dihapus: to-do,
+     * tanda selesai tugas, dan riwayat notifikasi hanya ada di perangkat (ADR-010, F-JDW-07/09) dan
+     * semuanya terikat `accountId`, jadi akun lain di perangkat yang sama tidak bisa melihatnya.
      */
     suspend fun logout(): Resource<Unit> {
         val refreshToken = sessionManager.getRefreshToken()
@@ -69,7 +67,6 @@ class AuthRepository @Inject constructor(
         }
         withTimeoutOrNull(TOKEN_TIMEOUT_MS) { tokenProvider.deleteToken() }
         sessionManager.clearSession()
-        withContext(Dispatchers.IO) { database.clearAllTables() }
         return Resource.Success(Unit)
     }
 
