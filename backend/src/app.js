@@ -24,6 +24,8 @@ api.use(require('./modules/notifications/notifications.routes'));
 api.use(require('./modules/schedules/schedules.routes'));
 api.use(require('./modules/bills/bills.routes'));
 api.use(require('./modules/reports/reports.routes'));
+api.use('/users', require('./modules/users/users.routes'));
+api.use(require('./modules/master/master.routes'));
 
 
 app.use('/api/v1', api);
