@@ -1,4 +1,3 @@
-
 package id.sch.santaagnes.sim.di
 
 import android.content.Context
@@ -71,7 +70,7 @@ object NetworkModule {
                 GsonConverterFactory.create()
             )
             .build()
-    }
+        }
 
     @Provides
     @Singleton

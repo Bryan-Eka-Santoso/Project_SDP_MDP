@@ -1,4 +1,3 @@
-
 package id.sch.santaagnes.sim.data.local
 
 import androidx.room.Database
@@ -20,6 +19,5 @@ import androidx.room.RoomDatabase
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
-
     abstract fun localDao(): LocalDao
 }

@@ -242,4 +242,18 @@
     <string name="bill_import_title">Impor Pembayaran</string>
     <string name="bill_import_info">Pilih berkas Excel (.xlsx) rekap pembayaran dari yayasan dengan kolom NIS, Kode Tagihan, Jenis Pembayaran, Nominal, Jatuh Tempo, Status, dan Tanggal Bayar (opsional). Bila ada baris yang salah, tidak ada yang diimpor dan baris yang salah ditampilkan.</string>
     <string name="bill_import_success">Impor selesai: %1$d tagihan baru, %2$d diperbarui, %3$d tidak berubah. %4$d siswa diberi notifikasi tunggakan.</string>
+
+    <!-- Komponen penilaian (NIL, milik Gilbert) -->
+    <string name="grade_title">Komponen Penilaian</string>
+    <string name="grade_subtitle">Pengaturan komponen dan bobot nilai</string>
+    <string name="grade_name">Nama Komponen</string>
+    <string name="grade_weight">Bobot (%)</string>
+    <string name="grade_add">Simpan Komponen</string>
+    <string name="grade_cancel">Batal Edit</string>
+    <string name="grade_delete">Hapus</string>
+    <string name="grade_edit">Edit</string>
+    <string name="grade_total">Total Bobot: 0%</string>
+    <string name="grade_valid">Bobot sudah valid (100%)</string>
+    <string name="grade_invalid">Total bobot harus 100%</string>
+    <string name="grade_demo">Mode Demo: data belum tersimpan ke server</string>
 </resources>
