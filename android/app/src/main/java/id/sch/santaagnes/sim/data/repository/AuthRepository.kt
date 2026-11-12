@@ -1,4 +1,3 @@
-
 package id.sch.santaagnes.sim.data.repository
 
 import id.sch.santaagnes.sim.data.local.SessionManager
@@ -11,8 +10,6 @@ import kotlinx.coroutines.CancellationException
 import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
-
-class AuthRepository  @Inject constructor(
 import javax.inject.Singleton
 
 @Singleton
@@ -25,7 +22,6 @@ class AuthRepository @Inject constructor(
         email: String,
         password: String
     ): Result<AuthUser> = safeCall {
-
         val response = authApi.login(
             LoginRequest(email, password)
         )
@@ -46,7 +42,6 @@ class AuthRepository @Inject constructor(
     }
 
     suspend fun getProfile(): Result<AuthUser> = safeCall {
-
         val response = authApi.getProfile()
 
         val user = response.data
@@ -56,9 +51,7 @@ class AuthRepository @Inject constructor(
     }
 
     suspend fun logout(): Result<Unit> = safeCall {
-
-        val refreshToken =
-            sessionManager.getRefreshToken()
+        val refreshToken = sessionManager.getRefreshToken()
 
         if (refreshToken != null) {
             authApi.logout(
@@ -105,74 +98,7 @@ class AuthRepository @Inject constructor(
             name = name,
             email = email,
             role = role,
-            isHomeroomTeacher =
-                teacher?.isHomeroomTeacher ?: false
+            isHomeroomTeacher = teacher?.isHomeroomTeacher ?: false
         )
-    ): Result<Unit> {
-        return try {
-            val response = authApi.login(
-                LoginRequest(
-                    email = email,
-                    password = password
-                )
-            )
-
-            val body = response.body()
-
-            if (response.isSuccessful &&
-                body?.success == true &&
-                body.data != null
-            ) {
-                val accessToken = body.data.accessToken
-                val refreshToken = body.data.refreshToken
-
-                if (accessToken.isBlank() ||
-                    refreshToken.isBlank()
-                ) {
-                    return Result.failure(
-                        Exception("Token login tidak valid")
-                    )
-                }
-
-                sessionManager.saveTokens(
-                    accessToken,
-                    refreshToken
-                )
-
-                Result.success(Unit)
-
-            } else {
-                val message = when (response.code()) {
-                    400 -> "Format data login tidak valid"
-                    401 -> "Email atau password salah"
-                    403 -> "Akun tidak memiliki izin untuk masuk"
-                    500 -> "Terjadi kesalahan pada server"
-                    else -> "Login gagal (${response.code()})"
-                }
-
-                Result.failure(Exception(message))
-            }
-
-        } catch (e: CancellationException) {
-            throw e
-
-        } catch (e: IOException) {
-            Result.failure(
-                Exception(
-                    "Tidak dapat terhubung ke server. Periksa koneksi.",
-                    e
-                )
-            )
-
-        } catch (e: HttpException) {
-            Result.failure(
-                Exception("Terjadi kesalahan HTTP ${e.code()}", e)
-            )
-
-        } catch (e: Exception) {
-            Result.failure(
-                Exception("Login gagal. Silakan coba lagi.", e)
-            )
-        }
     }
 }

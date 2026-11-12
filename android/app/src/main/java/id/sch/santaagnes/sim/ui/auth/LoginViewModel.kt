@@ -1,4 +1,3 @@
-
 package id.sch.santaagnes.sim.ui.auth
 
 import androidx.lifecycle.ViewModel
@@ -16,15 +15,8 @@ class LoginViewModel @Inject constructor(
     private val repository: AuthRepository
 ) : ViewModel() {
 
-    private val _uiState =
-        MutableStateFlow(LoginUiState())
-    private val authRepository: AuthRepository
-) : ViewModel() {
-
     private val _uiState = MutableStateFlow(LoginUiState())
-
-    val uiState: StateFlow<LoginUiState> =
-        _uiState.asStateFlow()
+    val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
     fun login(
         email: String,
@@ -33,13 +25,6 @@ class LoginViewModel @Inject constructor(
         if (email.isBlank() || password.isBlank()) {
             _uiState.value = LoginUiState(
                 errorMessage = "Email dan password wajib diisi."
-    fun login(email: String, password: String) {
-
-        if (_uiState.value.isLoading) return
-
-        if (email.isBlank() || password.isBlank()) {
-            _uiState.value = _uiState.value.copy(
-                errorMessage = "Email dan password wajib diisi"
             )
             return
         }
@@ -47,9 +32,7 @@ class LoginViewModel @Inject constructor(
         if (_uiState.value.isLoading) return
 
         viewModelScope.launch {
-            _uiState.value = LoginUiState(
-                isLoading = true
-            )
+            _uiState.value = LoginUiState(isLoading = true)
 
             val result = repository.login(
                 email.trim(),
@@ -65,36 +48,14 @@ class LoginViewModel @Inject constructor(
                 },
                 onFailure = { error ->
                     _uiState.value = LoginUiState(
-                        errorMessage = error.message
-                            ?: "Login gagal."
+                        errorMessage = error.message ?: "Login gagal."
                     )
                 }
             )
         }
     }
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(
-                isLoading = true,
-                isLoginSuccess = false,
-                errorMessage = null
-            )
-
-            val result = authRepository.login(
-                email = email.trim(),
-                password = password
-            )
-
-            _uiState.value = _uiState.value.copy(
-                isLoading = false,
-                isLoginSuccess = result.isSuccess,
-                errorMessage = result.exceptionOrNull()?.message
-            )
-        }
-    }
 
     fun clearError() {
-        _uiState.value = _uiState.value.copy(
-            errorMessage = null
-        )
+        _uiState.value = _uiState.value.copy(errorMessage = null)
     }
 }

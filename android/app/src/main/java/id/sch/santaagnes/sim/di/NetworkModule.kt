@@ -1,4 +1,3 @@
-
 package id.sch.santaagnes.sim.di
 
 import android.content.Context
@@ -13,21 +12,11 @@ import id.sch.santaagnes.sim.data.remote.AuthApi
 import id.sch.santaagnes.sim.data.remote.AuthInterceptor
 import id.sch.santaagnes.sim.data.remote.TokenAuthenticator
 import okhttp3.OkHttpClient
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import id.sch.santaagnes.sim.BuildConfig
-import id.sch.santaagnes.sim.data.remote.HealthApi
-import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
-import id.sch.santaagnes.sim.data.remote.AuthApi
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -46,7 +35,7 @@ object NetworkModule {
     fun provideOkHttpClient(
         sessionManager: SessionManager
     ): OkHttpClient {
-        return OkHttpClient.Builder()
+        val builder = OkHttpClient.Builder()
             .addInterceptor(
                 AuthInterceptor(sessionManager)
             )
@@ -56,42 +45,6 @@ object NetworkModule {
                     BuildConfig.BASE_URL
                 )
             )
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .build()
-    }
-
-    @Provides
-    @Singleton
-    fun provideRetrofit(
-        client: OkHttpClient
-    ): Retrofit {
-        return Retrofit.Builder()
-            .baseUrl(BuildConfig.BASE_URL)
-            .client(client)
-            .addConverterFactory(
-                GsonConverterFactory.create()
-            )
-            .build()
-    }
-    fun provideGson(): Gson {
-        return GsonBuilder().create()
-    }
-
-
-    @Provides
-    @Singleton
-    fun provideAuthApi(
-        retrofit: Retrofit
-    ): AuthApi {
-        return retrofit.create(AuthApi::class.java)
-    }
-
-
-    @Provides
-    @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
-        val builder = OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
 
@@ -107,23 +60,22 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideRetrofit(
-        client: OkHttpClient,
-        gson: Gson
+        client: OkHttpClient
     ): Retrofit {
         return Retrofit.Builder()
             .baseUrl(BuildConfig.BASE_URL)
             .client(client)
             .addConverterFactory(
-                GsonConverterFactory.create(gson)
+                GsonConverterFactory.create()
             )
             .build()
-    }
+        }
 
     @Provides
     @Singleton
-    fun provideHealthApi(
+    fun provideAuthApi(
         retrofit: Retrofit
-    ): HealthApi {
-        return retrofit.create(HealthApi::class.java)
+    ): AuthApi {
+        return retrofit.create(AuthApi::class.java)
     }
 }

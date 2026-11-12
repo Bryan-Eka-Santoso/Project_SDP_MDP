@@ -8,7 +8,4 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     app:defaultNavHost="true"
-    app:navGraph="@navigation/nav_graph"
-    xmlns:app="http://schemas.android.com/apk/res-auto" />
-    app:defaultNavHost="true"
     app:navGraph="@navigation/nav_graph" />

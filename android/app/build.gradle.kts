@@ -11,33 +11,6 @@ android {
         version = release(37)
     }
 
-    buildFeatures {
-        viewBinding = true
-        buildConfig = true
-    }
-
-
-    buildTypes {
-        debug {
-            buildConfigField(
-                "String",
-                "BASE_URL",
-                "\"http://10.0.2.2:3000/\""
-            )
-        }
-        release {
-            buildConfigField(
-                "String",
-                "BASE_URL",
-                "\"https://example.invalid/\""
-            )
-            optimization {
-                enable = false
-            }
-        }
-    }
-
-
     defaultConfig {
         applicationId = "id.sch.santaagnes.sim"
         minSdk = 24
@@ -46,12 +19,6 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        buildConfigField(
-            "String",
-            "BASE_URL",
-            "\"http://127.0.0.1:3000/api/v1/\""
-        )
     }
 
     buildFeatures {
@@ -60,12 +27,25 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField(
+                "String",
+                "BASE_URL",
+                "\"http://10.0.2.2:3000/api/v1/\""
+            )
+        }
         release {
+            buildConfigField(
+                "String",
+                "BASE_URL",
+                "\"https://api.santaagnes.sch.id/api/v1/\""
+            )
             optimization {
                 enable = false
             }
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -78,28 +58,17 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.core.ktx)
     implementation(libs.material)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(libs.androidx.junit)
 
-    // REST API
-    implementation("com.squareup.retrofit2:retrofit:2.11.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
-
-    // Local session storage
-    implementation("androidx.datastore:datastore-preferences:1.1.1")
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
-
-    // Hilt
+    // Hilt Dependency Injection
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 
-    // Navigation Component
+    // Navigation & Fragment
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
     implementation(libs.fragment.ktx)
 
-    // ViewModel dan Lifecycle
+    // ViewModel & Lifecycle
     implementation(libs.lifecycle.viewmodel)
     implementation(libs.lifecycle.runtime)
 
@@ -108,31 +77,18 @@ dependencies {
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
-    androidTestImplementation(
-        "androidx.test:core-ktx:1.7.0"
-    )
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
-
-
+    // Retrofit & OkHttp
     implementation(libs.retrofit.core)
     implementation(libs.retrofit.gson)
-
     implementation(libs.okhttp.core)
     implementation(libs.okhttp.logging)
 
-    implementation(libs.androidx.lifecycle.viewmodel)
-    implementation(libs.androidx.lifecycle.runtime)
-    implementation(libs.androidx.fragment.ktx)
-
-    implementation(libs.androidx.navigation.fragment)
-    implementation(libs.androidx.navigation.ui)
-
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler)
-
+    // DataStore & Coroutines
     implementation(libs.androidx.datastore)
     implementation(libs.kotlinx.coroutines.android)
 
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation("androidx.test:core-ktx:1.7.0")
 }

@@ -1,4 +1,3 @@
-
 package id.sch.santaagnes.sim.data.local
 
 import android.content.Context
@@ -7,6 +6,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -17,7 +17,7 @@ private val Context.sessionDataStore by preferencesDataStore(
 
 @Singleton
 class SessionManager @Inject constructor(
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ) {
 
     companion object {
@@ -46,49 +46,46 @@ class SessionManager @Inject constructor(
             preferences[ACTIVE_STUDENT_ID]
         }
 
+    suspend fun getAccessToken(): String? {
+        val preferences = context.sessionDataStore.data.first()
+        return preferences[ACCESS_TOKEN]
+    }
+
+    suspend fun getRefreshToken(): String? {
+        val preferences = context.sessionDataStore.data.first()
+        return preferences[REFRESH_TOKEN]
+    }
+
     suspend fun saveTokens(
         accessToken: String,
         refreshToken: String
     ) {
-        context.dataStore.edit {
-            it[ACCESS_TOKEN] = accessToken
-            it[REFRESH_TOKEN] = refreshToken
-        }
-    }
-
-    suspend fun saveActiveStudentId(studentId: Int) {
-        context.dataStore.edit {
-            it[ACTIVE_STUDENT_ID] = studentId.toString()
-        }
-    }
-
-    suspend fun getActiveStudentId(): Int? {
-        val preferences = context.dataStore.data.first()
-        return preferences[ACTIVE_STUDENT_ID]?.toIntOrNull()
-    }
-
-    suspend fun clearSession() {
-        context.dataStore.edit {
-            it.clear()
         context.sessionDataStore.edit { preferences ->
             preferences[ACCESS_TOKEN] = accessToken
             preferences[REFRESH_TOKEN] = refreshToken
         }
     }
 
-    suspend fun saveActiveStudent(
-        studentId: String
-    ) {
+    suspend fun saveActiveStudentId(studentId: Int) {
+        context.sessionDataStore.edit { preferences ->
+            preferences[ACTIVE_STUDENT_ID] = studentId.toString()
+        }
+    }
+
+    suspend fun saveActiveStudent(studentId: String) {
         context.sessionDataStore.edit { preferences ->
             preferences[ACTIVE_STUDENT_ID] = studentId
         }
     }
 
+    suspend fun getActiveStudentId(): Int? {
+        val preferences = context.sessionDataStore.data.first()
+        return preferences[ACTIVE_STUDENT_ID]?.toIntOrNull()
+    }
+
     suspend fun clearSession() {
         context.sessionDataStore.edit { preferences ->
-            preferences.remove(ACCESS_TOKEN)
-            preferences.remove(REFRESH_TOKEN)
-            preferences.remove(ACTIVE_STUDENT_ID)
+            preferences.clear()
         }
     }
 }
