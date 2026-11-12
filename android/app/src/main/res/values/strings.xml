@@ -13,4 +13,55 @@
     <string name="login_footer">© 2024 Agnesian — SMA St. Agnes</string>
     <string name="home_welcome">Login berhasil! Role: %1$s</string>
     <string name="check_session">Cek Sesi</string>
+
+    <string name="login_title">SIM Santa Agnes</string>
+    <string name="login_subtitle">Sistem Informasi Akademik</string>
+    <string name="login_email">Email</string>
+    <string name="login_password">Password</string>
+    <string name="login_button">Masuk</string>
+    <string name="login_welcome">Silakan masuk menggunakan akun Anda</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="login_success">Login berhasil</string>
+    <string name="login_required">Email dan password wajib diisi</string>
+    <string name="login_connection_error">Tidak dapat terhubung ke server. Periksa koneksi.</string>
+    <string name="login_invalid_credentials">Email atau password salah</string>
+
+
+    <string name="profile_title">Profil Pengguna</string>
+    <string name="profile_name">Nama Pengguna</string>
+    <string name="profile_email">Email</string>
+    <string name="profile_role">Role</string>
+    <string name="profile_not_loaded">Data profil belum tersedia</string>
+    <string name="profile_change_password">Ubah Password</string>
+    <string name="profile_logout">Keluar dari Akun</string>
+
+    <string name="password_title">Ubah Password</string>
+    <string name="password_old">Password Lama</string>
+    <string name="password_new">Password Baru</string>
+    <string name="password_confirm">Konfirmasi Password Baru</string>
+    <string name="password_save">Simpan Perubahan</string>
+    <string name="password_required">Semua kolom wajib diisi</string>
+    <string name="password_mismatch">Konfirmasi password tidak sama</string>
+    <string name="password_min_length">Password baru minimal 8 karakter</string>
+    <string name="password_api_pending">Layanan ubah password belum tersedia</string>
+    <string name="logout_api_pending">Logout belum tersedia karena API belum terhubung</string>
+    <string name="back">Kembali</string>
+
+
+    <string name="grade_title">Komponen Penilaian</string>
+    <string name="grade_subtitle">Pengaturan komponen dan bobot nilai</string>
+    <string name="grade_name">Nama Komponen</string>
+    <string name="grade_weight">Bobot (%)</string>
+    <string name="grade_add">Simpan Komponen</string>
+    <string name="grade_cancel">Batal Edit</string>
+    <string name="grade_delete">Hapus</string>
+    <string name="grade_edit">Edit</string>
+    <string name="grade_total">Total Bobot: 0%</string>
+    <string name="grade_valid">Bobot sudah valid (100%)</string>
+    <string name="grade_invalid">Total bobot harus 100%</string>
+    <string name="grade_demo">Mode Demo: data belum tersimpan ke server</string>
+
+
 </resources>

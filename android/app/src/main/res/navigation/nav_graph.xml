@@ -13,5 +13,36 @@
     <include app:graph="@navigation/nav_teacher" />
     <include app:graph="@navigation/nav_student" />
     <include app:graph="@navigation/nav_guardian" />
+        android:name="id.sch.santaagnes.sim.ui.auth.LoginFragment"
+        android:label="@string/login_title" />
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="id.sch.santaagnes.sim.ui.profile.ProfileFragment"
+        android:label="@string/profile_title">
+
+        <action
+            android:id="@+id/action_profile_to_changePassword"
+            app:destination="@id/changePasswordFragment" />
+
+        <action
+            android:id="@+id/action_profile_to_login"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/changePasswordFragment"
+        android:name="id.sch.santaagnes.sim.ui.profile.ChangePasswordFragment"
+        android:label="@string/password_title" />
+
+
+    <fragment
+        android:id="@+id/gradeComponentFragment"
+        android:name="id.sch.santaagnes.sim.ui.grades.GradeComponentFragment"
+        android:label="@string/grade_title" />
+
 
 </navigation>

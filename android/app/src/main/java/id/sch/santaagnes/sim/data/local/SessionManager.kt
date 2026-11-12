@@ -5,16 +5,21 @@ import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import kotlinx.coroutines.flow.first
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
+import javax.inject.Singleton
 
-private val Context.dataStore by preferencesDataStore(
-    name = "session"
+private val Context.sessionDataStore by preferencesDataStore(
+    name = "user_session"
 )
 
-class SessionManager(
-    private val context: Context
+@Singleton
+class SessionManager @Inject constructor(
+    @ApplicationContext private val context: Context
 ) {
+
     companion object {
         private val ACCESS_TOKEN =
             stringPreferencesKey("access_token")
@@ -26,17 +31,20 @@ class SessionManager(
             stringPreferencesKey("active_student_id")
     }
 
-    val accessToken = context.dataStore.data.map {
-        it[ACCESS_TOKEN]
-    }
+    val accessToken: Flow<String?> =
+        context.sessionDataStore.data.map { preferences ->
+            preferences[ACCESS_TOKEN]
+        }
 
-    suspend fun getAccessToken(): String? {
-        return accessToken.first()
-    }
+    val refreshToken: Flow<String?> =
+        context.sessionDataStore.data.map { preferences ->
+            preferences[REFRESH_TOKEN]
+        }
 
-    suspend fun getRefreshToken(): String? {
-        return context.dataStore.data.first()[REFRESH_TOKEN]
-    }
+    val activeStudentId: Flow<String?> =
+        context.sessionDataStore.data.map { preferences ->
+            preferences[ACTIVE_STUDENT_ID]
+        }
 
     suspend fun saveTokens(
         accessToken: String,
@@ -62,6 +70,25 @@ class SessionManager(
     suspend fun clearSession() {
         context.dataStore.edit {
             it.clear()
+        context.sessionDataStore.edit { preferences ->
+            preferences[ACCESS_TOKEN] = accessToken
+            preferences[REFRESH_TOKEN] = refreshToken
+        }
+    }
+
+    suspend fun saveActiveStudent(
+        studentId: String
+    ) {
+        context.sessionDataStore.edit { preferences ->
+            preferences[ACTIVE_STUDENT_ID] = studentId
+        }
+    }
+
+    suspend fun clearSession() {
+        context.sessionDataStore.edit { preferences ->
+            preferences.remove(ACCESS_TOKEN)
+            preferences.remove(REFRESH_TOKEN)
+            preferences.remove(ACTIVE_STUDENT_ID)
         }
     }
 }

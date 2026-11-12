@@ -10,6 +10,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import id.sch.santaagnes.sim.data.local.AppDatabase
 import id.sch.santaagnes.sim.data.local.LocalDao
+import id.sch.santaagnes.sim.data.local.ScheduleDao
 import javax.inject.Singleton
 
 @Module
@@ -25,6 +26,7 @@ object DatabaseModule {
             context,
             AppDatabase::class.java,
             "santa_agnes_local.db"
+            "santa_agnes_db"
         ).build()
     }
 
@@ -33,5 +35,9 @@ object DatabaseModule {
         database: AppDatabase
     ): LocalDao {
         return database.localDao()
+    fun provideScheduleDao(
+        database: AppDatabase
+    ): ScheduleDao {
+        return database.scheduleDao()
     }
 }

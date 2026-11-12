@@ -17,4 +17,5 @@ import androidx.room.RoomDatabase
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun localDao(): LocalDao
+    abstract fun scheduleDao(): ScheduleDao
 }

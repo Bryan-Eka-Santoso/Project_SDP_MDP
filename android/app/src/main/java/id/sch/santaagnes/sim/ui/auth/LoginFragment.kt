@@ -19,6 +19,10 @@ import id.sch.santaagnes.sim.databinding.FragmentLoginBinding
 import kotlinx.coroutines.launch
 import androidx.navigation.NavOptions
 
+import dagger.hilt.android.AndroidEntryPoint
+import id.sch.santaagnes.sim.databinding.FragmentLoginBinding
+import kotlinx.coroutines.launch
+import id.sch.santaagnes.sim.R
 @AndroidEntryPoint
 class LoginFragment : Fragment() {
 
@@ -28,6 +32,8 @@ class LoginFragment : Fragment() {
     private val viewModel: LoginViewModel by viewModels()
     private var navigated = false
 
+    private var loginSuccessShown = false
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -36,6 +42,11 @@ class LoginFragment : Fragment() {
         _binding = FragmentLoginBinding.inflate(
             inflater, container, false
         )
+            inflater,
+            container,
+            false
+        )
+
         return binding.root
     }
 
@@ -51,6 +62,29 @@ class LoginFragment : Fragment() {
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
+        super.onViewCreated(view, savedInstanceState)
+
+        setupListeners()
+        observeViewModel()
+    }
+
+    private fun setupListeners() {
+        binding.btnLogin.setOnClickListener {
+            val email = binding.etEmail.text
+                .toString()
+                .trim()
+
+            val password = binding.etPassword.text
+                .toString()
+
+            viewModel.login(email, password)
+        }
+    }
+
+    private fun observeViewModel() {
+
+        viewLifecycleOwner.lifecycleScope.launch {
+
             viewLifecycleOwner.repeatOnLifecycle(
                 Lifecycle.State.STARTED
             ) {
@@ -58,6 +92,9 @@ class LoginFragment : Fragment() {
 
                     binding.progressBar.isVisible =
                         state.isLoading
+                    binding.progressLogin.visibility =
+                        if (state.isLoading) View.VISIBLE
+                        else View.GONE
 
                     binding.btnLogin.isEnabled =
                         !state.isLoading
@@ -107,6 +144,29 @@ class LoginFragment : Fragment() {
                         }
                     }
 
+                    state.errorMessage?.let { message ->
+                        Toast.makeText(
+                            requireContext(),
+                            message,
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        viewModel.clearError()
+                    }
+
+                    if (state.isLoginSuccess &&
+                        !loginSuccessShown
+                    ) {
+                        loginSuccessShown = true
+
+
+                        Toast.makeText(
+                            requireContext(),
+                            getString(R.string.login_success),
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                    }
                 }
             }
         }
@@ -115,5 +175,7 @@ class LoginFragment : Fragment() {
     override fun onDestroyView() {
         _binding = null
         super.onDestroyView()
+        super.onDestroyView()
+        _binding = null
     }
 }
