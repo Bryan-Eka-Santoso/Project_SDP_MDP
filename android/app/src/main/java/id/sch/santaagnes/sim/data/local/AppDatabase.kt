@@ -8,9 +8,14 @@ import androidx.room.RoomDatabase
         ScheduleEntity::class,
         AnnouncementEntity::class,
         NotificationEntity::class,
-        TodoItem::class
+        TodoItem::class,
+        TaskDoneEntity::class
     ],
-    version = 1,
+    // v2: ScheduleEntity per tanggal. v3: subjectId pada jadwal, TodoItem diperluas, TaskDoneEntity baru.
+    // Tabel lokal-saja (notifikasi, to-do, tanda selesai tugas) butuh Migration sungguhan begitu berisi
+    // data pengguna; sampai itu, DatabaseModule memakai fallback destruktif.
+    // v4: referenceId pada notifikasi.
+    version = 4,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

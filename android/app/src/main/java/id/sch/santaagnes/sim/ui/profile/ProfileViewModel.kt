@@ -1,77 +1,50 @@
-
 package id.sch.santaagnes.sim.ui.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import id.sch.santaagnes.sim.data.local.SessionManager
-import kotlinx.coroutines.CancellationException
+import id.sch.santaagnes.sim.core.Resource
+import id.sch.santaagnes.sim.data.repository.AccountRepository
+import id.sch.santaagnes.sim.domain.model.Profile
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+data class ProfileUiState(
+    // null sampai data sesi terbaca
+    val profile: Profile? = null,
+    val isRefreshing: Boolean = false,
+    // gagal memuat dari server; data sesi tetap tampil
+    val errorMessage: String? = null
+)
+
+/** Profil tampil dulu dari sesi tersimpan, lalu dilengkapi (email, NIS/NIP) dari server. */
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    private val sessionManager: SessionManager
+    private val repository: AccountRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileUiState())
-
-    val uiState: StateFlow<ProfileUiState> =
-        _uiState.asStateFlow()
+    val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
     init {
-        checkSession()
-    }
-
-    private fun checkSession() {
         viewModelScope.launch {
-            val token = sessionManager.accessToken.first()
-
-            _uiState.value = _uiState.value.copy(
-                isLoading = false,
-                isLoggedIn = !token.isNullOrBlank()
-            )
+            repository.cachedProfile()?.let { cached -> _uiState.update { it.copy(profile = cached) } }
+            refresh()
         }
     }
 
-    fun logout() {
-        if (_uiState.value.isLoading) return
-
+    fun refresh() {
+        if (_uiState.value.isRefreshing) return
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(
-                isLoading = true,
-                errorMessage = null
-            )
-
-            try {
-                // Logout lokal: belum mencabut token di backend
-                sessionManager.clearSession()
-
-                _uiState.value = ProfileUiState(
-                    isLoading = false,
-                    isLoggedIn = false,
-                    isLogoutSuccess = true
-                )
-
-            } catch (e: CancellationException) {
-                throw e
-
-            } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    errorMessage = "Gagal menghapus sesi lokal"
-                )
+            _uiState.update { it.copy(isRefreshing = true, errorMessage = null) }
+            when (val result = repository.refreshProfile()) {
+                is Resource.Success -> _uiState.update { it.copy(profile = result.data, isRefreshing = false) }
+                is Resource.Error -> _uiState.update { it.copy(isRefreshing = false, errorMessage = result.message) }
             }
         }
-    }
-
-    fun clearError() {
-        _uiState.value = _uiState.value.copy(
-            errorMessage = null
-        )
     }
 }

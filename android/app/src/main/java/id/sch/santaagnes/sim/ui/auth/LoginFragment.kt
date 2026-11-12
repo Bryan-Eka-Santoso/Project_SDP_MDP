@@ -1,3 +1,4 @@
+
 package id.sch.santaagnes.sim.ui.auth
 
 import android.os.Bundle
@@ -11,12 +12,12 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
 import id.sch.santaagnes.sim.R
 import id.sch.santaagnes.sim.databinding.FragmentLoginBinding
 import kotlinx.coroutines.launch
+import androidx.navigation.NavOptions
 
 @AndroidEntryPoint
 class LoginFragment : Fragment() {
@@ -33,9 +34,7 @@ class LoginFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentLoginBinding.inflate(
-            inflater,
-            container,
-            false
+            inflater, container, false
         )
         return binding.root
     }
@@ -44,8 +43,6 @@ class LoginFragment : Fragment() {
         view: View,
         savedInstanceState: Bundle?
     ) {
-        super.onViewCreated(view, savedInstanceState)
-
         binding.btnLogin.setOnClickListener {
             viewModel.login(
                 binding.etEmail.text.toString(),
@@ -58,36 +55,40 @@ class LoginFragment : Fragment() {
                 Lifecycle.State.STARTED
             ) {
                 viewModel.uiState.collect { state ->
-                    binding.progressBar.isVisible = state.isLoading
-                    binding.btnLogin.isEnabled = !state.isLoading
 
-                    state.errorMessage?.let { message ->
+                    binding.progressBar.isVisible =
+                        state.isLoading
+
+                    binding.btnLogin.isEnabled =
+                        !state.isLoading
+
+                    val errorText = state.errorMessage
+                        ?: state.errorRes?.let { getString(it) }
+
+                    if (errorText != null) {
                         Toast.makeText(
                             requireContext(),
-                            message,
+                            errorText,
                             Toast.LENGTH_LONG
                         ).show()
-                        viewModel.clearError()
                     }
 
+
                     if (state.isLoginSuccess && !navigated) {
-                        val destination = when (state.role) {
-                            "ADMIN" -> R.id.admin_graph
-                            "TEACHER" -> R.id.teacher_graph
-                            "STUDENT" -> R.id.student_graph
-                            "GUARDIAN" -> R.id.guardian_graph
-                            else -> null
-                        }
+
+                        val destination = roleGraphId(state.role)
 
                         if (destination == null) {
                             navigated = false
+
                             Toast.makeText(
                                 requireContext(),
-                                "Role pengguna tidak dikenal.",
+                                R.string.error_unknown_role,
                                 Toast.LENGTH_LONG
                             ).show()
                         } else {
                             navigated = true
+
                             val options = NavOptions.Builder()
                                 .setPopUpTo(
                                     R.id.loginFragment,
@@ -102,13 +103,14 @@ class LoginFragment : Fragment() {
                             )
                         }
                     }
+
                 }
             }
         }
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
         _binding = null
+        super.onDestroyView()
     }
 }

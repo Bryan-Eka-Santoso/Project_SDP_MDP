@@ -83,7 +83,12 @@ async function deleteTask(req, res) {
   res.status(204).end();
 }
 
+async function listMyTeachingAssignments(req, res) {
+  sendSuccess(res, await tasksService.listMyTeachingAssignments(req.user));
+}
+
 module.exports = {
+  listMyTeachingAssignments,
   listTasks,
   getTask,
   createTask,

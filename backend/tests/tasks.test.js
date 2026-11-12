@@ -3,7 +3,7 @@ process.env.JWT_ACCESS_SECRET = 'test-secret-yang-panjangnya-lebih-dari-32-karak
 jest.mock('../src/lib/prisma', () => ({
   user: { findUnique: jest.fn() },
   semester: { findFirst: jest.fn() },
-  teachingAssignment: { findFirst: jest.fn() },
+  teachingAssignment: { findFirst: jest.fn(), findMany: jest.fn() },
   task: {
     create: jest.fn(),
     findMany: jest.fn(),
@@ -268,5 +268,49 @@ describe('DELETE /api/v1/tasks/:id', () => {
     expect(prisma.task.delete).not.toHaveBeenCalled();
     expect((await del(loginAs('STUDENT'))).status).toBe(403);
     expect((await request(app).delete('/api/v1/tasks/1')).status).toBe(401);
+  });
+});
+
+describe('GET /api/v1/me/teaching-assignments', () => {
+  const get = (auth) => request(app).get('/api/v1/me/teaching-assignments').set('Authorization', auth);
+
+  it('guru: penugasan miliknya pada semester aktif, urut kelas lalu mapel', async () => {
+    const rows = [
+      { id: 10, subject: { id: 2, code: 'MAT', name: 'Matematika' }, classGroup: { id: 7, name: 'X-1' } },
+      { id: 11, subject: { id: 3, code: 'FIS', name: 'Fisika' }, classGroup: { id: 8, name: 'X-2' } },
+    ];
+    prisma.teachingAssignment.findMany.mockResolvedValue(rows);
+
+    const res = await get(loginAs('TEACHER', 40));
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).toEqual(rows);
+    const call = prisma.teachingAssignment.findMany.mock.calls[0][0];
+    expect(call.where).toEqual({ semesterId: 1, teacher: { userId: 40 } });
+    expect(call.orderBy).toEqual([{ classGroup: { name: 'asc' } }, { subject: { name: 'asc' } }]);
+    // hanya data pilihan form; tanpa data guru lain atau siswa
+    expect(call.select).toEqual({
+      id: true,
+      subject: { select: { id: true, code: true, name: true } },
+      classGroup: { select: { id: true, name: true } },
+    });
+  });
+
+  it('tanpa semester aktif: daftar kosong tanpa query penugasan', async () => {
+    prisma.semester.findFirst.mockResolvedValue(null);
+
+    const res = await get(loginAs('TEACHER'));
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).toEqual([]);
+    expect(prisma.teachingAssignment.findMany).not.toHaveBeenCalled();
+  });
+
+  it('siswa, wali murid, admin 403; tanpa login 401', async () => {
+    for (const role of ['STUDENT', 'GUARDIAN', 'ADMIN']) {
+      expect((await get(loginAs(role))).status).toBe(403);
+    }
+    expect((await request(app).get('/api/v1/me/teaching-assignments')).status).toBe(401);
+    expect(prisma.teachingAssignment.findMany).not.toHaveBeenCalled();
   });
 });

@@ -6,4 +6,9 @@
     <color name="agnesian_button">#3262D6</color>
     <color name="agnesian_background">#F0F0F0</color>
     <color name="agnesian_muted">#9299A5</color>
+    <color name="agnesian_text">#1F2937</color>
+    <color name="change_substitute">#B26A00</color>
+    <color name="change_reschedule">#1E50CA</color>
+    <color name="change_cancel">#B3261E</color>
+    <color name="bill_paid">#2E7D32</color>
 </resources>

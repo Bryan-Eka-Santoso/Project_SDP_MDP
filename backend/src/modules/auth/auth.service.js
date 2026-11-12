@@ -17,7 +17,19 @@ const PROFILE_SELECT = {
   email: true,
   name: true,
   role: true,
-  teacher: { select: { id: true, employeeNumber: true, isHomeroomTeacher: true } },
+  teacher: {
+    select: {
+      id: true,
+      employeeNumber: true,
+      isHomeroomTeacher: true,
+      // Kelas binaan pada tahun ajaran aktif; dipakai Android untuk jadwal/tagihan kelas wali kelas.
+      homeroomClasses: {
+        where: { academicYear: { isActive: true } },
+        select: { id: true, name: true },
+        orderBy: { name: 'asc' },
+      },
+    },
+  },
   student: { select: { id: true, nis: true, birthDate: true } },
   guardian: {
     select: {
@@ -44,7 +56,12 @@ function toProfile(user) {
     email: user.email,
     name: user.name,
     role: user.role,
-    teacher: user.teacher,
+    teacher: user.teacher && {
+      id: user.teacher.id,
+      employeeNumber: user.teacher.employeeNumber,
+      isHomeroomTeacher: user.teacher.isHomeroomTeacher,
+      homeroomClassGroups: (user.teacher.homeroomClasses ?? []).map(({ id, name }) => ({ id, name })),
+    },
     student: user.student && {
       ...user.student,
       birthDate: formatDateOnly(user.student.birthDate),

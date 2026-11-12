@@ -7,12 +7,18 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import id.sch.santaagnes.sim.BuildConfig
+import id.sch.santaagnes.sim.core.SessionEvents
 import id.sch.santaagnes.sim.data.local.SessionManager
+import id.sch.santaagnes.sim.data.remote.AdminScheduleApi
 import id.sch.santaagnes.sim.data.remote.AuthApi
+import id.sch.santaagnes.sim.data.remote.BillApi
+import id.sch.santaagnes.sim.data.remote.DeviceTokenApi
 import id.sch.santaagnes.sim.data.remote.AuthInterceptor
+import id.sch.santaagnes.sim.data.remote.MasterLookupApi
+import id.sch.santaagnes.sim.data.remote.ScheduleApi
+import id.sch.santaagnes.sim.data.remote.TaskApi
 import id.sch.santaagnes.sim.data.remote.TokenAuthenticator
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
@@ -33,28 +39,23 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(
-        sessionManager: SessionManager
+        sessionManager: SessionManager,
+        sessionEvents: SessionEvents
     ): OkHttpClient {
-        val builder = OkHttpClient.Builder()
+        return OkHttpClient.Builder()
             .addInterceptor(
                 AuthInterceptor(sessionManager)
             )
             .authenticator(
                 TokenAuthenticator(
                     sessionManager,
-                    BuildConfig.BASE_URL
+                    BuildConfig.BASE_URL,
+                    sessionEvents
                 )
             )
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
-
-        if (BuildConfig.DEBUG) {
-            val logging = HttpLoggingInterceptor()
-            logging.level = HttpLoggingInterceptor.Level.BASIC
-            builder.addInterceptor(logging)
-        }
-
-        return builder.build()
+            .build()
     }
 
     @Provides
@@ -77,5 +78,53 @@ object NetworkModule {
         retrofit: Retrofit
     ): AuthApi {
         return retrofit.create(AuthApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideScheduleApi(
+        retrofit: Retrofit
+    ): ScheduleApi {
+        return retrofit.create(ScheduleApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAdminScheduleApi(
+        retrofit: Retrofit
+    ): AdminScheduleApi {
+        return retrofit.create(AdminScheduleApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideMasterLookupApi(
+        retrofit: Retrofit
+    ): MasterLookupApi {
+        return retrofit.create(MasterLookupApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideTaskApi(
+        retrofit: Retrofit
+    ): TaskApi {
+        return retrofit.create(TaskApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideBillApi(
+        retrofit: Retrofit
+    ): BillApi {
+        return retrofit.create(BillApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDeviceTokenApi(
+        retrofit: Retrofit
+    ): DeviceTokenApi {
+        return retrofit.create(DeviceTokenApi::class.java)
     }
 }
