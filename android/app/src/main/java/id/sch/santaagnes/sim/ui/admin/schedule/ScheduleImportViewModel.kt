@@ -5,8 +5,12 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import id.sch.santaagnes.sim.core.Resource
 import id.sch.santaagnes.sim.data.repository.AdminScheduleRepository
+import id.sch.santaagnes.sim.domain.model.ImportRowError
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -19,8 +23,13 @@ data class ScheduleImportUiState(
     // jumlah slot yang berhasil diimpor; null selama belum ada impor sukses
     val importedCount: Int? = null,
     // alasan gagal: satu baris per kesalahan (nomor baris + alasan) untuk impor yang ditolak
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    // rincian per baris/kolom bila impor ditolak (IMPORT_INVALID); kosong untuk kegagalan lain
+    val importErrors: List<ImportRowError> = emptyList()
 ) {
+    // jumlah baris Excel berbeda yang bermasalah (kesalahan tanpa nomor baris tidak dihitung)
+    val errorRowCount: Int get() = importErrors.mapNotNull { it.row }.distinct().size
+
     val canImport: Boolean get() = fileUri != null && !isUploading
 }
 
@@ -31,6 +40,14 @@ class ScheduleImportViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(ScheduleImportUiState())
     val uiState: StateFlow<ScheduleImportUiState> = _uiState.asStateFlow()
+
+    // true bila template tersimpan, false bila gagal; sekali jalan untuk Snackbar
+    private val _templateSaved = MutableSharedFlow<Boolean>(extraBufferCapacity = 1)
+    val templateSaved: SharedFlow<Boolean> = _templateSaved.asSharedFlow()
+
+    fun onTemplateDestinationPicked(uri: String) {
+        viewModelScope.launch { _templateSaved.emit(repository.saveTemplate(uri)) }
+    }
 
     fun onFilePicked(uri: String) {
         // Hasil impor sebelumnya dihapus: berkas baru berarti percobaan baru.
@@ -45,12 +62,12 @@ class ScheduleImportViewModel @Inject constructor(
         val uri = _uiState.value.fileUri ?: return
         if (_uiState.value.isUploading) return
         viewModelScope.launch {
-            _uiState.update { it.copy(isUploading = true, errorMessage = null, importedCount = null) }
+            _uiState.update { it.copy(isUploading = true, errorMessage = null, importErrors = emptyList(), importedCount = null) }
             when (val result = repository.importSlots(uri)) {
                 is Resource.Success -> _uiState.update {
                     it.copy(isUploading = false, importedCount = result.data.imported)
                 }
-                is Resource.Error -> _uiState.update { it.copy(isUploading = false, errorMessage = result.message) }
+                is Resource.Error -> _uiState.update { it.copy(isUploading = false, errorMessage = result.message, importErrors = result.importErrors) }
             }
         }
     }

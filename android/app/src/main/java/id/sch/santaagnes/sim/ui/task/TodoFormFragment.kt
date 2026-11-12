@@ -17,6 +17,7 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import dagger.hilt.android.AndroidEntryPoint
 import id.sch.santaagnes.sim.R
 import id.sch.santaagnes.sim.core.DateTimeWib
+import id.sch.santaagnes.sim.core.clearErrorOnEdit
 import id.sch.santaagnes.sim.databinding.FragmentTodoFormBinding
 import id.sch.santaagnes.sim.domain.model.SubjectOption
 import kotlinx.coroutines.launch
@@ -49,6 +50,7 @@ class TodoFormFragment : Fragment() {
         showDueDate()
 
         binding.btnBack.setOnClickListener { findNavController().popBackStack() }
+        listOf(binding.layoutTitle, binding.layoutDueDate, binding.layoutNotes).forEach { it.clearErrorOnEdit() }
         binding.inputDueDate.setOnClickListener { pickDueDate() }
         binding.btnSave.setOnClickListener { save() }
 

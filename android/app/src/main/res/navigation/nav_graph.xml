@@ -32,6 +32,32 @@
         android:id="@+id/billImportFragment"
         android:name="id.sch.santaagnes.sim.ui.bill.BillImportFragment" />
 
+    <!-- Laporan admin (F-LAP-07, F-LAP-09, F-LAP-11); pintu masuknya tombol di tab Profil admin. -->
+    <fragment
+        android:id="@+id/reportHubFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.report.ReportHubFragment">
+
+        <action
+            android:id="@+id/action_reportHub_to_scheduleChangeReport"
+            app:destination="@id/scheduleChangeReportFragment" />
+
+        <action
+            android:id="@+id/action_reportHub_to_teachingLoadReport"
+            app:destination="@id/teachingLoadReportFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/scheduleChangeReportFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.report.ScheduleChangeReportFragment" />
+
+    <fragment
+        android:id="@+id/teachingLoadReportFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.report.TeachingLoadReportFragment" />
+
+    <action
+        android:id="@+id/action_global_reports"
+        app:destination="@id/reportHubFragment" />
+
     <action
         android:id="@+id/action_global_changePassword"
         app:destination="@id/changePasswordFragment" />

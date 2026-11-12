@@ -6,8 +6,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import id.sch.santaagnes.sim.core.Resource
 import id.sch.santaagnes.sim.data.repository.BillRepository
 import id.sch.santaagnes.sim.domain.model.BillImportResult
+import id.sch.santaagnes.sim.domain.model.ImportRowError
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -20,8 +24,13 @@ data class BillImportUiState(
     // ringkasan impor sukses; null selama belum ada impor sukses
     val result: BillImportResult? = null,
     // alasan gagal: satu baris per kesalahan (nomor baris, kolom, alasan) untuk impor yang ditolak
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    // rincian per baris/kolom bila impor ditolak (IMPORT_INVALID); kosong untuk kegagalan lain
+    val importErrors: List<ImportRowError> = emptyList()
 ) {
+    // jumlah baris Excel berbeda yang bermasalah (kesalahan tanpa nomor baris tidak dihitung)
+    val errorRowCount: Int get() = importErrors.mapNotNull { it.row }.distinct().size
+
     val canImport: Boolean get() = fileUri != null && !isUploading
 }
 
@@ -33,6 +42,14 @@ class BillImportViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(BillImportUiState())
     val uiState: StateFlow<BillImportUiState> = _uiState.asStateFlow()
+
+    // true bila template tersimpan, false bila gagal; sekali jalan untuk Snackbar
+    private val _templateSaved = MutableSharedFlow<Boolean>(extraBufferCapacity = 1)
+    val templateSaved: SharedFlow<Boolean> = _templateSaved.asSharedFlow()
+
+    fun onTemplateDestinationPicked(uri: String) {
+        viewModelScope.launch { _templateSaved.emit(repository.saveTemplate(uri)) }
+    }
 
     fun onFilePicked(uri: String) {
         // Hasil impor sebelumnya dihapus: berkas baru berarti percobaan baru.
@@ -47,10 +64,10 @@ class BillImportViewModel @Inject constructor(
         val uri = _uiState.value.fileUri ?: return
         if (_uiState.value.isUploading) return
         viewModelScope.launch {
-            _uiState.update { it.copy(isUploading = true, errorMessage = null, result = null) }
+            _uiState.update { it.copy(isUploading = true, errorMessage = null, importErrors = emptyList(), result = null) }
             when (val result = repository.importBills(uri)) {
                 is Resource.Success -> _uiState.update { it.copy(isUploading = false, result = result.data) }
-                is Resource.Error -> _uiState.update { it.copy(isUploading = false, errorMessage = result.message) }
+                is Resource.Error -> _uiState.update { it.copy(isUploading = false, errorMessage = result.message, importErrors = result.importErrors) }
             }
         }
     }

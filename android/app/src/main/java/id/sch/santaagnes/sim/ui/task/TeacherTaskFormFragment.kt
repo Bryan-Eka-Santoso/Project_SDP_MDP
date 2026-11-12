@@ -19,6 +19,7 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import dagger.hilt.android.AndroidEntryPoint
 import id.sch.santaagnes.sim.R
 import id.sch.santaagnes.sim.core.DateTimeWib
+import id.sch.santaagnes.sim.core.clearErrorOnEdit
 import id.sch.santaagnes.sim.databinding.FragmentTeacherTaskFormBinding
 import id.sch.santaagnes.sim.domain.model.TeachingAssignment
 import kotlinx.coroutines.launch
@@ -51,6 +52,8 @@ class TeacherTaskFormFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.tvHeading.setText(if (isEdit) R.string.task_form_title_edit else R.string.task_form_title_new)
         binding.btnBack.setOnClickListener { findNavController().popBackStack() }
+        listOf(binding.layoutAssignment, binding.layoutTitle, binding.layoutDescription, binding.layoutDueDate)
+            .forEach { it.clearErrorOnEdit() }
 
         if (savedInstanceState == null && isEdit) {
             binding.inputTitle.setText(args.title)

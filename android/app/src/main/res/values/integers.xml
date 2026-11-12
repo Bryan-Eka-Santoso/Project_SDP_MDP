@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Kolom kartu pada daftar laporan admin; layar tablet memakai dua kolom (values-sw600dp). -->
+    <integer name="report_columns">1</integer>
+</resources>

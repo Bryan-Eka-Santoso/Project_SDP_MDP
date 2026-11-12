@@ -2,6 +2,7 @@ package id.sch.santaagnes.sim.data.repository
 
 import id.sch.santaagnes.sim.core.ApiErrorMapper
 import id.sch.santaagnes.sim.core.Resource
+import id.sch.santaagnes.sim.core.TemplateFiles
 import id.sch.santaagnes.sim.core.UploadFiles
 import id.sch.santaagnes.sim.data.local.SessionManager
 import id.sch.santaagnes.sim.data.remote.BillApi
@@ -30,6 +31,9 @@ interface BillRepository {
     suspend fun fileName(uri: String): String?
 
     suspend fun importBills(uri: String): Resource<BillImportResult>
+
+    /** Simpan template rekap pembayaran ke lokasi [destination] (uri teks dari pemilih file); true bila berhasil. */
+    suspend fun saveTemplate(destination: String): Boolean
 }
 
 @Singleton
@@ -37,7 +41,8 @@ class BillRepositoryImpl @Inject constructor(
     private val api: BillApi,
     private val session: SessionManager,
     private val errors: ApiErrorMapper,
-    private val uploads: UploadFiles
+    private val uploads: UploadFiles,
+    private val templates: TemplateFiles
 ) : BillRepository {
 
     override suspend fun viewer(): BillViewer {
@@ -81,6 +86,8 @@ class BillRepositoryImpl @Inject constructor(
     }
 
     override suspend fun fileName(uri: String): String? = uploads.name(uri)
+
+    override suspend fun saveTemplate(destination: String): Boolean = templates.save("pembayaran.xlsx", destination)
 
     override suspend fun importBills(uri: String): Resource<BillImportResult> = errors.call {
         val part = uploads.xlsxPart(uri, "pembayaran.xlsx")

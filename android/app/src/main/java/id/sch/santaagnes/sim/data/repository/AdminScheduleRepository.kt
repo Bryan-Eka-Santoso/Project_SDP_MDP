@@ -2,6 +2,7 @@ package id.sch.santaagnes.sim.data.repository
 
 import id.sch.santaagnes.sim.core.ApiErrorMapper
 import id.sch.santaagnes.sim.core.Resource
+import id.sch.santaagnes.sim.core.TemplateFiles
 import id.sch.santaagnes.sim.core.UploadFiles
 import id.sch.santaagnes.sim.data.remote.AdminScheduleApi
 import id.sch.santaagnes.sim.data.remote.MasterLookupApi
@@ -41,6 +42,9 @@ interface AdminScheduleRepository {
 
     suspend fun importSlots(uri: String): Resource<ImportResult>
 
+    /** Simpan template impor jadwal ke lokasi [destination] (uri teks dari pemilih file); true bila berhasil. */
+    suspend fun saveTemplate(destination: String): Boolean
+
     suspend fun changes(page: Int, type: ChangeType?): Resource<PageResult<AdminChange>>
 
     suspend fun saveChange(input: ChangeInput): Resource<AdminChange>
@@ -56,7 +60,8 @@ class AdminScheduleRepositoryImpl @Inject constructor(
     private val api: AdminScheduleApi,
     private val master: MasterLookupApi,
     private val errors: ApiErrorMapper,
-    private val uploads: UploadFiles
+    private val uploads: UploadFiles,
+    private val templates: TemplateFiles
 ) : AdminScheduleRepository {
 
     override suspend fun slots(page: Int, filter: SlotFilter): Resource<PageResult<AdminSlot>> = errors.call {
@@ -92,6 +97,8 @@ class AdminScheduleRepositoryImpl @Inject constructor(
     }
 
     override suspend fun fileName(uri: String): String? = uploads.name(uri)
+
+    override suspend fun saveTemplate(destination: String): Boolean = templates.save("jadwal.xlsx", destination)
 
     override suspend fun importSlots(uri: String): Resource<ImportResult> = errors.call {
         val part = uploads.xlsxPart(uri, "jadwal.xlsx")

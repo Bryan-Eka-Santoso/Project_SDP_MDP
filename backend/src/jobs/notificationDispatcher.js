@@ -9,6 +9,7 @@ const STALE_TOKEN_CODES = new Set([
   'messaging/registration-token-not-registered',
   'messaging/invalid-registration-token',
 ]);
+const INVALID_ARGUMENT_CODE = 'messaging/invalid-argument';
 
 // FCM data message hanya menerima nilai string.
 function toData(payload) {
@@ -49,6 +50,7 @@ async function dispatch(userIds, payload) {
   }
 
   const stale = [];
+  const failureCodes = {};
   for (let i = 0; i < tokens.length; i += BATCH_SIZE) {
     const batch = tokens.slice(i, i + BATCH_SIZE);
     const response = await fcm.sendEachForMulticast({
@@ -58,8 +60,16 @@ async function dispatch(userIds, payload) {
     });
     result.sent += response.successCount;
     result.failed += response.failureCount;
+    // invalid-argument bisa berarti token malformed atau payload salah; hanya dianggap token rusak
+    // bila batch ini punya pengiriman sukses (payload terbukti valid).
+    const payloadProvenValid = response.successCount > 0;
     response.responses.forEach((r, j) => {
-      if (!r.success && STALE_TOKEN_CODES.has(r.error?.code)) stale.push(batch[j]);
+      if (r.success) return;
+      const code = r.error?.code ?? 'unknown';
+      failureCodes[code] = (failureCodes[code] ?? 0) + 1;
+      if (STALE_TOKEN_CODES.has(code) || (payloadProvenValid && code === INVALID_ARGUMENT_CODE)) {
+        stale.push(batch[j]);
+      }
     });
   }
 
@@ -67,6 +77,12 @@ async function dispatch(userIds, payload) {
     await prisma.deviceToken.deleteMany({ where: { token: { in: stale } } });
     result.removed = stale.length;
   }
+
+  // Ringkasan tanpa token, agar kegagalan FCM (kredensial, token kedaluwarsa) terlihat di log.
+  const failedInfo = result.failed > 0 ? ` (${JSON.stringify(failureCodes)})` : '';
+  console.info(
+    `[notifikasi] ${data.type}: ${result.sent}/${result.tokens} terkirim, ${result.failed} gagal${failedInfo}, ${result.removed} token dihapus.`,
+  );
   return result;
 }
 

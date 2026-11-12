@@ -6,6 +6,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import id.sch.santaagnes.sim.R
 import id.sch.santaagnes.sim.data.remote.ApiErrorBody
 import id.sch.santaagnes.sim.data.remote.ApiErrorDetail
+import id.sch.santaagnes.sim.domain.model.ImportRowError
 import kotlinx.coroutines.CancellationException
 import retrofit2.HttpException
 import java.io.IOException
@@ -24,6 +25,15 @@ fun parseApiError(body: String?): ApiErrorBody? {
     }
 }
 
+/** Daftar kesalahan per baris/kolom dari `IMPORT_INVALID`; kosong untuk kode error lain. */
+fun importErrorsOf(body: ApiErrorBody?): List<ImportRowError> {
+    if (body?.code != "IMPORT_INVALID") return emptyList()
+    return body.details.orEmpty().mapNotNull { detail ->
+        val message = detail.message?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
+        ImportRowError(row = detail.row, column = detail.column?.takeIf { it.isNotBlank() }, message = message)
+    }
+}
+
 /**
  * Mengubah kegagalan jaringan/HTTP menjadi pesan bahasa Indonesia. Pesan dari server dipakai bila
  * ada (backend menjamin aman ditampilkan); selain itu pesan bawaan dari `strings.xml`.
@@ -39,11 +49,17 @@ class ApiErrorMapper @Inject constructor(
         } catch (exception: CancellationException) {
             throw exception
         } catch (exception: Exception) {
-            Resource.Error(message(exception))
+            failure(exception)
         }
 
-    fun message(error: Throwable): String = when (error) {
-        is IOException -> context.getString(R.string.error_network)
+    fun message(error: Throwable): String = failure(error).message
+
+    /**
+     * Badan error HTTP hanya bisa dibaca sekali, jadi pesan dan rincian impor dihitung dari satu
+     * kali pembacaan.
+     */
+    fun failure(error: Throwable): Resource.Error = when (error) {
+        is IOException -> Resource.Error(context.getString(R.string.error_network))
         is HttpException -> {
             val body = parseApiError(error.response()?.errorBody()?.string())
             val reasons = body?.details.orEmpty().mapNotNull(::describe).distinct()
@@ -54,9 +70,12 @@ class ApiErrorMapper @Inject constructor(
             } else {
                 body?.message
             }
-            if (!fromServer.isNullOrBlank()) fromServer else byStatus(error.code())
+            Resource.Error(
+                message = if (!fromServer.isNullOrBlank()) fromServer else byStatus(error.code()),
+                importErrors = importErrorsOf(body)
+            )
         }
-        else -> context.getString(R.string.error_unknown)
+        else -> Resource.Error(context.getString(R.string.error_unknown))
     }
 
     private fun describe(detail: ApiErrorDetail): String? {

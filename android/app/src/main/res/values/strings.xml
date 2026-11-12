@@ -2,7 +2,7 @@
     <string name="app_name">SIM SMA Santa Agnes</string>
     <string name="login_title">Masuk</string>
     <string name="login_subtitle">Silahkan masuk dengan akun sekolah Anda.</string>
-    <string name="login_email">Email / NIS</string>
+    <string name="login_email">Email</string>
     <string name="login_password">Password</string>
     <string name="login_button">Masuk</string>
     <string name="login_remember">Ingat saya</string>
@@ -105,7 +105,7 @@
     <string name="role_admin">Admin</string>
     <string name="role_unknown">Pengguna</string>
     <string name="schedule_time_range">%1$s – %2$s</string>
-    <string name="schedule_room">Ruang %1$s</string>
+    <string name="schedule_room">%1$s</string>
     <string name="schedule_room_none">Ruang belum ditentukan</string>
     <string name="schedule_change_substitute">Diganti guru</string>
     <string name="schedule_change_reschedule">Dipindah jadwal</string>
@@ -148,7 +148,28 @@
     <string name="slot_error_order">Jam selesai harus setelah jam mulai.</string>
 
     <string name="import_title">Impor Jadwal</string>
-    <string name="import_info">Pilih berkas Excel (.xlsx) berisi jadwal semester aktif. Bila ada baris yang salah, tidak ada jadwal yang diimpor dan baris yang salah ditampilkan.</string>
+    <string name="import_info">Impor jadwal pelajaran semester aktif dari berkas Excel (.xlsx). Jadwal ditambahkan ke jadwal yang sudah ada.</string>
+    <string name="import_columns_title">Kolom yang dibaca</string>
+    <string name="import_rules">Hanya lembar pertama yang dibaca. Baris 1 adalah judul kolom. Bila ada satu baris yang salah, tidak ada data yang disimpan.</string>
+    <string name="import_download_template">Unduh template</string>
+    <string name="import_template_saved">Template tersimpan.</string>
+    <string name="import_template_failed">Template gagal disimpan.</string>
+    <string name="import_error_title">Impor dibatalkan, tidak ada data yang disimpan</string>
+    <string name="import_error_summary">%1$d kesalahan di %2$d baris.</string>
+    <string name="import_error_summary_no_row">%1$d kesalahan.</string>
+    <string name="import_error_truncated">Hanya %1$d kesalahan pertama yang ditampilkan.</string>
+    <string name="import_error_row">Baris %1$d</string>
+    <string name="import_error_file">Berkas</string>
+    <string name="import_error_column">Kolom %1$s</string>
+    <string-array name="import_schedule_columns">
+        <item>Kelas|Nama kelas persis seperti di data master, mis. X-1</item>
+        <item>Kode Mapel|Kode mata pelajaran, mis. MAT</item>
+        <item>NIP Guru|NIP guru pengajar (format Teks), mis. 198001012005011001</item>
+        <item>Hari|Senin sampai Sabtu</item>
+        <item>Jam Mulai|Format HH:mm, mis. 07:00</item>
+        <item>Jam Selesai|Format HH:mm, setelah jam mulai</item>
+        <item>Ruangan|Nama ruangan persis seperti di data master, mis. Ruang X-1</item>
+    </string-array>
     <string name="import_pick">Pilih berkas</string>
     <string name="import_start">Impor</string>
     <string name="import_file_selected">Berkas dipilih</string>
@@ -211,6 +232,30 @@
     <string name="profile_homeroom">Wali kelas: %1$s</string>
     <string name="profile_children">Anak: %1$s</string>
     <string name="profile_bills">Tagihan</string>
+    <string name="profile_reports">Laporan</string>
+
+    <!-- Laporan admin (F-LAP-07, F-LAP-09, F-LAP-11) -->
+    <string name="report_hub_title">Laporan</string>
+    <string name="report_hub_hint">Pilih laporan. Data memakai semester aktif.</string>
+    <string name="report_schedule_changes_title">Perubahan Jadwal</string>
+    <string name="report_schedule_changes_desc">Penggantian guru, pemindahan jadwal, dan pembatalan, lengkap dengan jam dan ruangan semula.</string>
+    <string name="report_teaching_load_title">Beban Mengajar Guru</string>
+    <string name="report_teaching_load_desc">Jumlah jam mengajar tiap guru per minggu dan sebarannya dari Senin sampai Sabtu.</string>
+    <string name="report_export">Ekspor Excel</string>
+    <string name="report_export_saved">Laporan tersimpan.</string>
+    <string name="report_export_write_failed">Berkas laporan gagal disimpan.</string>
+    <string name="report_total_changes">%1$d perubahan</string>
+    <string name="report_total_teachers">%1$d guru</string>
+    <string name="report_empty">Tidak ada data untuk filter ini.</string>
+    <string name="report_filter_date_from">Dari tanggal</string>
+    <string name="report_filter_date_to">Sampai tanggal</string>
+    <string name="report_filter_clear_dates">Hapus tanggal</string>
+    <string name="report_original_time">Jam semula: %1$s – %2$s</string>
+    <string name="report_original_room">Ruang semula: %1$s</string>
+    <string name="report_load_hours">%1$s jam/minggu</string>
+    <string name="report_load_summary">%1$d pertemuan · %2$d kelas</string>
+    <string name="report_load_nip">NIP %1$s</string>
+    <string name="report_load_no_schedule">Belum ada jadwal.</string>
     <string name="profile_change_password">Ubah password</string>
     <string name="password_title">Ubah Password</string>
     <string name="password_info">Setelah password diubah, akunmu otomatis keluar dari perangkat lain.</string>
@@ -240,7 +285,16 @@
     <string name="bill_status_overdue">Menunggak</string>
     <string name="bill_status_unpaid">Belum dibayar</string>
     <string name="bill_import_title">Impor Pembayaran</string>
-    <string name="bill_import_info">Pilih berkas Excel (.xlsx) rekap pembayaran dari yayasan dengan kolom NIS, Kode Tagihan, Jenis Pembayaran, Nominal, Jatuh Tempo, Status, dan Tanggal Bayar (opsional). Bila ada baris yang salah, tidak ada yang diimpor dan baris yang salah ditampilkan.</string>
+    <string name="bill_import_info">Impor rekap pembayaran dari yayasan lewat berkas Excel (.xlsx). Tagihan yang sudah ada diperbarui, yang belum ada dibuat.</string>
+    <string-array name="import_bill_columns">
+        <item>NIS|NIS siswa (format Teks), mis. 2026001</item>
+        <item>Kode Tagihan|Kode unik tagihan (format Teks), mis. SPP-2026-09</item>
+        <item>Jenis Pembayaran|Maksimal 50 karakter, mis. SPP</item>
+        <item>Nominal|Rupiah bulat tanpa desimal, mis. 850000</item>
+        <item>Jatuh Tempo|YYYY-MM-DD atau DD/MM/YYYY</item>
+        <item>Status|Lunas atau Belum Dibayar</item>
+        <item>Tanggal Bayar|Opsional, hanya untuk tagihan Lunas</item>
+    </string-array>
     <string name="bill_import_success">Impor selesai: %1$d tagihan baru, %2$d diperbarui, %3$d tidak berubah. %4$d siswa diberi notifikasi tunggakan.</string>
 
     <!-- Komponen penilaian (NIL, milik Gilbert) -->

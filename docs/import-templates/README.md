@@ -46,3 +46,16 @@ Ketentuan khusus pembayaran:
 - NIS + Kode Tagihan adalah kunci: tagihan yang sudah ada **diperbarui** jika ada isi yang berbeda, yang belum ada **dibuat**. Tagihan yang tidak ada di file tidak diubah.
 - Setelah impor yang mengubah data, siswa dan wali murid yang punya tagihan menunggak (belum dibayar dan lewat jatuh tempo) di file itu menerima notifikasi.
 - Tiga baris contoh memakai NIS data demo (seeder) dan jatuh tempo yang sudah lewat, jadi mengimpornya akan menghasilkan notifikasi tunggakan. Hapus baris contoh sebelum mengisi rekap sebenarnya.
+
+## Berkas contoh (`docs/import-samples/`)
+
+Template di atas sudah pernah diimpor ke data demo, jadi mengunggahnya lagi hanya menghasilkan duplikat atau "tidak berubah". Untuk mencoba impor, pakai berkas di `docs/import-samples/` (dibuat dari template ini, setiap berkas punya lembar "Tentang berkas ini" yang menjelaskan isinya):
+
+| Berkas | Hasil yang diharapkan pada data demo (seeder) |
+|---|---|
+| `jadwal_valid.xlsx` | `201`, 3 jadwal Sabtu baru diimpor. **Sekali pakai**: mengunggah lagi ditolak sebagai duplikat. Hapus ketiga slot lewat layar Jadwal sebelum mencoba ulang. |
+| `jadwal_salah.xlsx` | `422 IMPORT_INVALID`, 11 kesalahan di 11 baris (satu per jenis kesalahan), tidak ada jadwal tersimpan. |
+| `pembayaran_valid.xlsx` | `201`, 6 tagihan baru, 1 diperbarui, 1 tidak berubah, 3 siswa diberi notifikasi tunggakan (dihitung terhadap tanggal 12 Nov 2026). Aman diulang. Tagihan tidak bisa dihapus dari aplikasi. |
+| `pembayaran_salah.xlsx` | `422 IMPORT_INVALID`, 10 kesalahan di 10 baris, tidak ada tagihan tersimpan. |
+
+Aplikasi Android (layar Impor Jadwal dan Impor Pembayaran) memuat `jadwal.xlsx` dan `pembayaran.xlsx` dari folder ini ke dalam APK sebagai aset untuk tombol **Unduh template**: mengubah template di sini otomatis mengubah template di aplikasi pada build berikutnya. Berkas contoh sengaja berada di folder terpisah supaya tidak ikut masuk APK.

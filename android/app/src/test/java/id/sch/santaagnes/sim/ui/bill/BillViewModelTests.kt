@@ -9,9 +9,11 @@ import id.sch.santaagnes.sim.domain.model.BillScope
 import id.sch.santaagnes.sim.domain.model.BillScopeOption
 import id.sch.santaagnes.sim.domain.model.BillStatus
 import id.sch.santaagnes.sim.domain.model.BillViewer
+import id.sch.santaagnes.sim.domain.model.ImportRowError
 import id.sch.santaagnes.sim.domain.model.PageResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -30,12 +32,15 @@ class FakeBillRepository : BillRepository {
     var pages: List<List<Bill>> = listOf(emptyList())
     var billsError: String? = null
     var importError: String? = null
+    var importErrorRows: List<ImportRowError> = emptyList()
+    var templateSaveResult = true
     var importResult = BillImportResult(created = 2, updated = 1, unchanged = 0, notifiedStudents = 1)
     var fileName: String? = "pembayaran.xlsx"
 
     val requests = mutableListOf<List<Any?>>()
     val remembered = mutableListOf<BillScope>()
     val imports = mutableListOf<String>()
+    val savedTemplates = mutableListOf<String>()
 
     override suspend fun viewer(): BillViewer = viewer
 
@@ -52,9 +57,14 @@ class FakeBillRepository : BillRepository {
     override suspend fun fileName(uri: String): String? = fileName
 
     override suspend fun importBills(uri: String): Resource<BillImportResult> {
-        importError?.let { return Resource.Error(it) }
+        importError?.let { return Resource.Error(it, importErrorRows) }
         imports += uri
         return Resource.Success(importResult)
+    }
+
+    override suspend fun saveTemplate(destination: String): Boolean {
+        savedTemplates += destination
+        return templateSaveResult
     }
 
     companion object {
@@ -239,5 +249,59 @@ class BillImportViewModelTest {
 
         assertNull(viewModel.uiState.value.result)
         assertEquals("content://doc/2", viewModel.uiState.value.fileUri)
+    }
+
+    @Test
+    fun rejectedImportKeepsPerRowErrors() = runTest {
+        val rows = listOf(
+            ImportRowError(row = 2, column = "NIS", message = "NIS tidak ditemukan."),
+            ImportRowError(row = 2, column = "Nominal", message = "Nominal harus lebih dari 0."),
+            ImportRowError(row = 5, column = null, message = "Kode tagihan kembar.")
+        )
+        val repository = FakeBillRepository().apply {
+            importError = "Berkas tidak valid."
+            importErrorRows = rows
+        }
+        val viewModel = BillImportViewModel(repository)
+        viewModel.onFilePicked("content://doc/1")
+
+        viewModel.import()
+
+        assertEquals(rows, viewModel.uiState.value.importErrors)
+        // dua kesalahan di baris 2 dan satu di baris 5 = tiga kesalahan di dua baris
+        assertEquals(2, viewModel.uiState.value.errorRowCount)
+    }
+
+    @Test
+    fun newImportAttemptClearsPreviousRowErrors() = runTest {
+        val repository = FakeBillRepository().apply {
+            importError = "Berkas tidak valid."
+            importErrorRows = listOf(ImportRowError(2, "NIS", "NIS tidak ditemukan."))
+        }
+        val viewModel = BillImportViewModel(repository)
+        viewModel.onFilePicked("content://doc/1")
+        viewModel.import()
+
+        repository.importError = null
+        viewModel.import()
+
+        assertTrue(viewModel.uiState.value.importErrors.isEmpty())
+        assertNull(viewModel.uiState.value.errorMessage)
+    }
+
+    @Test
+    fun templateSaveReportsSuccessAndFailure() = runTest {
+        val repository = FakeBillRepository()
+        val viewModel = BillImportViewModel(repository)
+        val events = mutableListOf<Boolean>()
+        val job = launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.templateSaved.collect { events += it } }
+
+        viewModel.onTemplateDestinationPicked("content://dest/1")
+        repository.templateSaveResult = false
+        viewModel.onTemplateDestinationPicked("content://dest/2")
+        job.cancel()
+
+        assertEquals(listOf("content://dest/1", "content://dest/2"), repository.savedTemplates)
+        assertEquals(listOf(true, false), events)
     }
 }

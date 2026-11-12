@@ -14,6 +14,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
 import id.sch.santaagnes.sim.R
+import id.sch.santaagnes.sim.core.clearErrorOnEdit
 import id.sch.santaagnes.sim.databinding.FragmentChangePasswordBinding
 import kotlinx.coroutines.launch
 
@@ -37,6 +38,7 @@ class ChangePasswordFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.btnBack.setOnClickListener { findNavController().popBackStack() }
+        listOf(binding.layoutCurrent, binding.layoutNew, binding.layoutConfirm).forEach { it.clearErrorOnEdit() }
         binding.btnSave.setOnClickListener {
             viewModel.save(
                 current = binding.inputCurrent.text.toString(),

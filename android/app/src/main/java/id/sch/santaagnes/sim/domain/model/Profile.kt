@@ -19,4 +19,8 @@ data class Profile(
             "TEACHER" -> homeroomClasses.isNotEmpty()
             else -> false
         }
+
+    /** Laporan dan ekspor hanya untuk admin (F-LAP-*); backend tetap memeriksa role. */
+    val canViewReports: Boolean
+        get() = role == "ADMIN"
 }

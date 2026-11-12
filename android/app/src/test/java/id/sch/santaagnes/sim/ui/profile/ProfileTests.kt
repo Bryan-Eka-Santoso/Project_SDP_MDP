@@ -80,6 +80,14 @@ class ProfileViewModelTest {
         assertTrue(Profile("A", null, "TEACHER", null, homeroomClasses = listOf("X-1")).canViewBills)
         assertFalse(Profile("A", null, "TEACHER", null).canViewBills)
     }
+
+    @Test
+    fun reportsEntryIsAdminOnly() {
+        assertTrue(Profile("A", null, "ADMIN", null).canViewReports)
+        assertFalse(Profile("A", null, "TEACHER", null, homeroomClasses = listOf("X-1")).canViewReports)
+        assertFalse(Profile("A", null, "STUDENT", null).canViewReports)
+        assertFalse(Profile("A", null, "GUARDIAN", null, children = listOf("Anak")).canViewReports)
+    }
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
