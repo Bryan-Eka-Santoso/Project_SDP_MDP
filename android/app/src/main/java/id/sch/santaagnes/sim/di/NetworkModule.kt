@@ -24,6 +24,10 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
+import id.sch.santaagnes.sim.data.remote.MataPelajaranApi
+import id.sch.santaagnes.sim.data.remote.FasilitasApi
+import id.sch.santaagnes.sim.data.remote.JenisPelanggaranApi
+import id.sch.santaagnes.sim.data.remote.PeminjamanApi
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -135,5 +139,37 @@ object NetworkModule {
         retrofit: Retrofit
     ): DeviceTokenApi {
         return retrofit.create(DeviceTokenApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideMataPelajaranApi(
+        retrofit: Retrofit
+    ): MataPelajaranApi {
+        return retrofit.create(MataPelajaranApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideFasilitasApi(
+        retrofit: Retrofit
+    ): FasilitasApi {
+        return retrofit.create(FasilitasApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideJenisPelanggaranApi(
+        retrofit: Retrofit
+    ): JenisPelanggaranApi {
+        return retrofit.create(JenisPelanggaranApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun providePeminjamanApi(
+        retrofit: Retrofit
+    ): PeminjamanApi {
+        return retrofit.create(PeminjamanApi::class.java)
     }
 }
