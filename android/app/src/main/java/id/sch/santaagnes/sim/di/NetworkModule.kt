@@ -79,6 +79,16 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    fun provideGradesApi(
+        retrofit: Retrofit
+    ): id.sch.santaagnes.sim.data.remote.GradesApi {
+        return retrofit.create(
+            id.sch.santaagnes.sim.data.remote.GradesApi::class.java
+        )
+    }
+
+    @Provides
+    @Singleton
     fun provideAuthApi(
         retrofit: Retrofit
     ): AuthApi {
@@ -87,6 +97,12 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    fun provideAttendanceApi(
+        retrofit: Retrofit
+    ): id.sch.santaagnes.sim.data.remote.AttendanceApi {
+        return retrofit.create(
+            id.sch.santaagnes.sim.data.remote.AttendanceApi::class.java
+        )
     fun provideScheduleApi(
         retrofit: Retrofit
     ): ScheduleApi {
@@ -95,6 +111,12 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    fun provideLeaveApi(
+        retrofit: Retrofit
+    ): id.sch.santaagnes.sim.data.remote.LeaveApi {
+        return retrofit.create(
+            id.sch.santaagnes.sim.data.remote.LeaveApi::class.java
+        )
     fun provideAdminScheduleApi(
         retrofit: Retrofit
     ): AdminScheduleApi {
