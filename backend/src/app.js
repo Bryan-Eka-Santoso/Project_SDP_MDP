@@ -19,14 +19,12 @@ api.get("/health", (req, res) => {
 });
 
 // Router modul. Router auth memuat path /auth/* dan /me sekaligus.
-// Router modul
 api.use(require("./modules/auth/auth.routes"));
 api.use(require("./modules/grades/grades.routes"));
 api.use(require("./modules/grades/grades.lookup.routes"));
 api.use(require("./modules/grades/grades.read.routes"));
 api.use(require("./modules/attendance/attendance.routes"));
 api.use(require("./modules/attendance/leave.routes"));
-api.use(require("./modules/auth/auth.routes"));
 api.use(require("./modules/notifications/notifications.routes"));
 api.use(require("./modules/schedules/schedules.routes"));
 api.use("/facility-bookings", require("./modules/bookings/peminjaman.routes"));
