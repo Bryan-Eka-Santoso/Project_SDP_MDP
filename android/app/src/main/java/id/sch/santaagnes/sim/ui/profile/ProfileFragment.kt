@@ -61,15 +61,44 @@ class ProfileFragment : Fragment() {
 
     private fun render(profile: Profile) {
         binding.tvName.text = profile.name
-        binding.tvRole.text = roleLabel(profile.role)
+        val roleStr = roleLabel(profile.role)
+        binding.tvRole.text = roleStr
         binding.btnBills.isVisible = profile.canViewBills
         binding.btnReports.isVisible = profile.canViewReports
 
+        // Inisial avatar
+        val initials = profile.name.trim().split(" ")
+            .filter { it.isNotEmpty() }
+            .take(2)
+            .map { it.first().uppercaseChar() }
+            .joinToString("")
+        binding.tvAvatarInitials.text = if (initials.isNotEmpty()) initials else "SA"
+
+        // NIS / NIP
+        if (!profile.identifier.isNullOrBlank()) {
+            binding.layoutIdentifier.isVisible = true
+            binding.tvIdentifierLabel.text = if (profile.role == "STUDENT") "NIS" else "NIP"
+            binding.tvIdentifierValue.text = profile.identifier
+        } else {
+            binding.layoutIdentifier.isVisible = false
+        }
+
+        // Nama Lengkap
+        binding.tvFullNameValue.text = profile.name
+
+        // Peran / Kelas
+        binding.tvRoleLabel.text = if (profile.role == "STUDENT") "Kelas / Peran" else "Peran"
+        binding.tvRoleValue.text = roleStr
+
+        // Email
+        if (!profile.email.isNullOrBlank()) {
+            binding.layoutEmail.isVisible = true
+            binding.tvEmailValue.text = profile.email
+        } else {
+            binding.layoutEmail.isVisible = false
+        }
+
         val lines = buildList {
-            profile.email?.let { add(getString(R.string.profile_email, it)) }
-            profile.identifier?.let {
-                add(getString(if (profile.role == "STUDENT") R.string.profile_nis else R.string.profile_nip, it))
-            }
             if (profile.homeroomClasses.isNotEmpty()) {
                 add(getString(R.string.profile_homeroom, profile.homeroomClasses.joinToString(", ")))
             }

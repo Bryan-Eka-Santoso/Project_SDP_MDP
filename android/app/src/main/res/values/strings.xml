@@ -310,4 +310,31 @@
     <string name="grade_valid">Bobot sudah valid (100%)</string>
     <string name="grade_invalid">Total bobot harus 100%</string>
     <string name="grade_demo">Mode Demo: data belum tersimpan ke server</string>
+
+    <!-- Master Data (F-MST, milik Yosua) -->
+    <string name="status_active">Aktif</string>
+    <string name="status_inactive">Non-aktif</string>
+    <string name="title_management_user">Manajemen User</string>
+    <string name="title_management_student">Manajemen Siswa</string>
+    <string name="tab_master_user">User</string>
+    <string name="tab_master_student">Siswa</string>
+    <string name="tab_master_teacher">Guru</string>
+    <string name="tab_master_class">Kelas</string>
+    <string name="btn_back_previous">&lt; Kembali ke Halaman Sebelumnya</string>
+    <string name="search_user_hint">Cari nama atau Email</string>
+    <string name="search_student_hint">Cari nama atau NIS</string>
+    <string name="filter_all_roles">Semua Role</string>
+    <string name="filter_all_classes">Semua Kelas</string>
+    <string name="chip_active_count">(%1$d) Aktif</string>
+    <string name="chip_inactive_count">(%1$d) Non-aktif</string>
+    <string name="chip_student_count">(%1$d) Siswa</string>
+    <string name="dialog_add_user_title">Tambah Pengguna</string>
+    <string name="dialog_edit_user_title">Ubah Pengguna</string>
+    <string name="dialog_reset_password_title">Reset Password</string>
+    <string name="dialog_add_student_title">Tambah Siswa</string>
+    <string name="user_empty">Belum ada data pengguna yang cocok.</string>
+    <string name="student_empty">Belum ada data siswa yang cocok.</string>
+    <string name="action_block">Blokir Akun</string>
+    <string name="action_unblock">Buka Blokir</string>
+    <string name="action_reset_pwd">Reset Password</string>
 </resources>
