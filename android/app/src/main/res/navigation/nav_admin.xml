@@ -6,7 +6,21 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/admin_graph"
-    app:startDestination="@id/adminScheduleFragment">
+    app:startDestination="@id/adminDashboardFragment">
+
+    <!-- Dashboard Admin (Figma 144:5468, Home Tab Admin) -->
+    <fragment
+        android:id="@+id/adminDashboardFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.dashboard.AdminDashboardFragment">
+
+        <action
+            android:id="@+id/action_adminDashboard_to_adminUser"
+            app:destination="@id/adminUserFragment" />
+
+        <action
+            android:id="@+id/action_adminDashboard_to_adminSchedule"
+            app:destination="@id/adminScheduleFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/adminScheduleFragment"
@@ -121,4 +135,23 @@
     <fragment
         android:id="@+id/adminProfileFragment"
         android:name="id.sch.santaagnes.sim.ui.profile.ProfileFragment" />
+
+    <!-- Master Data (F-MST, milik Yosua) -->
+    <fragment
+        android:id="@+id/adminUserFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.master.users.AdminUserFragment">
+
+        <action
+            android:id="@+id/action_adminUser_to_adminStudent"
+            app:destination="@id/adminStudentFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminStudentFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.master.students.AdminStudentFragment">
+
+        <action
+            android:id="@+id/action_adminStudent_to_adminUser"
+            app:destination="@id/adminUserFragment" />
+    </fragment>
 </navigation>

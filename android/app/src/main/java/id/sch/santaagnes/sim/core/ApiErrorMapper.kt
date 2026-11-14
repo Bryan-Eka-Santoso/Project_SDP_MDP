@@ -58,7 +58,9 @@ class ApiErrorMapper @Inject constructor(
      * Badan error HTTP hanya bisa dibaca sekali, jadi pesan dan rincian impor dihitung dari satu
      * kali pembacaan.
      */
-    fun failure(error: Throwable): Resource.Error = when (error) {
+    fun failure(error: Throwable): Resource.Error {
+        android.util.Log.e("API_ERROR_DEBUG", "API failure: ${error::class.java.name}: ${error.message}", error)
+        return when (error) {
         is IOException -> Resource.Error(context.getString(R.string.error_network))
         is HttpException -> {
             val body = parseApiError(error.response()?.errorBody()?.string())
@@ -76,6 +78,7 @@ class ApiErrorMapper @Inject constructor(
             )
         }
         else -> Resource.Error(context.getString(R.string.error_unknown))
+        }
     }
 
     private fun describe(detail: ApiErrorDetail): String? {

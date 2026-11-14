@@ -2,9 +2,19 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@+id/adminDashboardFragment"
+        android:icon="@drawable/ic_home"
+        android:title="@string/tab_home" />
+
+    <item
         android:id="@+id/adminScheduleFragment"
         android:icon="@drawable/ic_calendar"
         android:title="@string/tab_schedule" />
+
+    <item
+        android:id="@+id/adminUserFragment"
+        android:icon="@drawable/ic_book"
+        android:title="Akademik" />
 
     <item
         android:id="@+id/adminNotificationsFragment"

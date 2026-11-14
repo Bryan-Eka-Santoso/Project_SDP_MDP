@@ -14,7 +14,7 @@ val localProperties = Properties().apply {
     val file = rootProject.file("local.properties")
     if (file.exists()) file.inputStream().use { load(it) }
 }
-val apiBaseUrl = (localProperties.getProperty("api.baseUrl") ?: "http://10.0.2.2:3000/api/v1/")
+val apiBaseUrl = (localProperties.getProperty("api.baseUrl") ?: "http://100.122.168.100:3005/api/v1/")
     .trim()
     .let { if (it.endsWith("/")) it else "$it/" } // Retrofit mewajibkan akhiran "/"
 
