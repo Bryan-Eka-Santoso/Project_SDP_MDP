@@ -1,4 +1,3 @@
-
 package id.sch.santaagnes.sim.di
 
 import android.content.Context
@@ -25,7 +24,7 @@ object DatabaseModule {
             context,
             AppDatabase::class.java,
             "santa_agnes_local.db"
-        ).build()
+        ).fallbackToDestructiveMigration(dropAllTables = true).build()
     }
 
     @Provides

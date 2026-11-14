@@ -40,6 +40,8 @@ Detail hak akses dan cakupan data: `docs/PERMISSIONS.md`.
 - Peminjaman tidak mencakup biaya sewa, denda, atau transaksi pembayaran.
 - Pembayaran hanya informasi dari rekap yayasan; tidak ada transaksi pembayaran di aplikasi.
 - Tidak menghitung insentif guru; hanya rekap beban mengajar.
+- Tidak ada pengumpulan tugas (unggah jawaban) maupun penilaian tugas di aplikasi; tugas dari guru hanya pengingat (F-JDW-08).
+- Tidak ada fitur lupa password mandiri; password direset admin (F-MST-03).
 
 ## 5. Fitur
 
@@ -83,16 +85,19 @@ Format ID: `F-<MODUL>-<nomor>`. Gunakan ID ini di prompt, tiket, commit, dan pen
 | F-JDW-05 | Lihat jadwal beserta perubahannya, sesuai cakupan role | Siswa, Guru, Wali kelas, Wali murid |
 | F-JDW-06 | Sinkronkan agenda kalender akademik dan peminjaman yang disetujui ke kalender perangkat. Jadwal pelajaran **tidak** disinkron | Semua (kalender akademik); Siswa, Guru (peminjaman miliknya) |
 | F-JDW-07 | To-do list pribadi di halaman jadwal (judul, catatan, tenggat, opsional mapel, tandai selesai). Disimpan di perangkat (Room) | Siswa |
+| F-JDW-08 | Tambah, ubah, hapus tugas untuk kelas yang diajar (judul, catatan, tenggat) + notifikasi ke siswa kelas tersebut. Tanpa pengumpulan | Guru |
+| F-JDW-09 | Lihat tugas dari guru per mapel di halaman jadwal; tandai selesai (disimpan di perangkat) | Siswa |
 
 ### 5.4 Nilai (`NIL`)
 
 | ID | Fitur | Aktor |
 |---|---|---|
-| F-NIL-01 | Master komponen penilaian dan bobot | Admin |
+| F-NIL-01 | Atur komponen penilaian dan bobot untuk kelas yang diajar (total 100) | Guru |
 | F-NIL-02 | Input dan edit nilai per komponen | Guru |
-| F-NIL-03 | Lihat nilai dan rekap satu periode | Siswa, Wali murid |
+| F-NIL-03 | Lihat nilai, nilai akhir, dan predikat satu periode | Siswa, Wali murid |
 | F-NIL-04 | Lihat rekap nilai satu kelas | Guru, Wali kelas |
 | F-NIL-05 | Input catatan perkembangan siswa per mapel (bahan rapor) | Guru |
+| F-NIL-06 | Atur skala predikat nilai per tahun ajaran (mis. A ≥ 90) | Admin |
 
 ### 5.5 Presensi, jurnal, dan izin (`ABS`, `IZN`)
 

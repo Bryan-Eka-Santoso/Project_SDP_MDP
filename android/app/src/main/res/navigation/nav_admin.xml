@@ -1,16 +1,144 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Kerangka admin. Tab Home dan Akademik milik anggota tim lain dan sengaja belum ada di sini;
+    pemiliknya menambahkan tujuan dan item menu (menu_bottom_admin.xml) sendiri.
+-->
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/admin_graph"
-    app:startDestination="@id/adminHomeFragment">
+    app:startDestination="@id/adminScheduleFragment">
 
     <fragment
-        android:id="@+id/adminHomeFragment"
-        android:name="id.sch.santaagnes.sim.ui.home.HomeFragment">
+        android:id="@+id/adminScheduleFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.schedule.AdminScheduleFragment">
+
+        <action
+            android:id="@+id/action_adminSchedule_to_slotForm"
+            app:destination="@id/slotFormFragment" />
+
+        <action
+            android:id="@+id/action_adminSchedule_to_import"
+            app:destination="@id/scheduleImportFragment" />
+
+        <action
+            android:id="@+id/action_adminSchedule_to_changeList"
+            app:destination="@id/changeListFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/slotFormFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.schedule.SlotFormFragment">
 
         <argument
-            android:name="role"
-            android:defaultValue="ADMIN"
-            app:argType="string" />
+            android:name="slotId"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <argument
+            android:name="assignmentId"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <argument
+            android:name="roomId"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <argument
+            android:name="dayOfWeek"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="startTime"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="endTime"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
     </fragment>
+
+    <fragment
+        android:id="@+id/scheduleImportFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.schedule.ScheduleImportFragment" />
+
+    <fragment
+        android:id="@+id/changeListFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.schedule.ChangeListFragment">
+
+        <action
+            android:id="@+id/action_changeList_to_changeForm"
+            app:destination="@id/changeFormFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/changeFormFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.schedule.ChangeFormFragment">
+
+        <argument
+            android:name="slotId"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <argument
+            android:name="date"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="type"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="description"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="substituteTeacherId"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <argument
+            android:name="newRoomId"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <argument
+            android:name="newStartTime"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="newEndTime"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminNotificationsFragment"
+        android:name="id.sch.santaagnes.sim.ui.notification.NotificationListFragment" />
+
+    <fragment
+        android:id="@+id/adminProfileFragment"
+        android:name="id.sch.santaagnes.sim.ui.profile.ProfileFragment" />
+
+    <fragment
+        android:id="@+id/adminMataPelajaranFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.matapelajaran.MataPelajaranFragment"
+        android:label="Master Mata Pelajaran" />
+
+    <fragment
+        android:id="@+id/adminFasilitasFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.fasilitas.FasilitasFragment"
+        android:label="Master Fasilitas" />
+
+    <fragment
+        android:id="@+id/adminJenisPelanggaranFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.jenispelanggaran.JenisPelanggaranFragment"
+        android:label="Master Jenis Pelanggaran" />
+
+    <fragment
+        android:id="@+id/adminPeminjamanFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.peminjaman.PeminjamanFragment"
+        android:label="Persetujuan Peminjaman" />
 </navigation>

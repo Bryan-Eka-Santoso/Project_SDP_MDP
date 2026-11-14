@@ -2,29 +2,37 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/guardian_graph"
-    app:startDestination="@id/guardianHomeFragment">
+    app:startDestination="@id/guardianScheduleFragment">
 
     <fragment
         android:id="@+id/guardianHomeFragment"
-        android:name="id.sch.santaagnes.sim.ui.home.HomeFragment">
+        android:name="id.sch.santaagnes.sim.ui.home.ComingSoonFragment">
 
         <argument
-            android:name="role"
-            android:defaultValue="GUARDIAN"
-            app:argType="string" />
+            android:name="titleRes"
+            android:defaultValue="@string/tab_home"
+            app:argType="reference" />
     </fragment>
 
     <fragment
-        android:id="@+id/guardianGradeReportFragment"
-        android:name="id.sch.santaagnes.sim.ui.grades.GradeReportFragment">
+        android:id="@+id/guardianScheduleFragment"
+        android:name="id.sch.santaagnes.sim.ui.schedule.ScheduleListFragment" />
+
+    <fragment
+        android:id="@+id/guardianGradesFragment"
+        android:name="id.sch.santaagnes.sim.ui.home.ComingSoonFragment">
 
         <argument
-            android:name="role"
-            android:defaultValue="GUARDIAN"
-            app:argType="string" />
+            android:name="titleRes"
+            android:defaultValue="@string/tab_grades"
+            app:argType="reference" />
     </fragment>
 
     <fragment
-        android:id="@+id/guardianLeaveFragment"
-        android:name="id.sch.santaagnes.sim.ui.leave.LeaveFragment" />
+        android:id="@+id/guardianNotificationsFragment"
+        android:name="id.sch.santaagnes.sim.ui.notification.NotificationListFragment" />
+
+    <fragment
+        android:id="@+id/guardianProfileFragment"
+        android:name="id.sch.santaagnes.sim.ui.profile.ProfileFragment" />
 </navigation>

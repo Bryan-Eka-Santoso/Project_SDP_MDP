@@ -24,6 +24,7 @@ Berlaku untuk semua endpoint backend dan semua pemanggil di Android.
 - JSON dengan key `camelCase`, sama dengan nama field Prisma.
 - `DateTime` dikirim sebagai ISO 8601 UTC: `"2026-10-23T01:30:00.000Z"`.
 - Tanggal saja: `"2026-10-23"`.
+- Jam saja (kolom `@db.Time`, mis. jam slot jadwal): `"07:30"` (format `HH:mm`, WIB apa adanya).
 - Enum dikirim apa adanya (`"APPROVED"`), label Indonesia dibuat di Android.
 - Uang dalam rupiah sebagai bilangan bulat (`1500000`).
 - Nilai desimal (nilai siswa) sebagai number (`79.5`).
@@ -51,7 +52,7 @@ Gagal:
   "error": {
     "code": "SCHEDULE_CONFLICT",
     "message": "Jadwal bentrok dengan slot lain.",
-    "details": [ { "field": "teacherId", "message": "Guru sudah mengajar di XI-2 pada jam 2." } ]
+    "details": [ { "field": "teachingAssignmentId", "reason": "TEACHER", "slotId": 12, "message": "Guru Bu Sari sudah mengajar Matematika di XI-2 pada Senin 07:00–08:30." } ]
   }
 }
 ```
@@ -86,6 +87,7 @@ Gagal:
 | 413 | `PAYLOAD_TOO_LARGE` | Body JSON melebihi 1 MB |
 | 415 | `UNSUPPORTED_FILE_TYPE` | Tipe file tidak diizinkan |
 | 422 | `IMPORT_INVALID` | Impor Excel ada baris tidak valid; `details` = `[{ row, column, message }]` |
+| 429 | `TOO_MANY_REQUESTS` | Terlalu banyak percobaan login/refresh/ganti password; tunggu sesuai header `Retry-After` (detik) |
 | 500 | `INTERNAL_ERROR` | Error tak terduga (detail hanya di log server) |
 
 Menambah kode error baru: tambahkan ke tabel ini.
@@ -95,20 +97,21 @@ Menambah kode error baru: tambahkan ke tabel ini.
 - `POST /auth/login` `{ email, password }` → `{ accessToken, refreshToken, user }`. `user` sama dengan respons `GET /me`.
 - `POST /auth/refresh` `{ refreshToken }` → `{ accessToken, refreshToken }`. Refresh token dirotasi: token lama langsung tidak berlaku. Memakai ulang token lama mencabut semua sesi user (dianggap dicuri).
 - `POST /auth/logout` `{ refreshToken, deviceToken? }` → mencabut refresh token dan menghapus device token perangkat tersebut. Tidak butuh access token; selalu sukses.
-- `GET /me` → profil: `{ id, email, name, role, teacher, student, guardian }`. Hanya objek sesuai role yang terisi, lainnya `null`. `teacher.isHomeroomTeacher` untuk menu wali kelas; `guardian.children` = daftar anak `{ id, name, nis, relationship }`.
+- `GET /me` → profil: `{ id, email, name, role, teacher, student, guardian }`. Hanya objek sesuai role yang terisi, lainnya `null`. `teacher` = `{ id, employeeNumber, isHomeroomTeacher, homeroomClassGroups }`: `isHomeroomTeacher` untuk menu wali kelas, `homeroomClassGroups` = kelas binaan tahun ajaran aktif `[{ id, name }]` (kosong bila bukan wali kelas; `id`-nya dipakai sebagai `classGroupId` pada `GET /schedule`). `guardian.children` = daftar anak `{ id, name, nis, relationship }`.
 - `PATCH /me/password` `{ currentPassword, newPassword }` → `{ accessToken, refreshToken }` baru. Sesi di perangkat lain dicabut.
 - Akun `BLOCKED` ditolak `403 ACCOUNT_BLOCKED` saat login, refresh, dan setiap request ber-token.
 - Header: `Authorization: Bearer <accessToken>`.
 - Masa berlaku: access token 15 menit, refresh token 7 hari. Nilai diatur lewat env.
 - `POST /me/device-tokens` `{ token, platform: "ANDROID" }` untuk mendaftarkan token FCM.
+- `GET /me/teaching-assignments` (hanya guru) → `[{ id, subject: { id, code, name }, classGroup: { id, name } }]`: penugasan mengajar milik guru itu pada semester aktif, urut kelas lalu mapel. Tidak berpaginasi (daftar kecil per guru; kosong bila tidak ada semester aktif). `id`-nya dipakai sebagai `teachingAssignmentId` pada `POST /tasks`.
 
 ## 7. Upload dan unduh
 
 - Upload: `multipart/form-data`, nama field `file` (satu file) atau `files` (beberapa).
 - Lampiran (izin, pengumuman): JPG, PNG, PDF; maksimal 5 MB per file.
-- Impor Excel: `.xlsx`; maksimal 10 MB.
+- Impor Excel: `.xlsx`; maksimal 10 MB. Tipe dicek dari ekstensi dan isi file (bukan header `Content-Type`, karena klien Android sering mengirim `application/octet-stream`): ekstensi lain atau isi bukan arsip Excel → `415 UNSUPPORTED_FILE_TYPE`; melebihi batas → `413 FILE_TOO_LARGE`; tidak ada file atau field salah → `400 VALIDATION_ERROR`. Field teks tambahan (mis. `semesterId`) dikirim sebagai field form biasa. Sukses `201`; gagal validasi isi `422 IMPORT_INVALID` dengan `details` = `[{ row, column, message }]` (`column` null untuk kesalahan seluruh baris/file; maksimal 200 entri). Contoh: `POST /schedule-slots/import`.
 - Respons upload menyertakan `{ url, publicId, fileName, mimeType, size }`.
-- Ekspor laporan: `GET /reports/:type/export?...` → file `.xlsx` dengan header `Content-Disposition: attachment`.
+- Ekspor laporan: `GET /reports/:type/export?...` → file `.xlsx` dengan header `Content-Disposition: attachment` (respons biner, bukan envelope JSON; kesalahan tetap berupa envelope JSON). Filternya sama dengan `GET /reports/:type` tanpa `page`/`limit`. Jenis yang tersedia dan kolomnya: `docs/BUSINESS_RULES.md` bagian 12.
 
 ## 8. Contoh lengkap
 

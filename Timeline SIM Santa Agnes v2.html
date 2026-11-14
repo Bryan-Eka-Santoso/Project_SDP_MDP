@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Timeline SIM Santa Agnes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: header → pemilik fitur → tabel minggu × anggota (scroll horizontal sendiri) → catatan */
+:root{
+  --bg:#f6f7f9; --surface:#ffffff; --fg:#17202b; --muted:#5b6675; --line:#dde2e8; --line-strong:#c6cdd6;
+  --accent:#1f4e8c; --now-bg:#fff7e0; --now-line:#e0a526; --done:#0f7a5c;
+  --p-vinc:#2563a8; --p-gilbert:#0f7a5c; --p-yosua:#9a4b13; --p-bryan:#7a3aa8;
+  --chip-bg:#eef1f5; --chip-fg:#3a4554;
+  --f-body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#11161d; --surface:#18202a; --fg:#e7ebf0; --muted:#9aa5b3; --line:#2a3440; --line-strong:#3a4654;
+  --accent:#8db8ee; --now-bg:#2c2614; --now-line:#c99a2e; --done:#6fd0ae;
+  --p-vinc:#86b6ec; --p-gilbert:#6fd0ae; --p-yosua:#efaa72; --p-bryan:#c9a0ec;
+  --chip-bg:#232d39; --chip-fg:#c3ccd7; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11161d; --surface:#18202a; --fg:#e7ebf0; --muted:#9aa5b3; --line:#2a3440; --line-strong:#3a4654;
+  --accent:#8db8ee; --now-bg:#2c2614; --now-line:#c99a2e; --done:#6fd0ae;
+  --p-vinc:#86b6ec; --p-gilbert:#6fd0ae; --p-yosua:#efaa72; --p-bryan:#c9a0ec;
+  --chip-bg:#232d39; --chip-fg:#c3ccd7; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:1320px;margin:0 auto;padding:32px 16px 56px;display:flex;flex-direction:column;gap:28px}
+header{display:flex;flex-direction:column;gap:6px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+h1{font-size:clamp(24px,3.4vw,34px);line-height:1.15;margin:0;font-weight:700}
+.meta{color:var(--muted);display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px}
+.meta b{color:var(--fg);font-weight:600}
+h2{font-size:17px;margin:0 0 12px;font-weight:600}
+.rule{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;padding:12px 16px;font-size:14px}
+.owners{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:900px){.owners{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.owners{grid-template-columns:1fr}}
+.owner{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;cursor:pointer;text-align:left;font:inherit;color:inherit}
+.owner:hover{border-color:var(--line-strong)}
+.owner:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.owner[aria-pressed="true"]{border-color:var(--pc);box-shadow:inset 0 0 0 1px var(--pc)}
+.owner .name{display:flex;align-items:center;gap:8px;font-weight:700;font-size:16px}
+.owner .count{margin-left:auto;font-family:var(--f-mono);font-size:12px;font-weight:500;color:var(--muted)}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--pc);flex:none}
+.owner ul{margin:0;padding-left:18px;color:var(--muted);font-size:13.5px}
+.hint{font-size:13px;color:var(--muted);margin:8px 0 0}
+.tablebox{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:1180px;font-size:13.5px}
+th,td{border-bottom:1px solid var(--line);vertical-align:top;padding:12px 14px;text-align:left}
+th{font-size:12.5px;font-weight:600;color:var(--muted);background:var(--surface)}
+th.person{color:var(--pc)}
+th.person .dot{display:inline-block;margin-right:6px;vertical-align:-1px}
+tbody tr:last-child td{border-bottom:none}
+td.week{width:132px;white-space:nowrap}
+.wk{font-family:var(--f-mono);font-weight:500;font-size:13px}
+.dates{color:var(--muted);font-size:12.5px}
+.nowtag{display:inline-block;margin-top:6px;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;background:var(--now-line);color:#2a1d00;padding:2px 7px;border-radius:999px}
+tr.now td{background:var(--now-bg)}
+tr.now td.week{box-shadow:inset 3px 0 0 var(--now-line)}
+td.cell{width:21%}
+td.cell ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+td.cell li{padding-left:10px;border-left:2px solid var(--pc);line-height:1.4}
+td.cell li.done{color:var(--muted)}
+td.cell li.done::before{content:"✓ ";color:var(--done);font-weight:700}
+.ids{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.id{font-family:var(--f-mono);font-size:11px;background:var(--chip-bg);color:var(--chip-fg);padding:1px 6px;border-radius:4px;white-space:nowrap}
+td.goal{width:16%;font-weight:500}
+td.goal .sub{display:block;font-weight:400;color:var(--muted);font-size:12.5px;margin-top:4px}
+.dim{opacity:.28}
+.notes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.notes{grid-template-columns:1fr}}
+.note{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;min-width:0}
+.note ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:14px}
+.note p{margin:0 0 8px;font-size:14px;color:var(--muted)}
+code{font-family:var(--f-mono);font-size:12.5px;background:var(--chip-bg);padding:1px 5px;border-radius:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Software Development Project · SIM Akademik · versi 2</span>
+    <h1>Timeline SIM Santa Agnes</h1>
+    <div class="meta">
+      <span><b>6 – 19 Nov 2026</b></span>
+      <span>2 minggu</span>
+      <span>4 anggota</span>
+      <span>Feature freeze <b>Minggu, 15 Nov</b></span>
+      <span>Demo / pengumpulan <b>Jumat, 20 Nov</b></span>
+    </div>
+  </header>
+
+  <div class="rule"><b>Pembagian per fitur.</b> Pemilik fitur mengerjakan backend (endpoint, validasi, test) <b>dan</b> layar Android (Fragment, ViewModel, Room bila perlu) untuk fitur tersebut. Progres dicentang di <code>Checklist Fitur SIM Santa Agnes.xlsx</code>.</div>
+
+  <section>
+    <h2>Pemilik fitur</h2>
+    <div class="owners" id="owners"></div>
+    <p class="hint">Pilih nama untuk menyorot tugas orang tersebut. Kode abu-abu adalah ID fitur di <code>docs/PRD.md</code>. Tanda ✓ = sudah selesai per 7 Nov.</p>
+  </section>
+
+  <section>
+    <h2>Tugas per minggu</h2>
+    <div class="tablebox">
+      <table>
+        <thead><tr id="headrow"></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="notes">
+    <div class="note">
+      <h2>Ketergantungan antar tugas</h2>
+      <ul>
+        <li><b>Fondasi Android dari Gilbert (target Minggu, 8 Nov)</b> dipakai semua layar: Hilt, Retrofit + interceptor refresh token, Room, DataStore, navigasi per role. Sebelum siap, yang lain mengerjakan backend dulu.</li>
+        <li>Migrasi <code>20261107000000_teacher_tasks_grade_components</code> (Vinc) harus di-merge ke <code>main</code> dulu: komponen nilai kini per penugasan guru, tabel <code>tugas</code> dan <code>predikat_nilai</code> baru.</li>
+        <li>Notifikasi FCM dari Vinc (target 12 Nov) dipakai perubahan jadwal, tugas, pengumuman (Yosua), peminjaman dan pelanggaran (Bryan). Sebelum siap, panggil fungsi kirim notifikasi sebagai stub.</li>
+        <li>Penugasan guru (MST-10, Yosua) dibutuhkan jadwal, nilai, presensi, dan tugas. Sebelum siap, pakai data seed.</li>
+        <li>Predikat (NIL-06, Yosua) dipakai layar nilai siswa (NIL-03, Gilbert). Seed sudah berisi skala A/B/C/D.</li>
+        <li>Helper ekspor Excel (LAP-11, Vinc) dipakai semua laporan. Pemilik laporan lain membuat query + layarnya, lalu memanggil helper itu.</li>
+        <li>Pembagian kelas mapel pilihan (MPP-05, Gilbert) butuh paket (MPP-03, Yosua) dan pilihan siswa (MPP-04, Bryan).</li>
+        <li>Revisi Figma dari Bryan mengikuti <code>Catatan untuk Bryan - Revisi Figma.txt</code>.</li>
+      </ul>
+    </div>
+    <div class="note">
+      <h2>Cakupan fitur</h2>
+      <p style="margin:0 0 6px;color:var(--fg);font-weight:600">Semua wajib: 76 fitur, 19 per orang</p>
+      <div class="ids"><span class="id">F-AUTH-01–03</span><span class="id">F-NTF-01–02</span><span class="id">F-MST-01–12</span><span class="id">F-JDW-01–09</span><span class="id">F-NIL-01–06</span><span class="id">F-ABS-01–05</span><span class="id">F-IZN-01–04</span><span class="id">F-PLG-01–03</span><span class="id">F-BKP-01–03</span><span class="id">F-PGM-01–03</span><span class="id">F-KAL-01–02</span><span class="id">F-MPP-01–06</span><span class="id">F-PJM-01–04</span><span class="id">F-BYR-01–03</span><span class="id">F-LAP-01–11</span></div>
+      <p style="margin:14px 0 0">Minggu 1 (6–12 Nov): 40 fitur inti. Minggu 2 (13–15 Nov): 36 fitur sisanya, termasuk laporan dan mapel pilihan. Laporan bergantung pada data fitur lain, jadi dikerjakan terakhir.</p>
+    </div>
+    <div class="note">
+      <h2>Wajib di setiap layar (rubrik penilaian)</h2>
+      <ul>
+        <li>Satu <b>ViewModel</b> per layar; Fragment hanya merender <code>UiState</code>.</li>
+        <li>Indikator <b>loading</b>, <b>empty state</b>, dan pesan <b>error jaringan</b>.</li>
+        <li><b>Dialog konfirmasi</b> sebelum hapus, blokir, tolak.</li>
+        <li>Minimal satu <b>unit test</b> ViewModel per fitur (tiap test = 1 poin rubrik), plus test backend per endpoint.</li>
+        <li>Room dipakai: cache jadwal + pengumuman, riwayat notifikasi, to-do, tanda selesai tugas.</li>
+      </ul>
+    </div>
+    <div class="note">
+      <h2>Aturan kerja</h2>
+      <ul>
+        <li>Satu branch per fitur: <code>&lt;nama&gt;/&lt;fitur&gt;</code>, mis. <code>bryan/peminjaman</code>. Merge ke <code>main</code> lewat Pull Request yang direview satu teman.</li>
+        <li>Sebelum PR: <code>npm run lint</code>, <code>npm test</code>, dan build Android lolos.</li>
+        <li>Fitur dianggap selesai bila backend + Android sudah di <code>main</code>, lalu centang di checklist.</li>
+        <li>16–19 Nov tidak ada fitur baru, hanya perbaikan bug dan uji ulang.</li>
+      </ul>
+    </div>
+  </section>
+</div>
+
+<script>
+const people=[
+  {key:"vinc",name:"Vinc",focus:["Auth (Android), notifikasi FCM","Jadwal, impor, bentrok, perubahan jadwal","Sinkron kalender perangkat","Tugas dari guru","Pembayaran","Laporan jadwal, beban mengajar, ekspor Excel","Integrasi & server demo"]},
+  {key:"gilbert",name:"Gilbert",focus:["Fondasi Android","Komponen nilai, nilai, catatan perkembangan","Presensi, jurnal, izin","Pembagian kelas & tren mapel pilihan","Laporan nilai, kehadiran, jurnal"]},
+  {key:"yosua",name:"Yosua",focus:["Master data & akun","Predikat nilai","Pengumuman, kalender akademik","Paket mapel pilihan","Laporan pembayaran, statistik kesiswaan"]},
+  {key:"bryan",name:"Bryan",focus:["Revisi Figma","Mapel, fasilitas, peminjaman","Pelanggaran, buku penghubung","To-do siswa, survei & pilih paket","Laporan pelanggaran, peminjaman, survei","Uji Black Box"]}
+];
+const counts={vinc:19,gilbert:19,yosua:19,bryan:19};
+// [teks, idFitur[], selesai?]
+const weeks=[
+  {n:1,start:"2026-11-06",end:"2026-11-12",label:"6 – 12 Nov",
+   goal:"Fitur inti jalan",goalSub:"Fondasi Android siap Minggu 8 Nov; 40 fitur selesai (backend + Android) per Kamis 12 Nov",
+   vinc:[["Schema v5: tugas guru, komponen nilai per penugasan, predikat",[],true],["Backend auth: login, refresh, logout, profil, ubah password + test",["AUTH-01","AUTH-02","AUTH-03"],true],["Layar Android login, logout, profil, ubah password (setelah fondasi siap)",["AUTH-01","AUTH-02","AUTH-03"]],["Notifikasi: token perangkat, kirim FCM data message, riwayat Room + layar daftar",["NTF-01","NTF-02"]],["Master jadwal + cek bentrok guru, kelas, ruangan; impor jadwal Excel",["JDW-01","JDW-02","JDW-03"]],["Perubahan jadwal per tanggal + notifikasi",["JDW-04"]],["Pembayaran: unggah rekap Excel, lihat tagihan, notifikasi tunggakan",["BYR-01","BYR-02","BYR-03"]]],
+   gilbert:[["Fondasi Android: Hilt, Retrofit + refresh token, Room, DataStore, navigasi per role. Target Minggu 8 Nov",[]],["Komponen + bobot oleh guru, input/edit nilai, lihat nilai + predikat, rekap kelas",["NIL-01","NIL-02","NIL-03","NIL-04"]],["Kelas yang diajar, daftar siswa, presensi + jurnal mengajar",["ABS-01","ABS-05","ABS-02"]],["Ajukan izin dan lihat statusnya (wali murid)",["IZN-01","IZN-02"]]],
+   yosua:[["Master tahun ajaran dan semester (jika belum selesai)",["MST-06"]],["Master user, role, reset password (password awal oleh admin)",["MST-01","MST-02","MST-03"]],["Master siswa (+ no. telp, relasi wali murid) dan guru, termasuk impor Excel",["MST-04","MST-05"]],["Master kelas, wali kelas, siswa dalam kelas, guru pengajar",["MST-07","MST-08","MST-09","MST-10"]]],
+   bryan:[["Revisi Figma sesuai catatan (target Minggu 8 Nov)",[]],["Master mata pelajaran dan fasilitas",["MST-11","MST-12"]],["Peminjaman: ajukan, status, ACC/tolak (cek bentrok), pengembalian",["PJM-01","PJM-02","PJM-03","PJM-04"]],["Pelanggaran: master jenis, input + notifikasi wali murid, lihat poin",["PLG-01","PLG-02","PLG-03"]],["Susun test case Black Box per ID fitur",[]]]},
+  {n:2,start:"2026-11-13",end:"2026-11-19",label:"13 – 19 Nov",
+   goal:"Freeze & demo",goalSub:"Feature freeze Minggu 15 Nov; 16–19 Nov hanya perbaikan bug; demo Jumat 20 Nov",
+   vinc:[["Lihat jadwal per role + perubahan + cache offline",["JDW-05"]],["Tugas dari guru: tambah/ubah/hapus + notifikasi; siswa lihat per mapel, tandai selesai di Room",["JDW-08","JDW-09"]],["Sinkron kalender akademik + peminjaman disetujui (CalendarContract)",["JDW-06"]],["Laporan perubahan jadwal, beban mengajar; helper ekspor Excel untuk semua laporan",["LAP-07","LAP-09","LAP-11"]],["16–19 Nov: server demo, data demo, perbaiki bug",[]]],
+   gilbert:[["Lihat presensi + rekap, pantau jurnal (admin), catatan perkembangan",["ABS-03","ABS-04","NIL-05"]],["Daftar izin menunggu + setujui/tolak (presensi jadi izin)",["IZN-03","IZN-04"]],["Pembagian kelas otomatis per kapasitas, tren peminat paket",["MPP-05","MPP-06"]],["Laporan nilai, kehadiran, jurnal mengajar",["LAP-01","LAP-02","LAP-06"]],["16–19 Nov: perbaiki bug, build APK rilis",[]]],
+   yosua:[["Atur skala predikat per tahun ajaran",["NIL-06"]],["Pengumuman sekolah dan kelas + lampiran + notifikasi",["PGM-01","PGM-02","PGM-03"]],["Kalender akademik: kelola + lihat",["KAL-01","KAL-02"]],["Master paket mapel pilihan",["MPP-03"]],["Laporan status pembayaran, statistik kesiswaan",["LAP-05","LAP-10"]],["16–19 Nov: perbaiki bug, isi data master demo",[]]],
+   bryan:[["To-do pribadi siswa (Room saja)",["JDW-07"]],["Buku penghubung + profil siswa binaan",["BKP-01","BKP-02","BKP-03"]],["Survei minat: buat/terbitkan + isi; siswa pilih paket",["MPP-01","MPP-02","MPP-04"]],["Laporan pelanggaran, peminjaman, survei",["LAP-03","LAP-04","LAP-08"]],["16–19 Nov: uji Black Box semua modul, uji ulang, rekap BAB IV",[]]]}
+];
+
+const $=s=>document.querySelector(s);
+const pcVar=k=>`--pc:var(--p-${k})`;
+$("#owners").innerHTML=people.map(p=>`<button class="owner" type="button" data-key="${p.key}" aria-pressed="false" style="${pcVar(p.key)}"><span class="name"><span class="dot"></span>${p.name}<span class="count">${counts[p.key]} fitur wajib</span></span><ul>${p.focus.map(f=>`<li>${f}</li>`).join("")}</ul></button>`).join("");
+$("#headrow").innerHTML=`<th>Minggu</th>`+people.map(p=>`<th class="person" data-key="${p.key}" style="${pcVar(p.key)}"><span class="dot"></span>${p.name}</th>`).join("")+`<th>Target akhir minggu</th>`;
+const today=new Date();
+const toDate=s=>{const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)};
+$("#rows").innerHTML=weeks.map(w=>{
+  const now=today>=toDate(w.start)&&today<new Date(toDate(w.end).getTime()+864e5);
+  const cells=people.map(p=>{
+    const items=w[p.key].map(([t,ids,done])=>`<li${done?' class="done"':""}>${t}${ids.length?`<div class="ids">${ids.map(i=>`<span class="id">F-${i}</span>`).join("")}</div>`:""}</li>`).join("");
+    return `<td class="cell" data-key="${p.key}" style="${pcVar(p.key)}"><ul>${items}</ul></td>`;
+  }).join("");
+  return `<tr class="${now?"now":""}"><td class="week"><div class="wk">Minggu ${w.n}</div><div class="dates">${w.label}</div>${now?`<span class="nowtag">Minggu ini</span>`:""}</td>${cells}<td class="goal">${w.goal}<span class="sub">${w.goalSub}</span></td></tr>`;
+}).join("");
+let active=null;
+try{active=localStorage.getItem("timeline-v2-focus")}catch(e){}
+function apply(){
+  document.querySelectorAll(".owner").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.key===active)));
+  document.querySelectorAll("td.cell,th.person").forEach(el=>el.classList.toggle("dim",!!active&&el.dataset.key!==active));
+  try{active?localStorage.setItem("timeline-v2-focus",active):localStorage.removeItem("timeline-v2-focus")}catch(e){}
+}
+document.querySelectorAll(".owner").forEach(b=>b.addEventListener("click",()=>{active=active===b.dataset.key?null:b.dataset.key;apply()}));
+if(!people.some(p=>p.key===active))active=null;
+apply();
+</script>
+</body>
+</html>

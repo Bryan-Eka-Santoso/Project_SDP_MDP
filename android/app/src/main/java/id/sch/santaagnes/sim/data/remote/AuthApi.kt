@@ -1,15 +1,9 @@
-
 package id.sch.santaagnes.sim.data.remote
 
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.PATCH
 import retrofit2.http.POST
-
-data class ApiResponse<T>(
-    val success: Boolean,
-    val data: T?
-)
 
 data class LoginRequest(
     val email: String,
@@ -44,7 +38,9 @@ data class StudentDto(
 data class TeacherDto(
     val id: Int,
     val employeeNumber: String?,
-    val isHomeroomTeacher: Boolean
+    val isHomeroomTeacher: Boolean,
+    // kelas binaan tahun ajaran aktif; null/kosong bila bukan wali kelas
+    val homeroomClassGroups: List<IdNameDto>? = null
 )
 
 data class GuardianChildDto(

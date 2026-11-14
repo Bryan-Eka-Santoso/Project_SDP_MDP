@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/adminScheduleFragment"
+        android:icon="@drawable/ic_calendar"
+        android:title="@string/tab_schedule" />
+
+    <item
+        android:id="@+id/adminMataPelajaranFragment"
+        android:icon="@drawable/ic_class"
+        android:title="Mata Pelajaran" />
+
+    <item
+        android:id="@+id/adminNotificationsFragment"
+        android:icon="@drawable/ic_bell"
+        android:title="@string/tab_notifications" />
+
+    <item
+        android:id="@+id/adminProfileFragment"
+        android:icon="@drawable/ic_person"
+        android:title="@string/tab_profile" />
+
+    <item
+        android:id="@+id/adminFasilitasFragment"
+        android:icon="@drawable/ic_building"
+        android:title="Fasilitas" />
+
+    <item
+        android:id="@+id/adminJenisPelanggaranFragment"
+        android:icon="@drawable/ic_warning"
+        android:title="Pelanggaran" />
+</menu>

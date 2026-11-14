@@ -3,15 +3,78 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/loginFragment">
+    app:startDestination="@id/splashFragment">
+
+    <fragment
+        android:id="@+id/splashFragment"
+        android:name="id.sch.santaagnes.sim.ui.auth.SplashFragment" />
 
     <fragment
         android:id="@+id/loginFragment"
-        android:name="id.sch.santaagnes.sim.ui.auth.LoginFragment" />
+        android:name="id.sch.santaagnes.sim.ui.auth.LoginFragment"
+        android:label="@string/login_title" />
+
+    <!-- Layar bersama lintas role. Tujuan tingkat atas: bottom nav tersembunyi dan Kembali ke tab asal. -->
+    <fragment
+        android:id="@+id/changePasswordFragment"
+        android:name="id.sch.santaagnes.sim.ui.profile.ChangePasswordFragment" />
+
+    <fragment
+        android:id="@+id/billListFragment"
+        android:name="id.sch.santaagnes.sim.ui.bill.BillListFragment">
+
+        <action
+            android:id="@+id/action_bills_to_import"
+            app:destination="@id/billImportFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/billImportFragment"
+        android:name="id.sch.santaagnes.sim.ui.bill.BillImportFragment" />
+
+    <!-- Laporan admin (F-LAP-07, F-LAP-09, F-LAP-11); pintu masuknya tombol di tab Profil admin. -->
+    <fragment
+        android:id="@+id/reportHubFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.report.ReportHubFragment">
+
+        <action
+            android:id="@+id/action_reportHub_to_scheduleChangeReport"
+            app:destination="@id/scheduleChangeReportFragment" />
+
+        <action
+            android:id="@+id/action_reportHub_to_teachingLoadReport"
+            app:destination="@id/teachingLoadReportFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/scheduleChangeReportFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.report.ScheduleChangeReportFragment" />
+
+    <fragment
+        android:id="@+id/teachingLoadReportFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.report.TeachingLoadReportFragment" />
+
+    <action
+        android:id="@+id/action_global_reports"
+        app:destination="@id/reportHubFragment" />
+
+    <action
+        android:id="@+id/action_global_changePassword"
+        app:destination="@id/changePasswordFragment" />
+
+    <action
+        android:id="@+id/action_global_bills"
+        app:destination="@id/billListFragment" />
 
     <include app:graph="@navigation/nav_admin" />
     <include app:graph="@navigation/nav_teacher" />
     <include app:graph="@navigation/nav_student" />
     <include app:graph="@navigation/nav_guardian" />
+
+    <!-- Milik Gilbert (NIL): belum ada pintu masuk dari menu; ditambahkan saat fitur nilai dikerjakan. -->
+    <fragment
+        android:id="@+id/gradeComponentFragment"
+        android:name="id.sch.santaagnes.sim.ui.grades.GradeComponentFragment"
+        android:label="@string/grade_title" />
 
 </navigation>
