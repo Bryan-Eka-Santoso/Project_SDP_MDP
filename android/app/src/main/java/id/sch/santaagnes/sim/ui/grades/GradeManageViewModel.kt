@@ -30,7 +30,7 @@ class GradeManageViewModel @Inject constructor(private val repository: GradesRep
         val id = _uiState.value.selectedAssignmentId ?: return
         val weight = weightText.toIntOrNull()
         if (name.isBlank() || weight == null || weight !in 1..100) {
-            _uiState.value = _uiState.value.copy(errorMessage = "Nama dan bobot 1–100 wajib diisi.")
+            _uiState.value = _uiState.value.copy(errorMessage = "Nama dan bobot 1â€“100 wajib diisi.")
             return
         }
         viewModelScope.launch {
@@ -59,7 +59,7 @@ class GradeManageViewModel @Inject constructor(private val repository: GradesRep
         for ((componentId, input) in nonblank) {
             val value = input.replace(',', '.').toDoubleOrNull()
             if (value == null || value !in 0.0..100.0 || kotlin.math.abs(value * 100 - kotlin.math.round(value * 100)) > 0.00001) {
-                _uiState.value = _uiState.value.copy(errorMessage = "Nilai harus 0–100, maksimal dua angka desimal.")
+                _uiState.value = _uiState.value.copy(errorMessage = "Nilai harus 0â€“100, maksimal dua angka desimal.")
                 return
             }
             parsed[componentId] = value

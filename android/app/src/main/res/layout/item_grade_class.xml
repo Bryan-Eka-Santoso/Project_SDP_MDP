@@ -1,17 +1,27 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical"
-    android:padding="16dp" android:layout_marginTop="12dp" android:background="#FFFFFF">
-    <TextView android:id="@+id/tvAssignment" android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:textSize="16sp" android:textColor="#242A35" android:textStyle="bold" />
-    <Button android:id="@+id/btnGrades" android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:text="Nilai" android:textAllCaps="false" android:backgroundTint="#245CCB" android:textColor="#FFFFFF" />
-    <Button
-        android:id="@+id/btnAttendance"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Absensi"
-        android:textAllCaps="false"
-        android:backgroundTint="#245CCB"
-        android:textColor="#FFFFFF" />
+    android:background="@drawable/bg_teacher_card" android:padding="16dp" android:layout_marginTop="12dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+        <TextView android:id="@+id/tvAssignment" android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:textStyle="bold" android:textSize="15sp" android:textColor="@color/teacher_ink"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="◷" android:textColor="@color/teacher_blue" android:textSize="17sp"/>
+    </LinearLayout>
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="6dp" android:text="Semester aktif · Kelola pembelajaran"
+        android:textSize="11sp" android:textColor="@color/teacher_muted"/>
+    <TextView android:id="@+id/tvClassSchedule"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="8dp" android:textSize="12sp"
+        android:lineSpacingExtra="3dp" android:textColor="@color/teacher_muted"/>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:layout_marginTop="13dp">
+        <Button android:id="@+id/btnAttendance" android:layout_width="wrap_content" android:layout_height="36dp"
+            android:minWidth="92dp" android:minHeight="0dp" android:paddingStart="12dp" android:paddingEnd="12dp"
+            android:text="Absensi" android:textAllCaps="false" android:textSize="12sp" android:textColor="#FFFFFF"
+            android:backgroundTint="@color/teacher_blue_light"/>
+        <Button android:id="@+id/btnGrades" android:layout_width="wrap_content" android:layout_height="36dp"
+            android:minWidth="80dp" android:minHeight="0dp" android:layout_marginStart="8dp"
+            android:text="Nilai" android:textAllCaps="false" android:textSize="12sp" android:textColor="#FFFFFF"
+            android:backgroundTint="@color/teacher_blue_light"/>
+    </LinearLayout>
 </LinearLayout>

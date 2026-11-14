@@ -1,0 +1,8 @@
+<resources>
+    <color name="teacher_blue">#1C50C4</color>
+    <color name="teacher_blue_light">#2D65D7</color>
+    <color name="teacher_screen">#F0F0F0</color>
+    <color name="teacher_ink">#20242C</color>
+    <color name="teacher_muted">#959AA5</color>
+    <color name="teacher_edge">#E5E7EB</color>
+</resources>

@@ -1,0 +1,10 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal"
+    android:layout_marginTop="8dp" android:gravity="center_vertical">
+    <TextView android:id="@+id/tvComponentLabel" android:layout_width="0dp" android:layout_height="wrap_content"
+        android:layout_weight="1" android:layout_marginEnd="8dp" android:textSize="13sp" android:textColor="@color/teacher_ink"/>
+    <TextView android:id="@+id/btnEditComponent" android:layout_width="wrap_content" android:layout_height="38dp"
+        android:gravity="center" android:paddingStart="10dp" android:paddingEnd="10dp"
+        android:text="Ubah" android:textSize="12sp" android:textStyle="bold" android:textColor="@color/teacher_blue"
+        android:background="@drawable/bg_teacher_outline"/>
+</LinearLayout>

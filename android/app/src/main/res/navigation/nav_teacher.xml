@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/teacherHomeFragment"
-        android:name="id.sch.santaagnes.sim.ui.home.HomeFragment">
+        android:name="id.sch.santaagnes.sim.ui.grades.TeacherDashboardFragment">
 
         <argument
             android:name="role"

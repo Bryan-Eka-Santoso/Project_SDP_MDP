@@ -1,0 +1,29 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="70dp" android:background="@drawable/bg_teacher_card"
+    android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="8dp" android:paddingEnd="8dp">
+    <LinearLayout android:id="@+id/navTeacherHome" android:layout_width="0dp" android:layout_height="match_parent"
+        android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:clickable="true" android:focusable="true">
+        <ImageView android:layout_width="23dp" android:layout_height="23dp" android:src="@drawable/ic_teacher_home" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Home" android:textSize="10sp" android:textColor="#79869D"/>
+    </LinearLayout>
+    <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+        android:gravity="center" android:orientation="vertical" android:alpha="0.42">
+        <ImageView android:layout_width="23dp" android:layout_height="23dp" android:src="@drawable/ic_teacher_calendar"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Jadwal" android:textSize="10sp" android:textColor="#79869D"/>
+    </LinearLayout>
+    <LinearLayout android:id="@+id/navTeacherClasses" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+        android:gravity="center" android:orientation="vertical" android:clickable="true" android:focusable="true">
+        <ImageView android:layout_width="23dp" android:layout_height="23dp" android:src="@drawable/ic_teacher_classes" android:tint="@color/teacher_blue"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Kelas" android:textSize="10sp" android:textStyle="bold" android:textColor="@color/teacher_blue"/>
+    </LinearLayout>
+    <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+        android:gravity="center" android:orientation="vertical" android:alpha="0.42">
+        <ImageView android:layout_width="23dp" android:layout_height="23dp" android:src="@drawable/ic_teacher_bell"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Notifikasi" android:textSize="10sp" android:textColor="#79869D"/>
+    </LinearLayout>
+    <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+        android:gravity="center" android:orientation="vertical" android:alpha="0.42">
+        <ImageView android:layout_width="23dp" android:layout_height="23dp" android:src="@drawable/ic_teacher_user"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Profil" android:textSize="10sp" android:textColor="#79869D"/>
+    </LinearLayout>
+</LinearLayout>

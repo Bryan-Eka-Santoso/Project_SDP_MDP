@@ -16,6 +16,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
+import id.sch.santaagnes.sim.R
 import id.sch.santaagnes.sim.databinding.FragmentAttendanceBinding
 import id.sch.santaagnes.sim.data.remote.AttendanceSessionDto
 import id.sch.santaagnes.sim.data.remote.AttendanceSlotDto
@@ -49,6 +50,19 @@ class AttendanceFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.tvSubtitle.text = arguments?.getString("assignmentLabel") ?: "Kelas yang diajar"
         binding.btnBack.setOnClickListener { findNavController().navigateUp() }
+        binding.bottomNav.navTeacherHome.setOnClickListener {
+            if (!findNavController().popBackStack(R.id.teacherHomeFragment, false)) {
+                findNavController().navigate(R.id.teacherHomeFragment)
+            }
+        }
+        binding.bottomNav.navTeacherClasses.setOnClickListener {
+            if (!findNavController().popBackStack(R.id.teacherClassesFragment, false)) {
+                findNavController().navigate(R.id.teacherClassesFragment)
+            }
+        }
+        binding.btnMarkAllPresent.setOnClickListener {
+            statuses.values.forEach { it.setSelection(0) }
+        }
         binding.btnDate.text = "Tanggal: $date (pilih)"
         binding.btnDate.setOnClickListener {
             val now = Calendar.getInstance().apply {
@@ -137,25 +151,21 @@ class AttendanceFragment : Fragment() {
         binding.studentsContainer.removeAllViews()
         statuses.clear()
         session.students.forEach { student ->
-            val row = LinearLayout(requireContext()).apply {
-                orientation = LinearLayout.VERTICAL
-                setPadding(18, 15, 18, 15)
-                setBackgroundColor(android.graphics.Color.WHITE)
-            }
-            val name = TextView(requireContext()).apply {
-                text = "${student.name} (${student.nis.orEmpty()})"
-                textSize = 15f
-                setTextColor(android.graphics.Color.rgb(35, 47, 71))
-            }
-            val picker = Spinner(requireContext()).apply {
-                adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, statusLabels)
-                setSelection(statusCodes.indexOf(student.status ?: "PRESENT").coerceAtLeast(0))
-            }
-            row.addView(name)
-            row.addView(picker)
-            val params = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-            params.bottomMargin = 10
-            binding.studentsContainer.addView(row, params)
+            val row = layoutInflater.inflate(
+                R.layout.item_attendance_student,
+                binding.studentsContainer,
+                false
+            )
+            row.findViewById<TextView>(R.id.tvAttendanceStudent).text =
+                "${student.name} (${student.nis.orEmpty()})"
+            val picker = row.findViewById<Spinner>(R.id.spinnerAttendanceStatus)
+            picker.adapter = ArrayAdapter(
+                requireContext(),
+                android.R.layout.simple_spinner_dropdown_item,
+                statusLabels
+            )
+            picker.setSelection(statusCodes.indexOf(student.status ?: "PRESENT").coerceAtLeast(0))
+            binding.studentsContainer.addView(row)
             statuses[student.id] = picker
         }
         binding.tvCount.text = "${session.students.size} siswa • ${if (session.saved) "Sudah dicatat" else "Belum dicatat"}"

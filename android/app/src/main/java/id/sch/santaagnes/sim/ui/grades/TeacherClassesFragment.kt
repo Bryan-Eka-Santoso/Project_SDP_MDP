@@ -1,4 +1,3 @@
-
 package id.sch.santaagnes.sim.ui.grades
 
 import android.os.Bundle
@@ -21,82 +20,54 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class TeacherClassesFragment : Fragment() {
-
     private var _binding: FragmentTeacherClassesBinding? = null
     private val binding get() = _binding!!
-
     private val viewModel: TeacherClassesViewModel by viewModels()
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentTeacherClassesBinding.inflate(
-            inflater,
-            container,
-            false
-        )
-
+        _binding = FragmentTeacherClassesBinding.inflate(inflater, container, false)
         return binding.root
     }
 
-    override fun onViewCreated(
-        view: View,
-        savedInstanceState: Bundle?
-    ) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        // Tombol kembali
-        binding.btnBack.setOnClickListener {
-            findNavController().navigateUp()
+        binding.header.tvTitle.text = "Kelas yang Diajar"
+        binding.header.tvSubheading.text = "Pilih kelas untuk mengelola nilai dan absensi"
+        binding.header.btnBack.setOnClickListener { findNavController().navigateUp() }
+        binding.btnReload.setOnClickListener { viewModel.load() }
+        binding.bottomNav.navTeacherHome.setOnClickListener {
+            if (!findNavController().popBackStack(R.id.teacherHomeFragment, false)) {
+                findNavController().navigate(R.id.teacherHomeFragment)
+            }
         }
+        binding.bottomNav.navTeacherClasses.setOnClickListener { viewModel.load() }
 
-        // Tombol muat ulang kelas
-        binding.btnReload.setOnClickListener {
-            viewModel.load()
-        }
-
-        // Mengamati data dari ViewModel
         viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(
-                Lifecycle.State.STARTED
-            ) {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
-
-                    binding.progressBar.visibility =
-                        if (state.loading) View.VISIBLE else View.GONE
-
+                    binding.progressBar.visibility = if (state.loading) View.VISIBLE else View.GONE
                     binding.tvStatus.text = state.error
-                        ?: if (
-                            !state.loading &&
-                            state.assignments.isEmpty()
-                        ) {
-                            "Belum ada kelas yang diajar di semester aktif."
-                        } else {
-                            ""
-                        }
-
-                    // Bersihkan daftar sebelum menampilkan ulang
+                        ?: if (!state.loading && state.assignments.isEmpty())
+                            "Belum ada kelas yang diajar di semester aktif." else ""
                     binding.classesContainer.removeAllViews()
-
                     state.assignments.forEach { assignment ->
-
                         val card = layoutInflater.inflate(
-                            R.layout.item_grade_class,
-                            binding.classesContainer,
-                            false
+                            R.layout.item_grade_class, binding.classesContainer, false
                         )
-
-                        // Nama kelas dan mata pelajaran
-                        card.findViewById<TextView>(
-                            R.id.tvAssignment
-                        ).text = assignment.label
-
-                        // Tombol Nilai
-                        card.findViewById<Button>(
-                            R.id.btnGrades
-                        ).setOnClickListener {
+                        card.findViewById<TextView>(R.id.tvAssignment).text =
+                            "${assignment.subjectName} · ${assignment.className}"
+                        card.findViewById<TextView>(R.id.tvClassSchedule).text =
+                            if (assignment.schedules.isEmpty()) {
+                                "Semester ${assignment.semesterName} · Jadwal belum tersedia"
+                            } else {
+                                "Semester ${assignment.semesterName}\n" +
+                                    assignment.schedules.joinToString("\n") { slot ->
+                                        "${slot.day}  ${slot.startTime}–${slot.endTime}"
+                                    }
+                            }
+                        card.findViewById<Button>(R.id.btnGrades).setOnClickListener {
                             findNavController().navigate(
                                 R.id.gradeManageFragment,
                                 bundleOf(
@@ -105,11 +76,7 @@ class TeacherClassesFragment : Fragment() {
                                 )
                             )
                         }
-
-                        // Tombol Absensi
-                        card.findViewById<Button>(
-                            R.id.btnAttendance
-                        ).setOnClickListener {
+                        card.findViewById<Button>(R.id.btnAttendance).setOnClickListener {
                             findNavController().navigate(
                                 R.id.attendanceFragment,
                                 bundleOf(
@@ -118,8 +85,6 @@ class TeacherClassesFragment : Fragment() {
                                 )
                             )
                         }
-
-                        // Tambahkan card ke daftar
                         binding.classesContainer.addView(card)
                     }
                 }

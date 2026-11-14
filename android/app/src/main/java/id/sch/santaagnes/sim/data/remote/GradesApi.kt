@@ -7,7 +7,24 @@ import retrofit2.http.PATCH
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-data class GradeAssignmentDto(val id: Int, val label: String, val classGroupId: Int)
+data class GradeScheduleDto(
+    val id: Int,
+    val day: String,
+    val dayOfWeek: String,
+    val startTime: String,
+    val endTime: String
+)
+
+data class GradeAssignmentDto(
+    val id: Int,
+    val label: String,
+    val classGroupId: Int,
+    val subjectName: String? = null,
+    val className: String? = null,
+    val semesterName: String? = null,
+    val schedules: List<GradeScheduleDto> = emptyList()
+)
+
 data class GradeStudentDto(val id: Int, val name: String, val nis: String?)
 data class GradeComponentDto(val id: Int, val name: String, val weight: Int, val teachingAssignmentId: Int)
 data class GradeScoreDto(val id: Int, val studentId: Int, val gradeComponentId: Int, val teachingAssignmentId: Int, val value: Double, val inputDate: String?)
