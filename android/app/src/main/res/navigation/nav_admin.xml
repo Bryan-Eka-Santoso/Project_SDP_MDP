@@ -121,4 +121,24 @@
     <fragment
         android:id="@+id/adminProfileFragment"
         android:name="id.sch.santaagnes.sim.ui.profile.ProfileFragment" />
+
+    <fragment
+        android:id="@+id/adminMataPelajaranFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.matapelajaran.MataPelajaranFragment"
+        android:label="Master Mata Pelajaran" />
+
+    <fragment
+        android:id="@+id/adminFasilitasFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.fasilitas.FasilitasFragment"
+        android:label="Master Fasilitas" />
+
+    <fragment
+        android:id="@+id/adminJenisPelanggaranFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.jenispelanggaran.JenisPelanggaranFragment"
+        android:label="Master Jenis Pelanggaran" />
+
+    <fragment
+        android:id="@+id/adminPeminjamanFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.peminjaman.PeminjamanFragment"
+        android:label="Persetujuan Peminjaman" />
 </navigation>
