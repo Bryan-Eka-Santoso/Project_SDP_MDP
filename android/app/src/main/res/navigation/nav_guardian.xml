@@ -6,13 +6,27 @@
 
     <fragment
         android:id="@+id/guardianHomeFragment"
-        android:name="id.sch.santaagnes.sim.ui.home.ComingSoonFragment">
+        android:name="id.sch.santaagnes.sim.ui.home.HomeFragment">
 
         <argument
-            android:name="titleRes"
-            android:defaultValue="@string/tab_home"
-            app:argType="reference" />
+            android:name="role"
+            android:defaultValue="GUARDIAN"
+            app:argType="string" />
     </fragment>
+
+    <fragment
+        android:id="@+id/guardianGradeReportFragment"
+        android:name="id.sch.santaagnes.sim.ui.grades.GradeReportFragment">
+
+        <argument
+            android:name="role"
+            android:defaultValue="GUARDIAN"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/guardianLeaveFragment"
+        android:name="id.sch.santaagnes.sim.ui.leave.LeaveFragment" />
 
     <fragment
         android:id="@+id/guardianScheduleFragment"

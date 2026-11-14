@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="grade_title">Kelola Nilai</string>
+    <string name="grade_refresh">Muat ulang</string>
+    <string name="grade_assignment">Kelas dan mata pelajaran</string>
+    <string name="grade_component_section">Komponen nilai dan bobot</string>
+    <string name="grade_weight_total">Total bobot: %1$d%% (harus 100%% untuk input nilai)</string>
+    <string name="grade_component_for_edit">Pilih komponen untuk diedit, atau tekan Komponen Baru</string>
+    <string name="grade_component_name">Nama komponen (mis. UH)</string>
+    <string name="grade_component_weight">Bobot persen (1-100)</string>
+    <string name="grade_save_component">Simpan komponen</string>
+    <string name="grade_new_component">Komponen baru</string>
+    <string name="grade_score_section">Input atau edit nilai siswa</string>
+    <string name="grade_student">Siswa</string>
+    <string name="grade_component">Komponen</string>
+    <string name="grade_score_hint">Nilai 0–100</string>
+    <string name="grade_save_score">Simpan nilai</string>
+    <string name="grade_no_assignment">Belum ada penugasan guru pada semester aktif.</string>
+    <string name="grade_no_students">Belum ada siswa pada kelas ini.</string>
+    <string name="grade_menu">Kelola Nilai</string>
+</resources>

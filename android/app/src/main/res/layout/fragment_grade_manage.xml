@@ -1,0 +1,118 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="@color/teacher_screen">
+    <include android:id="@+id/header" layout="@layout/layout_teacher_header"/>
+    <ScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
+        android:fillViewport="true" android:clipToPadding="false">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:paddingStart="16dp" android:paddingEnd="16dp" android:paddingTop="22dp" android:paddingBottom="28dp" android:orientation="vertical">
+            <ProgressBar android:id="@+id/progressBar" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal" android:visibility="gone"/>
+            <TextView android:id="@+id/tvError" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:textSize="12sp" android:textColor="#B42318"/>
+            <TextView android:id="@+id/tvMessage" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:textSize="12sp" android:textColor="#0B804C"/>
+            <!-- Daftar Nilai -->
+            <LinearLayout android:id="@+id/listPanel" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:background="@drawable/bg_teacher_card" android:padding="15dp">
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:text="Cari Siswa" android:textColor="@color/teacher_muted" android:textSize="12sp"/>
+                    <EditText android:id="@+id/etSearch" android:layout_width="match_parent" android:layout_height="46dp"
+                        android:layout_marginTop="8dp" android:paddingStart="12dp" android:paddingEnd="12dp"
+                        android:background="@drawable/bg_teacher_field" android:hint="Cari nama siswa / NIS"
+                        android:textSize="13sp" android:singleLine="true" android:inputType="text"/>
+                    <TextView android:id="@+id/tvStats" android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp" android:text="Total Siswa: —          Rata-rata: —"
+                        android:textColor="@color/teacher_muted" android:textSize="11sp" />
+                </LinearLayout>
+                <Button android:id="@+id/btnReload" android:layout_width="match_parent" android:layout_height="46dp"
+                    android:layout_marginTop="15dp" android:text="Cari Siswa / Muat Ulang" android:textAllCaps="false"
+                    android:textSize="13sp" android:backgroundTint="@color/teacher_blue_light" android:textColor="#FFFFFF"/>
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="Daftar Nilai Siswa" android:textColor="@color/teacher_ink" android:textSize="15sp"
+                    android:textStyle="bold" android:layout_marginTop="20dp" android:layout_marginBottom="5dp"/>
+                <TextView android:id="@+id/tvEmpty" android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:textColor="@color/teacher_muted" android:textSize="12sp"/>
+                <LinearLayout android:id="@+id/studentsContainer" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:orientation="vertical"/>
+                <Button android:id="@+id/btnShowComponents" android:layout_width="match_parent" android:layout_height="44dp"
+                    android:layout_marginTop="17dp" android:text="Pengelolaan Komponen Nilai" android:textAllCaps="false"
+                    android:textSize="12sp" android:textColor="@color/teacher_blue" android:backgroundTint="#E2EAFB"/>
+            </LinearLayout>
+            <!-- Form Ubah Nilai -->
+            <LinearLayout android:id="@+id/editPanel" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:visibility="gone" android:orientation="vertical">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp" android:background="@drawable/bg_teacher_card">
+                    <TextView android:id="@+id/tvEditStudent" android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:textSize="15sp" android:textStyle="bold" android:textColor="@color/teacher_ink"/>
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="9dp" android:text="Ringkasan nilai saat ini" android:textSize="11sp"
+                        android:textColor="@color/teacher_muted"/>
+                    <TextView android:id="@+id/tvEditSummary" android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp" android:textSize="13sp" android:textColor="@color/teacher_blue"/>
+                </LinearLayout>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp" android:background="@drawable/bg_teacher_card"
+                    android:orientation="vertical" android:padding="16dp">
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:text="Ubah Nilai per Komponen" android:textColor="@color/teacher_ink"
+                        android:textSize="15sp" android:textStyle="bold"/>
+                    <LinearLayout android:id="@+id/editFieldsContainer" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:orientation="vertical"/>
+                    <TextView android:id="@+id/tvEditFinal" android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="17dp" android:text="Nilai Akhir: —" android:textSize="13sp"
+                        android:textColor="@color/teacher_blue" android:textStyle="bold"/>
+                </LinearLayout>
+                <Button android:id="@+id/btnSaveScores" android:layout_width="match_parent" android:layout_height="46dp"
+                    android:layout_marginTop="20dp" android:text="Ubah Nilai" android:textAllCaps="false"
+                    android:backgroundTint="@color/teacher_blue_light" android:textColor="#FFFFFF"/>
+                <Button android:id="@+id/btnCancelEdit" android:layout_width="match_parent" android:layout_height="43dp"
+                    android:layout_marginTop="8dp" android:text="Kembali ke Daftar Siswa" android:textAllCaps="false"
+                    android:backgroundTint="#E4EAF5" android:textColor="@color/teacher_blue"/>
+            </LinearLayout>
+            <!-- Pengelolaan Nilai -->
+            <LinearLayout android:id="@+id/componentsPanel" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:visibility="gone" android:orientation="vertical">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:background="@drawable/bg_teacher_card" android:padding="16dp">
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:text="Kelas | Mata Pelajaran | Komponen" android:textSize="12sp"
+                        android:textColor="@color/teacher_muted"/>
+                    <TextView android:id="@+id/tvComponentAssignment" android:layout_width="match_parent" android:layout_height="46dp"
+                        android:layout_marginTop="8dp" android:background="@drawable/bg_teacher_field"
+                        android:padding="12dp" android:gravity="center_vertical" android:textColor="@color/teacher_ink"
+                        android:textSize="13sp" />
+                    <TextView android:id="@+id/tvWeight" android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp" android:textStyle="bold" android:textColor="@color/teacher_blue"/>
+                    <LinearLayout android:id="@+id/componentsContainer" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:orientation="vertical"/>
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:text="Nama Komponen" android:layout_marginTop="15dp" android:textSize="12sp"
+                        android:textColor="@color/teacher_muted" />
+                    <EditText android:id="@+id/etComponentName" android:layout_width="match_parent" android:layout_height="46dp"
+                        android:layout_marginTop="7dp" android:padding="12dp" android:hint="Mis. Tugas"
+                        android:background="@drawable/bg_teacher_field" android:inputType="textCapWords" android:maxLength="50"/>
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:text="Bobot (%)" android:layout_marginTop="12dp" android:textSize="12sp"
+                        android:textColor="@color/teacher_muted"/>
+                    <EditText android:id="@+id/etWeight" android:layout_width="match_parent" android:layout_height="46dp"
+                        android:layout_marginTop="7dp" android:padding="12dp" android:hint="0 - 100"
+                        android:background="@drawable/bg_teacher_field" android:inputType="number"/>
+                    <Button android:id="@+id/btnSaveComponent" android:layout_width="match_parent" android:layout_height="46dp"
+                        android:layout_marginTop="14dp" android:text="Simpan Komponen" android:textAllCaps="false"
+                        android:textColor="#FFFFFF" android:backgroundTint="@color/teacher_blue_light"/>
+                    <Button android:id="@+id/btnAddComponent" android:layout_width="match_parent" android:layout_height="44dp"
+                        android:layout_marginTop="7dp" android:text="+ Komponen Baru" android:textAllCaps="false"
+                        android:textColor="@color/teacher_blue" android:backgroundTint="#E2EAFB"/>
+                </LinearLayout>
+                <Button android:id="@+id/btnBackToGrades" android:layout_width="match_parent" android:layout_height="44dp"
+                    android:layout_marginTop="13dp" android:text="Kembali ke Nilai Siswa" android:textAllCaps="false"
+                    android:textColor="@color/teacher_blue" android:backgroundTint="#E2EAFB"/>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+    <include android:id="@+id/bottomNav" layout="@layout/layout_teacher_bottom_nav"/>
+</LinearLayout>

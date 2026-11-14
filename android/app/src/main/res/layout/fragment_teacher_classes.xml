@@ -1,0 +1,26 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="@color/teacher_screen">
+    <include android:id="@+id/header" layout="@layout/layout_teacher_header"/>
+    <ScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
+        android:fillViewport="true" android:clipToPadding="false">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="16dp"
+            android:orientation="vertical">
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Kelas dan Mata Pelajaran" android:textStyle="bold" android:textColor="@color/teacher_ink"
+                android:textSize="15sp" android:layout_marginBottom="5dp"/>
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Pilih kelas untuk membuka Nilai atau Absensi" android:textColor="@color/teacher_muted" android:textSize="12sp"/>
+            <ProgressBar android:id="@+id/progressBar" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal" android:layout_margin="8dp" android:visibility="gone"/>
+            <TextView android:id="@+id/tvStatus" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="12dp" android:textColor="#B42318" android:textSize="12sp"/>
+            <LinearLayout android:id="@+id/classesContainer" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="vertical"/>
+            <Button android:id="@+id/btnReload" android:layout_width="match_parent" android:layout_height="43dp"
+                android:layout_marginTop="16dp" android:text="Muat ulang kelas" android:textAllCaps="false"
+                android:textColor="#FFFFFF" android:backgroundTint="@color/teacher_blue_light"/>
+        </LinearLayout>
+    </ScrollView>
+    <include android:id="@+id/bottomNav" layout="@layout/layout_teacher_bottom_nav"/>
+</LinearLayout>

@@ -1,0 +1,17 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="164dp"
+    android:background="@drawable/bg_teacher_header" android:clipChildren="true">
+    <View android:layout_width="128dp" android:layout_height="128dp" android:layout_gravity="top|end"
+        android:translationX="38dp" android:translationY="-34dp" android:background="@drawable/bg_teacher_header_circle"/>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
+        android:paddingStart="18dp" android:paddingEnd="18dp" android:orientation="vertical">
+        <TextView android:id="@+id/btnBack" android:layout_width="wrap_content" android:layout_height="50dp"
+            android:gravity="center_vertical" android:text="‹ Kembali ke Halaman Sebelumnya"
+            android:textSize="12sp" android:textColor="#FFFFFF"/>
+        <TextView android:id="@+id/tvTitle" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="10dp" android:text="Nilai Siswa" android:textSize="25sp"
+            android:textStyle="bold" android:textColor="#FFFFFF"/>
+        <TextView android:id="@+id/tvSubheading" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="5dp" android:textSize="12sp" android:textColor="#EAF1FF" />
+    </LinearLayout>
+</FrameLayout>
