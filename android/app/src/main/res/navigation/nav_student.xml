@@ -6,12 +6,12 @@
 
     <fragment
         android:id="@+id/studentHomeFragment"
-        android:name="id.sch.santaagnes.sim.ui.home.ComingSoonFragment">
+        android:name="id.sch.santaagnes.sim.ui.home.HomeFragment">
 
         <argument
-            android:name="titleRes"
-            android:defaultValue="@string/tab_home"
-            app:argType="reference" />
+            android:name="role"
+            android:defaultValue="STUDENT"
+            app:argType="string" />
     </fragment>
 
     <fragment
@@ -23,6 +23,8 @@
             android:defaultValue="STUDENT"
             app:argType="string" />
     </fragment>
+
+    <fragment
         android:id="@+id/studentScheduleFragment"
         android:name="id.sch.santaagnes.sim.ui.schedule.ScheduleListFragment">
 
