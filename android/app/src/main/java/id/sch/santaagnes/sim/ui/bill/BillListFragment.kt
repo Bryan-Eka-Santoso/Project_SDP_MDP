@@ -19,6 +19,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import id.sch.santaagnes.sim.R
 import id.sch.santaagnes.sim.databinding.FragmentBillListBinding
 import id.sch.santaagnes.sim.domain.model.BillFilter
+import id.sch.santaagnes.sim.domain.model.BillScope
 import id.sch.santaagnes.sim.domain.model.BillScopeOption
 import kotlinx.coroutines.launch
 
@@ -115,7 +116,24 @@ class BillListFragment : Fragment() {
         binding.tvEmpty.setText(if (state.hasNoAccess) R.string.bill_no_access else R.string.bill_empty)
         (binding.chipFilter.getChildAt(filters.indexOf(state.filter)) as? Chip)?.isChecked = true
         renderScopeChips(state)
+        renderSummary(state)
         adapter.submitList(state.bills)
+    }
+
+    /** Wali kelas: "X-1 · 32 murid". Admin: "Total: 120 tagihan". Siswa dan wali murid: tanpa ringkasan. */
+    private fun renderSummary(state: BillListUiState) {
+        val option = state.options.getOrNull(state.selectedOption)
+        val text = when {
+            state.isLoading && state.total == null -> null
+            option?.scope is BillScope.HomeroomClass && state.studentCount != null -> {
+                val students = getString(R.string.bill_summary_students, state.studentCount)
+                if (option.name != null) getString(R.string.bill_summary_class, option.name, students) else students
+            }
+            option?.scope is BillScope.All && state.total != null -> getString(R.string.bill_summary_total, state.total)
+            else -> null
+        }
+        binding.tvSummary.isVisible = text != null
+        binding.tvSummary.text = text
     }
 
     private fun renderScopeChips(state: BillListUiState) {

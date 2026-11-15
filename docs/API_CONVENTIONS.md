@@ -104,6 +104,8 @@ Menambah kode error baru: tambahkan ke tabel ini.
 - Masa berlaku: access token 15 menit, refresh token 7 hari. Nilai diatur lewat env.
 - `POST /me/device-tokens` `{ token, platform: "ANDROID" }` untuk mendaftarkan token FCM.
 - `GET /me/teaching-assignments` (hanya guru) → `[{ id, subject: { id, code, name }, classGroup: { id, name } }]`: penugasan mengajar milik guru itu pada semester aktif, urut kelas lalu mapel. Tidak berpaginasi (daftar kecil per guru; kosong bila tidak ada semester aktif). `id`-nya dipakai sebagai `teachingAssignmentId` pada `POST /tasks`.
+- `GET /tasks`: daftar tugas (siswa kelasnya, guru yang membuat, wali murid untuk anaknya lewat `studentId` wajib; peran lain yang mengirim `studentId` ditolak `400`). Filter `dueFrom`/`dueTo` (`YYYY-MM-DD`), urut tenggat terdekat. Tiap tugas: `dueDate` (`YYYY-MM-DD`) dan `dueTime` (`HH:mm` WIB; `null` pada tugas lama). `POST /tasks` mewajibkan `dueTime`.
+- `GET /bills` (wali kelas atau admin): bila daftar dibatasi ke kelas (wali kelas, atau admin dengan `classGroupId`), `meta` memuat tambahan `studentCount` = jumlah murid di kelas itu (tidak memengaruhi `total`). Nominal pada teks notifikasi tunggakan memakai awalan `IDR`.
 
 ## 7. Upload dan unduh
 

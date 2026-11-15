@@ -57,6 +57,19 @@
             app:singleSelection="true" />
     </HorizontalScrollView>
 
+    <!-- Jumlah seluruh data yang cocok dengan filter (dari meta.total). -->
+    <TextView
+        android:id="@+id/tvTotal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        android:textColor="@color/agnesian_blue"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
     <LinearLayout
         android:id="@+id/errorBanner"
         android:layout_width="match_parent"

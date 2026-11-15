@@ -5,51 +5,71 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F0F0F0">
+    android:background="@color/agnesian_background">
 
-    <!-- HEADER BIRU -->
+    <!-- HEADER -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="160dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_header"
         android:orientation="vertical"
-        android:padding="20dp"
-        android:background="#2052CE"
-        android:gravity="center_vertical">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Master Mata Pelajaran"
-            android:textColor="#FFFFFF"
-            android:textStyle="bold"
-            android:textSize="24sp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Kelola mata pelajaran sekolah"
-            android:textColor="#E6EEFF"
-            android:textSize="12sp" />
+        android:paddingHorizontal="8dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="12dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:gravity="end">
+            android:gravity="center_vertical"
+            android:minHeight="56dp"
+            android:orientation="horizontal">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnAdd"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:text="+ Tambah"
-                android:textAllCaps="false"
-                android:textColor="#2052CE"
-                app:cornerRadius="11dp"
-                app:backgroundTint="#FFFFFF" />
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/cd_back"
+                android:src="@drawable/ic_arrow_back" />
 
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/master_subjects_title"
+                android:textColor="@color/white"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAdd"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/master_add"
+            android:textColor="@color/white" />
         </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="56dp"
+            android:alpha="0.85"
+            android:text="@string/master_subjects_subtitle"
+            android:textColor="@color/white"
+            android:textSize="12sp" />
     </LinearLayout>
+
+    <!-- Jumlah seluruh data (dari daftar yang dimuat). -->
+    <TextView
+        android:id="@+id/tvTotal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="12dp"
+        android:textColor="@color/agnesian_blue"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
 
     <!-- DAFTAR MATA PELAJARAN -->
     <TextView
@@ -57,10 +77,10 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginTop="22dp"
-        android:text="Daftar Mata Pelajaran"
+        android:text="@string/master_subjects_daftar_mata_pelajaran"
         android:textStyle="bold"
         android:textSize="15sp"
-        android:textColor="#262626" />
+        android:textColor="@color/agnesian_text" />
 
     <ProgressBar
         android:id="@+id/progress"
@@ -74,7 +94,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="20dp"
-        android:textColor="#B00020"
+        android:textColor="@color/change_cancel"
         android:visibility="gone" />
 
     <Button
@@ -82,7 +102,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="Coba Lagi"
+        android:text="@string/action_retry"
         android:visibility="gone" />
 
     <TextView
@@ -90,7 +110,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="Belum ada mata pelajaran"
+        android:text="@string/master_subjects_belum_ada_mata_pelajaran"
         android:padding="24dp"
         android:visibility="gone" />
 

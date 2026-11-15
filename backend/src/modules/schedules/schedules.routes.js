@@ -36,7 +36,14 @@ router.get(
 const teacher = [authenticate, authorize('TEACHER')];
 // Pilihan kelas + mapel untuk form tugas; hanya penugasan milik guru yang login.
 router.get('/me/teaching-assignments', ...teacher, controller.listMyTeachingAssignments);
-router.get('/tasks', authenticate, authorize('TEACHER', 'STUDENT'), validate({ query: listTasksQuery }), controller.listTasks);
+// Wali murid hanya boleh membaca daftar (dengan studentId anaknya) untuk pengingat di dashboard.
+router.get(
+  '/tasks',
+  authenticate,
+  authorize('TEACHER', 'STUDENT', 'GUARDIAN'),
+  validate({ query: listTasksQuery }),
+  controller.listTasks,
+);
 router.get('/tasks/:id', authenticate, authorize('TEACHER', 'STUDENT'), validate({ params: idParams }), controller.getTask);
 router.post('/tasks', ...teacher, validate({ body: createTaskBody }), controller.createTask);
 router.patch('/tasks/:id', ...teacher, validate({ params: idParams, body: updateTaskBody }), controller.updateTask);

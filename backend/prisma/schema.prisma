@@ -376,13 +376,15 @@ model GradePredicate {
 // Tugas/pengingat dari guru untuk satu kelas yang ia ajar (F-JDW-08). Tidak ada pengumpulan;
 // tanda "selesai" milik siswa hanya disimpan di perangkat (Room).
 model Task {
-  id                   Int      @id @default(autoincrement()) @map("id_tugas")
-  teachingAssignmentId Int      @map("id_penugasan")
-  title                String   @map("judul") @db.VarChar(150)
-  description          String?  @map("catatan") @db.Text
-  dueDate              DateTime @map("tenggat") @db.Date
-  createdAt            DateTime @default(now()) @map("created_at")
-  updatedAt            DateTime @updatedAt @map("updated_at")
+  id                   Int       @id @default(autoincrement()) @map("id_tugas")
+  teachingAssignmentId Int       @map("id_penugasan")
+  title                String    @map("judul") @db.VarChar(150)
+  description          String?   @map("catatan") @db.Text
+  dueDate              DateTime  @map("tenggat") @db.Date
+  // Jam tenggat (WIB). Wajib saat tugas dibuat lewat API; null hanya untuk tugas lama = akhir hari.
+  dueTime              DateTime? @map("jam_tenggat") @db.Time(0)
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
 
   teachingAssignment TeachingAssignment @relation(fields: [teachingAssignmentId], references: [id])
 

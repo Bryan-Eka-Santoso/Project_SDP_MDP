@@ -2,13 +2,11 @@ package id.sch.santaagnes.sim.ui.task
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import id.sch.santaagnes.sim.R
-import id.sch.santaagnes.sim.core.DateTimeWib
 import id.sch.santaagnes.sim.databinding.ItemTeacherTaskBinding
 import id.sch.santaagnes.sim.domain.model.Task
 
@@ -32,12 +30,8 @@ class TeacherTaskAdapter(
             val context = binding.root.context
             binding.tvTitle.text = task.title
             binding.tvSubject.text = context.getString(R.string.task_subject_class, task.subjectName, task.classGroupName)
-            binding.tvDue.text = context.getString(R.string.task_due_label, DateTimeWib.formatDate(task.dueDate))
-            // Tenggat yang sudah lewat diredupkan agar tugas yang masih berjalan menonjol.
-            val overdue = task.dueDate.isBefore(DateTimeWib.today())
-            binding.tvDue.setTextColor(
-                ContextCompat.getColor(context, if (overdue) R.color.agnesian_muted else R.color.agnesian_blue)
-            )
+            binding.tvDue.text = context.getString(R.string.task_due_label, dueDateText(context, task.dueDate, task.dueTime))
+            binding.tvDue.setTextColor(dueColor(context, task.dueDate, task.dueTime))
             binding.tvNotes.isVisible = task.description != null
             binding.tvNotes.text = task.description
             binding.btnEdit.setOnClickListener { onEdit(task) }

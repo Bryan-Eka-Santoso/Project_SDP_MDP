@@ -28,6 +28,9 @@ data class BillListUiState(
     val isLoading: Boolean = true,
     val isLoadingMore: Boolean = false,
     val hasMore: Boolean = false,
+    // dari meta halaman pertama: seluruh tagihan yang cocok, dan murid di kelas binaan (wali kelas)
+    val total: Int? = null,
+    val studentCount: Int? = null,
     val errorMessage: String? = null
 ) {
     private val scope: BillScope? get() = options.getOrNull(selectedOption)?.scope
@@ -80,7 +83,13 @@ class BillListViewModel @Inject constructor(
                     if (isStale(scope, state)) return@launch
                     nextPage = 2
                     _uiState.update {
-                        it.copy(bills = result.data.items, hasMore = result.data.hasMore, isLoading = false)
+                        it.copy(
+                            bills = result.data.items,
+                            hasMore = result.data.hasMore,
+                            total = result.data.total,
+                            studentCount = result.data.studentCount,
+                            isLoading = false
+                        )
                     }
                 }
                 is Resource.Error -> _uiState.update { it.copy(isLoading = false, errorMessage = result.message) }
@@ -116,7 +125,9 @@ class BillListViewModel @Inject constructor(
     fun selectOption(index: Int) {
         val state = _uiState.value
         if (index !in state.options.indices || index == state.selectedOption) return
-        _uiState.update { it.copy(selectedOption = index, bills = emptyList(), hasMore = false) }
+        _uiState.update {
+            it.copy(selectedOption = index, bills = emptyList(), hasMore = false, total = null, studentCount = null)
+        }
         viewModelScope.launch { repository.remember(state.options[index].scope) }
         refresh()
     }

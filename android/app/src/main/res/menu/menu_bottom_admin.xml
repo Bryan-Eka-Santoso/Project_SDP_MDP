@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Tab admin sesuai Figma: Home, Jadwal, Akademik, Notifikasi, Profil. BottomNavigationView
+    hanya menerima maksimal 5 item; master data lain (mapel, fasilitas, pelanggaran, peminjaman)
+    dibuka dari kartu menu di Dashboard.
+-->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
@@ -14,12 +19,8 @@
     <item
         android:id="@+id/adminUserFragment"
         android:icon="@drawable/ic_book"
-        android:title="Akademik" />
+        android:title="@string/tab_academic" />
 
-    <item                                       
-        android:id="@+id/adminMataPelajaranFragment"
-        android:icon="@drawable/ic_class"
-        android:title="Mata Pelajaran" />
     <item
         android:id="@+id/adminNotificationsFragment"
         android:icon="@drawable/ic_bell"
@@ -29,14 +30,4 @@
         android:id="@+id/adminProfileFragment"
         android:icon="@drawable/ic_person"
         android:title="@string/tab_profile" />
-
-    <item
-        android:id="@+id/adminFasilitasFragment"
-        android:icon="@drawable/ic_building"
-        android:title="Fasilitas" />
-
-    <item
-        android:id="@+id/adminJenisPelanggaranFragment"
-        android:icon="@drawable/ic_warning"
-        android:title="Pelanggaran" />
 </menu>

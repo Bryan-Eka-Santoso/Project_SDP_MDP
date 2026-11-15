@@ -37,12 +37,6 @@ class TeacherClassesFragment : Fragment() {
         binding.header.tvSubheading.text = "Pilih kelas untuk mengelola nilai dan absensi"
         binding.header.btnBack.setOnClickListener { findNavController().navigateUp() }
         binding.btnReload.setOnClickListener { viewModel.load() }
-        binding.bottomNav.navTeacherHome.setOnClickListener {
-            if (!findNavController().popBackStack(R.id.teacherHomeFragment, false)) {
-                findNavController().navigate(R.id.teacherHomeFragment)
-            }
-        }
-        binding.bottomNav.navTeacherClasses.setOnClickListener { viewModel.load() }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {

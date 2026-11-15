@@ -85,6 +85,7 @@ class TeacherTaskListFragment : Fragment() {
                 title = task.title,
                 description = task.description,
                 dueDate = task.dueDate.toString(),
+                dueTime = task.dueTime?.toString(),
                 label = getString(R.string.task_subject_class, task.subjectName, task.classGroupName)
             )
         )

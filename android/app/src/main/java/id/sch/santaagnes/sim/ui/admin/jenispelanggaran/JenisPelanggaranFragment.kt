@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.view.isVisible
+import id.sch.santaagnes.sim.R
+import androidx.navigation.fragment.findNavController
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -53,6 +55,8 @@ class JenisPelanggaranFragment : Fragment() {
     ) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.btnBack.setOnClickListener { findNavController().popBackStack() }
+
         binding.rvPelanggaran.layoutManager =
             LinearLayoutManager(requireContext())
 
@@ -87,6 +91,9 @@ class JenisPelanggaranFragment : Fragment() {
 
                     binding.btnRetry.isVisible =
                         state.error != null
+
+                    binding.tvTotal.isVisible = !state.loading && state.error == null
+                    binding.tvTotal.text = getString(R.string.master_total_violations, state.daftar.size)
 
                     adapter.setData(state.daftar)
 

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Kerangka admin. Tab Home dan Akademik milik anggota tim lain dan sengaja belum ada di sini;
-    pemiliknya menambahkan tujuan dan item menu (menu_bottom_admin.xml) sendiri.
+    Graph admin. Lima tab bottom nav (menu_bottom_admin.xml): Home (dashboard), Jadwal, Akademik
+    (manajemen pengguna dan siswa), Notifikasi, Profil. Master data lain dibuka dari kartu di dashboard:
+    Manajemen -> tab Akademik, Operasional -> adminOperationsFragment, Pembayaran dan Laporan -> aksi global.
 -->
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -20,6 +21,31 @@
         <action
             android:id="@+id/action_adminDashboard_to_adminSchedule"
             app:destination="@id/adminScheduleFragment" />
+
+        <action
+            android:id="@+id/action_adminDashboard_to_operations"
+            app:destination="@id/adminOperationsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminOperationsFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.operations.AdminOperationsFragment">
+
+        <action
+            android:id="@+id/action_adminOperations_to_subjects"
+            app:destination="@id/adminMataPelajaranFragment" />
+
+        <action
+            android:id="@+id/action_adminOperations_to_facilities"
+            app:destination="@id/adminFasilitasFragment" />
+
+        <action
+            android:id="@+id/action_adminOperations_to_violationTypes"
+            app:destination="@id/adminJenisPelanggaranFragment" />
+
+        <action
+            android:id="@+id/action_adminOperations_to_bookings"
+            app:destination="@id/adminPeminjamanFragment" />
     </fragment>
 
     <fragment

@@ -77,7 +77,13 @@ async function listBills(user, { page, limit, classGroupId, q, ...filters }) {
   const today = todayLocal();
   const where = { AND: [...billFilters(filters, today)], ...(Object.keys(student).length ? { student } : {}) };
 
-  const [rows, total] = await Promise.all([
+  // Jumlah murid di kelas yang dicakup (wali kelas = kelas binaannya), terlepas dari filter tagihan.
+  // Tanpa batas kelas (admin tanpa filter) tidak dihitung.
+  const studentCountPromise = classIds
+    ? prisma.student.count({ where: { classMemberships: { some: { classGroupId: { in: classIds } } } } })
+    : Promise.resolve(undefined);
+
+  const [rows, total, studentCount] = await Promise.all([
     prisma.bill.findMany({
       where,
       select: {
@@ -99,6 +105,7 @@ async function listBills(user, { page, limit, classGroupId, q, ...filters }) {
       ...toPrismaPagination({ page, limit }),
     }),
     prisma.bill.count({ where }),
+    studentCountPromise,
   ]);
 
   const items = rows.map((row) => ({
@@ -110,7 +117,7 @@ async function listBills(user, { page, limit, classGroupId, q, ...filters }) {
       classGroups: row.student.classMemberships.map((m) => m.classGroup),
     },
   }));
-  return { items, total };
+  return { items, total, studentCount };
 }
 
 module.exports = { listStudentBills, listBills, toBillDto };

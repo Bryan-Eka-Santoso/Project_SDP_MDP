@@ -34,6 +34,16 @@ function todayLocal(now = new Date(), timeZone = env.tzDisplay) {
   }).format(now);
 }
 
+// Jam sekarang 'HH:mm' menurut zona sekolah (WIB), untuk membandingkan dengan jam tenggat.
+function timeLocal(now = new Date(), timeZone = env.tzDisplay) {
+  return new Intl.DateTimeFormat('en-GB', {
+    timeZone,
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).format(now);
+}
+
 const TIME_OF_DAY = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
 // 'HH:mm' → Date 1970-01-01 UTC, cocok untuk kolom `@db.Time` (sama dengan seed.js).
@@ -64,5 +74,6 @@ module.exports = {
   formatTimeOfDay,
   TIME_OF_DAY,
   todayLocal,
+  timeLocal,
   parseDuration,
 };

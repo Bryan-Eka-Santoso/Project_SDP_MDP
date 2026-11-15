@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.LocalTime
 import javax.inject.Inject
 
 data class TeacherTaskFormUiState(
@@ -29,7 +30,8 @@ data class TeacherTaskFormUiState(
     @param:StringRes val assignmentError: Int? = null,
     @param:StringRes val titleError: Int? = null,
     @param:StringRes val descriptionError: Int? = null,
-    @param:StringRes val dueDateError: Int? = null
+    @param:StringRes val dueDateError: Int? = null,
+    @param:StringRes val dueTimeError: Int? = null
 )
 
 @HiltViewModel
@@ -71,7 +73,8 @@ class TeacherTaskFormViewModel @Inject constructor(
         assignment: TeachingAssignment?,
         title: String,
         description: String,
-        dueDate: LocalDate?
+        dueDate: LocalDate?,
+        dueTime: LocalTime?
     ) {
         if (_uiState.value.isSaving) return
 
@@ -80,17 +83,18 @@ class TeacherTaskFormViewModel @Inject constructor(
             assignmentError = if (taskId == null && assignment == null) R.string.task_error_assignment else null,
             titleError = titleError(title),
             descriptionError = if (description.trim().length > MAX_DESCRIPTION) R.string.task_error_description_long else null,
-            dueDateError = dueDateError(dueDate, isNew = taskId == null)
+            dueDateError = dueDateError(dueDate, isNew = taskId == null),
+            dueTimeError = dueTimeError(dueDate, dueTime, isNew = taskId == null)
         )
         val valid = state.assignmentError == null && state.titleError == null &&
-            state.descriptionError == null && state.dueDateError == null
+            state.descriptionError == null && state.dueDateError == null && state.dueTimeError == null
         if (!valid) {
             _uiState.value = state
             return
         }
 
         _uiState.value = state.copy(isSaving = true)
-        val input = TaskInput(title, description, checkNotNull(dueDate))
+        val input = TaskInput(title, description, checkNotNull(dueDate), checkNotNull(dueTime))
         viewModelScope.launch {
             val result = if (taskId == null) {
                 repository.create(checkNotNull(assignment).id, input)
@@ -117,6 +121,14 @@ class TeacherTaskFormViewModel @Inject constructor(
     private fun dueDateError(dueDate: LocalDate?, isNew: Boolean): Int? = when {
         dueDate == null -> R.string.task_error_due_required
         isNew && dueDate.isBefore(DateTimeWib.today()) -> R.string.task_error_due_past
+        else -> null
+    }
+
+    // Jam wajib; pada tugas baru yang jatuh hari ini, jamnya harus belum lewat (sama dengan aturan server).
+    private fun dueTimeError(dueDate: LocalDate?, dueTime: LocalTime?, isNew: Boolean): Int? = when {
+        dueTime == null -> R.string.task_error_time_required
+        isNew && dueDate == DateTimeWib.today() && !dueTime.isAfter(DateTimeWib.now().toLocalTime()) ->
+            R.string.task_error_time_past
         else -> null
     }
 

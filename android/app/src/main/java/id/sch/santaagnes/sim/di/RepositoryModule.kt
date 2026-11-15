@@ -14,6 +14,8 @@ import id.sch.santaagnes.sim.data.repository.ReportRepository
 import id.sch.santaagnes.sim.data.repository.ReportRepositoryImpl
 import id.sch.santaagnes.sim.data.repository.ScheduleRepository
 import id.sch.santaagnes.sim.data.repository.ScheduleRepositoryImpl
+import id.sch.santaagnes.sim.data.repository.AdminOverviewRepository
+import id.sch.santaagnes.sim.data.repository.AdminOverviewRepositoryImpl
 import id.sch.santaagnes.sim.data.repository.TaskRepository
 import id.sch.santaagnes.sim.data.repository.TaskRepositoryImpl
 import id.sch.santaagnes.sim.data.repository.TodoRepository
@@ -37,6 +39,9 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindReportRepository(impl: ReportRepositoryImpl): ReportRepository
+
+    @Binds
+    abstract fun bindAdminOverviewRepository(impl: AdminOverviewRepositoryImpl): AdminOverviewRepository
 
     @Binds
     abstract fun bindTaskRepository(impl: TaskRepositoryImpl): TaskRepository

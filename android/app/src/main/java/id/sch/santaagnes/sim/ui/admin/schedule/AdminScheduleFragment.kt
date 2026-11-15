@@ -106,6 +106,8 @@ class AdminScheduleFragment : Fragment() {
         binding.errorBanner.isVisible = state.errorMessage != null
         binding.tvError.text = state.errorMessage
         binding.tvEmpty.isVisible = state.isEmpty
+        binding.tvTotal.isVisible = state.total != null
+        binding.tvTotal.text = state.total?.let { getString(R.string.admin_total_slots, it) }
         adapter.submitList(state.slots)
     }
 

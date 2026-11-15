@@ -22,6 +22,8 @@ data class ChangeListUiState(
     val isLoading: Boolean = true,
     val isLoadingMore: Boolean = false,
     val hasMore: Boolean = false,
+    // seluruh perubahan yang cocok dengan jenis terpilih (meta.total), null sampai halaman pertama termuat
+    val total: Int? = null,
     val errorMessage: String? = null
 ) {
     val isEmpty: Boolean get() = changes.isEmpty() && !isLoading && errorMessage == null
@@ -49,7 +51,12 @@ class ChangeListViewModel @Inject constructor(
                     if (_uiState.value.type != type) return@launch
                     nextPage = 2
                     _uiState.update {
-                        it.copy(changes = result.data.items, hasMore = result.data.hasMore, isLoading = false)
+                        it.copy(
+                            changes = result.data.items,
+                            hasMore = result.data.hasMore,
+                            total = result.data.total,
+                            isLoading = false
+                        )
                     }
                 }
                 is Resource.Error -> _uiState.update { it.copy(isLoading = false, errorMessage = result.message) }

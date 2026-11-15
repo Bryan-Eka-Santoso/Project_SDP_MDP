@@ -36,7 +36,7 @@ Tanda `—` berarti tidak punya akses (backend mengembalikan 403).
 | Lihat jadwal | `SELF` (kelas reguler + kelas paket) | jadwal mengajarnya | `HOMEROOM` | `CHILD` | `ALL` (lewat master jadwal) |
 | Kelola jadwal, impor, perubahan jadwal | — | — | — | — | ✓ |
 | Kelola tugas dari guru (termasuk daftar penugasan miliknya, `GET /me/teaching-assignments`) | — | `TAUGHT` (penugasan miliknya) | | — | — |
-| Lihat tugas dari guru | `SELF` (kelasnya) | `TAUGHT` | | — | — |
+| Lihat tugas dari guru | `SELF` (kelasnya) | `TAUGHT` | | `CHILD` (daftar saja, `GET /tasks?studentId=`) | — |
 | To-do pribadi (di perangkat) | milik sendiri | — | | — | — |
 | Lihat nilai + rekap | `SELF` | `TAUGHT` | `HOMEROOM` (semua mapel) | `CHILD` | `ALL` (lewat laporan) |
 | Input/edit nilai | — | `TAUGHT` | | — | — |

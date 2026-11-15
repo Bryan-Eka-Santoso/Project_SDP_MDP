@@ -212,13 +212,26 @@ function overdueByStudent(valid, today) {
   return groups;
 }
 
+// Banyak tunggakan: rincian dibatasi agar isi notifikasi (data message FCM) tetap pendek.
+const MAX_OVERDUE_DETAILS = 3;
+const shortDate = new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+
+// Nominal ditampilkan sebagai "IDR 850.000" (permintaan dosen), konsisten dengan aplikasi Android.
+const money = (amount) => `IDR ${idr.format(amount)}`;
+
 function overdueMessage({ student, bills }) {
   if (bills.length === 1) {
     const [bill] = bills;
-    return `${student.name}: tagihan ${bill.paymentType} (${bill.billCode}) sebesar Rp ${idr.format(bill.amount)} jatuh tempo ${longDate.format(bill.dueDate)} dan belum dibayar.`;
+    return `${student.name}: tagihan ${bill.paymentType} (${bill.billCode}) sebesar ${money(bill.amount)} jatuh tempo ${longDate.format(bill.dueDate)} dan belum dibayar.`;
   }
   const total = bills.reduce((sum, bill) => sum + bill.amount, 0);
-  return `${student.name}: ${bills.length} tagihan belum dibayar dan sudah lewat jatuh tempo, total Rp ${idr.format(total)}.`;
+  const sorted = [...bills].sort((a, b) => a.dueDate - b.dueDate);
+  const details = sorted
+    .slice(0, MAX_OVERDUE_DETAILS)
+    .map((bill) => `${bill.paymentType} ${money(bill.amount)} (jatuh tempo ${shortDate.format(bill.dueDate)})`);
+  const rest = sorted.length - details.length;
+  const more = rest > 0 ? `; dan ${rest} lainnya` : '';
+  return `${student.name}: ${bills.length} tagihan belum dibayar dan sudah lewat jatuh tempo, total ${money(total)}. Rincian: ${details.join('; ')}${more}.`;
 }
 
 /**

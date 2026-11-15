@@ -22,6 +22,8 @@ data class TaskDto(
     val title: String,
     val description: String?,
     val dueDate: String,
+    // "HH:mm" WIB; null pada tugas lama sebelum jam tenggat ada
+    val dueTime: String?,
     val teachingAssignment: TaskTeachingAssignmentDto
 )
 
@@ -37,13 +39,15 @@ data class CreateTaskRequest(
     val teachingAssignmentId: Int,
     val title: String,
     val description: String,
-    val dueDate: String
+    val dueDate: String,
+    val dueTime: String
 )
 
 data class UpdateTaskRequest(
     val title: String,
     val description: String,
-    val dueDate: String
+    val dueDate: String,
+    val dueTime: String
 )
 
 interface TaskApi {
@@ -51,7 +55,11 @@ interface TaskApi {
     @GET("tasks")
     suspend fun getTasks(
         @Query("page") page: Int,
-        @Query("limit") limit: Int
+        @Query("limit") limit: Int,
+        // hanya tugas bertenggat tanggal ini ke depan (YYYY-MM-DD)
+        @Query("dueFrom") dueFrom: String? = null,
+        // wajib untuk wali murid (anak yang dilihat); peran lain tidak boleh mengirimnya
+        @Query("studentId") studentId: Int? = null
     ): ApiResponse<List<TaskDto>>
 
     @POST("tasks")

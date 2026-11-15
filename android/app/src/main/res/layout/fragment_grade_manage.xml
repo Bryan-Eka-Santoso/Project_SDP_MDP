@@ -114,5 +114,4 @@
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
-    <include android:id="@+id/bottomNav" layout="@layout/layout_teacher_bottom_nav"/>
 </LinearLayout>

@@ -37,7 +37,8 @@ Contoh: slot A Senin 07.00–08.30, slot B Senin 08.00–09.30, guru sama → `0
 - Jika **ada satu saja** baris tidak valid: tidak ada data yang disimpan; kembalikan `422 IMPORT_INVALID` berisi daftar `{ row, column, message }`. Nomor baris mengikuti nomor baris di Excel (baris header = 1). `column` = teks header kolom, atau `null` jika kesalahan menyangkut seluruh baris atau file. Semua kesalahan satu file dikumpulkan sekaligus (bukan berhenti di yang pertama), dengan batas 200 kesalahan yang ditampilkan; `message` menyebut jumlah totalnya.
 - Jika semua valid: simpan dalam satu transaksi.
 - Format kolom setiap jenis impor ditentukan oleh file contoh di `docs/import-templates/` (dibuat tim; penjelasannya di `docs/import-templates/README.md`). Jangan mengarang format kolom.
-- Dibaca **lembar pertama**; baris 1 = header, urutan kolom bebas, kolom tambahan diabaikan. Maksimal 5000 baris data per file (impor pembayaran: 20000); baris kosong dilewati.
+- Dibaca **lembar pertama**; baris 1 = header, urutan kolom bebas (huruf besar/kecil dan spasi berlebih pada header diabaikan). Maksimal 5000 baris data per file (impor pembayaran: 20000); baris kosong dilewati.
+- **Struktur harus sama dengan template.** Yang ditolak (`422 IMPORT_INVALID`, semua temuan struktur dilaporkan sekaligus, tidak ada data tersimpan): kolom yang tidak ada di template (termasuk kolom opsional yang diganti namanya), header ganda, header yang bukan teks, kolom wajib yang hilang (pesan menyebut header yang ditemukan di file), baris 1 yang kosong, data di kolom yang tidak punya header, dan lembar tambahan selain lembar petunjuk (`Petunjuk` pada template, `Tentang berkas ini` pada berkas contoh; isinya tidak dibaca).
 - Kolom kode/NIP/NIS harus bertipe **Teks**: Excel membulatkan angka di atas 15 digit (NIP 18 digit rusak), sehingga angka seperti itu ditolak dengan petunjuk mengubah format kolom.
 
 #### 2.3.1 Impor jadwal (F-JDW-02)
@@ -69,13 +70,14 @@ Contoh: slot A Senin 07.00–08.30, slot B Senin 08.00–09.30, guru sama → `0
 
 ### 2.5 Tugas dari guru (F-JDW-08, F-JDW-09)
 - Guru membuat `Task` pada `TeachingAssignment` miliknya; pilihan penugasan (kelas + mapel) diambil dari `GET /me/teaching-assignments` (semester aktif, hanya miliknya). Tugas terlihat oleh siswa anggota kelas penugasan itu, dikelompokkan per mapel.
-- `dueDate` saat dibuat tidak boleh sebelum hari ini (WIB).
+- `dueDate` saat dibuat tidak boleh sebelum hari ini (WIB). `dueTime` (jam tenggat WIB, `HH:mm`) **wajib saat membuat tugas**; bila tenggatnya hari ini, jamnya harus setelah jam sekarang. Tugas lama tanpa jam (`dueTime` null) dianggap berakhir pukul 23:59.
+- Klien menandai tanggal tenggat **merah** bila tugas sudah lewat atau sisa waktu sampai tenggat 24 jam atau kurang.
 - Tidak ada pengumpulan atau penilaian tugas. Tanda "selesai" milik siswa hanya disimpan di perangkat (Room) dan tidak dikirim ke server.
 - Tugas baru → notifikasi `TASK` ke siswa kelas tersebut. Ubah dan hapus tidak mengirim notifikasi.
 - To-do pribadi siswa (F-JDW-07) terpisah dari `Task`: dibuat siswa sendiri dan hanya ada di perangkat.
-- Endpoint: `POST /tasks`, `PATCH /tasks/:id`, `DELETE /tasks/:id` (hanya guru; di luar penugasannya sendiri: `PATCH`/`DELETE` → `404`, `POST` dengan `teachingAssignmentId` yang bukan miliknya → `400` pada field itu). `GET /tasks` dan `GET /tasks/:id` untuk guru (tugas penugasannya) dan siswa (tugas kelasnya); wali murid dan admin `403`; tugas di luar cakupan → `404`.
-- `POST /tasks`: `teachingAssignmentId`, `title` (1–150 karakter), `description` (opsional, maksimal 2000; kosong disimpan `null`), `dueDate` (`YYYY-MM-DD`). Penugasan tidak bisa dipindah dengan `PATCH`. Pada `PATCH`, tenggat tidak dicek terhadap hari ini (aturan itu hanya saat dibuat).
-- `GET /tasks`: berpaginasi, urut tenggat lalu id, default semester aktif; filter `semesterId`, `teachingAssignmentId`, `subjectId`, `classGroupId`, `dueFrom`, `dueTo`. Tiap item memuat `teachingAssignment` (guru, mapel, kelas) agar klien bisa mengelompokkan per mapel. Penerima notifikasi tugas baru hanya siswa kelas penugasan itu (wali murid tidak).
+- Endpoint: `POST /tasks`, `PATCH /tasks/:id`, `DELETE /tasks/:id` (hanya guru; di luar penugasannya sendiri: `PATCH`/`DELETE` → `404`, `POST` dengan `teachingAssignmentId` yang bukan miliknya → `400` pada field itu). `GET /tasks` untuk guru (tugas penugasannya), siswa (tugas kelasnya), dan wali murid (tugas kelas anak, **wajib** `studentId`; bukan anaknya → `404`, tanpa `studentId` → `400`; peran lain yang mengirim `studentId` → `400`); `GET /tasks/:id` hanya guru dan siswa; admin `403` pada keduanya; tugas di luar cakupan → `404`. Wali murid dan siswa memakai `GET /tasks?dueFrom=<hari ini>&limit=3` untuk pengingat 3 tugas terdekat di dashboard.
+- `POST /tasks`: `teachingAssignmentId`, `title` (1–150 karakter), `description` (opsional, maksimal 2000; kosong disimpan `null`), `dueDate` (`YYYY-MM-DD`), `dueTime` (`HH:mm`, wajib). `PATCH` boleh mengirim `dueTime` bersama atau terpisah dari `dueDate`. Penugasan tidak bisa dipindah dengan `PATCH`. Pada `PATCH`, tenggat tidak dicek terhadap hari ini (aturan itu hanya saat dibuat).
+- `GET /tasks`: berpaginasi, urut tenggat lalu id, default semester aktif; filter `semesterId`, `teachingAssignmentId`, `subjectId`, `classGroupId`, `dueFrom`, `dueTo`. Tiap item memuat `teachingAssignment` (guru, mapel, kelas) agar klien bisa mengelompokkan per mapel. Penerima notifikasi tugas baru hanya siswa kelas penugasan itu (wali murid tidak); isinya memuat tenggat dan jamnya.
 
 ## 3. Nilai
 
@@ -173,6 +175,8 @@ Contoh: 40 sesi, 36 hadir, 2 sakit, 1 izin, 1 alpa → 36/40 × 100 = **90%**.
 - Status tampil: `PAID` → "Lunas"; `UNPAID` dan belum jatuh tempo → "Belum dibayar"; `UNPAID` dan sudah lewat jatuh tempo → "Menunggak".
 - Setelah impor, siswa dan wali murid yang memiliki tagihan menunggak menerima notifikasi `BILL_OVERDUE`. Penerima = siswa yang **ada di file impor** dan punya tagihan `UNPAID` yang sudah lewat jatuh tempo (tanggal WIB; jatuh tempo hari ini belum menunggak), beserta semua wali muridnya. Satu notifikasi per siswa (isinya merangkum tagihan menunggak siswa itu). Impor yang tidak mengubah data apa pun (tidak ada tagihan baru atau berubah) tidak mengirim notifikasi, agar mengunggah file yang sama dua kali tidak mengulang notifikasi ke orang tua.
 - Melihat tagihan: `GET /students/:studentId/bills` (siswa sendiri, wali murid untuk anaknya, wali kelas untuk siswa kelas binaannya pada tahun ajaran aktif, admin untuk semua; di luar cakupan → `404`) dan `GET /bills` (admin untuk semua; wali kelas otomatis dibatasi ke kelas binaannya, guru yang bukan wali kelas `403`). Setiap tagihan membawa `status` (`PAID`/`UNPAID`) dan `isOverdue` (status tampil "Menunggak" = `UNPAID` dan `isOverdue`).
+- Nominal selalu ditampilkan sebagai `IDR 850.000` (daftar tagihan di aplikasi dan isi notifikasi tunggakan), bukan `Rp`. Notifikasi `BILL_OVERDUE` untuk lebih dari satu tagihan menyebut total dan merinci maksimal 3 tagihan tertua (jenis, nominal, jatuh tempo), sisanya sebagai "dan N lainnya".
+- `GET /bills` memuat `meta.studentCount` (jumlah murid di kelas yang dicakup: kelas binaan wali kelas, atau kelas yang difilter admin) agar wali kelas tahu jumlah murid kelasnya; tanpa batas kelas, field itu tidak ada.
 - Tidak ada pembayaran di dalam aplikasi.
 
 ## 11. Akun

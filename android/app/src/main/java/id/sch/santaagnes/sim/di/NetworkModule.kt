@@ -18,6 +18,7 @@ import id.sch.santaagnes.sim.data.remote.MasterLookupApi
 import id.sch.santaagnes.sim.data.remote.ReportApi
 import id.sch.santaagnes.sim.data.remote.ScheduleApi
 import id.sch.santaagnes.sim.data.remote.TaskApi
+import id.sch.santaagnes.sim.data.remote.AdminOverviewApi
 import id.sch.santaagnes.sim.data.remote.TokenAuthenticator
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -103,6 +104,10 @@ object NetworkModule {
         return retrofit.create(
             id.sch.santaagnes.sim.data.remote.AttendanceApi::class.java
         )
+    }
+
+    @Provides
+    @Singleton
     fun provideScheduleApi(
         retrofit: Retrofit
     ): ScheduleApi {
@@ -117,6 +122,10 @@ object NetworkModule {
         return retrofit.create(
             id.sch.santaagnes.sim.data.remote.LeaveApi::class.java
         )
+    }
+
+    @Provides
+    @Singleton
     fun provideAdminScheduleApi(
         retrofit: Retrofit
     ): AdminScheduleApi {
@@ -137,6 +146,14 @@ object NetworkModule {
         retrofit: Retrofit
     ): TaskApi {
         return retrofit.create(TaskApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAdminOverviewApi(
+        retrofit: Retrofit
+    ): AdminOverviewApi {
+        return retrofit.create(AdminOverviewApi::class.java)
     }
 
     @Provides

@@ -246,10 +246,21 @@ describe('POST /api/v1/schedule-slots/import: validasi baris (422 IMPORT_INVALID
     const res = await upload(await xlsx([['X-1', 'MAT', NIP_YOHANES, 'Senin', '07:00']], ['Kelas', 'Kode Mapel', 'NIP Guru', 'Hari', 'Jam Mulai']));
 
     expect(res.status).toBe(422);
+    const found = 'Header di file: Kelas, Kode Mapel, NIP Guru, Hari, Jam Mulai.';
     expect(res.body.error.details).toEqual([
-      { row: 1, column: 'Jam Selesai', message: 'Kolom "Jam Selesai" tidak ditemukan di baris pertama (header).' },
-      { row: 1, column: 'Ruangan', message: 'Kolom "Ruangan" tidak ditemukan di baris pertama (header).' },
+      { row: 1, column: 'Jam Selesai', message: `Kolom "Jam Selesai" tidak ditemukan di baris pertama (header). ${found}` },
+      { row: 1, column: 'Ruangan', message: `Kolom "Ruangan" tidak ditemukan di baris pertama (header). ${found}` },
     ]);
+  });
+
+  it('422 jika template ditambah kolom baru: kolom itu disebut namanya dan tidak ada yang disimpan', async () => {
+    const res = await upload(await xlsx([['X-1', 'MAT', NIP_YOHANES, 'Senin', '07:00', '08:30', 'Ruang X-1', 'catatan']], [...HEADER, 'Catatan']));
+
+    expect(res.status).toBe(422);
+    expect(res.body.error.details).toHaveLength(1);
+    expect(res.body.error.details[0]).toMatchObject({ row: 1, column: 'Catatan' });
+    expect(res.body.error.details[0].message).toContain('tidak ada di template');
+    expect(prisma.scheduleSlot.createMany).not.toHaveBeenCalled();
   });
 
   it('422 jika file hanya berisi header', async () => {

@@ -81,7 +81,9 @@ class BillRepositoryImpl @Inject constructor(
         PageResult(
             items = response.data.orEmpty().map { it.toDomain() },
             page = page,
-            hasMore = page < (response.meta?.totalPages ?: page)
+            hasMore = page < (response.meta?.totalPages ?: page),
+            total = response.meta?.total,
+            studentCount = response.meta?.studentCount
         )
     }
 
