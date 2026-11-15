@@ -19,12 +19,14 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import java.time.LocalTime
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class TeacherTaskFormViewModelTest {
 
     private val assignment = TeachingAssignment(id = 7, subjectName = "Matematika", classGroupName = "X-1")
     private val tomorrow get() = DateTimeWib.today().plusDays(1)
+    private val noon = LocalTime.of(12, 0)
 
     @Before
     fun setUp() {
@@ -62,12 +64,13 @@ class TeacherTaskFormViewModelTest {
         val repository = FakeTaskRepository()
         val viewModel = TeacherTaskFormViewModel(repository)
 
-        viewModel.save(taskId = null, assignment = null, title = "  ", description = "", dueDate = null)
+        viewModel.save(taskId = null, assignment = null, title = "  ", description = "", dueDate = null, dueTime = null)
 
         val state = viewModel.uiState.value
         assertEquals(R.string.task_error_assignment, state.assignmentError)
         assertEquals(R.string.task_error_title_required, state.titleError)
         assertEquals(R.string.task_error_due_required, state.dueDateError)
+        assertEquals(R.string.task_error_time_required, state.dueTimeError)
         assertTrue(repository.created.isEmpty())
         assertFalse(state.isSaving)
     }
@@ -76,7 +79,7 @@ class TeacherTaskFormViewModelTest {
     fun rejectsTooLongTitleAndNotes() = runTest {
         val viewModel = TeacherTaskFormViewModel(FakeTaskRepository())
 
-        viewModel.save(null, assignment, "a".repeat(151), "b".repeat(2001), tomorrow)
+        viewModel.save(null, assignment, "a".repeat(151), "b".repeat(2001), tomorrow, noon)
 
         assertEquals(R.string.task_error_title_long, viewModel.uiState.value.titleError)
         assertEquals(R.string.task_error_description_long, viewModel.uiState.value.descriptionError)
@@ -87,9 +90,20 @@ class TeacherTaskFormViewModelTest {
         val repository = FakeTaskRepository()
         val viewModel = TeacherTaskFormViewModel(repository)
 
-        viewModel.save(null, assignment, "Latihan", "", DateTimeWib.today().minusDays(1))
+        viewModel.save(null, assignment, "Latihan", "", DateTimeWib.today().minusDays(1), noon)
 
         assertEquals(R.string.task_error_due_past, viewModel.uiState.value.dueDateError)
+        assertTrue(repository.created.isEmpty())
+    }
+
+    @Test
+    fun newTaskDueTodayRejectsTimeAlreadyPassed() = runTest {
+        val repository = FakeTaskRepository()
+        val viewModel = TeacherTaskFormViewModel(repository)
+
+        viewModel.save(null, assignment, "Latihan", "", DateTimeWib.today(), LocalTime.MIN)
+
+        assertEquals(R.string.task_error_time_past, viewModel.uiState.value.dueTimeError)
         assertTrue(repository.created.isEmpty())
     }
 
@@ -98,7 +112,7 @@ class TeacherTaskFormViewModelTest {
         val repository = FakeTaskRepository()
         val viewModel = TeacherTaskFormViewModel(repository)
 
-        viewModel.save(5, null, "Latihan", "", DateTimeWib.today().minusDays(3))
+        viewModel.save(5, null, "Latihan", "", DateTimeWib.today().minusDays(3), noon)
 
         assertNull(viewModel.uiState.value.dueDateError)
         assertEquals(listOf(5), repository.updated.map { it.first })
@@ -111,11 +125,12 @@ class TeacherTaskFormViewModelTest {
         var saved = false
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.saved.first(); saved = true }
 
-        viewModel.save(null, assignment, " Latihan Bab 3 ", "Soal 1-10", tomorrow)
+        viewModel.save(null, assignment, " Latihan Bab 3 ", "Soal 1-10", tomorrow, noon)
 
         assertEquals(1, repository.created.size)
         assertEquals(7, repository.created[0].first)
         assertEquals(tomorrow, repository.created[0].second.dueDate)
+        assertEquals(noon, repository.created[0].second.dueTime)
         assertTrue(saved)
         assertFalse(viewModel.uiState.value.isSaving)
     }
@@ -125,7 +140,7 @@ class TeacherTaskFormViewModelTest {
         val repository = FakeTaskRepository().apply { saveError = "Tenggat tidak boleh sebelum hari ini." }
         val viewModel = TeacherTaskFormViewModel(repository)
 
-        viewModel.save(null, assignment, "Latihan", "", tomorrow)
+        viewModel.save(null, assignment, "Latihan", "", tomorrow, noon)
 
         assertEquals("Tenggat tidak boleh sebelum hari ini.", viewModel.uiState.value.errorMessage)
         assertFalse(viewModel.uiState.value.isSaving)

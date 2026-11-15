@@ -109,6 +109,8 @@ const taskFields = {
     .nullable()
     .optional(),
   dueDate: dateOnly,
+  // Jam tenggat WIB 'HH:mm'. Wajib saat membuat tugas; boleh dihilangkan saat mengubah bagian lain.
+  dueTime: timeOfDay,
 };
 
 const createTaskBody = z.object({ teachingAssignmentId: z.number().int().positive(), ...taskFields });
@@ -125,6 +127,8 @@ const listTasksQuery = paginationQuery
     teachingAssignmentId: id.optional(),
     subjectId: id.optional(),
     classGroupId: id.optional(),
+    // Wali murid: anak yang tugasnya dilihat (wajib). Peran lain tidak boleh mengirimnya.
+    studentId: id.optional(),
     dueFrom: dateOnly.optional(),
     dueTo: dateOnly.optional(),
   })

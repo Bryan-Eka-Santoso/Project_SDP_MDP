@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="grade_title">Kelola Nilai</string>
     <string name="grade_refresh">Muat ulang</string>
     <string name="grade_assignment">Kelas dan mata pelajaran</string>
     <string name="grade_component_section">Komponen nilai dan bobot</string>

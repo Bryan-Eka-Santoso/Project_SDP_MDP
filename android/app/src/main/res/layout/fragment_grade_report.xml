@@ -42,5 +42,4 @@
                 android:orientation="vertical" android:layout_marginTop="5dp"/>
         </LinearLayout>
     </ScrollView>
-    <include android:id="@+id/bottomNav" layout="@layout/layout_teacher_bottom_nav" android:visibility="gone"/>
 </LinearLayout>

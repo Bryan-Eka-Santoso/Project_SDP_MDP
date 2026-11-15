@@ -116,7 +116,7 @@ describe('POST /api/v1/bills/import: berhasil (F-BYR-01)', () => {
     expect(payload).toEqual({
       type: 'BILL_OVERDUE',
       title: 'Tunggakan pembayaran',
-      body: 'Angela Putri: tagihan SPP (SPP-2020-09) sebesar Rp 850.000 jatuh tempo 10 September 2020 dan belum dibayar.',
+      body: 'Angela Putri: tagihan SPP (SPP-2020-09) sebesar IDR 850.000 jatuh tempo 10 September 2020 dan belum dibayar.',
       referenceId: 1,
     });
   });
@@ -133,7 +133,27 @@ describe('POST /api/v1/bills/import: berhasil (F-BYR-01)', () => {
     expect(notify).toHaveBeenCalledTimes(1);
     expect(notify.mock.calls[0][0].sort()).toEqual([12, 303]);
     expect(notify.mock.calls[0][1].body).toBe(
-      'Benediktus Santoso: 2 tagihan belum dibayar dan sudah lewat jatuh tempo, total Rp 1.500.000.',
+      'Benediktus Santoso: 2 tagihan belum dibayar dan sudah lewat jatuh tempo, total IDR 1.500.000. ' +
+        'Rincian: SPP IDR 800.000 (jatuh tempo 10 Jan 2020); SPP IDR 700.000 (jatuh tempo 10 Feb 2020).',
+    );
+  });
+
+  it('rincian tunggakan dibatasi 3 tagihan tertua; sisanya disebut jumlahnya', async () => {
+    await upload(
+      await xlsx([
+        ['2026002', 'SPP-2020-04', 'SPP', 100000, '2020-04-10', 'Belum Dibayar', null],
+        ['2026002', 'SPP-2020-01', 'SPP', 100000, '2020-01-10', 'Belum Dibayar', null],
+        ['2026002', 'SPP-2020-03', 'SPP', 100000, '2020-03-10', 'Belum Dibayar', null],
+        ['2026002', 'SPP-2020-02', 'SPP', 100000, '2020-02-10', 'Belum Dibayar', null],
+        ['2026002', 'SPP-2020-05', 'SPP', 100000, '2020-05-10', 'Belum Dibayar', null],
+      ]),
+    );
+    await flush();
+
+    expect(notify.mock.calls[0][1].body).toBe(
+      'Benediktus Santoso: 5 tagihan belum dibayar dan sudah lewat jatuh tempo, total IDR 500.000. ' +
+        'Rincian: SPP IDR 100.000 (jatuh tempo 10 Jan 2020); SPP IDR 100.000 (jatuh tempo 10 Feb 2020); ' +
+        'SPP IDR 100.000 (jatuh tempo 10 Mar 2020); dan 2 lainnya.',
     );
   });
 
@@ -160,6 +180,20 @@ describe('POST /api/v1/bills/import: berhasil (F-BYR-01)', () => {
     expect(res.body.data).toEqual({ created: 0, updated: 0, unchanged: 1, notifiedStudents: 0 });
     expect(prisma.$transaction).not.toHaveBeenCalled();
     expect(notify).not.toHaveBeenCalled();
+  });
+
+  it('kolom opsional yang diganti nama ditolak (bukan dibuang diam-diam)', async () => {
+    const buffer = await xlsx(
+      [['2026001', 'SPP-2099-01', 'SPP', 850000, '2099-01-10', 'Lunas', '2099-01-08']],
+      [...HEADER.slice(0, 6), 'Tgl Bayar'],
+    );
+
+    const res = await upload(buffer);
+
+    expect(res.status).toBe(422);
+    expect(res.body.error.details).toHaveLength(1);
+    expect(res.body.error.details[0]).toMatchObject({ row: 1, column: 'Tgl Bayar' });
+    expect(prisma.$transaction).not.toHaveBeenCalled();
   });
 
   it('kolom Tanggal Bayar boleh tidak ada di file', async () => {

@@ -16,6 +16,8 @@ import androidx.navigation.fragment.navArgs
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointForward
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.timepicker.MaterialTimePicker
+import com.google.android.material.timepicker.TimeFormat
 import dagger.hilt.android.AndroidEntryPoint
 import id.sch.santaagnes.sim.R
 import id.sch.santaagnes.sim.core.DateTimeWib
@@ -24,6 +26,7 @@ import id.sch.santaagnes.sim.databinding.FragmentTeacherTaskFormBinding
 import id.sch.santaagnes.sim.domain.model.TeachingAssignment
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneOffset
 
 @AndroidEntryPoint
@@ -38,6 +41,7 @@ class TeacherTaskFormFragment : Fragment() {
     private val isEdit get() = args.taskId != 0
 
     private var dueDate: LocalDate? = null
+    private var dueTime: LocalTime? = null
     private var assignments: List<TeachingAssignment> = emptyList()
 
     override fun onCreateView(
@@ -52,16 +56,22 @@ class TeacherTaskFormFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.tvHeading.setText(if (isEdit) R.string.task_form_title_edit else R.string.task_form_title_new)
         binding.btnBack.setOnClickListener { findNavController().popBackStack() }
-        listOf(binding.layoutAssignment, binding.layoutTitle, binding.layoutDescription, binding.layoutDueDate)
+        listOf(
+            binding.layoutAssignment, binding.layoutTitle, binding.layoutDescription,
+            binding.layoutDueDate, binding.layoutDueTime
+        )
             .forEach { it.clearErrorOnEdit() }
 
         if (savedInstanceState == null && isEdit) {
             binding.inputTitle.setText(args.title)
             binding.inputDescription.setText(args.description)
             dueDate = args.dueDate?.let(LocalDate::parse)
+            dueTime = args.dueTime?.let(LocalTime::parse)
         }
         savedInstanceState?.getString(STATE_DUE_DATE)?.let { dueDate = LocalDate.parse(it) }
+        savedInstanceState?.getString(STATE_DUE_TIME)?.let { dueTime = LocalTime.parse(it) }
         showDueDate()
+        showDueTime()
 
         // Kelas + mapel hanya dipilih saat membuat; saat mengubah tampil sebagai label tetap.
         binding.layoutAssignment.isVisible = !isEdit
@@ -70,6 +80,7 @@ class TeacherTaskFormFragment : Fragment() {
         if (!isEdit) viewModel.loadAssignments()
 
         binding.inputDueDate.setOnClickListener { pickDueDate() }
+        binding.inputDueTime.setOnClickListener { pickDueTime() }
         binding.btnSave.setOnClickListener { save() }
 
         viewLifecycleOwner.lifecycleScope.launch {
@@ -87,6 +98,7 @@ class TeacherTaskFormFragment : Fragment() {
         binding.layoutTitle.error = state.titleError?.let(::getString)
         binding.layoutDescription.error = state.descriptionError?.let(::getString)
         binding.layoutDueDate.error = state.dueDateError?.let(::getString)
+        binding.layoutDueTime.error = state.dueTimeError?.let(::getString)
 
         val noAssignments = !isEdit && !state.isLoadingAssignments && state.assignments.isEmpty()
         val message = state.errorMessage ?: if (noAssignments) getString(R.string.task_no_assignments) else null
@@ -113,7 +125,8 @@ class TeacherTaskFormFragment : Fragment() {
             assignment = assignments.firstOrNull { label(it) == chosen },
             title = binding.inputTitle.text.toString(),
             description = binding.inputDescription.text.toString(),
-            dueDate = dueDate
+            dueDate = dueDate,
+            dueTime = dueTime
         )
     }
 
@@ -138,13 +151,33 @@ class TeacherTaskFormFragment : Fragment() {
         picker.show(childFragmentManager, "dueDate")
     }
 
+    private fun pickDueTime() {
+        val initial = dueTime ?: LocalTime.of(DEFAULT_PICKER_HOUR, 0)
+        val picker = MaterialTimePicker.Builder()
+            .setTimeFormat(TimeFormat.CLOCK_24H)
+            .setHour(initial.hour)
+            .setMinute(initial.minute)
+            .setTitleText(R.string.task_due_time_hint)
+            .build()
+        picker.addOnPositiveButtonClickListener {
+            dueTime = LocalTime.of(picker.hour, picker.minute)
+            showDueTime()
+        }
+        picker.show(childFragmentManager, "dueTime")
+    }
+
     private fun showDueDate() {
         binding.inputDueDate.setText(dueDate?.let(DateTimeWib::formatDate).orEmpty())
+    }
+
+    private fun showDueTime() {
+        binding.inputDueTime.setText(dueTime?.let(DateTimeWib::formatTime).orEmpty())
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         dueDate?.let { outState.putString(STATE_DUE_DATE, it.toString()) }
+        dueTime?.let { outState.putString(STATE_DUE_TIME, it.toString()) }
     }
 
     override fun onDestroyView() {
@@ -154,5 +187,7 @@ class TeacherTaskFormFragment : Fragment() {
 
     private companion object {
         const val STATE_DUE_DATE = "dueDate"
+        const val STATE_DUE_TIME = "dueTime"
+        const val DEFAULT_PICKER_HOUR = 23
     }
 }

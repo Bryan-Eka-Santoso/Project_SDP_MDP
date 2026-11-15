@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.view.isVisible
+import id.sch.santaagnes.sim.R
+import androidx.navigation.fragment.findNavController
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -50,6 +52,8 @@ class PeminjamanFragment : Fragment() {
         savedInstanceState: Bundle?
     ) {
         super.onViewCreated(view, savedInstanceState)
+
+        binding.btnBack.setOnClickListener { findNavController().popBackStack() }
 
         binding.rvPeminjaman.layoutManager =
             LinearLayoutManager(requireContext())
@@ -102,6 +106,9 @@ class PeminjamanFragment : Fragment() {
                     binding.btnMenunggu.isEnabled = !state.processing
                     binding.btnDisetujui.isEnabled = !state.processing
                     binding.btnDitolak.isEnabled = !state.processing
+
+                    binding.tvTotal.isVisible = !state.loading && state.error == null
+                    binding.tvTotal.text = getString(R.string.master_total_bookings, state.daftar.size)
 
                     adapter.setData(state.daftar)
 

@@ -4,7 +4,8 @@ File contoh untuk impor data dari Excel (aturan: `docs/BUSINESS_RULES.md` bagian
 
 ## Aturan umum semua impor
 
-- Sistem membaca **lembar pertama**. Baris 1 adalah header; urutan kolom bebas, huruf besar/kecil pada header diabaikan, kolom tambahan diabaikan.
+- Sistem membaca **lembar pertama**. Baris 1 adalah header; urutan kolom bebas, huruf besar/kecil pada header diabaikan.
+- **Struktur harus persis template**: kolom tambahan atau kolom yang diganti namanya, header ganda, data di kolom tanpa header, dan lembar tambahan selain lembar petunjuk (`Petunjuk` / `Tentang berkas ini`) **ditolak** dengan pesan yang menyebut kolom atau lembar penyebabnya. Pakai template terbaru dari aplikasi.
 - File `.xlsx`, maksimal 10 MB dan 5000 baris data (pembayaran: 20000). Baris kosong dilewati.
 - **Semua atau tidak sama sekali**: satu baris salah membatalkan seluruh impor dan semua kesalahan ditampilkan sekaligus (nomor baris Excel + nama kolom + alasan).
 - Kolom kode, NIP, dan NIS harus berformat **Teks**. Excel membulatkan angka di atas 15 digit, jadi NIP 18 digit yang diketik sebagai angka rusak dan ditolak. Kolom NIP di template sudah berformat Teks.

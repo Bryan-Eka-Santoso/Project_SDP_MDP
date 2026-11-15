@@ -85,7 +85,7 @@ Format ID: `F-<MODUL>-<nomor>`. Gunakan ID ini di prompt, tiket, commit, dan pen
 | F-JDW-05 | Lihat jadwal beserta perubahannya, sesuai cakupan role | Siswa, Guru, Wali kelas, Wali murid |
 | F-JDW-06 | Sinkronkan agenda kalender akademik dan peminjaman yang disetujui ke kalender perangkat. Jadwal pelajaran **tidak** disinkron | Semua (kalender akademik); Siswa, Guru (peminjaman miliknya) |
 | F-JDW-07 | To-do list pribadi di halaman jadwal (judul, catatan, tenggat, opsional mapel, tandai selesai). Disimpan di perangkat (Room) | Siswa |
-| F-JDW-08 | Tambah, ubah, hapus tugas untuk kelas yang diajar (judul, catatan, tenggat) + notifikasi ke siswa kelas tersebut. Tanpa pengumpulan | Guru |
+| F-JDW-08 | Tambah, ubah, hapus tugas untuk kelas yang diajar (judul, catatan, tenggat tanggal + jam) + notifikasi ke siswa kelas tersebut. Tanpa pengumpulan | Guru |
 | F-JDW-09 | Lihat tugas dari guru per mapel di halaman jadwal; tandai selesai (disimpan di perangkat) | Siswa |
 
 ### 5.4 Nilai (`NIL`)

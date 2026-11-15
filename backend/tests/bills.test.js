@@ -2,7 +2,7 @@ process.env.JWT_ACCESS_SECRET = 'test-secret-yang-panjangnya-lebih-dari-32-karak
 
 jest.mock('../src/lib/prisma', () => ({
   user: { findUnique: jest.fn() },
-  student: { findUnique: jest.fn(), findFirst: jest.fn() },
+  student: { findUnique: jest.fn(), findFirst: jest.fn(), count: jest.fn() },
   studentGuardian: { findFirst: jest.fn() },
   classMember: { findFirst: jest.fn() },
   classGroup: { findMany: jest.fn() },
@@ -167,21 +167,32 @@ describe('GET /api/v1/bills', () => {
       },
     });
     expect(prisma.classGroup.findMany).not.toHaveBeenCalled();
+    // Jumlah murid dihitung dari anggota kelas yang difilter, bukan dari tagihan.
+    expect(prisma.student.count).toHaveBeenCalledWith({
+      where: { classMemberships: { some: { classGroupId: { in: [10] } } } },
+    });
   });
 
-  it('admin tanpa filter kelas/pencarian: tidak membatasi siswa', async () => {
+  it('admin tanpa filter kelas/pencarian: tidak membatasi siswa dan tanpa studentCount', async () => {
     prisma.bill.findMany.mockResolvedValue([row]);
-    await request(app).get('/api/v1/bills').set('Authorization', loginAs('ADMIN'));
+    const res = await request(app).get('/api/v1/bills').set('Authorization', loginAs('ADMIN'));
     expect(prisma.bill.findMany.mock.calls[0][0].where).toEqual({ AND: [] });
+    expect(prisma.student.count).not.toHaveBeenCalled();
+    expect(res.body.meta).not.toHaveProperty('studentCount');
   });
 
   it('wali kelas: otomatis dibatasi ke kelas binaan tahun ajaran aktif', async () => {
     prisma.classGroup.findMany.mockResolvedValue([{ id: 10 }, { id: 11 }]);
     prisma.bill.findMany.mockResolvedValue([row]);
+    prisma.student.count.mockResolvedValue(64);
 
     const res = await request(app).get('/api/v1/bills').set('Authorization', loginAs('TEACHER', 40));
 
     expect(res.status).toBe(200);
+    expect(res.body.meta.studentCount).toBe(64);
+    expect(prisma.student.count).toHaveBeenCalledWith({
+      where: { classMemberships: { some: { classGroupId: { in: [10, 11] } } } },
+    });
     expect(prisma.classGroup.findMany.mock.calls[0][0].where).toEqual({
       homeroomTeacher: { userId: 40 },
       academicYear: { isActive: true },

@@ -5,34 +5,64 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F0F0F0">
+    android:background="@color/agnesian_background">
 
     <!-- HEADER -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="140dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_header"
         android:orientation="vertical"
-        android:background="#2052CE"
-        android:gravity="center_vertical"
-        android:padding="20dp">
+        android:paddingHorizontal="8dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="12dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:minHeight="56dp"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/cd_back"
+                android:src="@drawable/ic_arrow_back" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/master_bookings_title"
+                android:textColor="@color/white"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+        </LinearLayout>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Pengajuan Peminjaman"
-            android:textColor="#FFFFFF"
-            android:textStyle="bold"
-            android:textSize="23sp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Kelola persetujuan peminjaman fasilitas"
-            android:textColor="#E6EEFF"
+            android:layout_marginStart="56dp"
+            android:alpha="0.85"
+            android:text="@string/master_bookings_subtitle"
+            android:textColor="@color/white"
             android:textSize="12sp" />
-
     </LinearLayout>
+
+    <!-- Jumlah seluruh data (dari daftar yang dimuat). -->
+    <TextView
+        android:id="@+id/tvTotal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="12dp"
+        android:textColor="@color/agnesian_blue"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
 
     <!-- FILTER STATUS -->
     <HorizontalScrollView
@@ -50,10 +80,10 @@
                 android:id="@+id/btnMenunggu"
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
-                android:text="Menunggu"
+                android:text="@string/master_bookings_menunggu"
                 android:textAllCaps="false"
-                android:textColor="#FFFFFF"
-                app:backgroundTint="#2052CE"
+                android:textColor="@color/white"
+                app:backgroundTint="@color/agnesian_blue"
                 app:cornerRadius="10dp" />
 
             <com.google.android.material.button.MaterialButton
@@ -62,7 +92,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
                 android:layout_marginStart="8dp"
-                android:text="Disetujui"
+                android:text="@string/master_bookings_disetujui"
                 android:textAllCaps="false"
                 app:cornerRadius="10dp" />
 
@@ -72,7 +102,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
                 android:layout_marginStart="8dp"
-                android:text="Ditolak"
+                android:text="@string/master_bookings_ditolak"
                 android:textAllCaps="false"
                 app:cornerRadius="10dp" />
 
@@ -82,7 +112,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
                 android:layout_marginStart="8dp"
-                android:text="Semua"
+                android:text="@string/master_bookings_semua"
                 android:textAllCaps="false"
                 app:cornerRadius="10dp" />
 
@@ -97,10 +127,10 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="14dp"
-        android:text="Daftar Pengajuan"
+        android:text="@string/master_bookings_daftar_pengajuan"
         android:textStyle="bold"
         android:textSize="15sp"
-        android:textColor="#262626" />
+        android:textColor="@color/agnesian_text" />
 
     <ProgressBar
         android:id="@+id/progress"
@@ -114,7 +144,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp"
-        android:textColor="#B00020"
+        android:textColor="@color/change_cancel"
         android:visibility="gone" />
 
     <Button
@@ -122,7 +152,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="Coba Lagi"
+        android:text="@string/action_retry"
         android:visibility="gone" />
 
     <TextView
@@ -131,7 +161,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:padding="24dp"
-        android:text="Belum ada pengajuan peminjaman"
+        android:text="@string/master_bookings_belum_ada_pengajuan_peminjam"
         android:visibility="gone" />
 
     <!-- DAFTAR -->

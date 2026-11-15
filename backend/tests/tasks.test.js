@@ -4,6 +4,7 @@ jest.mock('../src/lib/prisma', () => ({
   user: { findUnique: jest.fn() },
   semester: { findFirst: jest.fn() },
   teachingAssignment: { findFirst: jest.fn(), findMany: jest.fn() },
+  studentGuardian: { findFirst: jest.fn() },
   task: {
     create: jest.fn(),
     findMany: jest.fn(),
@@ -27,6 +28,7 @@ const recipients = require('../src/modules/notifications/notifications.recipient
 const { parseDateOnly, todayLocal } = require('../src/utils/date');
 
 const d = (ymd) => new Date(`${ymd}T00:00:00.000Z`);
+const t = (hm) => new Date(`1970-01-01T${hm}:00.000Z`);
 const flush = () => new Promise((resolve) => setImmediate(resolve));
 
 function loginAs(role, id = 1) {
@@ -39,6 +41,7 @@ const row = {
   title: 'Kerjakan LKS bab 3',
   description: 'Dikerjakan di buku tulis.',
   dueDate: d('2099-01-20'),
+  dueTime: t('14:30'),
   createdAt: new Date('2026-11-09T01:00:00.000Z'),
   updatedAt: new Date('2026-11-09T01:00:00.000Z'),
   teachingAssignment: {
@@ -55,6 +58,7 @@ const dto = {
   title: 'Kerjakan LKS bab 3',
   description: 'Dikerjakan di buku tulis.',
   dueDate: '2099-01-20',
+  dueTime: '14:30',
   createdAt: '2026-11-09T01:00:00.000Z',
   updatedAt: '2026-11-09T01:00:00.000Z',
   teachingAssignment: {
@@ -66,7 +70,7 @@ const dto = {
 };
 
 const post = (body, auth) => request(app).post('/api/v1/tasks').set('Authorization', auth).send(body);
-const valid = { teachingAssignmentId: 10, title: 'Kerjakan LKS bab 3', dueDate: '2099-01-20' };
+const valid = { teachingAssignmentId: 10, title: 'Kerjakan LKS bab 3', dueDate: '2099-01-20', dueTime: '14:30' };
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -95,6 +99,7 @@ describe('POST /api/v1/tasks', () => {
       title: 'Kerjakan LKS bab 3',
       description: 'Dikerjakan di buku tulis.',
       dueDate: d('2099-01-20'),
+      dueTime: t('14:30'),
     });
 
     await flush();
@@ -103,7 +108,7 @@ describe('POST /api/v1/tasks', () => {
     expect(notify).toHaveBeenCalledWith([201, 202], {
       type: 'TASK',
       title: 'Tugas baru',
-      body: expect.stringContaining('Matematika X-1: Kerjakan LKS bab 3.'),
+      body: expect.stringMatching(/^Matematika X-1: Kerjakan LKS bab 3\. Tenggat .+ 2099 pukul 14\.30\.$/),
       referenceId: 1,
     });
   });
@@ -122,13 +127,27 @@ describe('POST /api/v1/tasks', () => {
     expect(notify).not.toHaveBeenCalled();
   });
 
-  it('tenggat sebelum hari ini ditolak; hari ini boleh', async () => {
+  it('tenggat sebelum hari ini ditolak; hari ini boleh selama jamnya belum lewat', async () => {
     const past = await post({ ...valid, dueDate: '2020-01-01' }, loginAs('TEACHER'));
     expect(past.status).toBe(400);
     expect(past.body.error.details[0].field).toBe('body.dueDate');
 
-    const today = await post({ ...valid, dueDate: todayLocal() }, loginAs('TEACHER'));
+    const today = await post({ ...valid, dueDate: todayLocal(), dueTime: '23:59' }, loginAs('TEACHER'));
     expect(today.status).toBe(201);
+
+    const earlier = await post({ ...valid, dueDate: todayLocal(), dueTime: '00:00' }, loginAs('TEACHER'));
+    expect(earlier.status).toBe(400);
+    expect(earlier.body.error.details[0].field).toBe('body.dueTime');
+  });
+
+  it('jam tenggat wajib dan harus berformat HH:mm', async () => {
+    const auth = loginAs('TEACHER');
+    const missing = await post({ ...valid, dueTime: undefined }, auth);
+    expect(missing.status).toBe(400);
+    expect(missing.body.error.details[0].field).toBe('body.dueTime');
+    expect((await post({ ...valid, dueTime: '25:00' }, auth)).status).toBe(400);
+    expect((await post({ ...valid, dueTime: '9:30' }, auth)).status).toBe(400);
+    expect(prisma.task.create).not.toHaveBeenCalled();
   });
 
   it('400 untuk judul kosong, judul terlalu panjang, dan tanggal tidak ada', async () => {
@@ -136,7 +155,7 @@ describe('POST /api/v1/tasks', () => {
     expect((await post({ ...valid, title: '  ' }, auth)).status).toBe(400);
     expect((await post({ ...valid, title: 'x'.repeat(151) }, auth)).status).toBe(400);
     expect((await post({ ...valid, dueDate: '2099-02-30' }, auth)).status).toBe(400);
-    expect((await post({ title: 'Tanpa penugasan', dueDate: '2099-01-20' }, auth)).status).toBe(400);
+    expect((await post({ title: 'Tanpa penugasan', dueDate: '2099-01-20', dueTime: '14:30' }, auth)).status).toBe(400);
   });
 
   it('401 tanpa login; 403 untuk siswa, wali murid, dan admin', async () => {
@@ -188,14 +207,49 @@ describe('GET /api/v1/tasks', () => {
     expect(prisma.task.findMany).not.toHaveBeenCalled();
   });
 
-  it('403 untuk wali murid dan admin; 401 tanpa login; 400 rentang terbalik', async () => {
-    expect((await request(app).get('/api/v1/tasks').set('Authorization', loginAs('GUARDIAN'))).status).toBe(403);
+  it('403 untuk admin; 401 tanpa login; 400 rentang terbalik', async () => {
     expect((await request(app).get('/api/v1/tasks').set('Authorization', loginAs('ADMIN'))).status).toBe(403);
     expect((await request(app).get('/api/v1/tasks')).status).toBe(401);
     const bad = await request(app)
       .get('/api/v1/tasks?dueFrom=2099-02-01&dueTo=2099-01-01')
       .set('Authorization', loginAs('TEACHER'));
     expect(bad.status).toBe(400);
+  });
+});
+
+describe('GET /api/v1/tasks: wali murid (pengingat dashboard)', () => {
+  const get = (query, auth) => request(app).get(`/api/v1/tasks${query}`).set('Authorization', auth);
+
+  it('melihat tugas kelas anaknya dengan studentId', async () => {
+    prisma.studentGuardian.findFirst.mockResolvedValue({ studentId: 60 });
+
+    const res = await get('?studentId=60&dueFrom=2099-01-01&limit=3', loginAs('GUARDIAN', 70));
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).toEqual([dto]);
+    expect(prisma.studentGuardian.findFirst).toHaveBeenCalledWith({
+      where: { studentId: 60, guardian: { userId: 70 } },
+      select: { studentId: true },
+    });
+    const call = prisma.task.findMany.mock.calls[0][0];
+    expect(call.where.AND[0]).toEqual({ teachingAssignment: { classGroup: { members: { some: { studentId: 60 } } } } });
+    expect(call.take).toBe(3);
+  });
+
+  it('tanpa studentId: 400; anak orang lain: 404 tanpa query tugas', async () => {
+    const missing = await get('', loginAs('GUARDIAN', 70));
+    expect(missing.status).toBe(400);
+    expect(missing.body.error.details[0].field).toBe('query.studentId');
+
+    prisma.studentGuardian.findFirst.mockResolvedValue(null);
+    expect((await get('?studentId=61', loginAs('GUARDIAN', 70))).status).toBe(404);
+    expect(prisma.task.findMany).not.toHaveBeenCalled();
+  });
+
+  it('siswa dan guru tidak boleh mengirim studentId; wali murid tetap 403 pada detail tugas', async () => {
+    expect((await get('?studentId=60', loginAs('STUDENT', 50))).status).toBe(400);
+    expect((await get('?studentId=60', loginAs('TEACHER', 40))).status).toBe(400);
+    expect((await request(app).get('/api/v1/tasks/1').set('Authorization', loginAs('GUARDIAN'))).status).toBe(403);
   });
 });
 
@@ -226,7 +280,7 @@ describe('PATCH /api/v1/tasks/:id', () => {
   const patch = (body, auth) => request(app).patch('/api/v1/tasks/1').set('Authorization', auth).send(body);
 
   it('guru pemilik memperbarui sebagian field; tidak mengirim notifikasi', async () => {
-    const res = await patch({ title: 'Judul baru', dueDate: '2020-01-01' }, loginAs('TEACHER', 40));
+    const res = await patch({ title: 'Judul baru', dueDate: '2020-01-01', dueTime: '08:15' }, loginAs('TEACHER', 40));
 
     expect(res.status).toBe(200);
     expect(prisma.task.findFirst).toHaveBeenCalledWith({
@@ -234,7 +288,11 @@ describe('PATCH /api/v1/tasks/:id', () => {
       select: { id: true },
     });
     // Tenggat hanya dicek saat tugas dibuat.
-    expect(prisma.task.update.mock.calls[0][0].data).toEqual({ title: 'Judul baru', dueDate: d('2020-01-01') });
+    expect(prisma.task.update.mock.calls[0][0].data).toEqual({
+      title: 'Judul baru',
+      dueDate: d('2020-01-01'),
+      dueTime: t('08:15'),
+    });
     await flush();
     expect(notify).not.toHaveBeenCalled();
   });

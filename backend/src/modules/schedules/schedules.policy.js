@@ -56,4 +56,13 @@ async function resolveViewScope(user, { studentId, classGroupId }) {
   throw new AppError(403, 'FORBIDDEN', 'Anda tidak memiliki akses ke fitur ini.');
 }
 
-module.exports = { resolveViewScope };
+/** Wali murid hanya boleh melihat data anaknya (CHILD); selain itu 404 agar keberadaan siswa tidak bocor. */
+async function assertChildOfGuardian(user, studentId) {
+  const child = await prisma.studentGuardian.findFirst({
+    where: { studentId, guardian: { userId: user.id } },
+    select: { studentId: true },
+  });
+  if (!child) throw notFound('Data siswa tidak ditemukan.');
+}
+
+module.exports = { resolveViewScope, assertChildOfGuardian, invalidQuery };

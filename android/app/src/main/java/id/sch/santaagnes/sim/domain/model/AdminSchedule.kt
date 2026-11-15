@@ -8,7 +8,11 @@ import java.time.LocalTime
 data class PageResult<T>(
     val items: List<T>,
     val page: Int,
-    val hasMore: Boolean
+    val hasMore: Boolean,
+    // jumlah seluruh data di server (meta.total), untuk baris "Total: N"; null bila tidak diketahui
+    val total: Int? = null,
+    // jumlah murid di kelas (hanya daftar tagihan wali kelas)
+    val studentCount: Int? = null
 )
 
 /** Slot jadwal mingguan pada master jadwal. */

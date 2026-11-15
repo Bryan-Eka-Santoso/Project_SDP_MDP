@@ -51,16 +51,6 @@ class GradeManageFragment : Fragment() {
             if (currentPanel == "list") findNavController().navigateUp()
             else showPanel("list")
         }
-        binding.bottomNav.navTeacherHome.setOnClickListener {
-            if (!findNavController().popBackStack(R.id.teacherHomeFragment, false)) {
-                findNavController().navigate(R.id.teacherHomeFragment)
-            }
-        }
-        binding.bottomNav.navTeacherClasses.setOnClickListener {
-            if (!findNavController().popBackStack(R.id.teacherClassesFragment, false)) {
-                findNavController().navigate(R.id.teacherClassesFragment)
-            }
-        }
         binding.btnReload.setOnClickListener { viewModel.load(assignmentId) }
         binding.btnShowComponents.setOnClickListener { showPanel("components") }
         binding.btnBackToGrades.setOnClickListener {

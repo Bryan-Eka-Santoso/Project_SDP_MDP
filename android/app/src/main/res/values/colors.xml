@@ -7,6 +7,7 @@
     <color name="agnesian_background">#F0F0F0</color>
     <color name="agnesian_muted">#9299A5</color>
     <color name="agnesian_text">#1F2937</color>
+    <color name="agnesian_tile">#E8F0FE</color>
     <color name="change_substitute">#B26A00</color>
     <color name="change_reschedule">#1E50CA</color>
     <color name="change_cancel">#B3261E</color>

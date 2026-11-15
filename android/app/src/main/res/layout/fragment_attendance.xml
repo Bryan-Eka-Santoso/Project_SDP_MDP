@@ -226,8 +226,5 @@
     </ScrollView>
 
     <!-- Bottom Navigation Guru -->
-    <include
-        android:id="@+id/bottomNav"
-        layout="@layout/layout_teacher_bottom_nav" />
 
 </LinearLayout>

@@ -37,6 +37,8 @@ object DateTimeWib {
 
     fun today(clock: Clock = Clock.system(zone)): LocalDate = LocalDate.now(clock)
 
+    fun now(clock: Clock = Clock.system(zone)): java.time.LocalDateTime = java.time.LocalDateTime.now(clock)
+
     /** Senin pekan berjalan; pada hari Minggu (tidak ada pelajaran) yang dipakai pekan depan. */
     fun currentWeekStart(today: LocalDate): LocalDate =
         if (today.dayOfWeek == DayOfWeek.SUNDAY) {

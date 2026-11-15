@@ -2,9 +2,17 @@
 // pengumpulan atau penilaian, dan tanda "selesai" siswa disimpan di perangkat.
 const prisma = require('../../lib/prisma');
 const AppError = require('../../utils/AppError');
-const { parseDateOnly, formatDateOnly, todayLocal } = require('../../utils/date');
+const {
+  parseDateOnly,
+  formatDateOnly,
+  parseTimeOfDay,
+  formatTimeOfDay,
+  todayLocal,
+  timeLocal,
+} = require('../../utils/date');
 const { toPrismaPagination } = require('../../utils/pagination');
 const { invalidField, activeSemesterId } = require('./schedules.service');
+const { assertChildOfGuardian, invalidQuery } = require('./schedules.policy');
 const { notify } = require('../notifications/notifications.service');
 const recipients = require('../notifications/notifications.recipients');
 
@@ -13,6 +21,7 @@ const taskSelect = {
   title: true,
   description: true,
   dueDate: true,
+  dueTime: true,
   createdAt: true,
   updatedAt: true,
   teachingAssignment: {
@@ -43,6 +52,8 @@ function toTaskDto(task) {
     title: task.title,
     description: task.description,
     dueDate: formatDateOnly(task.dueDate),
+    // null = tugas lama tanpa jam; klien menganggapnya berakhir pukul 23:59.
+    dueTime: task.dueTime ? formatTimeOfDay(task.dueTime) : null,
     createdAt: task.createdAt,
     updatedAt: task.updatedAt,
     teachingAssignment: {
@@ -54,10 +65,14 @@ function toTaskDto(task) {
   };
 }
 
-// Cakupan data (docs/PERMISSIONS.md): siswa = tugas kelasnya (SELF), guru = penugasan miliknya (TAUGHT).
-function scopeWhere(user) {
+// Cakupan data (docs/PERMISSIONS.md): siswa = tugas kelasnya (SELF), wali murid = tugas kelas
+// anaknya (CHILD), guru = penugasan miliknya (TAUGHT).
+function scopeWhere(user, studentId) {
   if (user.role === 'STUDENT') {
     return { teachingAssignment: { classGroup: { members: { some: { student: { userId: user.id } } } } } };
+  }
+  if (user.role === 'GUARDIAN') {
+    return { teachingAssignment: { classGroup: { members: { some: { studentId } } } } };
   }
   return { teachingAssignment: { teacher: { userId: user.id } } };
 }
@@ -76,25 +91,38 @@ function sendTaskNotification(task) {
   (async () => {
     const ta = task.teachingAssignment;
     const students = await recipients.studentUserIdsOfClasses([ta.classGroup.id]);
+    const due = task.dueTime
+      ? `${longDate.format(task.dueDate)} pukul ${formatTimeOfDay(task.dueTime).replace(':', '.')}`
+      : longDate.format(task.dueDate);
     notify(students, {
       type: 'TASK',
       title: 'Tugas baru',
-      body: `${ta.subject.name} ${ta.classGroup.name}: ${task.title}. Tenggat ${longDate.format(task.dueDate)}.`,
+      body: `${ta.subject.name} ${ta.classGroup.name}: ${task.title}. Tenggat ${due}.`,
       referenceId: task.id,
     });
   })().catch((err) => console.error('[notifikasi] gagal menyiapkan tugas baru:', err));
 }
 
-async function createTask(user, { teachingAssignmentId, title, description, dueDate }) {
+async function createTask(user, { teachingAssignmentId, title, description, dueDate, dueTime }) {
   const assignment = await prisma.teachingAssignment.findFirst({
     where: { id: teachingAssignmentId, teacher: { userId: user.id } },
     select: { id: true },
   });
   if (!assignment) throw invalidField('teachingAssignmentId', 'Penugasan mengajar tidak ditemukan.');
   if (dueDate < todayLocal()) throw invalidField('dueDate', 'Tenggat tidak boleh sebelum hari ini.');
+  // Tenggat hari ini harus masih di depan jam sekarang (WIB).
+  if (dueDate === todayLocal() && dueTime <= timeLocal()) {
+    throw invalidField('dueTime', 'Jam tenggat harus setelah jam sekarang.');
+  }
 
   const task = await prisma.task.create({
-    data: { teachingAssignmentId, title, description: description ?? null, dueDate: parseDateOnly(dueDate) },
+    data: {
+      teachingAssignmentId,
+      title,
+      description: description ?? null,
+      dueDate: parseDateOnly(dueDate),
+      dueTime: parseTimeOfDay(dueTime),
+    },
     select: taskSelect,
   });
   sendTaskNotification(task);
@@ -102,13 +130,24 @@ async function createTask(user, { teachingAssignmentId, title, description, dueD
 }
 
 // Tanpa semesterId memakai semester aktif (docs/API_CONVENTIONS.md bagian 4).
-async function listTasks(user, { page, limit, semesterId, teachingAssignmentId, subjectId, classGroupId, dueFrom, dueTo }) {
+async function listTasks(
+  user,
+  { page, limit, semesterId, teachingAssignmentId, subjectId, classGroupId, studentId, dueFrom, dueTo },
+) {
+  // studentId hanya bermakna untuk wali murid: anak yang tugasnya dilihat, harus anaknya sendiri.
+  if (user.role === 'GUARDIAN') {
+    if (!studentId) throw invalidQuery('studentId', 'Pilih anak yang tugasnya ingin dilihat.');
+    await assertChildOfGuardian(user, studentId);
+  } else if (studentId) {
+    throw invalidQuery('studentId', 'studentId hanya untuk wali murid.');
+  }
+
   const periodId = semesterId ?? (await activeSemesterId());
   if (periodId === null) return { items: [], total: 0 };
 
   const where = {
     AND: [
-      scopeWhere(user),
+      scopeWhere(user, studentId),
       { teachingAssignment: { semesterId: periodId } },
       ...(teachingAssignmentId ? [{ teachingAssignmentId }] : []),
       ...(subjectId ? [{ teachingAssignment: { subjectId } }] : []),
@@ -137,7 +176,7 @@ async function getTask(user, id) {
 }
 
 // Penugasan tidak bisa dipindah. Tenggat hanya dicek saat tugas dibuat (BUSINESS_RULES 2.5).
-async function updateTask(user, id, { title, description, dueDate }) {
+async function updateTask(user, id, { title, description, dueDate, dueTime }) {
   await loadOwnedTaskId(user, id);
   const task = await prisma.task.update({
     where: { id },
@@ -145,6 +184,7 @@ async function updateTask(user, id, { title, description, dueDate }) {
       ...(title !== undefined && { title }),
       ...(description !== undefined && { description }),
       ...(dueDate !== undefined && { dueDate: parseDateOnly(dueDate) }),
+      ...(dueTime !== undefined && { dueTime: parseTimeOfDay(dueTime) }),
     },
     select: taskSelect,
   });

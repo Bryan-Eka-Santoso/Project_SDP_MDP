@@ -14,11 +14,13 @@ import id.sch.santaagnes.sim.R
 import id.sch.santaagnes.sim.core.DateTimeWib
 import id.sch.santaagnes.sim.core.DueCountdown
 import id.sch.santaagnes.sim.core.dueCountdown
+import id.sch.santaagnes.sim.core.isDueUrgent
 import id.sch.santaagnes.sim.databinding.ItemStudentTaskBinding
 import id.sch.santaagnes.sim.databinding.ItemSubjectHeaderBinding
 import id.sch.santaagnes.sim.databinding.ItemTodoBinding
 import id.sch.santaagnes.sim.domain.model.Todo
 import java.time.LocalDate
+import java.time.LocalTime
 
 /** Baris pada layar tugas siswa: judul mapel, tugas dari guru, atau pengingat pribadi. */
 sealed interface StudentTaskItem {
@@ -34,6 +36,18 @@ fun countdownText(context: Context, due: LocalDate, today: LocalDate): String =
         DueCountdown.Today -> context.getString(R.string.due_today)
         is DueCountdown.Remaining -> context.getString(R.string.due_remaining, countdown.days)
     }
+
+/** "Rabu, 11 November 2026 pukul 14:30"; tugas lama tanpa jam hanya menampilkan tanggal. */
+fun dueDateText(context: Context, date: LocalDate, time: LocalTime?): String {
+    val dateText = DateTimeWib.formatDate(date)
+    return if (time == null) dateText else context.getString(R.string.task_due_at, dateText, DateTimeWib.formatTime(time))
+}
+
+/** Merah bila tenggat sudah lewat atau tinggal 24 jam atau kurang; selain itu biru. */
+fun dueColor(context: Context, date: LocalDate, time: LocalTime?, active: Boolean = true): Int {
+    val urgent = active && isDueUrgent(date, time, DateTimeWib.now())
+    return ContextCompat.getColor(context, if (urgent) R.color.change_cancel else R.color.agnesian_blue)
+}
 
 class StudentTaskAdapter(
     private val onTaskDone: (taskId: Int, done: Boolean) -> Unit,
@@ -78,9 +92,10 @@ class StudentTaskAdapter(
             strike(binding.tvTitle, row.done)
             binding.tvDue.text = context.getString(
                 R.string.task_due_with_countdown,
-                DateTimeWib.formatDate(task.dueDate),
+                dueDateText(context, task.dueDate, task.dueTime),
                 countdownText(context, task.dueDate, DateTimeWib.today())
             )
+            binding.tvDue.setTextColor(dueColor(context, task.dueDate, task.dueTime, active = !row.done))
             binding.tvNotes.isVisible = task.description != null
             binding.tvNotes.text = task.description
             // Listener dilepas dulu agar penyetelan isChecked dari data tidak dianggap ketukan pengguna.
@@ -108,10 +123,8 @@ class StudentTaskAdapter(
                     countdownText(context, todo.dueDate, DateTimeWib.today())
                 )
             }
-            val overdue = !todo.isCompleted && todo.dueDate.isBefore(DateTimeWib.today())
-            binding.tvCountdown.setTextColor(
-                ContextCompat.getColor(context, if (overdue) R.color.change_cancel else R.color.agnesian_blue)
-            )
+            // Pengingat pribadi tidak punya jam: dihitung sampai 23:59 pada hari tenggat.
+            binding.tvCountdown.setTextColor(dueColor(context, todo.dueDate, null, active = !todo.isCompleted))
             binding.cbDone.setOnCheckedChangeListener(null)
             binding.cbDone.isChecked = todo.isCompleted
             binding.cbDone.setOnCheckedChangeListener { _, checked -> onCompleted(todo.id, checked) }

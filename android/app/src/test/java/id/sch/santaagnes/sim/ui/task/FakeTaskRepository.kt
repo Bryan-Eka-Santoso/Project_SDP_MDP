@@ -7,6 +7,7 @@ import id.sch.santaagnes.sim.domain.model.TaskInput
 import id.sch.santaagnes.sim.domain.model.TaskPage
 import id.sch.santaagnes.sim.domain.model.TeachingAssignment
 import java.time.LocalDate
+import java.time.LocalTime
 
 class FakeTaskRepository : TaskRepository {
     var pages: List<List<Task>> = listOf(emptyList())
@@ -25,6 +26,14 @@ class FakeTaskRepository : TaskRepository {
         tasksError?.let { return Resource.Error(it) }
         val items = pages.getOrElse(page - 1) { emptyList() }
         return Resource.Success(TaskPage(items, page, hasMore = page < pages.size))
+    }
+
+    var remindersResult: Resource<List<Task>> = Resource.Success(emptyList())
+    val requestedReminders = mutableListOf<Pair<Int?, Int>>()
+
+    override suspend fun reminders(studentId: Int?, limit: Int): Resource<List<Task>> {
+        requestedReminders += studentId to limit
+        return remindersResult
     }
 
     override suspend fun teachingAssignments() = assignmentsResult
@@ -53,6 +62,7 @@ class FakeTaskRepository : TaskRepository {
             title = "Tugas $id",
             description = null,
             dueDate = LocalDate.of(2026, 11, 20),
+            dueTime = LocalTime.of(14, 30),
             subjectName = "Matematika",
             classGroupName = "X-1",
             teacherName = "Guru Satu"

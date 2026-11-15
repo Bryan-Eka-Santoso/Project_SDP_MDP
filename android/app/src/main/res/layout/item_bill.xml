@@ -67,7 +67,7 @@
             android:textColor="@color/agnesian_text"
             android:textSize="20sp"
             android:textStyle="bold"
-            tools:text="Rp 850.000" />
+            tools:text="IDR 850.000" />
 
         <TextView
             android:id="@+id/tvDue"

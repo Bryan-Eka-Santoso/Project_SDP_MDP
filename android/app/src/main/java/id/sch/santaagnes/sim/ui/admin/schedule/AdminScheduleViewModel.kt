@@ -24,6 +24,8 @@ data class AdminScheduleUiState(
     val isLoading: Boolean = true,
     val isLoadingMore: Boolean = false,
     val hasMore: Boolean = false,
+    // seluruh jadwal yang cocok dengan filter (meta.total), null sampai halaman pertama termuat
+    val total: Int? = null,
     val errorMessage: String? = null,
     // pilihan filter; kosong bila master penugasan belum tersedia, filter hari tetap jalan
     val classGroups: List<NamedId> = emptyList(),
@@ -58,7 +60,12 @@ class AdminScheduleViewModel @Inject constructor(
                     if (_uiState.value.filter != filter) return@launch
                     nextPage = 2
                     _uiState.update {
-                        it.copy(slots = result.data.items, hasMore = result.data.hasMore, isLoading = false)
+                        it.copy(
+                            slots = result.data.items,
+                            hasMore = result.data.hasMore,
+                            total = result.data.total,
+                            isLoading = false
+                        )
                     }
                 }
                 is Resource.Error -> _uiState.update { it.copy(isLoading = false, errorMessage = result.message) }

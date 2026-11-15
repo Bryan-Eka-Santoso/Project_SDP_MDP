@@ -151,14 +151,12 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:orientation="horizontal">
+                    android:orientation="vertical">
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/layoutStart"
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="6dp"
-                        android:layout_weight="1"
                         android:hint="@string/change_start_hint">
 
                         <com.google.android.material.textfield.TextInputEditText
@@ -171,10 +169,9 @@
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/layoutEnd"
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
-                        android:layout_weight="1"
+                        android:layout_marginTop="12dp"
                         android:hint="@string/change_end_hint">
 
                         <com.google.android.material.textfield.TextInputEditText

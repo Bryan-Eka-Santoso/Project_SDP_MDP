@@ -13,7 +13,9 @@ data class PageMetaDto(
     val page: Int,
     val limit: Int,
     val total: Int,
-    val totalPages: Int
+    val totalPages: Int,
+    // hanya GET /bills yang dibatasi ke kelas (wali kelas): jumlah murid di kelas itu
+    val studentCount: Int? = null
 )
 
 data class ApiErrorBody(

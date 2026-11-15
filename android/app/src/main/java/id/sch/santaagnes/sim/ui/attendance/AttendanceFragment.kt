@@ -50,16 +50,6 @@ class AttendanceFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.tvSubtitle.text = arguments?.getString("assignmentLabel") ?: "Kelas yang diajar"
         binding.btnBack.setOnClickListener { findNavController().navigateUp() }
-        binding.bottomNav.navTeacherHome.setOnClickListener {
-            if (!findNavController().popBackStack(R.id.teacherHomeFragment, false)) {
-                findNavController().navigate(R.id.teacherHomeFragment)
-            }
-        }
-        binding.bottomNav.navTeacherClasses.setOnClickListener {
-            if (!findNavController().popBackStack(R.id.teacherClassesFragment, false)) {
-                findNavController().navigate(R.id.teacherClassesFragment)
-            }
-        }
         binding.btnMarkAllPresent.setOnClickListener {
             statuses.values.forEach { it.setSelection(0) }
         }

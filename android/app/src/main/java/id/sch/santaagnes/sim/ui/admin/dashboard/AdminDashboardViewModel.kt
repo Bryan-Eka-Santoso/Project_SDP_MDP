@@ -5,55 +5,50 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import id.sch.santaagnes.sim.core.Resource
 import id.sch.santaagnes.sim.data.local.SessionManager
-import id.sch.santaagnes.sim.data.repository.StudentRepository
-import id.sch.santaagnes.sim.data.repository.UserRepository
+import id.sch.santaagnes.sim.data.repository.AdminOverviewRepository
+import id.sch.santaagnes.sim.domain.model.AdminOverview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class AdminDashboardUiState(
-    val adminName: String = "Administrator",
-    val totalStudents: Int = 213,
-    val totalAlumni: Int = 1243,
-    val totalClasses: Int = 33,
-    val totalUsers: Int = 70,
-    val isLoading: Boolean = false
+    // null sampai nama dari sesi terbaca
+    val adminName: String? = null,
+    val overview: AdminOverview = AdminOverview(),
+    val isLoading: Boolean = true,
+    val errorMessage: String? = null
 )
 
 @HiltViewModel
 class AdminDashboardViewModel @Inject constructor(
     private val sessionManager: SessionManager,
-    private val userRepository: UserRepository,
-    private val studentRepository: StudentRepository
+    private val overviewRepository: AdminOverviewRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AdminDashboardUiState())
     val uiState: StateFlow<AdminDashboardUiState> = _uiState.asStateFlow()
 
     init {
-        loadDashboardData()
+        viewModelScope.launch {
+            val name = sessionManager.getUserName()
+            _uiState.update { it.copy(adminName = name) }
+        }
+        refresh()
     }
 
-    fun loadDashboardData() {
+    /** Muat ulang jumlah data; dipanggil saat layar tampil agar angkanya ikut data terbaru. */
+    fun refresh() {
         viewModelScope.launch {
-            val name = sessionManager.getUserName() ?: "Administrator"
-            _uiState.value = _uiState.value.copy(adminName = name, isLoading = true)
-
-            // Muat total users dan students secara aktual dari backend
-            val usersResult = userRepository.getUsers(page = 1, limit = 1)
-            val studentsResult = studentRepository.getStudents(page = 1, limit = 1)
-
-            val totalUsers = if (usersResult is Resource.Success) usersResult.data.second else 70
-            val totalStudents = if (studentsResult is Resource.Success) studentsResult.data.second else 213
-
-            _uiState.value = _uiState.value.copy(
-                adminName = name,
-                totalUsers = totalUsers,
-                totalStudents = totalStudents,
-                isLoading = false
-            )
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+            when (val result = overviewRepository.overview()) {
+                is Resource.Success -> _uiState.update {
+                    it.copy(overview = result.data, isLoading = false)
+                }
+                is Resource.Error -> _uiState.update { it.copy(isLoading = false, errorMessage = result.message) }
+            }
         }
     }
 }

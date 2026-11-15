@@ -13,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
 import id.sch.santaagnes.sim.R
+import id.sch.santaagnes.sim.core.Resource
 import id.sch.santaagnes.sim.data.repository.AuthRepository
 import id.sch.santaagnes.sim.data.repository.GradesRepository
 import id.sch.santaagnes.sim.databinding.FragmentTeacherDashboardBinding
@@ -66,18 +67,6 @@ class TeacherDashboardFragment : Fragment() {
             )
         }
 
-        // Bottom navigation - Home
-        binding.bottomNav.navTeacherHome.setOnClickListener {
-            refreshDashboard()
-        }
-
-        // Bottom navigation - Kelas
-        binding.bottomNav.navTeacherClasses.setOnClickListener {
-            findNavController().navigate(
-                R.id.teacherClassesFragment
-            )
-        }
-
         // Memuat data dashboard
         refreshDashboard()
     }
@@ -90,7 +79,7 @@ class TeacherDashboardFragment : Fragment() {
 
             try {
                 // Mengambil profil guru
-                val user = authRepository.getProfile().getOrNull()
+                val user = (authRepository.getProfile() as? Resource.Success)?.data
 
                 if (_binding == null) return@launch
 

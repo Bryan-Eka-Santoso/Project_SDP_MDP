@@ -60,10 +60,10 @@ class BillMappersTest {
 
     @Test
     fun formatsRupiahWithDotSeparators() {
-        assertEquals("Rp 0", Rupiah.format(0))
-        assertEquals("Rp 500", Rupiah.format(500))
-        assertEquals("Rp 1.000", Rupiah.format(1_000))
-        assertEquals("Rp 850.000", Rupiah.format(850_000))
-        assertEquals("Rp 9.999.999.999", Rupiah.format(9_999_999_999))
+        assertEquals("IDR 0", Rupiah.format(0))
+        assertEquals("IDR 500", Rupiah.format(500))
+        assertEquals("IDR 1.000", Rupiah.format(1_000))
+        assertEquals("IDR 850.000", Rupiah.format(850_000))
+        assertEquals("IDR 9.999.999.999", Rupiah.format(9_999_999_999))
     }
 }

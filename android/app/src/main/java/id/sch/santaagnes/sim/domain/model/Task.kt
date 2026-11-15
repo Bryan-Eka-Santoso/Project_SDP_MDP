@@ -1,6 +1,7 @@
 package id.sch.santaagnes.sim.domain.model
 
 import java.time.LocalDate
+import java.time.LocalTime
 
 /** Tugas dari guru untuk satu kelas + mapel. */
 data class Task(
@@ -8,6 +9,8 @@ data class Task(
     val title: String,
     val description: String?,
     val dueDate: LocalDate,
+    // null pada tugas lama tanpa jam tenggat (dianggap 23:59)
+    val dueTime: LocalTime?,
     val subjectName: String,
     val classGroupName: String,
     val teacherName: String?
@@ -31,5 +34,6 @@ data class TeachingAssignment(
 data class TaskInput(
     val title: String,
     val description: String,
-    val dueDate: LocalDate
+    val dueDate: LocalDate,
+    val dueTime: LocalTime
 )

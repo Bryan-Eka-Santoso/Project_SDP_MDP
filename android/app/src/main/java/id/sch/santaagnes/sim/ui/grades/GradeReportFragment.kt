@@ -37,16 +37,7 @@ class GradeReportFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val role = arguments?.getString("role") ?: "STUDENT"
         binding.tvReportTitle.text = if (role == "TEACHER") "Rekap Nilai Kelas" else "Nilai Siswa"
-        binding.bottomNav.root.visibility = if (role == "TEACHER") View.VISIBLE else View.GONE
         binding.btnReportBack.setOnClickListener { findNavController().navigateUp() }
-        binding.bottomNav.navTeacherHome.setOnClickListener {
-            if (!findNavController().popBackStack(R.id.teacherHomeFragment, false)) {
-                findNavController().navigate(R.id.teacherHomeFragment)
-            }
-        }
-        binding.bottomNav.navTeacherClasses.setOnClickListener {
-            findNavController().navigate(R.id.teacherClassesFragment)
-        }
         binding.btnReloadReport.setOnClickListener {
             val selected = viewModel.state.value.selectedId
             if (selected != null) viewModel.load(selected) else viewModel.start(role)
