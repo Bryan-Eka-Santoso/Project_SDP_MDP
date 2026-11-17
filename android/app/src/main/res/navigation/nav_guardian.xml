@@ -5,6 +5,11 @@
     app:startDestination="@id/guardianScheduleFragment">
 
     <fragment
+        android:id="@+id/guardianRiwayatPelanggaranFragment"
+        android:name="id.sch.santaagnes.sim.ui.pelanggaran.RiwayatPelanggaranFragment"
+        android:label="Riwayat Pelanggaran Anak" />
+
+    <fragment
         android:id="@+id/guardianHomeFragment"
         android:name="id.sch.santaagnes.sim.ui.home.HomeFragment">
 

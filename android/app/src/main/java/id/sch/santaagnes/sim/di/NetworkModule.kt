@@ -29,6 +29,10 @@ import id.sch.santaagnes.sim.data.remote.MataPelajaranApi
 import id.sch.santaagnes.sim.data.remote.FasilitasApi
 import id.sch.santaagnes.sim.data.remote.JenisPelanggaranApi
 import id.sch.santaagnes.sim.data.remote.PeminjamanApi
+import id.sch.santaagnes.sim.data.remote.PelanggaranApi
+import id.sch.santaagnes.sim.data.remote.RiwayatPelanggaranApi
+import id.sch.santaagnes.sim.data.remote.AjukanPeminjamanApi
+import id.sch.santaagnes.sim.data.remote.RiwayatPeminjamanApi
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -210,5 +214,43 @@ object NetworkModule {
         retrofit: Retrofit
     ): PeminjamanApi {
         return retrofit.create(PeminjamanApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun providePelanggaranApi(
+        retrofit: Retrofit
+    ): PelanggaranApi {
+        return retrofit.create(PelanggaranApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideRiwayatPelanggaranApi(
+        retrofit: Retrofit
+    ): RiwayatPelanggaranApi {
+        return retrofit.create(
+            RiwayatPelanggaranApi::class.java
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideAjukanPeminjamanApi(
+        retrofit: Retrofit
+    ): AjukanPeminjamanApi {
+        return retrofit.create(
+            AjukanPeminjamanApi::class.java
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideRiwayatPeminjamanApi(
+        retrofit: Retrofit
+    ): RiwayatPeminjamanApi {
+        return retrofit.create(
+            RiwayatPeminjamanApi::class.java
+        )
     }
 }

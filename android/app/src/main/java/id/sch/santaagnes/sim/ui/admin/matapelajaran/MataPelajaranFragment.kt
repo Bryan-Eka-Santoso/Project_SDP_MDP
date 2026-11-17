@@ -21,7 +21,8 @@ import id.sch.santaagnes.sim.data.remote.SimpanMataPelajaranRequest
 import id.sch.santaagnes.sim.databinding.DialogMataPelajaranBinding
 import id.sch.santaagnes.sim.databinding.FragmentMataPelajaranBinding
 import kotlinx.coroutines.launch
-
+import android.text.Editable
+import android.text.TextWatcher
 @AndroidEntryPoint
 class MataPelajaranFragment : Fragment() {
 
@@ -29,6 +30,8 @@ class MataPelajaranFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: MataPelajaranViewModel by viewModels()
+
+    private var semuaMataPelajaran = listOf<MataPelajaranDto>()
 
     private val adapter = MataPelajaranAdapter(
         onEdit = { item -> tampilForm(item) },
@@ -61,6 +64,29 @@ class MataPelajaranFragment : Fragment() {
 
         binding.rvSubjects.adapter = adapter
 
+        binding.etSearch.addTextChangedListener(object : TextWatcher {
+
+            override fun beforeTextChanged(
+                s: CharSequence?,
+                start: Int,
+                count: Int,
+                after: Int
+            ) {}
+
+            override fun onTextChanged(
+                s: CharSequence?,
+                start: Int,
+                before: Int,
+                count: Int
+            ) {
+                filterMataPelajaran(
+                    s?.toString()?.trim().orEmpty()
+                )
+            }
+
+            override fun afterTextChanged(s: Editable?) {}
+        })
+
         binding.btnAdd.setOnClickListener {
             tampilForm(null)
         }
@@ -81,7 +107,7 @@ class MataPelajaranFragment : Fragment() {
                     binding.btnAdd.isEnabled = !state.saving
 
                     binding.tvEmpty.isVisible =
-                        state.daftar.isEmpty() &&
+                        adapter.itemCount == 0 &&
                                 !state.loading &&
                                 state.error == null
 
@@ -90,10 +116,13 @@ class MataPelajaranFragment : Fragment() {
 
                     binding.btnRetry.isVisible = state.error != null
 
-                    binding.tvTotal.isVisible = !state.loading && state.error == null
-                    binding.tvTotal.text = getString(R.string.master_total_subjects, state.daftar.size)
+                    semuaMataPelajaran = state.daftar
 
-                    adapter.setData(state.daftar)
+                    if (!state.loading && state.error == null) {
+                        filterMataPelajaran(
+                            binding.etSearch.text?.toString()?.trim().orEmpty()
+                        )
+                    }
 
                     state.pesan?.let { pesan ->
                         Toast.makeText(
@@ -187,6 +216,29 @@ class MataPelajaranFragment : Fragment() {
                 viewModel.hapus(item.id)
             }
             .show()
+    }
+
+    private fun filterMataPelajaran(keyword: String) {
+
+        val hasil = semuaMataPelajaran.filter { item ->
+            item.name.contains(keyword, ignoreCase = true) ||
+                    item.code.contains(keyword, ignoreCase = true) ||
+                    item.type.contains(keyword, ignoreCase = true)
+        }.sortedBy { it.name.lowercase() }
+
+        adapter.setData(hasil)
+
+        // Total data sebenarnya yang sudah dimuat
+        binding.tvTotal.text = semuaMataPelajaran.size.toString()
+
+        // Empty state
+        binding.tvEmpty.isVisible = hasil.isEmpty()
+
+        binding.tvEmpty.text = if (keyword.isBlank()) {
+            "Belum ada mata pelajaran"
+        } else {
+            "Tidak ada mata pelajaran yang cocok"
+        }
     }
 
     override fun onDestroyView() {

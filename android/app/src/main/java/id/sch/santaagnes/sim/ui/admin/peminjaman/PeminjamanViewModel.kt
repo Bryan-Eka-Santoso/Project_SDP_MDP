@@ -149,6 +149,61 @@ class PeminjamanViewModel @Inject constructor(
         }
     }
 
+
+    fun konfirmasiPengembalian(id: Int) {
+
+        if (_uiState.value.processing) return
+
+        viewModelScope.launch {
+
+            _uiState.value = _uiState.value.copy(
+                processing = true,
+                error = null
+            )
+
+            try {
+                val response = api.konfirmasiPengembalian(id)
+
+                if (!response.success) {
+                    throw Exception(
+                        response.error?.message
+                            ?: "Gagal mengonfirmasi pengembalian"
+                    )
+                }
+
+                _uiState.value = _uiState.value.copy(
+                    processing = false,
+                    pesan = "Pengembalian fasilitas berhasil dikonfirmasi"
+                )
+
+                // Perbarui daftar sesuai filter aktif
+                getPeminjaman()
+
+            } catch (e: HttpException) {
+
+                val pesan = when (e.code()) {
+                    400 -> "Tanggal peminjaman belum tiba."
+                    403 -> "Hanya Admin yang dapat mengonfirmasi."
+                    404 -> "Data peminjaman tidak ditemukan."
+                    409 -> "Peminjaman sudah diproses atau belum disetujui."
+                    else -> "Gagal memproses (HTTP ${e.code()})"
+                }
+
+                _uiState.value = _uiState.value.copy(
+                    processing = false,
+                    error = pesan
+                )
+
+            } catch (e: Exception) {
+
+                _uiState.value = _uiState.value.copy(
+                    processing = false,
+                    error = e.message ?: "Gagal mengonfirmasi pengembalian"
+                )
+            }
+        }
+    }
+
     fun clearMessage() {
         _uiState.value = _uiState.value.copy(
             pesan = null,

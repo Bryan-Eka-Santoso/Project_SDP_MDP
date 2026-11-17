@@ -47,8 +47,35 @@ class MataPelajaranAdapter(
 
         fun bind(item: MataPelajaranDto) {
             binding.tvName.text = item.name
+
             binding.tvDetail.text = "Kode: ${item.code}"
-            binding.tvType.text = item.type
+
+            binding.tvType.text = when (
+                item.type.uppercase()
+            ) {
+                "WAJIB" -> "Wajib"
+                "PEMINATAN" -> "Peminatan"
+                "PILIHAN" -> "Pilihan"
+                else -> item.type
+            }
+
+            val isPeminatan = item.type.equals(
+                "PEMINATAN",
+                ignoreCase = true
+            )
+
+            binding.tvType.backgroundTintList =
+                android.content.res.ColorStateList.valueOf(
+                    android.graphics.Color.parseColor(
+                        if (isPeminatan) "#FFF3E0" else "#E8F0FE"
+                    )
+                )
+
+            binding.tvType.setTextColor(
+                android.graphics.Color.parseColor(
+                    if (isPeminatan) "#A76500" else "#1E50CA"
+                )
+            )
 
             binding.btnEdit.setOnClickListener {
                 onEdit(item)

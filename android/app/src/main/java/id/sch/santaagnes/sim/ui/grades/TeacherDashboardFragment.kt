@@ -60,6 +60,30 @@ class TeacherDashboardFragment : Fragment() {
             )
         }
 
+        binding.btnInputPelanggaran.setOnClickListener {
+            findNavController().navigate(
+                R.id.action_teacherHome_to_inputPelanggaran
+            )
+        }
+
+        binding.btnRiwayatPelanggaran.setOnClickListener {
+            findNavController().navigate(
+                R.id.action_teacherHome_to_riwayatPelanggaran
+            )
+        }
+
+        binding.btnAjukanPeminjaman.setOnClickListener {
+            findNavController().navigate(
+                R.id.teacherAjukanPeminjamanFragment
+            )
+        }
+
+        binding.btnRiwayatPeminjaman.setOnClickListener {
+            findNavController().navigate(
+                R.id.teacherRiwayatPeminjamanFragment
+            )
+        }
+
         // Navigasi menuju rekap nilai
         binding.btnGradeReport.setOnClickListener {
             findNavController().navigate(

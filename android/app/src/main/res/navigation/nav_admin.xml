@@ -9,6 +9,11 @@
     android:id="@+id/admin_graph"
     app:startDestination="@id/adminDashboardFragment">
 
+    <fragment
+        android:id="@+id/adminRiwayatPelanggaranFragment"
+        android:name="id.sch.santaagnes.sim.ui.pelanggaran.RiwayatPelanggaranFragment"
+        android:label="Riwayat Pelanggaran" />
+
     <!-- Dashboard Admin (Figma 144:5468, Home Tab Admin) -->
     <fragment
         android:id="@+id/adminDashboardFragment"
@@ -46,6 +51,10 @@
         <action
             android:id="@+id/action_adminOperations_to_bookings"
             app:destination="@id/adminPeminjamanFragment" />
+
+        <action
+            android:id="@+id/action_adminOperations_to_riwayatPelanggaran"
+            app:destination="@id/adminRiwayatPelanggaranFragment" />
     </fragment>
 
     <fragment
@@ -199,4 +208,9 @@
         android:id="@+id/adminPeminjamanFragment"
         android:name="id.sch.santaagnes.sim.ui.admin.peminjaman.PeminjamanFragment"
         android:label="Persetujuan Peminjaman" />
+
+    <fragment
+        android:id="@+id/adminRiwayatPeminjamanFragment"
+        android:name="id.sch.santaagnes.sim.ui.peminjaman.RiwayatPeminjamanFragment"
+        android:label="Riwayat Peminjaman" />
 </navigation>

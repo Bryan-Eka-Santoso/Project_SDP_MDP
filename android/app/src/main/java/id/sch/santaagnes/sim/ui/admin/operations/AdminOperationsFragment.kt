@@ -28,11 +28,21 @@ class AdminOperationsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val nav = findNavController()
+        binding.cardRiwayatPelanggaran.setOnClickListener {
+            nav.navigate(
+                R.id.action_adminOperations_to_riwayatPelanggaran
+            )
+        }
         binding.btnBack.setOnClickListener { nav.popBackStack() }
         binding.cardSubjects.setOnClickListener { nav.navigate(R.id.action_adminOperations_to_subjects) }
         binding.cardFacilities.setOnClickListener { nav.navigate(R.id.action_adminOperations_to_facilities) }
         binding.cardViolationTypes.setOnClickListener { nav.navigate(R.id.action_adminOperations_to_violationTypes) }
         binding.cardBookings.setOnClickListener { nav.navigate(R.id.action_adminOperations_to_bookings) }
+        binding.cardRiwayatPeminjaman.setOnClickListener {
+            findNavController().navigate(
+                R.id.adminRiwayatPeminjamanFragment
+            )
+        }
     }
 
     override fun onDestroyView() {

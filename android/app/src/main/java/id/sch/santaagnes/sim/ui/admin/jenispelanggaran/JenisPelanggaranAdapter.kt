@@ -46,7 +46,9 @@ class JenisPelanggaranAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: JenisPelanggaranDto) {
+
             binding.tvName.text = item.name
+
             binding.tvPoints.text = "${item.points} Poin"
 
             binding.btnEdit.setOnClickListener {

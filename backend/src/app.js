@@ -32,6 +32,16 @@ api.use(require("./modules/bills/bills.routes"));
 api.use(require("./modules/reports/reports.routes"));
 api.use("/users", require("./modules/users/users.routes"));
 api.use(require("./modules/master/master.routes"));
+api.use("/violations", require("./modules/violations/pelanggaran.routes"));
+api.use(
+  "/violation-history",
+  require("./modules/violations/riwayat_pelanggaran.routes"),
+);
+api.use(
+  "/booking-requests",
+  require("./modules/bookings/ajukan_peminjaman.routes"),
+);
+api.use("/facility-bookings", require("./modules/bookings/peminjaman.routes"));
 
 app.use("/api/v1", api);
 

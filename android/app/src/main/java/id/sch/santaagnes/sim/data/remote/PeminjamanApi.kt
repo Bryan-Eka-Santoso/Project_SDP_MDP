@@ -17,7 +17,8 @@ data class PeminjamanDto(
     val endTime: String,
     val purpose: String,
     val status: String,
-    val verifierName: String?
+    val verifierName: String?,
+    val returnDate: String? = null
 )
 
 interface PeminjamanApi {
@@ -41,6 +42,11 @@ interface PeminjamanApi {
 
     @POST("facility-bookings/{id}/reject")
     suspend fun tolak(
+        @Path("id") id: Int
+    ): ApiResponse<PeminjamanDto>
+
+    @POST("facility-bookings/{id}/return")
+    suspend fun konfirmasiPengembalian(
         @Path("id") id: Int
     ): ApiResponse<PeminjamanDto>
 }

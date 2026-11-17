@@ -22,10 +22,18 @@ import id.sch.santaagnes.sim.data.remote.SimpanFasilitasRequest
 import id.sch.santaagnes.sim.databinding.DialogFasilitasBinding
 import id.sch.santaagnes.sim.databinding.FragmentFasilitasBinding
 import kotlinx.coroutines.launch
+import android.text.Editable
+import android.text.TextWatcher
+import android.content.res.ColorStateList
+import androidx.core.content.ContextCompat
+import com.google.android.material.button.MaterialButton
 
 @AndroidEntryPoint
 class FasilitasFragment : Fragment() {
-
+    private var semuaFasilitas = listOf<FasilitasDto>()
+    private var filterJenis: String? = null
+    private var sedangLoading = false
+    private var adaError = false
     private var _binding: FragmentFasilitasBinding? = null
     private val binding get() = _binding!!
 
@@ -60,24 +68,56 @@ class FasilitasFragment : Fragment() {
 
         binding.rvFasilitas.adapter = adapter
 
+        binding.etSearch.addTextChangedListener(
+            object : TextWatcher {
+
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {}
+
+                override fun onTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    before: Int,
+                    count: Int
+                ) {
+                    filterFasilitas()
+                }
+
+                override fun afterTextChanged(s: Editable?) {}
+            }
+        )
+
         binding.btnAdd.setOnClickListener {
             tampilForm(null)
         }
 
         binding.btnSemua.setOnClickListener {
-            viewModel.getFasilitas(null)
+            filterJenis = null
+            updateButtonActive(binding.btnSemua)
+            filterFasilitas()
         }
 
         binding.btnRuangan.setOnClickListener {
-            viewModel.getFasilitas("ROOM")
+            filterJenis = "ROOM"
+            updateButtonActive(binding.btnRuangan)
+            filterFasilitas()
         }
 
         binding.btnBarang.setOnClickListener {
-            viewModel.getFasilitas("ITEM")
+            filterJenis = "ITEM"
+            updateButtonActive(binding.btnBarang)
+            filterFasilitas()
         }
 
+        // Secara default, Semua aktif
+        updateButtonActive(binding.btnSemua)
+
         binding.btnRetry.setOnClickListener {
-            viewModel.getFasilitas()
+            viewModel.getFasilitas(null)
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
@@ -100,10 +140,11 @@ class FasilitasFragment : Fragment() {
                     binding.btnRetry.isVisible =
                         state.error != null
 
-                    binding.tvTotal.isVisible = !state.loading && state.error == null
-                    binding.tvTotal.text = getString(R.string.master_total_facilities, state.daftar.size)
+                    semuaFasilitas = state.daftar
+                    sedangLoading = state.loading
+                    adaError = state.error != null
 
-                    adapter.setData(state.daftar)
+                    filterFasilitas()
 
                     state.pesan?.let {
                         Toast.makeText(
@@ -118,7 +159,44 @@ class FasilitasFragment : Fragment() {
             }
         }
 
-        viewModel.getFasilitas()
+        viewModel.getFasilitas(null)
+    }
+
+    private fun filterFasilitas() {
+
+        val keyword = binding.etSearch.text
+            ?.toString()
+            ?.trim()
+            .orEmpty()
+
+        val hasil = semuaFasilitas.filter { item ->
+
+            val sesuaiJenis =
+                filterJenis == null || item.type == filterJenis
+
+            val sesuaiPencarian =
+                item.name.contains(keyword, ignoreCase = true) ||
+                        item.type.contains(keyword, ignoreCase = true)
+
+            sesuaiJenis && sesuaiPencarian
+
+        }.sortedBy { it.name.lowercase() }
+
+        adapter.setData(hasil)
+
+        // Total fasilitas, tidak terpengaruh filter
+        binding.tvTotal.text = semuaFasilitas.size.toString()
+
+        binding.tvEmpty.isVisible =
+            hasil.isEmpty() && !sedangLoading && !adaError
+
+        binding.tvEmpty.text = if (keyword.isNotBlank()) {
+            "Fasilitas tidak ditemukan"
+        } else if (filterJenis != null) {
+            "Belum ada fasilitas pada kategori ini"
+        } else {
+            "Belum ada fasilitas terdaftar"
+        }
     }
 
     private fun tampilForm(item: FasilitasDto?) {
@@ -195,6 +273,44 @@ class FasilitasFragment : Fragment() {
         }
 
         dialog.show()
+    }
+
+    private fun updateButtonActive(activeButton: MaterialButton) {
+
+        val warnaBiru = ContextCompat.getColor(
+            requireContext(),
+            R.color.agnesian_blue
+        )
+
+        val warnaPutih = ContextCompat.getColor(
+            requireContext(),
+            R.color.white
+        )
+
+        val buttons = listOf(
+            binding.btnSemua,
+            binding.btnRuangan,
+            binding.btnBarang
+        )
+
+        buttons.forEach { button ->
+
+            val isActive = button == activeButton
+
+            button.backgroundTintList = ColorStateList.valueOf(
+                if (isActive) warnaBiru else warnaPutih
+            )
+
+            button.setTextColor(
+                if (isActive) warnaPutih else warnaBiru
+            )
+
+            button.strokeColor = ColorStateList.valueOf(warnaBiru)
+
+            button.strokeWidth = if (isActive) 0 else
+                (resources.displayMetrics.density).toInt()
+                    .coerceAtLeast(1)
+        }
     }
 
     private fun konfirmasiHapus(item: FasilitasDto) {
