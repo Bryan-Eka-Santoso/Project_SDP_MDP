@@ -40,13 +40,17 @@ async function getChange(req, res) {
 
 // 201 jika perubahan baru, 200 jika memperbarui perubahan di tanggal yang sama.
 async function saveChange(req, res) {
-  const { change, created } = await changesService.saveChange(req.validated.body);
+  const { change, created } = await changesService.saveChange(req.user, req.validated.body);
   sendSuccess(res, change, created ? 201 : 200);
 }
 
 async function deleteChange(req, res) {
-  await changesService.deleteChange(req.validated.params.id);
+  await changesService.deleteChange(req.user, req.validated.params.id);
   res.status(204).end();
+}
+
+async function listRooms(req, res) {
+  sendSuccess(res, await schedulesService.listRooms());
 }
 
 async function importSlots(req, res) {
@@ -104,5 +108,6 @@ module.exports = {
   getChange,
   saveChange,
   deleteChange,
+  listRooms,
   importSlots,
 };

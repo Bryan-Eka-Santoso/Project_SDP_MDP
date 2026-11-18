@@ -28,6 +28,7 @@ Nama tabel fisik mengikuti PDM v2 di laporan (ADR-017): bahasa Indonesia, `snake
 | Jam pelajaran | `LessonPeriod` | — | **Belum dipakai** (PO-09); slot jadwal sementara memakai `startTime`–`endTime` |
 | Slot jadwal | `ScheduleSlot` | `jadwal` | Penugasan mengajar pada hari + jam mulai–selesai + ruangan |
 | Perubahan jadwal | `ScheduleChange` | `perubahan_jadwal` | Override untuk satu tanggal |
+| Tanggal baru (pindah lintas hari) | `newDate` | — (kolom `tanggal_baru`) | Field di `ScheduleChange`; pertemuan pada `date` dipindah ke tanggal ini |
 | Guru pengganti | `substituteTeacher` | — | Field di `ScheduleChange` |
 | Sesi pelajaran / pertemuan | `LessonSession` | `sesi_mengajar` | Satu slot pada satu tanggal; memuat jurnal |
 | Jurnal mengajar | `journal` | — | Field teks (`materi`) di `LessonSession` |
@@ -65,7 +66,7 @@ Nama tabel fisik mengikuti PDM v2 di laporan (ADR-017): bahasa Indonesia, `snake
 | `SemesterType` | `ODD`, `EVEN` | Ganjil, genap |
 | `DayOfWeek` | `MONDAY` … `SATURDAY` | Hari sekolah |
 | `FacilityType` | `ROOM`, `ITEM` | Ruangan, barang |
-| `ScheduleChangeType` | `SUBSTITUTE`, `RESCHEDULE`, `CANCEL` | Guru pengganti, pindah waktu/ruang, batal |
+| `ScheduleChangeType` | `SUBSTITUTE`, `RESCHEDULE`, `CANCEL` | Guru pengganti, pindah tanggal/waktu/ruang, batal |
 | `AttendanceStatus` | `PRESENT`, `SICK`, `EXCUSED`, `ABSENT` | Hadir, sakit, izin, alpa |
 | `LeaveRequestStatus` | `PENDING`, `APPROVED`, `REJECTED` | |
 | `AnnouncementScope` | `SCHOOL`, `CLASS` | |

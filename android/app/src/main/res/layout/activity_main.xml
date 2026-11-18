@@ -14,10 +14,18 @@
         app:defaultNavHost="true"
         app:navGraph="@navigation/nav_graph" />
 
+    <!-- paddingBottomSystemWindowInsets=false: inset bawah sudah dipasang MainActivity pada root;
+         tanpa ini BottomNavigationView menambah inset yang sama lagi (ruang kosong di bawah ikon). -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNav"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="gone" />
+        android:background="@color/white"
+        android:visibility="gone"
+        app:itemActiveIndicatorStyle="@style/Widget.Agnesian.BottomNav.Indicator"
+        app:itemIconTint="@color/bottom_nav_item"
+        app:itemTextColor="@color/bottom_nav_item"
+        app:labelVisibilityMode="labeled"
+        app:paddingBottomSystemWindowInsets="false" />
 
 </LinearLayout>

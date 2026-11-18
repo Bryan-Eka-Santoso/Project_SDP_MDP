@@ -89,4 +89,27 @@ class ScheduleMappersTest {
         assertEquals("RESCHEDULE", entity.changeType)
         assertEquals(entry, entity.toDomain())
     }
+
+    @Test
+    fun crossDayMoveKeepsChangeIdAndDatesThroughRoom() {
+        // Entri di tanggal tujuan (Rabu 11 Nov) untuk pertemuan yang aslinya Senin 9 Nov.
+        val movedIn = dto(
+            change = ScheduleChangeDto(40, "RESCHEDULE", "Guru dinas", movedTo = null, movedFrom = "2026-11-09"),
+            original = ScheduleOriginalDto("07:00", "08:30", IdNameDto(3, "Ruang 101"), IdNameDto(2, "Guru Dua"))
+        ).toDomain()
+
+        assertEquals(40, movedIn.change?.id)
+        assertEquals(LocalDate.of(2026, 11, 9), movedIn.change?.movedFrom)
+        assertEquals(LocalDate.of(2026, 11, 9), movedIn.occurrenceDate)
+        assertEquals(false, movedIn.isAway)
+        assertEquals(movedIn, movedIn.toEntity(accountId = 11, scope = 0).toDomain())
+
+        // Entri di tanggal asal: pertemuannya tidak berlangsung di tanggal itu.
+        val movedAway = dto(change = ScheduleChangeDto(40, "RESCHEDULE", null, movedTo = "2026-11-13")).toDomain()
+
+        assertEquals(LocalDate.of(2026, 11, 13), movedAway.change?.movedTo)
+        assertEquals(LocalDate.of(2026, 11, 11), movedAway.occurrenceDate)
+        assertEquals(true, movedAway.isAway)
+        assertEquals("2026-11-13", movedAway.toEntity(accountId = 11, scope = 0).changeMovedTo)
+    }
 }

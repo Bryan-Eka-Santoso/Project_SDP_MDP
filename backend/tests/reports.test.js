@@ -63,6 +63,7 @@ const substitute = {
   newRoom: null,
   newStartTime: null,
   newEndTime: null,
+  newDate: null,
   scheduleSlot: slotInfo,
 };
 
@@ -76,6 +77,8 @@ const reschedule = {
   newRoom: { id: 3, name: 'Aula' },
   newStartTime: t('10:00'),
   newEndTime: t('11:30'),
+  // Dipindah ke Rabu pekan itu.
+  newDate: d('2026-11-25'),
 };
 
 beforeEach(() => {
@@ -106,9 +109,12 @@ describe('GET /api/v1/reports/schedule-changes (F-LAP-07)', () => {
       newRoom: null,
       newStartTime: null,
       newEndTime: null,
+      newDate: null,
       description: 'Guru sakit',
     });
-    expect(res.body.data[1]).toMatchObject({ type: 'RESCHEDULE', newStartTime: '10:00', newEndTime: '11:30' });
+    expect(res.body.data[1]).toMatchObject({
+      type: 'RESCHEDULE', newStartTime: '10:00', newEndTime: '11:30', newDate: '2026-11-25',
+    });
 
     const call = prisma.scheduleChange.findMany.mock.calls[0][0];
     expect(call.where.AND).toEqual([{ scheduleSlot: { teachingAssignment: { semesterId: 1 } } }]);
@@ -215,17 +221,18 @@ describe('GET /api/v1/reports/:type/export (F-LAP-11)', () => {
     expect(sheet.name).toBe('Perubahan Jadwal');
     expect(sheet.getRow(1).values.slice(1)).toEqual([
       'Tanggal', 'Hari', 'Kelas', 'Mata Pelajaran', 'Guru Asli', 'Jenis Perubahan', 'Guru Pengganti',
-      'Jam Asli', 'Jam Baru', 'Ruangan Asli', 'Ruangan Baru', 'Keterangan',
+      'Jam Asli', 'Jam Baru', 'Ruangan Asli', 'Ruangan Baru', 'Tanggal Baru', 'Keterangan',
     ]);
     expect(sheet.getRow(2).values.slice(1)).toEqual([
       '2026-11-16', 'Senin', 'X-1', 'Matematika', 'Yohanes', 'Ganti guru', 'Maria',
-      '07:00–08:30', '', 'Ruang X-1', '', 'Guru sakit',
+      '07:00–08:30', '', 'Ruang X-1', '', '', 'Guru sakit',
     ]);
     expect(sheet.getRow(3).values.slice(1, 10)).toEqual([
       '2026-11-23', 'Senin', 'X-1', 'Matematika', 'Yohanes', 'Pindah jadwal', '', '07:00–08:30', '10:00–11:30',
     ]);
+    expect(sheet.getRow(3).getCell(12).value).toBe('2026-11-25');
     // Isi "=1+1" tersimpan sebagai teks, bukan rumus.
-    const cell = sheet.getRow(3).getCell(12);
+    const cell = sheet.getRow(3).getCell(13);
     expect(cell.value).toBe('=1+1');
     expect(cell.formula).toBeUndefined();
 

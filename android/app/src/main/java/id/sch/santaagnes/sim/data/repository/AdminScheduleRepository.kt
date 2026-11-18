@@ -127,7 +127,8 @@ class AdminScheduleRepositoryImpl @Inject constructor(
             substituteTeacherId = input.substituteTeacherId,
             newRoomId = input.newRoomId,
             newStartTime = input.newStartTime?.toString(),
-            newEndTime = input.newEndTime?.toString()
+            newEndTime = input.newEndTime?.toString(),
+            newDate = input.newDate?.toString()
         )
         checkNotNull(api.saveChange(request).data) { "Perubahan gagal disimpan." }.toDomain()
     }

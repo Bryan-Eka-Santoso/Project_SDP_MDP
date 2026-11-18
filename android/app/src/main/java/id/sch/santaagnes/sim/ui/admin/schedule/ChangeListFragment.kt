@@ -115,7 +115,8 @@ class ChangeListFragment : Fragment() {
                 substituteTeacherId = change.substituteTeacherId ?: 0,
                 newRoomId = change.newRoomId ?: 0,
                 newStartTime = change.newStartTime?.toString(),
-                newEndTime = change.newEndTime?.toString()
+                newEndTime = change.newEndTime?.toString(),
+                newDate = change.newDate?.toString()
             )
         )
     }

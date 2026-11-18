@@ -42,6 +42,7 @@ class ChangeFormFragment : Fragment() {
     private val isEdit get() = args.slotId != 0
 
     private var date: LocalDate? = null
+    private var newDate: LocalDate? = null
     private var start: LocalTime? = null
     private var end: LocalTime? = null
     private var loaded = false
@@ -71,12 +72,14 @@ class ChangeFormFragment : Fragment() {
         needsPrefill = savedInstanceState == null && isEdit
         if (needsPrefill) {
             date = args.date?.let(LocalDate::parse)
+            newDate = args.newDate?.let(LocalDate::parse)
             start = args.newStartTime?.let(LocalTime::parse)
             end = args.newEndTime?.let(LocalTime::parse)
             args.type?.let { binding.inputType.setText(typeLabel(ChangeType.valueOf(it)), false) }
             binding.inputDescription.setText(args.description.orEmpty())
         }
         savedInstanceState?.getString(STATE_DATE)?.let { date = LocalDate.parse(it) }
+        savedInstanceState?.getString(STATE_NEW_DATE)?.let { newDate = LocalDate.parse(it) }
         savedInstanceState?.getString(STATE_START)?.let { start = LocalTime.parse(it) }
         savedInstanceState?.getString(STATE_END)?.let { end = LocalTime.parse(it) }
         showDate()
@@ -86,7 +89,10 @@ class ChangeFormFragment : Fragment() {
         binding.layoutSlot.isEnabled = !isEdit
         binding.inputSlot.isEnabled = !isEdit
         binding.layoutDate.isEnabled = !isEdit
-        if (!isEdit) binding.inputDate.setOnClickListener { pickDate() }
+        if (!isEdit) binding.inputDate.setOnClickListener { pickDate(date, R.string.change_date_hint) { date = it } }
+        binding.inputNewDate.setOnClickListener {
+            pickDate(newDate ?: date, R.string.change_new_date_hint) { newDate = it }
+        }
         binding.inputStart.setOnClickListener { pickTime(start) { start = it; showTimes() } }
         binding.inputEnd.setOnClickListener { pickTime(end) { end = it; showTimes() } }
         binding.btnSave.setOnClickListener { save() }
@@ -182,17 +188,18 @@ class ChangeFormFragment : Fragment() {
             teacher = lookups?.teachers?.firstOrNull { it.name == teacherText },
             room = lookups?.rooms?.firstOrNull { it.name == roomText },
             start = start,
-            end = end
+            end = end,
+            newDate = newDate
         )
     }
 
-    private fun pickDate() {
+    private fun pickDate(current: LocalDate?, title: Int, onPicked: (LocalDate) -> Unit) {
         val picker = MaterialDatePicker.Builder.datePicker()
-            .setTitleText(R.string.change_date_hint)
-            .setSelection((date ?: DateTimeWib.today()).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
+            .setTitleText(title)
+            .setSelection((current ?: DateTimeWib.today()).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
             .build()
         picker.addOnPositiveButtonClickListener { millis ->
-            date = Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate()
+            onPicked(Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate())
             showDate()
         }
         picker.show(childFragmentManager, "date")
@@ -210,6 +217,7 @@ class ChangeFormFragment : Fragment() {
 
     private fun showDate() {
         binding.inputDate.setText(date?.let(DateTimeWib::formatDate).orEmpty())
+        binding.inputNewDate.setText(newDate?.let(DateTimeWib::formatDate).orEmpty())
     }
 
     private fun showTimes() {
@@ -220,6 +228,7 @@ class ChangeFormFragment : Fragment() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         date?.let { outState.putString(STATE_DATE, it.toString()) }
+        newDate?.let { outState.putString(STATE_NEW_DATE, it.toString()) }
         start?.let { outState.putString(STATE_START, it.toString()) }
         end?.let { outState.putString(STATE_END, it.toString()) }
     }
@@ -232,6 +241,7 @@ class ChangeFormFragment : Fragment() {
 
     private companion object {
         const val STATE_DATE = "date"
+        const val STATE_NEW_DATE = "newDate"
         const val STATE_START = "start"
         const val STATE_END = "end"
         const val DEFAULT_HOUR = 7

@@ -52,6 +52,7 @@ const select = {
   newRoom: { select: { id: true, name: true } },
   newStartTime: true,
   newEndTime: true,
+  newDate: true,
   scheduleSlot: {
     select: {
       dayOfWeek: true,
@@ -90,6 +91,8 @@ function toRow(change) {
     newRoom: change.newRoom,
     newStartTime: rescheduled && change.newStartTime ? formatTimeOfDay(change.newStartTime) : null,
     newEndTime: rescheduled && change.newEndTime ? formatTimeOfDay(change.newEndTime) : null,
+    // Terisi bila pertemuan dipindah ke hari lain.
+    newDate: rescheduled && change.newDate ? formatDateOnly(change.newDate) : null,
     description: change.description,
   };
 }
@@ -106,6 +109,7 @@ const columns = [
   { header: 'Jam Baru', width: 14 },
   { header: 'Ruangan Asli', width: 18 },
   { header: 'Ruangan Baru', width: 18 },
+  { header: 'Tanggal Baru', width: 12 },
   { header: 'Keterangan', width: 40 },
 ];
 
@@ -123,6 +127,7 @@ const toCells = (row) => [
   range(row.newStartTime, row.newEndTime),
   row.originalRoom.name,
   row.newRoom?.name ?? '',
+  row.newDate ?? '',
   row.description,
 ];
 

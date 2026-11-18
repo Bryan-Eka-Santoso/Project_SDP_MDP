@@ -41,7 +41,7 @@ Daftar modul: `auth`, `users`, `master` (siswa, guru, kelas, mapel, fasilitas, p
 ## Aturan wajib
 
 1. **Validasi semua input** (`body`, `params`, `query`) dengan Zod di `<module>.validation.js` melalui middleware `validate({ params, query, body })`. Controller membaca hasil parse dari `req.validated.<bagian>` (Express 5 tidak mengizinkan `req.query` ditimpa). Query daftar memakai `paginationQuery` dari `utils/pagination.js`.
-2. **Otorisasi dua lapis**: `authorize(...roles)` di route, lalu cek cakupan data di service/policy sesuai `docs/PERMISSIONS.md`. Jangan pernah mempercayai ID siswa/kelas dari request tanpa memeriksa kepemilikannya.
+2. **Otorisasi dua lapis**: `authorize(...roles)` di route, lalu cek cakupan data di service/policy sesuai `docs/PERMISSIONS.md`. Contoh: `POST /schedule-changes` dibuka untuk `ADMIN` dan `TEACHER` di route, lalu `schedules.changes.service.js` membatasi guru ke `RESCHEDULE` dan `CANCEL` pada slot miliknya. Jangan pernah mempercayai ID siswa/kelas dari request tanpa memeriksa kepemilikannya.
 3. **Error** dilempar sebagai `AppError(statusCode, code, message, details?)` dan ditangani di `errorHandler`. Jangan `res.status(...).json(...)` langsung di service.
 4. **Response** selalu lewat helper (`sendSuccess`, `sendPaginated`) dengan format di `docs/API_CONVENTIONS.md`.
 5. **Transaksi**: operasi yang mengubah lebih dari satu tabel (impor Excel, ACC izin yang mengubah presensi, pembagian kelas) wajib memakai `prisma.$transaction`.

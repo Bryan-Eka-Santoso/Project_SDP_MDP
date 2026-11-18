@@ -51,6 +51,9 @@ class AccountRepositoryImpl @Inject constructor(
         role = role,
         identifier = identifier,
         homeroomClasses = homeroomClassGroups.map { it.name },
-        children = children.map { it.name }
+        children = children.map { it.name },
+        classNames = classNames,
+        homeroomTeachers = homeroomTeacherNames,
+        phone = phone
     )
 }

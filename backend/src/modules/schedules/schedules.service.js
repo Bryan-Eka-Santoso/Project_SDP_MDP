@@ -180,7 +180,17 @@ async function deleteSlot(id) {
   await prisma.scheduleSlot.delete({ where: { id } });
 }
 
+// Pilihan ruangan untuk form perubahan jadwal (admin dan guru); tanpa paginasi karena lookup.
+async function listRooms() {
+  return prisma.facility.findMany({
+    where: { type: 'ROOM' },
+    select: { id: true, name: true },
+    orderBy: { name: 'asc' },
+  });
+}
+
 module.exports = {
+  listRooms,
   listSlots,
   getSlot,
   createSlot,
