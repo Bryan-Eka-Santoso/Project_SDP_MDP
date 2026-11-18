@@ -181,6 +181,43 @@
                     android:textColor="@color/white"
                     app:backgroundTint="@color/agnesian_blue"
                     app:cornerRadius="10dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnBukuPenghubung"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="12dp"
+                    android:text="Tulis Buku Penghubung"
+                    android:textAllCaps="false"
+                    android:textSize="14sp"
+                    android:textColor="@color/white"
+                    android:visibility="gone"
+                    app:backgroundTint="@color/agnesian_blue"
+                    app:cornerRadius="10dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnBacaBukuPenghubung"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="12dp"
+                    android:text="Baca Buku Penghubung"
+                    android:textAllCaps="false"
+                    android:textColor="@color/white"
+                    android:visibility="gone"
+                    app:backgroundTint="@color/agnesian_blue"
+                    app:cornerRadius="10dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnProfilSiswaBinaan"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="12dp"
+                    android:text="Profil Siswa Binaan"
+                    android:textAllCaps="false"
+                    android:textColor="@color/white"
+                    android:visibility="gone"
+                    app:backgroundTint="@color/agnesian_blue"
+                    app:cornerRadius="10dp" />
             </LinearLayout>
 
         </LinearLayout>

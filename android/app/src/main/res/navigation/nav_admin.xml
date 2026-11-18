@@ -213,4 +213,9 @@
         android:id="@+id/adminRiwayatPeminjamanFragment"
         android:name="id.sch.santaagnes.sim.ui.peminjaman.RiwayatPeminjamanFragment"
         android:label="Riwayat Peminjaman" />
+
+    <fragment
+        android:id="@+id/adminSurveiMinatFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.survei.SurveiMinatFragment"
+        android:label="Survei Minat" />
 </navigation>

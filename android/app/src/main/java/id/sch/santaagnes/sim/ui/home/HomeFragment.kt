@@ -156,6 +156,28 @@ class HomeFragment : Fragment() {
                 )
             }
         }
+
+        binding.btnBacaBukuPenghubung.isVisible =
+            role == "GUARDIAN"
+
+        binding.btnBacaBukuPenghubung.setOnClickListener {
+            if (role == "GUARDIAN") {
+                nav.navigate(
+                    R.id.guardianBacaBukuPenghubungFragment
+                )
+            }
+        }
+
+        binding.btnIsiSurveiMinat.isVisible =
+            role == "STUDENT"
+
+        binding.btnIsiSurveiMinat.setOnClickListener {
+            if (role == "STUDENT") {
+                nav.navigate(
+                    R.id.studentIsiSurveiMinatFragment
+                )
+            }
+        }
     }
 
     private fun greeting(): Int = when (DateTimeWib.now().hour) {

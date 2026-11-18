@@ -78,4 +78,9 @@
         android:id="@+id/studentRiwayatPeminjamanFragment"
         android:name="id.sch.santaagnes.sim.ui.peminjaman.RiwayatPeminjamanFragment"
         android:label="Riwayat Peminjaman" />
+
+    <fragment
+        android:id="@+id/studentIsiSurveiMinatFragment"
+        android:name="id.sch.santaagnes.sim.ui.student.survei.IsiSurveiMinatFragment"
+        android:label="Isi Survei Minat" />
 </navigation>

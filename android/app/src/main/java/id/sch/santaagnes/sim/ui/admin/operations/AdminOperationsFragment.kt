@@ -43,6 +43,11 @@ class AdminOperationsFragment : Fragment() {
                 R.id.adminRiwayatPeminjamanFragment
             )
         }
+        binding.cardSurveiMinat.setOnClickListener {
+            findNavController().navigate(
+                R.id.adminSurveiMinatFragment
+            )
+        }
     }
 
     override fun onDestroyView() {

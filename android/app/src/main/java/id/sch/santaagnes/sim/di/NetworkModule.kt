@@ -33,6 +33,11 @@ import id.sch.santaagnes.sim.data.remote.PelanggaranApi
 import id.sch.santaagnes.sim.data.remote.RiwayatPelanggaranApi
 import id.sch.santaagnes.sim.data.remote.AjukanPeminjamanApi
 import id.sch.santaagnes.sim.data.remote.RiwayatPeminjamanApi
+import id.sch.santaagnes.sim.data.remote.BukuPenghubungApi
+import id.sch.santaagnes.sim.data.remote.BacaBukuPenghubungApi
+import id.sch.santaagnes.sim.data.remote.ProfilSiswaBinaanApi
+import id.sch.santaagnes.sim.data.remote.SurveiMinatApi
+import id.sch.santaagnes.sim.data.remote.IsiSurveiMinatApi
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -251,6 +256,56 @@ object NetworkModule {
     ): RiwayatPeminjamanApi {
         return retrofit.create(
             RiwayatPeminjamanApi::class.java
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideBukuPenghubungApi(
+        retrofit: Retrofit
+    ): BukuPenghubungApi {
+        return retrofit.create(
+            BukuPenghubungApi::class.java
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideBacaBukuPenghubungApi(
+        retrofit: Retrofit
+    ): BacaBukuPenghubungApi {
+        return retrofit.create(
+            BacaBukuPenghubungApi::class.java
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideProfilSiswaBinaanApi(
+        retrofit: Retrofit
+    ): ProfilSiswaBinaanApi {
+        return retrofit.create(
+            ProfilSiswaBinaanApi::class.java
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideSurveiMinatApi(
+        retrofit: Retrofit
+    ): SurveiMinatApi {
+        return retrofit.create(
+            SurveiMinatApi::class.java
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideIsiSurveiMinatApi(
+        retrofit: Retrofit
+    ): IsiSurveiMinatApi {
+        return retrofit.create(
+            IsiSurveiMinatApi::class.java
         )
     }
 }

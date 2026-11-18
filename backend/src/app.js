@@ -42,6 +42,20 @@ api.use(
   require("./modules/bookings/ajukan_peminjaman.routes"),
 );
 api.use("/facility-bookings", require("./modules/bookings/peminjaman.routes"));
+api.use("/liaison-notes", require("./modules/liaison/buku_penghubung.routes"));
+api.use(
+  "/liaison-history",
+  require("./modules/liaison/baca_buku_penghubung.routes"),
+);
+api.use(
+  "/homeroom-profiles",
+  require("./modules/student-profiles/profil_siswa.routes"),
+);
+api.use("/elective-surveys", require("./modules/elective/survei.routes"));
+api.use(
+  "/student-elective-surveys",
+  require("./modules/elective/isi_survei.routes"),
+);
 
 app.use("/api/v1", api);
 
