@@ -9,7 +9,11 @@ data class Profile(
     // NIS (siswa) atau NIP (guru)
     val identifier: String?,
     val homeroomClasses: List<String> = emptyList(),
-    val children: List<String> = emptyList()
+    val children: List<String> = emptyList(),
+    // Siswa: kelas tahun ajaran aktif dan wali kelasnya (baru terisi setelah dimuat dari server).
+    val classNames: List<String> = emptyList(),
+    val homeroomTeachers: List<String> = emptyList(),
+    val phone: String? = null
 ) {
     /** Siapa yang punya layar tagihan; backend tetap memeriksa cakupan datanya. */
     val canViewBills: Boolean

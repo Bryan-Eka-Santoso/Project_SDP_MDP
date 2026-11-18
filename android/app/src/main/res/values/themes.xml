@@ -6,4 +6,9 @@
     </style>
 
     <style name="Theme.Android" parent="Base.Theme.Android" />
+
+    <!-- Figma tidak memakai kapsul penanda tab aktif; cukup warna ikon dan label. -->
+    <style name="Widget.Agnesian.BottomNav.Indicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">@android:color/transparent</item>
+    </style>
 </resources>

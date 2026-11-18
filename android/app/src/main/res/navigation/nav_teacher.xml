@@ -67,6 +67,75 @@
         <action
             android:id="@+id/action_schedule_to_taskList"
             app:destination="@id/teacherTaskListFragment" />
+
+        <action
+            android:id="@+id/action_schedule_to_reschedule"
+            app:destination="@id/rescheduleFormFragment" />
+    </fragment>
+
+    <!-- Guru memindah satu pertemuan miliknya (F-JDW-04). date/startTime/endTime/room = jadwal asli;
+         new* dan description terisi bila pertemuan itu sudah pernah dipindah (changeId != 0). -->
+    <fragment
+        android:id="@+id/rescheduleFormFragment"
+        android:name="id.sch.santaagnes.sim.ui.schedule.RescheduleFormFragment">
+
+        <argument
+            android:name="slotId"
+            app:argType="integer" />
+        <argument
+            android:name="date"
+            app:argType="string" />
+        <argument
+            android:name="changeId"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <!-- true: pertemuan ini sudah dibatalkan (changeId = perubahan CANCEL); form hanya menawarkan pemulihan. -->
+        <argument
+            android:name="cancelled"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <argument
+            android:name="subject"
+            app:argType="string" />
+        <argument
+            android:name="classGroup"
+            app:argType="string" />
+        <argument
+            android:name="startTime"
+            app:argType="string" />
+        <argument
+            android:name="endTime"
+            app:argType="string" />
+        <argument
+            android:name="room"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="newDate"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="newStartTime"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="newEndTime"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="newRoom"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="description"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
     </fragment>
 
     <fragment

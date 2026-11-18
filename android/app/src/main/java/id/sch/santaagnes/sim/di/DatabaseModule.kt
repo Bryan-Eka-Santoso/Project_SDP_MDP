@@ -9,6 +9,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import id.sch.santaagnes.sim.data.local.AppDatabase
 import id.sch.santaagnes.sim.data.local.LocalDao
+import id.sch.santaagnes.sim.data.local.MIGRATION_4_5
 import javax.inject.Singleton
 
 @Module
@@ -24,7 +25,7 @@ object DatabaseModule {
             context,
             AppDatabase::class.java,
             "santa_agnes_local.db"
-        ).fallbackToDestructiveMigration(dropAllTables = true).build()
+        ).addMigrations(MIGRATION_4_5).fallbackToDestructiveMigration(dropAllTables = true).build()
     }
 
     @Provides

@@ -21,7 +21,9 @@ data class ScheduleChangeReportDto(
     val newRoom: IdNameDto?,
     val newStartTime: String?,
     val newEndTime: String?,
-    val description: String
+    val description: String,
+    // Tanggal tujuan bila pertemuan dipindah ke hari lain.
+    val newDate: String? = null
 )
 
 data class ReportTeacherDto(

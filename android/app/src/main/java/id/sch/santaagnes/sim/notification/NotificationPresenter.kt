@@ -49,7 +49,10 @@ class SystemNotificationPresenter @Inject constructor(
             .setStyle(NotificationCompat.BigTextStyle().bigText(notification.message))
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            // Sebelum Android 8 prioritas diambil dari sini, bukan dari channel.
+            .setPriority(
+                if (channel.highImportance) NotificationCompat.PRIORITY_HIGH else NotificationCompat.PRIORITY_DEFAULT
+            )
             .build()
         NotificationManagerCompat.from(context).notify(notification.id.toInt(), built)
     }

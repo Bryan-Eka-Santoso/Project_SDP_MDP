@@ -40,7 +40,8 @@ fun ChangeDto.toDomain(): AdminChange = AdminChange(
     newRoomName = newRoom?.name,
     newStartTime = newStartTime?.let(LocalTime::parse),
     newEndTime = newEndTime?.let(LocalTime::parse),
-    slot = slot.toDomain()
+    slot = slot.toDomain(),
+    newDate = newDate?.let(LocalDate::parse)
 )
 
 fun LookupAssignmentDto.toDomain(): AssignmentOption = AssignmentOption(

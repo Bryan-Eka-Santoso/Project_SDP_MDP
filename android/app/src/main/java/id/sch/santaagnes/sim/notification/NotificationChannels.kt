@@ -9,8 +9,15 @@ import id.sch.santaagnes.sim.R
 import id.sch.santaagnes.sim.domain.model.NotificationType
 
 /** Channel notifikasi per jenis (jadwal, pengumuman, akademik, peminjaman, pembayaran). */
-enum class NotificationChannelSpec(val channelId: String, @param:StringRes val nameRes: Int) {
-    SCHEDULE("schedule", R.string.channel_schedule),
+enum class NotificationChannelSpec(
+    val channelId: String,
+    @param:StringRes val nameRes: Int,
+    val highImportance: Boolean = false
+) {
+    // Perubahan jadwal mendesak (kelas batal atau pindah): muncul sebagai banner. Android menyimpan
+    // importance channel yang sudah dibuat, jadi id diganti ke "schedule_v2" agar berlaku di HP yang
+    // sudah terpasang; channel lamanya dihapus di createAll.
+    SCHEDULE("schedule_v2", R.string.channel_schedule, highImportance = true),
     ANNOUNCEMENT("announcement", R.string.channel_announcement),
     ACADEMIC("academic", R.string.channel_academic),
     BOOKING("booking", R.string.channel_booking),
@@ -18,6 +25,8 @@ enum class NotificationChannelSpec(val channelId: String, @param:StringRes val n
     GENERAL("general", R.string.channel_general);
 
     companion object {
+        private const val LEGACY_SCHEDULE_CHANNEL_ID = "schedule"
+
         fun forType(type: NotificationType): NotificationChannelSpec = when (type) {
             NotificationType.SCHEDULE_CHANGE, NotificationType.TASK -> SCHEDULE
             NotificationType.ANNOUNCEMENT -> ANNOUNCEMENT
@@ -31,9 +40,15 @@ enum class NotificationChannelSpec(val channelId: String, @param:StringRes val n
         fun createAll(context: Context) {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
             val manager = context.getSystemService(NotificationManager::class.java) ?: return
+            manager.deleteNotificationChannel(LEGACY_SCHEDULE_CHANNEL_ID)
             entries.forEach { spec ->
+                val importance = if (spec.highImportance) {
+                    NotificationManager.IMPORTANCE_HIGH
+                } else {
+                    NotificationManager.IMPORTANCE_DEFAULT
+                }
                 manager.createNotificationChannel(
-                    NotificationChannel(spec.channelId, context.getString(spec.nameRes), NotificationManager.IMPORTANCE_DEFAULT)
+                    NotificationChannel(spec.channelId, context.getString(spec.nameRes), importance)
                 )
             }
         }

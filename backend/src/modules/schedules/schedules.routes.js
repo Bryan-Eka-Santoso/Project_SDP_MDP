@@ -20,8 +20,10 @@ const {
 
 const router = express.Router();
 
-// F-JDW-01..04. Kelola jadwal dan perubahan jadwal hanya admin (docs/PERMISSIONS.md).
+// F-JDW-01..04. Kelola jadwal hanya admin (docs/PERMISSIONS.md).
 const admin = [authenticate, authorize('ADMIN')];
+// Perubahan jadwal: admin semua jenis; guru hanya memindah (RESCHEDULE) slot miliknya, dicek di service.
+const adminOrTeacher = [authenticate, authorize('ADMIN', 'TEACHER')];
 
 // F-JDW-05. Jadwal untuk siswa, guru (termasuk wali kelas), dan wali murid; admin memakai master jadwal.
 router.get(
@@ -71,7 +73,14 @@ router.delete('/schedule-slots/:id', ...admin, validate({ params: idParams }), c
 // F-JDW-04. POST untuk tanggal yang sudah punya perubahan = memperbarui perubahan itu.
 router.get('/schedule-changes', ...admin, validate({ query: listChangesQuery }), controller.listChanges);
 router.get('/schedule-changes/:id', ...admin, validate({ params: idParams }), controller.getChange);
-router.post('/schedule-changes', ...admin, validate({ body: saveChangeBody }), controller.saveChange);
-router.delete('/schedule-changes/:id', ...admin, validate({ params: idParams }), controller.deleteChange);
+router.post('/schedule-changes', ...adminOrTeacher, validate({ body: saveChangeBody }), controller.saveChange);
+router.delete(
+  '/schedule-changes/:id',
+  ...adminOrTeacher,
+  validate({ params: idParams }),
+  controller.deleteChange,
+);
+// Pilihan ruangan untuk form perubahan jadwal.
+router.get('/schedule-rooms', ...adminOrTeacher, controller.listRooms);
 
 module.exports = router;

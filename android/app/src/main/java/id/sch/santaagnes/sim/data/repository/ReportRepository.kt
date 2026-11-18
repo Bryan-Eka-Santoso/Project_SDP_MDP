@@ -158,7 +158,8 @@ internal fun ScheduleChangeReportDto.toDomain() = ScheduleChangeReportRow(
     originalEnd = LocalTime.parse(originalEndTime),
     newStart = newStartTime?.let(LocalTime::parse),
     newEnd = newEndTime?.let(LocalTime::parse),
-    description = description
+    description = description,
+    newDate = newDate?.let(LocalDate::parse)
 )
 
 internal fun TeachingLoadDto.toDomain() = TeachingLoadRow(

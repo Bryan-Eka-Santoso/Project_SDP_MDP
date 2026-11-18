@@ -110,6 +110,23 @@ class ChangeFormViewModelTest {
         viewModel.save(slot(1), date, ChangeType.RESCHEDULE, "Pindah", null, null, null, null)
 
         assertEquals(R.string.change_error_reschedule, viewModel.uiState.value.rescheduleError)
+
+        // Tanggal baru yang sama dengan tanggal asal bukan perubahan.
+        viewModel.save(slot(1), date, ChangeType.RESCHEDULE, "Pindah", null, null, null, null, newDate = date)
+        assertEquals(R.string.change_error_reschedule, viewModel.uiState.value.rescheduleError)
+    }
+
+    @Test
+    fun rescheduleToAnotherDayNeedsOnlyTheNewDate() = runTest {
+        val repository = FakeAdminScheduleRepository()
+        val viewModel = viewModel(repository)
+
+        viewModel.save(slot(1), date, ChangeType.RESCHEDULE, "Pindah hari", null, null, null, null, newDate = date.plusDays(2))
+
+        val sent = repository.savedChanges.single()
+        assertEquals(date.plusDays(2), sent.newDate)
+        assertNull(sent.newStartTime)
+        assertNull(sent.newRoomId)
     }
 
     @Test

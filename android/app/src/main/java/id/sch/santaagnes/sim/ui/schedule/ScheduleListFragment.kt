@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -18,6 +19,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import id.sch.santaagnes.sim.R
 import id.sch.santaagnes.sim.core.DateTimeWib
 import id.sch.santaagnes.sim.databinding.FragmentScheduleListBinding
+import id.sch.santaagnes.sim.domain.model.ChangeType
+import id.sch.santaagnes.sim.domain.model.ScheduleEntry
 import id.sch.santaagnes.sim.domain.model.ScheduleScope
 import id.sch.santaagnes.sim.domain.model.ScopeOption
 import kotlinx.coroutines.launch
@@ -49,6 +52,7 @@ class ScheduleListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.rvSchedule.layoutManager = LinearLayoutManager(requireContext())
         binding.rvSchedule.adapter = adapter
+        adapter.onReschedule = ::openReschedule
 
         binding.btnPrevWeek.setOnClickListener { viewModel.previousWeek() }
         binding.btnNextWeek.setOnClickListener { viewModel.nextWeek() }
@@ -102,7 +106,41 @@ class ScheduleListFragment : Fragment() {
         binding.btnAddTask.isVisible = isTeacher
         binding.btnTaskList.isVisible = isTeacher
         adapter.showTeacher = state.showTeacher
+        // Hanya di jadwal mengajar milik guru itu sendiri (bukan jadwal kelas binaan).
+        adapter.canReschedule = isTeacher && !state.showTeacher
         adapter.submitList(state.lessons)
+    }
+
+    // Form menerima jadwal ASLI pertemuan itu; nilai yang sedang berlaku (bila sudah pernah dipindah)
+    // dikirim terpisah supaya form terisi dan tidak hilang saat disimpan ulang.
+    private fun openReschedule(entry: ScheduleEntry) {
+        val change = entry.change?.takeIf { it.type == ChangeType.RESCHEDULE }
+        // Kelas yang sudah dibatalkan: form hanya menawarkan pemulihan (menghapus perubahan CANCEL).
+        val cancelledId = entry.change?.takeIf { it.type == ChangeType.CANCEL }?.id
+        val original = entry.original.takeIf { change != null }
+        val originalStart = original?.startTime ?: entry.startTime
+        val originalEnd = original?.endTime ?: entry.endTime
+        val originalRoom = if (original != null) original.roomName else entry.roomName
+        val timeMoved = change != null && (entry.startTime != originalStart || entry.endTime != originalEnd)
+        findNavController().navigate(
+            R.id.action_schedule_to_reschedule,
+            bundleOf(
+                "slotId" to entry.slotId,
+                "date" to entry.occurrenceDate.toString(),
+                "changeId" to (change?.id ?: cancelledId ?: 0),
+                "cancelled" to (cancelledId != null),
+                "subject" to entry.subjectName,
+                "classGroup" to entry.classGroupName,
+                "startTime" to originalStart.toString(),
+                "endTime" to originalEnd.toString(),
+                "room" to originalRoom,
+                "newDate" to change?.movedFrom?.let { entry.date.toString() },
+                "newStartTime" to entry.startTime.takeIf { timeMoved }?.toString(),
+                "newEndTime" to entry.endTime.takeIf { timeMoved }?.toString(),
+                "newRoom" to entry.roomName.takeIf { change != null && it != originalRoom },
+                "description" to change?.description
+            )
+        )
     }
 
     private fun renderScopeChips(state: ScheduleUiState) {
