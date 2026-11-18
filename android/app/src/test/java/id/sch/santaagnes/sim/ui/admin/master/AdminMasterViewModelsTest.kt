@@ -9,6 +9,7 @@ import id.sch.santaagnes.sim.data.repository.ClassRepository
 import id.sch.santaagnes.sim.data.repository.GuardianRepository
 import id.sch.santaagnes.sim.data.repository.StudentRepository
 import id.sch.santaagnes.sim.data.repository.TeacherRepository
+import id.sch.santaagnes.sim.domain.model.MasterImportResult
 import id.sch.santaagnes.sim.data.repository.UserRepository
 import id.sch.santaagnes.sim.domain.model.ClassFilter
 import id.sch.santaagnes.sim.domain.model.MasterAcademicYear
@@ -160,6 +161,9 @@ class AdminMasterViewModelsTest {
             Resource.Success(assignments.first().copy(teacherId = teacherId))
         override suspend fun deleteTeachingAssignment(assignmentId: Int) = Resource.Success(Unit)
         override suspend fun getSubjects() = Resource.Success(listOf(MataPelajaranDto(5, "MTK", "Matematika", "MANDATORY")))
+        override suspend fun fileName(uri: String) = "guru.xlsx"
+        override suspend fun saveImportTemplate(destination: String) = true
+        override suspend fun importTeachers(uri: String) = Resource.Success(MasterImportResult(0))
     }
 
     private class FakeClassRepository : ClassRepository {
@@ -214,6 +218,9 @@ class AdminMasterViewModelsTest {
         override suspend fun deleteStudent(id: Int) = Resource.Success(Unit)
         override suspend fun linkGuardian(studentId: Int, guardianId: Int, relationship: String) = Resource.Success(Unit)
         override suspend fun unlinkGuardian(studentId: Int, guardianId: Int) = Resource.Success(Unit)
+        override suspend fun fileName(uri: String) = "siswa.xlsx"
+        override suspend fun saveImportTemplate(destination: String) = true
+        override suspend fun importStudents(uri: String) = Resource.Success(MasterImportResult(0))
     }
 
     private class FakeGuardianRepository : GuardianRepository {

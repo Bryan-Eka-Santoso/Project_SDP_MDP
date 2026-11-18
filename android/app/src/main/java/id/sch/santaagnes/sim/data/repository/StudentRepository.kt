@@ -2,10 +2,13 @@ package id.sch.santaagnes.sim.data.repository
 
 import id.sch.santaagnes.sim.core.ApiErrorMapper
 import id.sch.santaagnes.sim.core.Resource
+import id.sch.santaagnes.sim.core.TemplateFiles
+import id.sch.santaagnes.sim.core.UploadFiles
 import id.sch.santaagnes.sim.data.remote.CreateStudentRequest
 import id.sch.santaagnes.sim.data.remote.LinkGuardianRequest
 import id.sch.santaagnes.sim.data.remote.StudentApi
 import id.sch.santaagnes.sim.data.remote.UpdateStudentRequest
+import id.sch.santaagnes.sim.domain.model.MasterImportResult
 import id.sch.santaagnes.sim.domain.model.MasterStudent
 import id.sch.santaagnes.sim.domain.model.MasterStudentDetail
 import id.sch.santaagnes.sim.domain.model.StudentFilter
@@ -44,11 +47,19 @@ interface StudentRepository {
         studentId: Int,
         guardianId: Int
     ): Resource<Unit>
+
+    suspend fun fileName(uri: String): String?
+
+    suspend fun saveImportTemplate(destination: String): Boolean
+
+    suspend fun importStudents(uri: String): Resource<MasterImportResult>
 }
 
 @Singleton
 class StudentRepositoryImpl @Inject constructor(
     private val studentApi: StudentApi,
+    private val uploads: UploadFiles,
+    private val templates: TemplateFiles,
     private val errorMapper: ApiErrorMapper
 ) : StudentRepository {
 
@@ -114,5 +125,16 @@ class StudentRepositoryImpl @Inject constructor(
         guardianId: Int
     ): Resource<Unit> = errorMapper.call {
         ensureDeleteSucceeded(studentApi.unlinkGuardian(studentId, guardianId), allowNotFound = true)
+    }
+
+    override suspend fun fileName(uri: String): String? = uploads.name(uri)
+
+    override suspend fun saveImportTemplate(destination: String): Boolean =
+        templates.save("siswa.xlsx", destination)
+
+    override suspend fun importStudents(uri: String): Resource<MasterImportResult> = errorMapper.call {
+        val part = uploads.xlsxPart(uri, "siswa.xlsx")
+        val dto = studentApi.importStudents(part).data ?: error("Gagal mengimpor data siswa.")
+        dto.toDomain()
     }
 }

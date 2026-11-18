@@ -79,7 +79,7 @@ class AdminUserFragment : Fragment() {
             header = binding.header,
             navController = nav,
             titleRes = R.string.title_management_user,
-            showImport = true,
+            showImport = false,
             onAdd = { showUserFormSheet(null) }
         )
         setupMasterTabs(binding.tabs, nav, MasterTab.USER)

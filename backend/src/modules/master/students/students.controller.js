@@ -1,4 +1,5 @@
 const studentsService = require('./students.service');
+const studentsImportService = require('./students.import.service');
 const { sendSuccess, sendPaginated } = require('../../../utils/response');
 
 // ==========================================
@@ -87,11 +88,17 @@ async function deleteGuardian(req, res) {
   res.status(204).send();
 }
 
+async function importStudents(req, res) {
+  const result = await studentsImportService.importStudents({ buffer: req.file.buffer });
+  sendSuccess(res, result, 201);
+}
+
 module.exports = {
   listStudents,
   getStudentById,
   createStudent,
   updateStudent,
+  importStudents,
   linkGuardian,
   unlinkGuardian,
   deleteStudent,

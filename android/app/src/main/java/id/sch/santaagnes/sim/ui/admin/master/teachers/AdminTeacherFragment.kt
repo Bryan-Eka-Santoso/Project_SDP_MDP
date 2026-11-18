@@ -74,6 +74,16 @@ class AdminTeacherFragment : Fragment() {
         return binding.root
     }
 
+    private var hasStartedOnce = false
+
+    override fun onStart() {
+        super.onStart()
+        if (hasStartedOnce) {
+            viewModel.loadInitial()
+        }
+        hasStartedOnce = true
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -85,6 +95,7 @@ class AdminTeacherFragment : Fragment() {
             navController = nav,
             titleRes = R.string.title_management_teacher,
             showImport = true,
+            onImport = { nav.navigate(R.id.action_adminTeacher_to_import) },
             onAdd = {
                 if (viewModel.uiState.value.mode == TeacherSectionMode.TEACHERS) {
                     showTeacherFormSheet(null)

@@ -74,7 +74,7 @@ class AdminClassFragment : Fragment() {
             header = binding.header,
             navController = nav,
             titleRes = R.string.title_management_class,
-            showImport = true,
+            showImport = false,
             onAdd = { showClassFormSheet(null) }
         )
         setupMasterTabs(binding.tabs, nav, MasterTab.CLASS)

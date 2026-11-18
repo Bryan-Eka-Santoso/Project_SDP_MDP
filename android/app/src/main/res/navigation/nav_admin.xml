@@ -183,11 +183,39 @@
         <action
             android:id="@+id/action_adminStudent_to_adminUser"
             app:destination="@id/adminUserFragment" />
+
+        <action
+            android:id="@+id/action_adminStudent_to_import"
+            app:destination="@id/masterImportFragment">
+            <argument
+                android:name="importType"
+                android:defaultValue="STUDENT"
+                app:argType="string" />
+        </action>
     </fragment>
 
     <fragment
         android:id="@+id/adminTeacherFragment"
-        android:name="id.sch.santaagnes.sim.ui.admin.master.teachers.AdminTeacherFragment" />
+        android:name="id.sch.santaagnes.sim.ui.admin.master.teachers.AdminTeacherFragment">
+
+        <action
+            android:id="@+id/action_adminTeacher_to_import"
+            app:destination="@id/masterImportFragment">
+            <argument
+                android:name="importType"
+                android:defaultValue="TEACHER"
+                app:argType="string" />
+        </action>
+    </fragment>
+
+    <fragment
+        android:id="@+id/masterImportFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.master.MasterImportFragment">
+        <argument
+            android:name="importType"
+            android:defaultValue="STUDENT"
+            app:argType="string" />
+    </fragment>
 
     <fragment
         android:id="@+id/adminClassFragment"

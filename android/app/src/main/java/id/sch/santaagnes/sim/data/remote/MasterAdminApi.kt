@@ -1,13 +1,21 @@
 package id.sch.santaagnes.sim.data.remote
 
+import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.PATCH
 import retrofit2.http.POST
+import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
+
+data class MasterImportDto(
+    val imported: Int,
+    val assignedToClass: Int = 0
+)
 
 // =====================================================================
 // DTO — MASTER PERIODE AKADEMIK (F-MST-06)
@@ -374,6 +382,12 @@ interface TeacherApi {
     suspend fun deleteTeacher(
         @Path("id") id: Int
     ): Response<Unit>
+
+    @Multipart
+    @POST("teachers/import")
+    suspend fun importTeachers(
+        @Part file: MultipartBody.Part
+    ): ApiResponse<MasterImportDto>
 }
 
 interface TeachingAssignmentApi {

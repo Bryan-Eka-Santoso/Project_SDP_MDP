@@ -2,6 +2,7 @@ const express = require('express');
 const authenticate = require('../../../middlewares/authenticate');
 const authorize = require('../../../middlewares/authorize');
 const validate = require('../../../middlewares/validate');
+const { uploadXlsx } = require('../../../middlewares/upload');
 const controller = require('./teachers.controller');
 const {
   idParams,
@@ -19,6 +20,12 @@ router.get('/', validate({ query: listTeachersQuery }), controller.list);
 router.get('/:id', validate({ params: idParams }), controller.getById);
 
 // F-MST-05: Kelola guru (Admin)
+router.post(
+  '/import',
+  authorize('ADMIN'),
+  uploadXlsx('file'),
+  controller.importTeachers,
+);
 router.post(
   '/',
   authorize('ADMIN'),

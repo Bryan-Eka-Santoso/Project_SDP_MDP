@@ -79,6 +79,7 @@ class AdminStudentFragment : Fragment() {
             navController = nav,
             titleRes = R.string.title_management_student,
             showImport = true,
+            onImport = { nav.navigate(R.id.action_adminStudent_to_import) },
             onAdd = { showStudentFormSheet(null) }
         )
         setupMasterTabs(binding.tabs, nav, MasterTab.STUDENT)

@@ -482,4 +482,28 @@
     <string name="dialog_add_period_title">Tambah Tahun Ajaran</string>
     <string name="dialog_edit_period_title">Ubah Tahun Ajaran</string>
     <string name="dialog_manage_semesters_title">Kelola Semester</string>
+
+    <!-- Impor Excel Data Master (F-MST-04 Siswa, F-MST-05 Guru) -->
+    <string name="import_master_title_student">Impor Data Siswa</string>
+    <string name="import_master_title_teacher">Impor Data Guru</string>
+    <string name="import_student_info">Impor akun dan profil siswa dari berkas Excel (.xlsx). Password yang dikosongkan otomatis diisi 12345678, dan siswa otomatis masuk kelas jika kolom Kelas diisi.</string>
+    <string-array name="import_student_columns">
+        <item>Nama|Nama lengkap siswa (wajib)</item>
+        <item>NIS|Nomor Induk Siswa, format Teks dan unik (wajib)</item>
+        <item>Tanggal Lahir|Format YYYY-MM-DD atau DD/MM/YYYY, mis. 2009-05-14 (wajib)</item>
+        <item>Email|Email aktif dan unik untuk login (wajib)</item>
+        <item>Password|Opsional, min. 8 karakter (kosong = 12345678)</item>
+        <item>No. Telepon|Opsional, format Teks maks. 20 karakter</item>
+        <item>Kelas|Opsional, nama kelas aktif persis seperti di data master, mis. X-1</item>
+    </string-array>
+    <string name="import_teacher_info">Impor akun dan profil guru dari berkas Excel (.xlsx). Format kolom NIP wajib sebagai Teks agar angka 18 digit tidak terpotong Excel; password kosong otomatis diisi 12345678.</string>
+    <string-array name="import_teacher_columns">
+        <item>Nama|Nama lengkap guru beserta gelar (wajib)</item>
+        <item>NIP|Nomor Induk Pegawai, format Teks dan unik (wajib)</item>
+        <item>Email|Email aktif dan unik untuk login (wajib)</item>
+        <item>Password|Opsional, min. 8 karakter (kosong = 12345678)</item>
+    </string-array>
+    <string name="import_master_student_success">%1$d siswa berhasil diimpor.</string>
+    <string name="import_master_student_success_with_class">%1$d siswa berhasil diimpor (%2$d ditempatkan ke kelas).</string>
+    <string name="import_master_teacher_success">%1$d guru berhasil diimpor.</string>
 </resources>

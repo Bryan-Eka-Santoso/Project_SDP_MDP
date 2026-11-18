@@ -1,11 +1,14 @@
 package id.sch.santaagnes.sim.data.remote
 
+import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.PATCH
 import retrofit2.http.POST
+import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -105,4 +108,10 @@ interface StudentApi {
         @Path("id") id: Int,
         @Path("guardianId") guardianId: Int
     ): Response<Unit>
+
+    @Multipart
+    @POST("students/import")
+    suspend fun importStudents(
+        @Part file: MultipartBody.Part
+    ): ApiResponse<MasterImportDto>
 }

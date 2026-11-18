@@ -1,4 +1,5 @@
 const teachersService = require('./teachers.service');
+const teachersImportService = require('./teachers.import.service');
 const { sendSuccess, sendPaginated } = require('../../../utils/response');
 
 async function list(req, res) {
@@ -32,10 +33,16 @@ async function remove(req, res) {
   res.status(204).send();
 }
 
+async function importTeachers(req, res) {
+  const result = await teachersImportService.importTeachers({ buffer: req.file.buffer });
+  sendSuccess(res, result, 201);
+}
+
 module.exports = {
   list,
   getById,
   create,
   update,
   remove,
+  importTeachers,
 };

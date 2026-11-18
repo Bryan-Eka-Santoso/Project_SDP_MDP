@@ -50,6 +50,10 @@ Contoh: slot A Senin 07.00–08.30, slot B Senin 08.00–09.30, guru sama → `0
 - Jadwal yang persis sama (penugasan, hari, jam, ruangan) dengan slot yang sudah ada atau baris di atasnya dilaporkan satu kali sebagai duplikat (`column` null), bukan sebagai bentrok guru + kelas + ruangan sekaligus.
 - Semua baris valid → semua slot disimpan dalam satu transaksi; respons `201` berisi `{ semesterId, imported }`. Tidak ada notifikasi.
 
+#### 2.3.2 Impor siswa dan guru (F-MST-04, F-MST-05)
+- `POST /students/import` (template `docs/import-templates/siswa.xlsx`), hanya Admin, form multipart `file` (.xlsx, maks. 10 MB). Kolom: `Nama`, `NIS`, `Tanggal Lahir` (`YYYY-MM-DD`, `DD/MM/YYYY`, atau sel tanggal Excel), `Email`, `Password` (opsional, min. 8 karakter; jika kosong otomatis diisi `12345678`), `No. Telepon` (opsional, maks. 20 karakter), `Kelas` (opsional, nama kelas pada tahun ajaran aktif dan memeriksa sisa kapasitas). Duplikat `NIS` atau `Email` (baik di file maupun database) ditolak sekaligus; respons `201` berisi `{ imported, assignedToClass }`.
+- `POST /teachers/import` (template `docs/import-templates/guru.xlsx`), hanya Admin, form multipart `file` (.xlsx, maks. 10 MB). Kolom: `Nama`, `NIP`, `Email`, `Password` (opsional, min. 8 karakter; jika kosong otomatis diisi `12345678`). Duplikat `NIP` atau `Email` ditolak sekaligus; setiap guru baru dibuat dengan `isHomeroomTeacher = false` dan respons `201` berisi `{ imported }`.
+
 ### 2.4 Perubahan jadwal (F-JDW-04)
 - Perubahan disimpan sebagai `ScheduleChange` untuk **satu tanggal** tertentu; `ScheduleSlot` aslinya tidak diubah.
 - Jenis: `SUBSTITUTE` (guru pengganti), `RESCHEDULE` (pindah jam dan/atau ruangan pada tanggal yang sama), `CANCEL` (batal).

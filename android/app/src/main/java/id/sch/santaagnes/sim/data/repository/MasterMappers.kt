@@ -4,6 +4,7 @@ import id.sch.santaagnes.sim.data.remote.ClassMembersResponseDto
 import id.sch.santaagnes.sim.data.remote.MasterAcademicYearDto
 import id.sch.santaagnes.sim.data.remote.MasterClassGroupDto
 import id.sch.santaagnes.sim.data.remote.MasterGuardianDto
+import id.sch.santaagnes.sim.data.remote.MasterImportDto
 import id.sch.santaagnes.sim.data.remote.MasterSemesterDto
 import id.sch.santaagnes.sim.data.remote.MasterTeacherDto
 import id.sch.santaagnes.sim.data.remote.MasterTeachingAssignmentDto
@@ -15,6 +16,7 @@ import id.sch.santaagnes.sim.domain.model.MasterClassGroup
 import id.sch.santaagnes.sim.domain.model.MasterClassMember
 import id.sch.santaagnes.sim.domain.model.MasterClassMembersPage
 import id.sch.santaagnes.sim.domain.model.MasterGuardian
+import id.sch.santaagnes.sim.domain.model.MasterImportResult
 import id.sch.santaagnes.sim.domain.model.MasterSemester
 import id.sch.santaagnes.sim.domain.model.MasterStudent
 import id.sch.santaagnes.sim.domain.model.MasterStudentDetail
@@ -177,4 +179,9 @@ fun MasterGuardianDto.toDomain(): MasterGuardian = MasterGuardian(
     phone = phone,
     status = user.status,
     studentCount = _count?.students ?: 0
+)
+
+fun MasterImportDto.toDomain(): MasterImportResult = MasterImportResult(
+    imported = imported,
+    assignedToClass = assignedToClass
 )
