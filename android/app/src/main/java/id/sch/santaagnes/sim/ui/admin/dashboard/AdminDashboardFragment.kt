@@ -40,11 +40,12 @@ class AdminDashboardFragment : Fragment() {
         binding.tvGreeting.setText(greeting())
 
         val nav = findNavController()
-        // Manajemen: pengguna dan siswa (tab Akademik); Pembayaran dan Laporan: layar bersama; Operasional: hub.
         binding.btnMenuManagement.setOnClickListener { nav.navigate(R.id.action_adminDashboard_to_adminUser) }
         binding.btnMenuPayments.setOnClickListener { nav.navigate(R.id.action_global_bills) }
         binding.btnMenuOperations.setOnClickListener { nav.navigate(R.id.action_adminDashboard_to_operations) }
         binding.btnMenuReports.setOnClickListener { nav.navigate(R.id.action_global_reports) }
+        binding.tvPeriodBadge.setOnClickListener { nav.navigate(R.id.action_adminDashboard_to_academicYear) }
+        binding.cardAcademicPeriod.setOnClickListener { nav.navigate(R.id.action_adminDashboard_to_academicYear) }
         binding.btnRetry.setOnClickListener { viewModel.refresh() }
 
         viewLifecycleOwner.lifecycleScope.launch {
@@ -56,12 +57,24 @@ class AdminDashboardFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        // Angka mengikuti data terbaru setelah admin menambah atau menghapus data di layar lain.
         viewModel.refresh()
     }
 
     private fun render(state: AdminDashboardUiState) {
-        binding.tvAdminName.text = state.adminName ?: getString(R.string.admin_default_name)
+        val displayName = state.adminName ?: getString(R.string.admin_default_name)
+        binding.tvAdminName.text = displayName
+        val initials = displayName.trim().split(" ")
+            .filter { it.isNotEmpty() }
+            .take(2)
+            .map { it.first().uppercaseChar() }
+            .joinToString("")
+        binding.tvAvatarInitials.text = initials.ifEmpty { "AD" }
+
+        val periodLabel = state.activePeriodText ?: getString(R.string.master_period_loading)
+        binding.tvPeriodBadge.text = "$periodLabel ▾"
+        binding.tvPeriodCardSummary.text = state.activePeriodText
+            ?: getString(R.string.admin_period_manage_btn)
+
         binding.progress.isVisible = state.isLoading
         binding.errorBanner.isVisible = state.errorMessage != null
         binding.tvError.text = state.errorMessage
@@ -69,23 +82,41 @@ class AdminDashboardFragment : Fragment() {
     }
 
     private fun renderStats(overview: AdminOverview) {
+        val nav = findNavController()
         val stats = listOf(
-            R.string.admin_stat_students to overview.students,
-            R.string.admin_stat_teachers to overview.teachers,
-            R.string.admin_stat_classes to overview.classes,
-            R.string.admin_stat_users to overview.users,
-            R.string.admin_stat_subjects to overview.subjects,
-            R.string.admin_stat_slots to overview.scheduleSlots,
-            R.string.admin_stat_changes to overview.scheduleChanges,
-            R.string.admin_stat_facilities to overview.facilities
+            StatCardSpec(R.string.admin_stat_students, overview.students, R.drawable.ic_bar_chart) {
+                nav.navigate(R.id.adminStudentFragment)
+            },
+            StatCardSpec(R.string.admin_stat_teachers, overview.teachers, R.drawable.ic_person) {
+                nav.navigate(R.id.adminTeacherFragment)
+            },
+            StatCardSpec(R.string.admin_stat_classes, overview.classes, R.drawable.ic_calendar) {
+                nav.navigate(R.id.adminClassFragment)
+            },
+            StatCardSpec(R.string.admin_stat_users, overview.users, R.drawable.ic_shield_person) {
+                nav.navigate(R.id.adminUserFragment)
+            },
+            StatCardSpec(R.string.admin_stat_subjects, overview.subjects, R.drawable.ic_book, null),
+            StatCardSpec(R.string.admin_stat_slots, overview.scheduleSlots, R.drawable.ic_calendar) {
+                nav.navigate(R.id.action_adminDashboard_to_adminSchedule)
+            },
+            StatCardSpec(R.string.admin_stat_changes, overview.scheduleChanges, R.drawable.ic_warning, null),
+            StatCardSpec(R.string.admin_stat_facilities, overview.facilities, R.drawable.ic_facility) {
+                nav.navigate(R.id.action_adminDashboard_to_operations)
+            }
         )
+
         val grid = binding.gridStats
         grid.removeAllViews()
         val inflater = LayoutInflater.from(requireContext())
-        stats.forEach { (label, value) ->
+        stats.forEach { spec ->
             val item = ItemAdminStatBinding.inflate(inflater, grid, false)
-            item.tvLabel.setText(label)
-            item.tvValue.text = value?.toString() ?: getString(R.string.admin_stat_unknown)
+            item.tvLabel.setText(spec.labelRes)
+            item.tvValue.text = spec.value?.toString() ?: getString(R.string.admin_stat_unknown)
+            item.ivStatIcon.setImageResource(spec.iconRes)
+            spec.onClick?.let { handler ->
+                item.root.setOnClickListener { handler() }
+            }
             grid.addView(item.root)
         }
     }
@@ -101,4 +132,11 @@ class AdminDashboardFragment : Fragment() {
         _binding = null
         super.onDestroyView()
     }
+
+    private data class StatCardSpec(
+        val labelRes: Int,
+        val value: Int?,
+        val iconRes: Int,
+        val onClick: (() -> Unit)?
+    )
 }

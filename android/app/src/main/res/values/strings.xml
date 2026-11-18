@@ -408,4 +408,74 @@
     <string name="master_bookings_daftar_pengajuan">Daftar Pengajuan</string>
     <string name="master_bookings_belum_ada_pengajuan_peminjam">Belum ada pengajuan peminjaman</string>
     <string name="master_add">Tambah</string>
+
+    <!-- Tambahan UI Admin & Master Data (F-MST-01..10, Figma konsisten) -->
+    <string name="action_import">Import</string>
+    <string name="master_period_loading">Periode Aktif</string>
+    <string name="master_period_badge">%1$s | %2$s ▾</string>
+    <string name="master_total_count">Total: %1$d data</string>
+    <string name="master_import_unavailable">Impor Excel untuk modul ini belum tersedia di server.</string>
+    <string name="admin_stat_sub">SMA St. Agnes</string>
+    <string name="admin_period_card_title">Periode Akademik Aktif</string>
+    <string name="admin_period_manage_btn">Kelola Tahun Ajaran &amp; Semester</string>
+    <string name="profile_header_title">Profil Saya</string>
+    <string name="profile_full_name_label">Nama Lengkap</string>
+    <string name="profile_role_label">Peran</string>
+    <string name="profile_class_role_label">Kelas / Peran</string>
+    <string name="profile_email_label">Email</string>
+    <string name="profile_homeroom_badge">Wali Kelas</string>
+    <string name="profile_teacher_regular_note">Guru Pengajar (akses kelas &amp; mapel yang diajar)</string>
+
+    <!-- Master User & Siswa -->
+    <string name="user_edit_role_hint">Role Akun</string>
+    <string name="user_cd_edit">Ubah data dan role</string>
+    <string name="user_cd_block">Blokir atau aktifkan akun</string>
+    <string name="user_cd_reset">Reset password</string>
+    <string name="user_cd_delete">Hapus akun</string>
+    <string name="student_birthdate_hint">Tanggal Lahir (YYYY-MM-DD)</string>
+    <string name="student_guardians_action">Kelola Wali Murid</string>
+    <string name="student_guardians_empty">Belum ada wali murid terhubung dengan siswa ini.</string>
+
+    <!-- Master Guru & Guru Pengajar (F-MST-05 & F-MST-10) -->
+    <string name="title_management_teacher">Manajemen Guru</string>
+    <string name="teacher_mode_list">Daftar Guru</string>
+    <string name="teacher_mode_assignments">Guru Pengajar</string>
+    <string name="search_teacher_hint">Cari nama, email, atau NIP</string>
+    <string name="search_assignment_hint">Cari guru, mapel, atau kelas</string>
+    <string name="filter_all_teachers">Semua Guru</string>
+    <string name="filter_homeroom_teachers">Wali Kelas</string>
+    <string name="filter_regular_teachers">Guru Biasa</string>
+    <string name="chip_teacher_count">(%1$d) Guru</string>
+    <string name="chip_homeroom_count">(%1$d) Wali Kelas</string>
+    <string name="chip_regular_count">(%1$d) Guru Biasa</string>
+    <string name="teacher_empty">Belum ada data guru yang cocok.</string>
+    <string name="assignment_empty">Belum ada penugasan guru mengajar di semester aktif.</string>
+    <string name="teacher_badge_homeroom">Wali Kelas</string>
+    <string name="teacher_badge_regular">Guru Pengajar</string>
+    <string name="teacher_access_homeroom">Akses: Mengajar + Wali Kelas (izin, tagihan &amp; pantau kelas binaan)</string>
+    <string name="teacher_access_regular">Akses: Guru Biasa (hanya jadwal, nilai, presensi &amp; tugas mapel diampu)</string>
+    <string name="dialog_add_teacher_title">Tambah Guru</string>
+    <string name="dialog_edit_teacher_title">Ubah Data Guru</string>
+    <string name="dialog_add_assignment_title">Tambah Guru Pengajar</string>
+    <string name="dialog_edit_assignment_title">Ganti Guru Pengajar</string>
+
+    <!-- Master Kelas, Wali Kelas & Anggota (F-MST-07, F-MST-08, F-MST-09) -->
+    <string name="title_management_class">Manajemen Kelas</string>
+    <string name="search_class_hint">Cari nama kelas</string>
+    <string name="filter_all_years">Semua Tahun Ajaran</string>
+    <string name="chip_class_count">(%1$d) Kelas</string>
+    <string name="chip_class_with_homeroom">(%1$d) Ada Wali</string>
+    <string name="chip_class_no_homeroom">(%1$d) Tanpa Wali</string>
+    <string name="class_empty">Belum ada data kelas yang cocok.</string>
+    <string name="dialog_add_class_title">Tambah Kelas</string>
+    <string name="dialog_edit_class_title">Ubah Data Kelas</string>
+    <string name="dialog_homeroom_title">Atur Wali Kelas</string>
+    <string name="dialog_class_members_title">Anggota Kelas</string>
+
+    <!-- Master Tahun Ajaran & Semester (F-MST-06) -->
+    <string name="title_management_period">Tahun Ajaran &amp; Semester</string>
+    <string name="period_empty">Belum ada data tahun ajaran.</string>
+    <string name="dialog_add_period_title">Tambah Tahun Ajaran</string>
+    <string name="dialog_edit_period_title">Ubah Tahun Ajaran</string>
+    <string name="dialog_manage_semesters_title">Kelola Semester</string>
 </resources>

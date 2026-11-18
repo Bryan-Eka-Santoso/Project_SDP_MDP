@@ -15,6 +15,19 @@ data class MasterStudent(
     val guardianCount: Int = 0
 )
 
+data class MasterStudentGuardian(
+    val guardianId: Int,
+    val relationship: String,
+    val name: String,
+    val phone: String?,
+    val email: String
+)
+
+data class MasterStudentDetail(
+    val student: MasterStudent,
+    val guardians: List<MasterStudentGuardian> = emptyList()
+)
+
 data class StudentFilter(
     val search: String? = null,
     val classGroupId: Int? = null

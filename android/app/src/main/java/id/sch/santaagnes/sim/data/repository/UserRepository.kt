@@ -10,14 +10,13 @@ import id.sch.santaagnes.sim.data.remote.UpdateUserRequest
 import id.sch.santaagnes.sim.data.remote.UserApi
 import id.sch.santaagnes.sim.domain.model.MasterUser
 import id.sch.santaagnes.sim.domain.model.UserFilter
-import retrofit2.HttpException
 import javax.inject.Inject
 import javax.inject.Singleton
 
 interface UserRepository {
     suspend fun getUsers(
         page: Int = 1,
-        limit: Int = 20,
+        limit: Int = 50,
         filter: UserFilter = UserFilter()
     ): Resource<Pair<List<MasterUser>, Int>>
 
@@ -73,16 +72,7 @@ class UserRepositoryImpl @Inject constructor(
             status = filter.status?.takeIf { it.isNotBlank() && it != "ALL" }
         )
         val data = response.data ?: error("Gagal memuat data pengguna")
-        val items = data.map {
-            MasterUser(
-                id = it.id,
-                email = it.email,
-                name = it.name,
-                role = it.role,
-                status = it.status,
-                createdAt = it.createdAt
-            )
-        }
+        val items = data.map { it.toDomain() }
         val total = response.meta?.total ?: items.size
         Pair(items, total)
     }
@@ -96,15 +86,7 @@ class UserRepositoryImpl @Inject constructor(
         val response = userApi.createUser(
             CreateUserRequest(email, password, name, role)
         )
-        val it = response.data ?: error("Gagal membuat pengguna")
-        MasterUser(
-            id = it.id,
-            email = it.email,
-            name = it.name,
-            role = it.role,
-            status = it.status,
-            createdAt = it.createdAt
-        )
+        (response.data ?: error("Gagal membuat pengguna")).toDomain()
     }
 
     override suspend fun updateUser(
@@ -116,15 +98,7 @@ class UserRepositoryImpl @Inject constructor(
             id = id,
             body = UpdateUserRequest(name = name, email = email)
         )
-        val it = response.data ?: error("Gagal mengubah pengguna")
-        MasterUser(
-            id = it.id,
-            email = it.email,
-            name = it.name,
-            role = it.role,
-            status = it.status,
-            createdAt = it.createdAt
-        )
+        (response.data ?: error("Gagal mengubah pengguna")).toDomain()
     }
 
     override suspend fun updateRole(
@@ -135,15 +109,7 @@ class UserRepositoryImpl @Inject constructor(
             id = id,
             body = UpdateRoleRequest(role = role)
         )
-        val it = response.data ?: error("Gagal memperbarui role")
-        MasterUser(
-            id = it.id,
-            email = it.email,
-            name = it.name,
-            role = it.role,
-            status = it.status,
-            createdAt = it.createdAt
-        )
+        (response.data ?: error("Gagal memperbarui role")).toDomain()
     }
 
     override suspend fun updateStatus(
@@ -154,15 +120,7 @@ class UserRepositoryImpl @Inject constructor(
             id = id,
             body = UpdateStatusRequest(status = status)
         )
-        val it = response.data ?: error("Gagal memperbarui status")
-        MasterUser(
-            id = it.id,
-            email = it.email,
-            name = it.name,
-            role = it.role,
-            status = it.status,
-            createdAt = it.createdAt
-        )
+        (response.data ?: error("Gagal memperbarui status")).toDomain()
     }
 
     override suspend fun resetPassword(
@@ -179,9 +137,6 @@ class UserRepositoryImpl @Inject constructor(
     override suspend fun deleteUser(
         id: Int
     ): Resource<Unit> = errorMapper.call {
-        val response = userApi.deleteUser(id = id)
-        if (!response.isSuccessful && response.code() != 404) {
-            throw HttpException(response)
-        }
+        ensureDeleteSucceeded(userApi.deleteUser(id = id), allowNotFound = true)
     }
 }

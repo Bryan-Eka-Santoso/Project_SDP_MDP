@@ -7,22 +7,25 @@
     android:background="@color/agnesian_background"
     android:orientation="vertical">
 
+    <!-- Header Dashboard (Figma 144:5468): Sapaan, Nama Admin, Periode Aktif & Avatar -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/bg_header"
-        android:minHeight="110dp"
+        android:minHeight="132dp"
         android:paddingStart="20dp"
-        android:paddingTop="28dp"
+        android:paddingTop="24dp"
         android:paddingEnd="20dp"
-        android:paddingBottom="20dp">
+        android:paddingBottom="22dp">
 
         <TextView
             android:id="@+id/tvGreeting"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textColor="@color/white"
-            android:textSize="14sp"
+            android:layout_marginEnd="12dp"
+            android:textColor="#E6FFFFFF"
+            android:textSize="13sp"
+            app:layout_constraintEnd_toStartOf="@id/avatarCard"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Selamat pagi," />
@@ -32,15 +35,55 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
+            android:layout_marginEnd="12dp"
             android:ellipsize="end"
             android:maxLines="1"
             android:textColor="@color/white"
-            android:textSize="20sp"
+            android:textSize="19sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/avatarCard"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvGreeting"
-            tools:text="Administrator" />
+            app:layout_constraintTop_toBottomOf="@id/tvGreeting"
+            tools:text="Bpk. Andreas Santoso, S.Pd." />
+
+        <TextView
+            android:id="@+id/tvPeriodBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_badge_role"
+            android:backgroundTint="#29FFFFFF"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="4dp"
+            android:text="@string/master_period_loading"
+            android:textColor="@color/white"
+            android:textSize="11sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvAdminName" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/avatarCard"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            app:cardBackgroundColor="#33FFFFFF"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:layout_constraintBottom_toBottomOf="@id/tvAdminName"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tvGreeting"
+            app:strokeColor="#4DFFFFFF"
+            app:strokeWidth="1dp">
+
+            <TextView
+                android:id="@+id/tvAvatarInitials"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="AD"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </com.google.android.material.card.MaterialCardView>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.progressindicator.LinearProgressIndicator
@@ -91,36 +134,37 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="14dp"
                 android:text="@string/admin_stats_title"
                 android:textColor="@color/agnesian_text"
-                android:textSize="16sp"
+                android:textSize="15sp"
                 android:textStyle="bold" />
 
-            <!-- Jumlah seluruh data; kartunya dibuat dari kode (satu per jenis data). -->
+            <!-- Jumlah seluruh data (kartu gaya Figma 144:5468) -->
             <GridLayout
                 android:id="@+id/gridStats"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="10dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="6dp"
                 android:columnCount="2" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="18dp"
                 android:text="@string/admin_shortcuts_title"
                 android:textColor="@color/agnesian_text"
-                android:textSize="16sp"
+                android:textSize="15sp"
                 android:textStyle="bold" />
 
+            <!-- 4 Menu Cepat kotak putih (Figma 144:5468) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="10dp"
                 android:orientation="horizontal"
                 android:weightSum="4">
 
@@ -133,23 +177,24 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:paddingVertical="4dp">
 
                     <com.google.android.material.card.MaterialCardView
-                        android:layout_width="56dp"
-                        android:layout_height="56dp"
-                        app:cardBackgroundColor="@color/agnesian_tile"
-                        app:cardCornerRadius="16dp"
-                        app:cardElevation="0dp"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        app:cardBackgroundColor="@color/white"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="2dp"
                         app:strokeWidth="0dp">
 
                         <ImageView
-                            android:layout_width="26dp"
-                            android:layout_height="26dp"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
                             android:layout_gravity="center"
                             android:importantForAccessibility="no"
                             android:src="@drawable/ic_person"
-                            app:tint="@color/agnesian_blue" />
+                            app:tint="@color/black" />
                     </com.google.android.material.card.MaterialCardView>
 
                     <TextView
@@ -157,8 +202,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="6dp"
                         android:text="@string/admin_menu_management"
-                        android:textColor="@color/agnesian_text"
-                        android:textSize="11sp"
+                        android:textColor="@color/black"
+                        android:textSize="12sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
@@ -171,23 +216,24 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:paddingVertical="4dp">
 
                     <com.google.android.material.card.MaterialCardView
-                        android:layout_width="56dp"
-                        android:layout_height="56dp"
-                        app:cardBackgroundColor="@color/agnesian_tile"
-                        app:cardCornerRadius="16dp"
-                        app:cardElevation="0dp"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        app:cardBackgroundColor="@color/white"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="2dp"
                         app:strokeWidth="0dp">
 
                         <ImageView
-                            android:layout_width="26dp"
-                            android:layout_height="26dp"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
                             android:layout_gravity="center"
                             android:importantForAccessibility="no"
                             android:src="@drawable/ic_payment"
-                            app:tint="@color/agnesian_blue" />
+                            app:tint="@color/black" />
                     </com.google.android.material.card.MaterialCardView>
 
                     <TextView
@@ -195,8 +241,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="6dp"
                         android:text="@string/admin_menu_payments"
-                        android:textColor="@color/agnesian_text"
-                        android:textSize="11sp"
+                        android:textColor="@color/black"
+                        android:textSize="12sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
@@ -209,23 +255,24 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:paddingVertical="4dp">
 
                     <com.google.android.material.card.MaterialCardView
-                        android:layout_width="56dp"
-                        android:layout_height="56dp"
-                        app:cardBackgroundColor="@color/agnesian_tile"
-                        app:cardCornerRadius="16dp"
-                        app:cardElevation="0dp"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        app:cardBackgroundColor="@color/white"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="2dp"
                         app:strokeWidth="0dp">
 
                         <ImageView
-                            android:layout_width="26dp"
-                            android:layout_height="26dp"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
                             android:layout_gravity="center"
                             android:importantForAccessibility="no"
                             android:src="@drawable/ic_facility"
-                            app:tint="@color/agnesian_blue" />
+                            app:tint="@color/black" />
                     </com.google.android.material.card.MaterialCardView>
 
                     <TextView
@@ -233,8 +280,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="6dp"
                         android:text="@string/admin_menu_operations"
-                        android:textColor="@color/agnesian_text"
-                        android:textSize="11sp"
+                        android:textColor="@color/black"
+                        android:textSize="12sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
@@ -247,23 +294,24 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:paddingVertical="4dp">
 
                     <com.google.android.material.card.MaterialCardView
-                        android:layout_width="56dp"
-                        android:layout_height="56dp"
-                        app:cardBackgroundColor="@color/agnesian_tile"
-                        app:cardCornerRadius="16dp"
-                        app:cardElevation="0dp"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        app:cardBackgroundColor="@color/white"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="2dp"
                         app:strokeWidth="0dp">
 
                         <ImageView
-                            android:layout_width="26dp"
-                            android:layout_height="26dp"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
                             android:layout_gravity="center"
                             android:importantForAccessibility="no"
                             android:src="@drawable/ic_grades"
-                            app:tint="@color/agnesian_blue" />
+                            app:tint="@color/black" />
                     </com.google.android.material.card.MaterialCardView>
 
                     <TextView
@@ -271,11 +319,75 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="6dp"
                         android:text="@string/admin_menu_reports"
-                        android:textColor="@color/agnesian_text"
-                        android:textSize="11sp"
+                        android:textColor="@color/black"
+                        android:textSize="12sp"
                         android:textStyle="bold" />
                 </LinearLayout>
             </LinearLayout>
+
+            <!-- Kartu Periode Akademik Aktif (Akses cepat F-MST-06) -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardAcademicPeriod"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="18dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_calendar"
+                        app:tint="@color/agnesian_blue" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/admin_period_card_title"
+                            android:textColor="@color/black"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvPeriodCardSummary"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/master_period_loading"
+                            android:textColor="@color/agnesian_muted"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Kelola"
+                        android:textColor="@color/agnesian_button"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

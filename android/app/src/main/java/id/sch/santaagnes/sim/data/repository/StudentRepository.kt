@@ -7,17 +7,19 @@ import id.sch.santaagnes.sim.data.remote.LinkGuardianRequest
 import id.sch.santaagnes.sim.data.remote.StudentApi
 import id.sch.santaagnes.sim.data.remote.UpdateStudentRequest
 import id.sch.santaagnes.sim.domain.model.MasterStudent
+import id.sch.santaagnes.sim.domain.model.MasterStudentDetail
 import id.sch.santaagnes.sim.domain.model.StudentFilter
-import retrofit2.HttpException
 import javax.inject.Inject
 import javax.inject.Singleton
 
 interface StudentRepository {
     suspend fun getStudents(
         page: Int = 1,
-        limit: Int = 20,
+        limit: Int = 50,
         filter: StudentFilter = StudentFilter()
     ): Resource<Pair<List<MasterStudent>, Int>>
+
+    suspend fun getStudentDetail(id: Int): Resource<MasterStudentDetail>
 
     suspend fun createStudent(
         request: CreateStudentRequest
@@ -62,43 +64,22 @@ class StudentRepositoryImpl @Inject constructor(
             classGroupId = filter.classGroupId
         )
         val data = response.data ?: error("Gagal memuat data siswa")
-        val items = data.map {
-            MasterStudent(
-                id = it.id,
-                userId = it.user.id,
-                name = it.user.name,
-                email = it.user.email,
-                nis = it.nis,
-                status = it.user.status,
-                birthDate = it.birthDate,
-                phone = it.phone,
-                className = it.currentClass?.name,
-                classId = it.currentClass?.id,
-                guardianCount = it.guardians?.size ?: 0
-            )
-        }
+        val items = data.map { it.toDomain() }
         val total = response.meta?.total ?: items.size
         Pair(items, total)
+    }
+
+    override suspend fun getStudentDetail(id: Int): Resource<MasterStudentDetail> = errorMapper.call {
+        val dto = studentApi.getStudentById(id).data ?: error("Detail siswa tidak ditemukan")
+        dto.toDetailDomain()
     }
 
     override suspend fun createStudent(
         request: CreateStudentRequest
     ): Resource<MasterStudent> = errorMapper.call {
         val response = studentApi.createStudent(request)
-        val it = response.data ?: error("Gagal menambah siswa")
-        MasterStudent(
-            id = it.id,
-            userId = it.user.id,
-            name = it.user.name,
-            email = it.user.email,
-            nis = it.nis,
-            status = it.user.status,
-            birthDate = it.birthDate,
-            phone = it.phone,
-            className = it.currentClass?.name,
-            classId = it.currentClass?.id,
-            guardianCount = it.guardians?.size ?: 0
-        )
+        val dto = response.data ?: error("Gagal menambah siswa")
+        dto.toDomain()
     }
 
     override suspend fun updateStudent(
@@ -106,29 +87,14 @@ class StudentRepositoryImpl @Inject constructor(
         request: UpdateStudentRequest
     ): Resource<MasterStudent> = errorMapper.call {
         val response = studentApi.updateStudent(id, request)
-        val it = response.data ?: error("Gagal memperbarui siswa")
-        MasterStudent(
-            id = it.id,
-            userId = it.user.id,
-            name = it.user.name,
-            email = it.user.email,
-            nis = it.nis,
-            status = it.user.status,
-            birthDate = it.birthDate,
-            phone = it.phone,
-            className = it.currentClass?.name,
-            classId = it.currentClass?.id,
-            guardianCount = it.guardians?.size ?: 0
-        )
+        val dto = response.data ?: error("Gagal memperbarui siswa")
+        dto.toDomain()
     }
 
     override suspend fun deleteStudent(
         id: Int
     ): Resource<Unit> = errorMapper.call {
-        val response = studentApi.deleteStudent(id)
-        if (!response.isSuccessful && response.code() != 404) {
-            throw HttpException(response)
-        }
+        ensureDeleteSucceeded(studentApi.deleteStudent(id), allowNotFound = true)
     }
 
     override suspend fun linkGuardian(
@@ -147,9 +113,6 @@ class StudentRepositoryImpl @Inject constructor(
         studentId: Int,
         guardianId: Int
     ): Resource<Unit> = errorMapper.call {
-        val response = studentApi.unlinkGuardian(studentId, guardianId)
-        if (!response.isSuccessful && response.code() != 404) {
-            throw HttpException(response)
-        }
+        ensureDeleteSucceeded(studentApi.unlinkGuardian(studentId, guardianId), allowNotFound = true)
     }
 }

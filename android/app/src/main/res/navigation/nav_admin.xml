@@ -25,6 +25,10 @@
         <action
             android:id="@+id/action_adminDashboard_to_operations"
             app:destination="@id/adminOperationsFragment" />
+
+        <action
+            android:id="@+id/action_adminDashboard_to_academicYear"
+            app:destination="@id/adminAcademicYearFragment" />
     </fragment>
 
     <fragment
@@ -180,6 +184,18 @@
             android:id="@+id/action_adminStudent_to_adminUser"
             app:destination="@id/adminUserFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/adminTeacherFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.master.teachers.AdminTeacherFragment" />
+
+    <fragment
+        android:id="@+id/adminClassFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.master.classes.AdminClassFragment" />
+
+    <fragment
+        android:id="@+id/adminAcademicYearFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.master.periods.AdminAcademicYearFragment" />
     <fragment
         android:id="@+id/adminMataPelajaranFragment"
         android:name="id.sch.santaagnes.sim.ui.admin.matapelajaran.MataPelajaranFragment"

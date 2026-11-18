@@ -52,6 +52,7 @@ data class CreateStudentRequest(
 
 data class UpdateStudentRequest(
     val name: String? = null,
+    val email: String? = null,
     val nis: String? = null,
     val birthDate: String? = null,
     val phone: String? = null

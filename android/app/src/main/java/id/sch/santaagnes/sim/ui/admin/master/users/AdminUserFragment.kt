@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
@@ -22,6 +21,9 @@ import id.sch.santaagnes.sim.databinding.DialogAddUserBinding
 import id.sch.santaagnes.sim.databinding.DialogResetPasswordBinding
 import id.sch.santaagnes.sim.databinding.FragmentAdminUsersBinding
 import id.sch.santaagnes.sim.domain.model.MasterUser
+import id.sch.santaagnes.sim.ui.admin.master.MasterTab
+import id.sch.santaagnes.sim.ui.admin.master.setupMasterHeader
+import id.sch.santaagnes.sim.ui.admin.master.setupMasterTabs
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -53,41 +55,20 @@ class AdminUserFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupRecyclerView()
-        setupHeaderAndTabs()
-        setupFilterAndSearch()
-        observeViewModel()
-    }
-
-    private fun setupRecyclerView() {
+        val nav = findNavController()
         binding.rvUsers.layoutManager = LinearLayoutManager(requireContext())
         binding.rvUsers.adapter = userAdapter
-    }
 
-    private fun setupHeaderAndTabs() {
-        binding.btnBack.setOnClickListener {
-            findNavController().navigateUp()
-        }
-
-        binding.btnAddUser.setOnClickListener {
-            showAddUserDialog()
-        }
-
-        binding.btnImportUser.setOnClickListener {
-            Toast.makeText(requireContext(), "Fitur impor Excel user siap diintegrasikan", Toast.LENGTH_SHORT).show()
-        }
-
-        binding.tabStudent.setOnClickListener {
-            findNavController().navigate(R.id.action_adminUser_to_adminStudent)
-        }
-
-        binding.tabTeacher.setOnClickListener {
-            Toast.makeText(requireContext(), "Menuju Master Guru (M1/F-MST-05)", Toast.LENGTH_SHORT).show()
-        }
-
-        binding.tabClass.setOnClickListener {
-            Toast.makeText(requireContext(), "Menuju Master Kelas (M1/F-MST-07)", Toast.LENGTH_SHORT).show()
-        }
+        setupMasterHeader(
+            header = binding.header,
+            navController = nav,
+            titleRes = R.string.title_management_user,
+            showImport = true,
+            onAdd = ::showAddUserDialog
+        )
+        setupMasterTabs(binding.tabs, nav, MasterTab.USER)
+        setupFilterAndSearch()
+        observeViewModel()
     }
 
     private fun setupFilterAndSearch() {
@@ -104,13 +85,8 @@ class AdminUserFragment : Fragment() {
             viewModel.setSearchQuery(editable?.toString().orEmpty())
         }
 
-        binding.chipActive.setOnClickListener {
-            viewModel.setStatusFilter("ACTIVE")
-        }
-
-        binding.chipInactive.setOnClickListener {
-            viewModel.setStatusFilter("BLOCKED")
-        }
+        binding.chipActive.setOnClickListener { viewModel.setStatusFilter("ACTIVE") }
+        binding.chipInactive.setOnClickListener { viewModel.setStatusFilter("BLOCKED") }
     }
 
     private fun observeViewModel() {
@@ -118,12 +94,16 @@ class AdminUserFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     viewModel.uiState.collect { state ->
+                        state.activePeriodText?.let {
+                            binding.header.tvSemesterBadge.text = "$it ▾"
+                        }
                         binding.progressBar.isVisible = state.isLoading
                         binding.tvEmptyState.isVisible = !state.isLoading && state.users.isEmpty()
                         userAdapter.submitList(state.users)
 
                         binding.chipActive.text = getString(R.string.chip_active_count, state.activeCount)
                         binding.chipInactive.text = getString(R.string.chip_inactive_count, state.inactiveCount)
+                        binding.tvTotal.text = getString(R.string.master_total_count, state.totalCount)
 
                         val isFilterActive = state.currentFilter.status == "ACTIVE"
                         val isFilterBlocked = state.currentFilter.status == "BLOCKED"
@@ -147,9 +127,9 @@ class AdminUserFragment : Fragment() {
 
     private fun showAddUserDialog() {
         val dialogBinding = DialogAddUserBinding.inflate(layoutInflater)
-        val roles = listOf("STUDENT", "TEACHER", "GUARDIAN", "ADMIN")
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, roles)
-        dialogBinding.spinnerDialogRole.setAdapter(adapter)
+        val roles = arrayOf("STUDENT", "TEACHER", "GUARDIAN", "ADMIN")
+        dialogBinding.spinnerDialogRole.setSimpleItems(roles)
+        dialogBinding.spinnerDialogRole.setText("STUDENT", false)
 
         MaterialAlertDialogBuilder(requireContext())
             .setView(dialogBinding.root)
@@ -157,13 +137,12 @@ class AdminUserFragment : Fragment() {
                 val name = dialogBinding.etName.text.toString().trim()
                 val email = dialogBinding.etEmail.text.toString().trim()
                 val password = dialogBinding.etPassword.text.toString()
-                val role = dialogBinding.spinnerDialogRole.text.toString()
+                val role = dialogBinding.spinnerDialogRole.text.toString().ifBlank { "STUDENT" }
 
                 if (name.isBlank() || email.isBlank() || password.isBlank()) {
                     Toast.makeText(requireContext(), "Semua kolom wajib diisi", Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
-
                 viewModel.createUser(name, email, password, role)
             }
             .setNegativeButton("Batal", null)
@@ -176,14 +155,23 @@ class AdminUserFragment : Fragment() {
         dialogBinding.etName.setText(user.name)
         dialogBinding.etEmail.setText(user.email)
         dialogBinding.layoutPassword.isVisible = false
-        dialogBinding.layoutRole.isVisible = false
+
+        val roles = arrayOf("STUDENT", "TEACHER", "GUARDIAN", "ADMIN")
+        dialogBinding.layoutRole.isVisible = true
+        dialogBinding.spinnerDialogRole.setSimpleItems(roles)
+        dialogBinding.spinnerDialogRole.setText(user.role, false)
 
         MaterialAlertDialogBuilder(requireContext())
             .setView(dialogBinding.root)
             .setPositiveButton("Simpan") { _, _ ->
                 val name = dialogBinding.etName.text.toString().trim()
                 val email = dialogBinding.etEmail.text.toString().trim()
-                viewModel.updateUser(user.id, name, email)
+                val role = dialogBinding.spinnerDialogRole.text.toString().ifBlank { user.role }
+                if (name.isBlank() || email.isBlank()) {
+                    Toast.makeText(requireContext(), "Nama dan email wajib diisi", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+                viewModel.updateUser(user, name, email, role)
             }
             .setNegativeButton("Batal", null)
             .show()
@@ -212,9 +200,7 @@ class AdminUserFragment : Fragment() {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(if (user.isActive) "Blokir Akun?" else "Buka Blokir Akun?")
             .setMessage("Apakah Anda yakin ingin $action akun milik ${user.name}?")
-            .setPositiveButton("Ya") { _, _ ->
-                viewModel.toggleStatus(user)
-            }
+            .setPositiveButton("Ya") { _, _ -> viewModel.toggleStatus(user) }
             .setNegativeButton("Batal", null)
             .show()
     }
@@ -222,10 +208,8 @@ class AdminUserFragment : Fragment() {
     private fun confirmDeleteUser(user: MasterUser) {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Hapus Pengguna?")
-            .setMessage("Akun ${user.name} (${user.email}) akan dihapus permanen.\n\nCatatan: Sesuai aturan akademik, pengguna yang sudah memiliki data profil (siswa/guru/wali) tidak bisa dihapus dan harus diblokir.")
-            .setPositiveButton("Hapus") { _, _ ->
-                viewModel.deleteUser(user.id)
-            }
+            .setMessage("Akun ${user.name} (${user.email}) akan dihapus permanen.\n\nCatatan: Pengguna yang sudah memiliki data profil (siswa/guru/wali) tidak bisa dihapus dan harus diblokir.")
+            .setPositiveButton("Hapus") { _, _ -> viewModel.deleteUser(user.id) }
             .setNegativeButton("Batal", null)
             .show()
     }

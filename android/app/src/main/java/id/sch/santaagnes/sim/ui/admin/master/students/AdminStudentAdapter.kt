@@ -2,8 +2,7 @@ package id.sch.santaagnes.sim.ui.admin.master.students
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.PopupMenu
-import androidx.core.view.isVisible
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -22,39 +21,26 @@ class AdminStudentAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(student: MasterStudent) {
+            val context = binding.root.context
             binding.tvStudentName.text = student.name
-            binding.tvStudentNisClass.text = "NIS: ${student.nis} · ${student.className ?: "Belum ada kelas"}"
+            val classLabel = student.className ?: "Belum ada kelas"
+            binding.tvStudentNisClass.text = "NIS: ${student.nis} | $classLabel"
             binding.tvStudentEmail.text = student.email
+            binding.tvStudentMetaRight.text = student.birthDate ?: student.phone.orEmpty()
 
-            if (student.isActive) {
-                binding.tvStudentStatusBadge.text = binding.root.context.getString(R.string.status_active)
-                binding.tvStudentStatusBadge.setBackgroundResource(R.drawable.bg_badge_active)
-                binding.tvStudentStatusBadge.setTextColor(0xFF137333.toInt())
-            } else {
-                binding.tvStudentStatusBadge.text = binding.root.context.getString(R.string.status_inactive)
-                binding.tvStudentStatusBadge.setBackgroundResource(R.drawable.bg_badge_inactive)
-                binding.tvStudentStatusBadge.setTextColor(0xFFC5221F.toInt())
-            }
+            binding.tvStudentStatus.text = context.getString(
+                if (student.isActive) R.string.status_active else R.string.status_inactive
+            )
+            binding.tvStudentStatus.setTextColor(
+                ContextCompat.getColor(
+                    context,
+                    if (student.isActive) R.color.agnesian_button else R.color.change_cancel
+                )
+            )
 
-            binding.tvGuardianBadge.isVisible = student.guardianCount > 0
-            binding.tvGuardianBadge.text = "${student.guardianCount} Wali Murid"
-
-            binding.btnOptions.setOnClickListener { view ->
-                val popup = PopupMenu(view.context, view)
-                popup.menu.add(0, 1, 0, "Ubah Data Siswa")
-                popup.menu.add(0, 2, 1, "Kelola Wali Murid")
-                popup.menu.add(0, 3, 2, "Hapus Siswa")
-
-                popup.setOnMenuItemClickListener { item ->
-                    when (item.itemId) {
-                        1 -> { onEdit(student); true }
-                        2 -> { onManageGuardians(student); true }
-                        3 -> { onDelete(student); true }
-                        else -> false
-                    }
-                }
-                popup.show()
-            }
+            binding.btnGuardians.setOnClickListener { onManageGuardians(student) }
+            binding.btnEdit.setOnClickListener { onEdit(student) }
+            binding.btnDelete.setOnClickListener { onDelete(student) }
         }
     }
 
@@ -72,12 +58,10 @@ class AdminStudentAdapter(
     }
 
     companion object DiffCallback : DiffUtil.ItemCallback<MasterStudent>() {
-        override fun areItemsTheSame(oldItem: MasterStudent, newItem: MasterStudent): Boolean {
-            return oldItem.id == newItem.id
-        }
+        override fun areItemsTheSame(oldItem: MasterStudent, newItem: MasterStudent): Boolean =
+            oldItem.id == newItem.id
 
-        override fun areContentsTheSame(oldItem: MasterStudent, newItem: MasterStudent): Boolean {
-            return oldItem == newItem
-        }
+        override fun areContentsTheSame(oldItem: MasterStudent, newItem: MasterStudent): Boolean =
+            oldItem == newItem
     }
 }
