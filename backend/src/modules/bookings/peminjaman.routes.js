@@ -26,4 +26,11 @@ router.post("/:id/approve", validate({ params: idParams }), controller.approve);
 // Tolak pengajuan.
 router.post("/:id/reject", validate({ params: idParams }), controller.reject);
 
+// Konfirmasi pengembalian fasilitas
+router.post(
+  "/:id/return",
+  validate({ params: idParams }),
+  controller.konfirmasiPengembalian,
+);
+
 module.exports = router;

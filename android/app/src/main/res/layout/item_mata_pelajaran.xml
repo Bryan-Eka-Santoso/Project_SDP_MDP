@@ -4,69 +4,130 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="16dp"
+    android:layout_marginBottom="12dp"
     app:cardCornerRadius="12dp"
     app:cardElevation="0dp"
-    app:cardBackgroundColor="#FFFFFF">
+    app:cardBackgroundColor="@color/white">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="20dp"
+        android:padding="16dp"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/tvName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Matematika"
-            android:textColor="#121212"
-            android:textStyle="bold"
-            android:textSize="14sp" />
-
-        <TextView
-            android:id="@+id/tvDetail"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Kode: MAT"
-            android:textColor="#9CA3AF"
-            android:textSize="12sp" />
-
-        <TextView
-            android:id="@+id/tvType"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="WAJIB"
-            android:textColor="#9CA3AF"
-            android:textSize="12sp" />
-
+        <!-- INFORMASI MAPEL -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
-            android:gravity="end"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <!-- ICON -->
+            <LinearLayout
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_icon_mata_pelajaran"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:src="@drawable/ic_book"
+                    android:contentDescription="Mata Pelajaran"
+                    app:tint="@color/agnesian_blue" />
+
+            </LinearLayout>
+
+            <!-- NAMA, KODE, TIPE -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="12dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Matematika"
+                    android:textColor="@color/agnesian_text"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:maxLines="2" />
+
+                <TextView
+                    android:id="@+id/tvDetail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Kode: MTK"
+                    android:textColor="@color/agnesian_muted"
+                    android:textSize="11sp" />
+
+                <TextView
+                    android:id="@+id/tvType"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="7dp"
+                    android:background="@drawable/bg_badge_mata_pelajaran"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="4dp"
+                    android:text="Wajib"
+                    android:textColor="@color/agnesian_blue"
+                    android:textStyle="bold"
+                    android:textSize="10sp" />
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- DIVIDER -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="10dp"
+            android:background="#F0F0F0" />
+
+        <!-- ACTION BUTTON -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnEdit"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="wrap_content"
-                android:layout_height="42dp"
+                android:layout_height="40dp"
+                android:minWidth="0dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
                 android:text="Edit"
                 android:textAllCaps="false"
-                app:cornerRadius="7dp" />
+                android:textSize="12sp"
+                android:textColor="@color/agnesian_blue"
+                app:strokeColor="#CBD5E1"
+                app:strokeWidth="1dp"
+                app:cornerRadius="8dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnDelete"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="wrap_content"
-                android:layout_height="42dp"
+                android:layout_height="40dp"
+                android:minWidth="0dp"
                 android:layout_marginStart="8dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
                 android:text="Hapus"
                 android:textAllCaps="false"
-                app:cornerRadius="7dp" />
+                android:textSize="12sp"
+                android:textColor="@color/change_cancel"
+                app:strokeColor="#F5B8B8"
+                app:strokeWidth="1dp"
+                app:cornerRadius="8dp" />
 
         </LinearLayout>
 

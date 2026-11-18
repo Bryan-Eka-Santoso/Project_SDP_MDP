@@ -68,6 +68,33 @@
 
         </LinearLayout>
 
+        <!-- TANGGAL PENGEMBALIAN -->
+        <TextView
+            android:id="@+id/tvReturnDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Dikembalikan pada: -"
+            android:textColor="@color/agnesian_blue"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+        <!-- TOMBOL KONFIRMASI PENGEMBALIAN -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnReturn"
+            android:layout_width="match_parent"
+            android:layout_height="46dp"
+            android:layout_marginTop="12dp"
+            android:text="Konfirmasi Kembali"
+            android:textAllCaps="false"
+            android:textStyle="bold"
+            android:textSize="13sp"
+            android:textColor="@color/white"
+            android:visibility="gone"
+            app:backgroundTint="@color/agnesian_blue"
+            app:cornerRadius="10dp" />
+
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>

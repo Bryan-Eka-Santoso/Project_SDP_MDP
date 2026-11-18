@@ -34,6 +34,21 @@ class ReportHubFragment : Fragment() {
         binding.cardTeachingLoad.setOnClickListener {
             findNavController().navigate(R.id.action_reportHub_to_teachingLoadReport)
         }
+        binding.cardViolationReport.setOnClickListener {
+            findNavController().navigate(
+                R.id.action_reportHub_to_violationReport
+            )
+        }
+        binding.cardFacilityBookingReport.setOnClickListener {
+            findNavController().navigate(
+                R.id.action_reportHub_to_facilityBookingReport
+            )
+        }
+        binding.cardElectiveSurveyReport.setOnClickListener {
+            findNavController().navigate(
+                R.id.action_reportHub_to_electiveSurveyReport
+            )
+        }
     }
 
     override fun onDestroyView() {

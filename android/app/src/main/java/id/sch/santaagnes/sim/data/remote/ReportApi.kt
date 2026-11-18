@@ -48,6 +48,53 @@ data class TeachingLoadDto(
     val perDay: Map<String, ReportDayLoadDto>
 )
 
+data class ViolationReportDto(
+    val id: Int,
+    val date: String,
+    val studentId: Int,
+    val nis: String,
+    val studentName: String,
+    val className: String,
+    val violationTypeId: Int,
+    val violationTypeName: String,
+    val points: Int,
+    val reporterName: String,
+    val description: String?
+)
+
+data class FacilityBookingReportDto(
+    val id: Int,
+    val facilityId: Int,
+    val facilityName: String,
+    val facilityType: String,
+    val requesterId: Int,
+    val requesterName: String,
+    val requesterEmail: String,
+    val bookingDate: String,
+    val startTime: String,
+    val endTime: String,
+    val purpose: String,
+    val status: String,
+    val verifierName: String?,
+    val returnDate: String?
+)
+
+data class ElectiveSurveyReportDto(
+    val surveyId: Int,
+    val surveyTitle: String,
+    val academicYearName: String,
+    val gradeLevel: String,
+    val openDate: String,
+    val closeDate: String,
+    val status: String,
+    val subjectId: Int,
+    val subjectCode: String,
+    val subjectName: String,
+    val studentCount: Int,
+    val respondentCount: Int,
+    val percentage: Double
+)
+
 interface ReportApi {
 
     // Tanpa semesterId server memakai semester aktif.
@@ -84,5 +131,65 @@ interface ReportApi {
     @GET("reports/teaching-load/export")
     suspend fun exportTeachingLoad(
         @Query("teacherId") teacherId: Int?
+    ): ResponseBody
+
+
+    @GET("reports/violations")
+    suspend fun getViolations(
+        @Query("page") page: Int = 1,
+        @Query("limit") limit: Int = 20,
+        @Query("classGroupId") classGroupId: Int? = null,
+        @Query("violationTypeId") violationTypeId: Int? = null,
+        @Query("dateFrom") dateFrom: String? = null,
+        @Query("dateTo") dateTo: String? = null
+    ): ApiResponse<List<ViolationReportDto>>
+
+    @Streaming
+    @GET("reports/violations/export")
+    suspend fun exportViolations(
+        @Query("classGroupId") classGroupId: Int? = null,
+        @Query("violationTypeId") violationTypeId: Int? = null,
+        @Query("dateFrom") dateFrom: String? = null,
+        @Query("dateTo") dateTo: String? = null
+    ): ResponseBody
+
+
+    @GET("reports/facility-bookings")
+    suspend fun getFacilityBookings(
+        @Query("page") page: Int = 1,
+        @Query("limit") limit: Int = 20,
+        @Query("facilityId") facilityId: Int? = null,
+        @Query("status") status: String? = null,
+        @Query("dateFrom") dateFrom: String? = null,
+        @Query("dateTo") dateTo: String? = null
+    ): ApiResponse<List<FacilityBookingReportDto>>
+
+    @Streaming
+    @GET("reports/facility-bookings/export")
+    suspend fun exportFacilityBookings(
+        @Query("facilityId") facilityId: Int? = null,
+        @Query("status") status: String? = null,
+        @Query("dateFrom") dateFrom: String? = null,
+        @Query("dateTo") dateTo: String? = null
+    ): ResponseBody
+
+
+    @GET("reports/elective-surveys")
+    suspend fun getElectiveSurveys(
+        @Query("page") page: Int = 1,
+        @Query("limit") limit: Int = 20,
+        @Query("surveyId") surveyId: Int? = null,
+        @Query("academicYearId") academicYearId: Int? = null,
+        @Query("gradeLevel") gradeLevel: String? = null,
+        @Query("status") status: String? = null
+    ): ApiResponse<List<ElectiveSurveyReportDto>>
+
+    @Streaming
+    @GET("reports/elective-surveys/export")
+    suspend fun exportElectiveSurveys(
+        @Query("surveyId") surveyId: Int? = null,
+        @Query("academicYearId") academicYearId: Int? = null,
+        @Query("gradeLevel") gradeLevel: String? = null,
+        @Query("status") status: String? = null
     ): ResponseBody
 }

@@ -123,6 +123,61 @@ class HomeFragment : Fragment() {
         }
         binding.btnLeave.isVisible = role == "GUARDIAN"
         binding.btnLeave.setOnClickListener { nav.navigate(R.id.guardianLeaveFragment) }
+
+        binding.btnRiwayatPelanggaran.isVisible =
+            role == "STUDENT" || role == "GUARDIAN"
+
+        binding.btnRiwayatPelanggaran.setOnClickListener {
+            val destination = if (role == "STUDENT") {
+                R.id.studentRiwayatPelanggaranFragment
+            } else {
+                R.id.guardianRiwayatPelanggaranFragment
+            }
+
+            findNavController().navigate(destination)
+        }
+
+        binding.btnAjukanPeminjaman.isVisible =
+            role == "STUDENT"
+
+        binding.btnAjukanPeminjaman.setOnClickListener {
+            if (role == "STUDENT") {
+                nav.navigate(R.id.studentAjukanPeminjamanFragment)
+            }
+        }
+
+        binding.btnRiwayatPeminjaman.isVisible =
+            role == "STUDENT"
+
+        binding.btnRiwayatPeminjaman.setOnClickListener {
+            if (role == "STUDENT") {
+                nav.navigate(
+                    R.id.studentRiwayatPeminjamanFragment
+                )
+            }
+        }
+
+        binding.btnBacaBukuPenghubung.isVisible =
+            role == "GUARDIAN"
+
+        binding.btnBacaBukuPenghubung.setOnClickListener {
+            if (role == "GUARDIAN") {
+                nav.navigate(
+                    R.id.guardianBacaBukuPenghubungFragment
+                )
+            }
+        }
+
+        binding.btnIsiSurveiMinat.isVisible =
+            role == "STUDENT"
+
+        binding.btnIsiSurveiMinat.setOnClickListener {
+            if (role == "STUDENT") {
+                nav.navigate(
+                    R.id.studentIsiSurveiMinatFragment
+                )
+            }
+        }
     }
 
     private fun greeting(): Int = when (DateTimeWib.now().hour) {

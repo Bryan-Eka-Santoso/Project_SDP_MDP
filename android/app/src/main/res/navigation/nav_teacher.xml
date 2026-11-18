@@ -12,6 +12,22 @@
             android:name="role"
             android:defaultValue="TEACHER"
             app:argType="string" />
+
+        <action
+            android:id="@+id/action_teacherHome_to_inputPelanggaran"
+            app:destination="@id/inputPelanggaranFragment" />
+
+        <action
+            android:id="@+id/action_teacherHome_to_riwayatPelanggaran"
+            app:destination="@id/teacherRiwayatPelanggaranFragment" />
+
+        <action
+            android:id="@+id/action_teacherHome_to_bukuPenghubung"
+            app:destination="@id/teacherBukuPenghubungFragment" />
+
+        <action
+            android:id="@+id/action_teacherHome_to_profilSiswaBinaan"
+            app:destination="@id/teacherProfilSiswaBinaanFragment" />
     </fragment>
 
     <fragment
@@ -189,4 +205,39 @@
     <fragment
         android:id="@+id/teacherProfileFragment"
         android:name="id.sch.santaagnes.sim.ui.profile.ProfileFragment" />
+
+    <fragment
+        android:id="@+id/inputPelanggaranFragment"
+        android:name="id.sch.santaagnes.sim.ui.teacher.pelanggaran.InputPelanggaranFragment"
+        android:label="Input Pelanggaran" />
+
+    <fragment
+        android:id="@+id/teacherRiwayatPelanggaranFragment"
+        android:name="id.sch.santaagnes.sim.ui.pelanggaran.RiwayatPelanggaranFragment"
+        android:label="Riwayat Pelanggaran" />
+
+    <fragment
+        android:id="@+id/teacherAjukanPeminjamanFragment"
+        android:name="id.sch.santaagnes.sim.ui.peminjaman.AjukanPeminjamanFragment"
+        android:label="Ajukan Peminjaman" />
+
+    <fragment
+        android:id="@+id/teacherRiwayatPeminjamanFragment"
+        android:name="id.sch.santaagnes.sim.ui.peminjaman.RiwayatPeminjamanFragment"
+        android:label="Riwayat Peminjaman" />
+
+    <fragment
+        android:id="@+id/teacherBukuPenghubungFragment"
+        android:name="id.sch.santaagnes.sim.ui.teacher.bukupenghubung.BukuPenghubungFragment"
+        android:label="Buku Penghubung" />
+
+    <fragment
+        android:id="@+id/teacherBacaBukuPenghubungFragment"
+        android:name="id.sch.santaagnes.sim.ui.bukupenghubung.BacaBukuPenghubungFragment"
+        android:label="Riwayat Buku Penghubung" />
+
+    <fragment
+        android:id="@+id/teacherProfilSiswaBinaanFragment"
+        android:name="id.sch.santaagnes.sim.ui.teacher.profilsiswa.ProfilSiswaBinaanFragment"
+        android:label="Profil Siswa Binaan" />
 </navigation>
