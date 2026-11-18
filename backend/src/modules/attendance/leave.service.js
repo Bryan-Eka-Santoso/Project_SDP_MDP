@@ -1,5 +1,6 @@
 const prisma = require('../../lib/prisma');
 const AppError = require('../../utils/AppError');
+const attachment = require('./leave.attachment');
 
 async function guardianOf(userId) {
   const guardian = await prisma.guardian.findUnique({
@@ -68,27 +69,48 @@ async function list(userId, query) {
   };
 }
 
-async function create(userId, data) {
+async function create(userId, data, file = null) {
   const guardianId = await guardianOf(userId);
   await assertChild(guardianId, data.studentId);
-  const record = await prisma.leaveRequest.create({
-    data: {
-      studentId: data.studentId,
-      guardianId,
-      startDate: new Date(`${data.startDate}T00:00:00.000Z`),
-      endDate: new Date(`${data.endDate}T00:00:00.000Z`),
-      reason: data.reason,
-      status: 'PENDING',
-    },
-    select: {
-      id: true, studentId: true, startDate: true, endDate: true,
-      reason: true, status: true, createdAt: true,
-    },
-  });
+  const stored = await attachment.saveAttachment(file);
+  let record;
+  try {
+    record = await prisma.leaveRequest.create({
+      data: {
+        studentId: data.studentId,
+        guardianId,
+        startDate: new Date(`${data.startDate}T00:00:00.000Z`),
+        endDate: new Date(`${data.endDate}T00:00:00.000Z`),
+        reason: data.reason,
+        status: 'PENDING',
+        attachmentUrl: stored?.filename || null,
+      },
+      select: {
+        id: true, studentId: true, startDate: true, endDate: true,
+        reason: true, status: true, createdAt: true, attachmentUrl: true,
+      },
+    });
+  } catch (error) {
+    await attachment.deleteAttachment(stored?.filename);
+    throw error;
+  }
   return {
     ...record,
     startDate: record.startDate.toISOString().slice(0, 10),
     endDate: record.endDate.toISOString().slice(0, 10),
   };
 }
-module.exports = { children, list, create };
+
+async function findAttachment(userId, id) {
+  const guardianId = await guardianOf(userId);
+  const request = await prisma.leaveRequest.findFirst({
+    where: { id, guardianId }, select: { attachmentUrl: true },
+  });
+  if (!request || !request.attachmentUrl)
+    throw new AppError(404, 'NOT_FOUND', 'Lampiran tidak ditemukan.');
+  const filename = request.attachmentUrl;
+  const ext = filename.split('.').pop();
+  const contentType = ext === 'pdf' ? 'application/pdf' : ext === 'png' ? 'image/png' : 'image/jpeg';
+  return { path: attachment.absoluteFile(filename), contentType };
+}
+module.exports = { children, list, create, findAttachment };

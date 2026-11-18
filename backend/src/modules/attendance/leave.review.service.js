@@ -1,5 +1,6 @@
 const prisma = require('../../lib/prisma');
 const AppError = require('../../utils/AppError');
+const { absoluteFile } = require('./leave.attachment');
 
 function dateText(value) { return value.toISOString().slice(0, 10); }
 
@@ -93,4 +94,21 @@ async function decide(userId, requestId, decision) {
   });
 }
 
-module.exports = { pending, decide };
+// Unduh hanya jika permohonan milik siswa dari kelas aktif yang diampu wali kelas ini.
+async function findAttachmentForHomeroom(userId, requestId) {
+  const teacherId = await homeroomTeacherId(userId);
+  const request = await prisma.leaveRequest.findFirst({
+    where: { id: requestId, student: homeroomScope(teacherId) },
+    select: { attachmentUrl: true },
+  });
+  if (!request || !request.attachmentUrl)
+    throw new AppError(404, 'NOT_FOUND', 'Lampiran tidak ditemukan untuk kelas Anda.');
+  const filename = request.attachmentUrl;
+  // Hanya file privat yang dihasilkan backend; jangan mengikuti URL/path arbitrer.
+  const filePath = absoluteFile(filename);
+  const ext = filename.split('.').pop();
+  const mime = ext === 'pdf' ? 'application/pdf' : ext === 'png' ? 'image/png' : 'image/jpeg';
+  return { path: filePath, mime };
+}
+
+module.exports = { pending, decide, findAttachmentForHomeroom };

@@ -21,9 +21,46 @@ class GradeManageViewModel @Inject constructor(private val repository: GradesRep
             val students = repository.students(id)
             val components = repository.components(id)
             val scores = repository.scores(id)
-            _uiState.value = _uiState.value.copy(isLoading = false, students = students, components = components, scores = scores)
+            val assessments = repository.assessments(id)
+            _uiState.value = _uiState.value.copy(isLoading = false, students = students, components = components, scores = scores, assessments = assessments)
         } catch (e: CancellationException) { throw e }
         catch (e: Exception) { showError(e) }
+    }
+
+    fun createAssessment(componentId: Int, title: String) {
+        val id = _uiState.value.selectedAssignmentId ?: return
+        if (title.isBlank() || title.length > 80) {
+            _uiState.value = _uiState.value.copy(errorMessage = "Nama penilaian wajib diisi (maks. 80 karakter).")
+            return
+        }
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null, message = null)
+            try {
+                repository.createAssessment(id, componentId, title.trim())
+                val assessments = repository.assessments(id)
+                _uiState.value = _uiState.value.copy(isLoading = false, assessments = assessments, message = "Penilaian berhasil ditambahkan.")
+            } catch (e: CancellationException) { throw e }
+            catch (e: Exception) { showError(e) }
+        }
+    }
+
+    fun saveAssessmentScore(assessmentId: Int, studentId: Int, input: String) {
+        val id = _uiState.value.selectedAssignmentId ?: return
+        val value = input.replace(',', '.').toDoubleOrNull()
+        if (value == null || value !in 0.0..100.0 || kotlin.math.abs(value * 100 - kotlin.math.round(value * 100)) > 0.00001) {
+            _uiState.value = _uiState.value.copy(errorMessage = "Nilai harus 0–100 (maksimal dua desimal).")
+            return
+        }
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null, message = null)
+            try {
+                repository.saveAssessmentScore(assessmentId, studentId, value)
+                val assessments = repository.assessments(id)
+                val scores = repository.scores(id)
+                _uiState.value = _uiState.value.copy(isLoading = false, assessments = assessments, scores = scores, message = "Detail nilai berhasil disimpan.")
+            } catch (e: CancellationException) { throw e }
+            catch (e: Exception) { showError(e) }
+        }
     }
 
     fun saveComponent(componentId: Int?, name: String, weightText: String) {
@@ -33,10 +70,30 @@ class GradeManageViewModel @Inject constructor(private val repository: GradesRep
             _uiState.value = _uiState.value.copy(errorMessage = "Nama dan bobot 1â€“100 wajib diisi.")
             return
         }
+        val components = _uiState.value.components
+        val standardNames = setOf("tugas", "ulangan", "uts", "uas")
+        val cleaned = name.trim()
+        if (componentId == null && components.size >= 5) {
+            _uiState.value = _uiState.value.copy(errorMessage = "Maksimal satu komponen tambahan (Lainnya). Ubah komponen yang sudah ada.")
+            return
+        }
+        if (componentId == null && (cleaned.lowercase() in standardNames || components.any { it.name.equals(cleaned, ignoreCase = true) })) {
+            _uiState.value = _uiState.value.copy(errorMessage = "Nama komponen sudah digunakan atau merupakan komponen default.")
+            return
+        }
+        val existing = components.find { it.id == componentId }
+        if (existing != null && existing.name.lowercase() in standardNames && !existing.name.equals(cleaned, ignoreCase = true)) {
+            _uiState.value = _uiState.value.copy(errorMessage = "Nama komponen default tidak dapat diubah.")
+            return
+        }
+        if (existing != null && components.any { it.id != componentId && it.name.equals(cleaned, ignoreCase = true) }) {
+            _uiState.value = _uiState.value.copy(errorMessage = "Nama komponen sudah digunakan.")
+            return
+        }
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null, message = null)
             try {
-                repository.saveComponent(id, componentId, name.trim(), weight)
+                repository.saveComponent(id, componentId, cleaned, weight)
                 val components = repository.components(id)
                 _uiState.value = _uiState.value.copy(isLoading = false, components = components, message = "Komponen berhasil disimpan.")
             } catch (e: CancellationException) { throw e }
@@ -50,9 +107,11 @@ class GradeManageViewModel @Inject constructor(private val repository: GradesRep
             _uiState.value = _uiState.value.copy(errorMessage = "Total bobot harus 100% untuk menyimpan nilai.")
             return
         }
-        val nonblank = values.filterValues { it.isNotBlank() }
+        // Tugas/Ulangan disimpan via detail penilaian, bukan melalui endpoint score langsung.
+        val detailedComponents = _uiState.value.assessments.map { it.gradeComponentId }.toSet()
+        val nonblank = values.filter { (componentId, input) -> input.isNotBlank() && componentId !in detailedComponents }
         if (nonblank.isEmpty()) {
-            _uiState.value = _uiState.value.copy(errorMessage = "Isi setidaknya satu nilai.")
+            _uiState.value = _uiState.value.copy(errorMessage = "Untuk Tugas/Ulangan gunakan tombol Isi Nilai pada setiap penilaian.")
             return
         }
         val parsed = mutableMapOf<Int, Double>()

@@ -1,4 +1,3 @@
-
 package id.sch.santaagnes.sim.ui.grades
 
 import androidx.lifecycle.ViewModel
@@ -14,9 +13,22 @@ import retrofit2.Retrofit
 import java.util.Locale
 import javax.inject.Inject
 
-data class ReportOption(
-    val id: Int,
-    val name: String
+data class ReportOption(val id: Int, val name: String)
+
+data class ReportAssessmentUi(val title: String, val value: String)
+data class ReportComponentUi(
+    val name: String,
+    val value: String,
+    val assessments: List<ReportAssessmentUi> = emptyList()
+)
+
+data class ReportEntryUi(
+    val title: String,
+    val subtitle: String = "",
+    val components: List<ReportComponentUi>,
+    val finalScore: String,
+    val predicate: String,
+    val isComplete: Boolean = false
 )
 
 data class GradeReportUiState(
@@ -24,7 +36,7 @@ data class GradeReportUiState(
     val role: String = "",
     val options: List<ReportOption> = emptyList(),
     val selectedId: Int? = null,
-    val entries: List<String> = emptyList(),
+    val entries: List<ReportEntryUi> = emptyList(),
     val error: String? = null
 )
 
@@ -34,86 +46,38 @@ class GradeReportViewModel @Inject constructor(
     private val authApi: AuthApi,
     private val gradesRepository: GradesRepository
 ) : ViewModel() {
-
-    private val api by lazy {
-        retrofit.create(GradesReportApi::class.java)
-    }
-
+    private val api by lazy { retrofit.create(GradesReportApi::class.java) }
     private val _state = MutableStateFlow(GradeReportUiState())
     val state = _state.asStateFlow()
 
     fun start(role: String) {
-        if (
-            _state.value.role == role &&
-            _state.value.options.isNotEmpty()
-        ) return
-
+        if (_state.value.role == role && _state.value.options.isNotEmpty()) return
         viewModelScope.launch {
-            _state.value = GradeReportUiState(
-                loading = true,
-                role = role
-            )
-
+            _state.value = GradeReportUiState(loading = true, role = role)
             try {
                 when (role) {
-
                     "STUDENT" -> {
-                        _state.value = _state.value.copy(
-
-                            loading = false
-                        )
+                        _state.value = _state.value.copy(loading = false)
                         load(0)
                     }
-
                     "GUARDIAN" -> {
-                        val children = authApi.getProfile()
-                            .data
-                            ?.guardian
-                            ?.children
-                            .orEmpty()
-
+                        val children = authApi.getProfile().data?.guardian?.children.orEmpty()
                         val options = children.map {
-                            ReportOption(
-                                id = it.id,
-                                name = "${it.name} (${it.nis.orEmpty()})"
-                            )
+                            ReportOption(it.id, "${it.name} (${it.nis.orEmpty()})")
                         }
-
-                        _state.value = _state.value.copy(
-                            loading = false,
-                            options = options
-                        )
-
-                        if (options.isNotEmpty()) {
-                            load(options.first().id)
-                        }
+                        _state.value = _state.value.copy(loading = false, options = options)
+                        if (options.isNotEmpty()) load(options.first().id)
                     }
-
                     "TEACHER" -> {
-                        val options = gradesRepository.assignments()
-                            .map {
-                                ReportOption(
-                                    id = it.id,
-                                    name = it.label
-                                )
-                            }
-
-                        _state.value = _state.value.copy(
-                            loading = false,
-                            options = options
-                        )
-
-                        if (options.isNotEmpty()) {
-                            load(options.first().id)
+                        val options = gradesRepository.assignments().map {
+                            ReportOption(it.id, it.label)
                         }
+                        _state.value = _state.value.copy(loading = false, options = options)
+                        if (options.isNotEmpty()) load(options.first().id)
                     }
-
-                    else -> {
-                        _state.value = _state.value.copy(
-                            loading = false,
-                            error = "Role tidak didukung."
-                        )
-                    }
+                    else -> _state.value = _state.value.copy(
+                        loading = false, error = "Role tidak didukung."
+                    )
                 }
             } catch (e: CancellationException) {
                 throw e
@@ -125,59 +89,26 @@ class GradeReportViewModel @Inject constructor(
 
     fun load(id: Int) = viewModelScope.launch {
         val role = _state.value.role
-
-        _state.value = _state.value.copy(
-            loading = true,
-            selectedId = id,
-            error = null
-        )
-
+        _state.value = _state.value.copy(loading = true, selectedId = id, error = null)
         try {
-            val entries: List<String> = when (role) {
-
-                "STUDENT" -> {
-                    api.ownScores()
-                        .data
-                        .orEmpty()
-                        .map { row ->
-                            formatSubject(row)
-                        }
+            val entries: List<ReportEntryUi> = when (role) {
+                "STUDENT" -> api.ownScores().data.orEmpty().map { formatSubject(it) }
+                "GUARDIAN" -> api.studentScores(id).data.orEmpty().map { formatSubject(it) }
+                "TEACHER" -> api.classReport(id).data.map { row ->
+                    ReportEntryUi(
+                        title = row.name,
+                        subtitle = row.nis.orEmpty(),
+                        components = row.components.map { part ->
+                            ReportComponentUi(part.name, componentScore(part.value))
+                        },
+                        finalScore = scoreText(row.finalScore),
+                        predicate = predicateText(row.finalScore, row.predicate),
+                        isComplete = row.complete
+                    )
                 }
-
-                "GUARDIAN" -> {
-                    api.studentScores(id)
-                        .data
-                        .orEmpty()
-                        .map { row ->
-                            formatSubject(row)
-                        }
-                }
-
-                "TEACHER" -> {
-                    api.classReport(id)
-                        .data
-                        .map { row ->
-
-                            // Gunakan separator ASCII agar tidak rusak
-                            val scores = row.components.joinToString(" | ") { part ->
-                                "${part.name}: ${componentScoreText(part.value)}"
-                            }
-
-                            "${row.name} (${row.nis.orEmpty()})\n" +
-                                    "$scores\n" +
-                                    "Nilai akhir: ${scoreText(row.finalScore)}\n" +
-                                    "Predikat: ${predicateText(row.finalScore, row.predicate)}"
-                        }
-                }
-
                 else -> emptyList()
             }
-
-            _state.value = _state.value.copy(
-                loading = false,
-                entries = entries
-            )
-
+            _state.value = _state.value.copy(loading = false, entries = entries)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -185,44 +116,31 @@ class GradeReportViewModel @Inject constructor(
         }
     }
 
-    // Format nilai untuk Siswa dan Wali Murid
-    private fun formatSubject(row: SubjectReportDto): String {
+    private fun formatSubject(row: SubjectReportDto): ReportEntryUi = ReportEntryUi(
+        title = row.subjectName,
+        subtitle = row.className,
+        components = row.components.map { part ->
+            ReportComponentUi(
+                "${part.name} (${part.weight}%)",
+                componentScore(part.value),
+                part.assessments.sortedBy { it.sequence }.map { assessment ->
+                    ReportAssessmentUi(assessment.title, componentScore(assessment.value))
+                }
+            )
+        },
+        finalScore = scoreText(row.finalScore),
+        predicate = predicateText(row.finalScore, row.predicate),
+        isComplete = row.complete
+    )
 
-        val scores = row.components.joinToString(" | ") { part ->
-            "${part.name} (${part.weight}%): ${componentScoreText(part.value)}"
-        }
+    private fun componentScore(value: Double?): String =
+        value?.let { String.format(Locale("id", "ID"), "%.2f", it) } ?: "-"
 
-        return "${row.subjectName} - ${row.className}\n" +
-                "$scores\n" +
-                "Nilai akhir: ${scoreText(row.finalScore)}\n" +
-                "Predikat: ${predicateText(row.finalScore, row.predicate)}"
-    }
+    private fun scoreText(score: Double?): String =
+        score?.let { String.format(Locale("id", "ID"), "%.2f", it) } ?: "Belum lengkap"
 
-    // Nilai per komponen
-    private fun componentScoreText(score: Double?): String {
-        return score?.let {
-            String.format(Locale.US, "%.2f", it)
-        } ?: "-"
-    }
-
-    // Nilai akhir
-    private fun scoreText(score: Double?): String {
-        return score?.let {
-            String.format(Locale.US, "%.2f", it)
-        } ?: "Belum lengkap"
-    }
-
-    // Predikat tetap berasal dari API
-    private fun predicateText(
-        score: Double?,
-        predicate: String?
-    ): String {
-        return if (score == null) {
-            "Belum lengkap"
-        } else {
-            predicate ?: "Belum tersedia"
-        }
-    }
+    private fun predicateText(score: Double?, predicate: String?): String =
+        if (score == null) "Belum lengkap" else predicate ?: "Belum tersedia"
 
     private fun fail(e: Exception) {
         _state.value = _state.value.copy(

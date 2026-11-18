@@ -12,4 +12,7 @@ router.get('/homeroom/leave-requests/pending', authenticate, authorize('TEACHER'
 router.patch('/homeroom/leave-requests/:requestId/decision', authenticate, authorize('TEACHER'),
   validate({ params: schema.idParams, body: schema.decisionBody }), controller.decide);
 
+router.get('/homeroom/leave-requests/:requestId/attachment', authenticate, authorize('TEACHER'),
+  validate({ params: schema.idParams }), controller.downloadAttachment);
+
 module.exports = router;

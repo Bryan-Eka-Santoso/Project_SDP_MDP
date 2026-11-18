@@ -39,11 +39,12 @@ class LeaveViewModel @Inject constructor(
         }
     }
 
-    fun create(childId: Int, start: String, end: String, reason: String) = viewModelScope.launch {
+    fun create(childId: Int, start: String, end: String, reason: String,
+               file: ByteArray? = null, fileName: String? = null, mime: String? = null) = viewModelScope.launch {
         if (mutable.value.saving) return@launch
         mutable.value = mutable.value.copy(saving = true, error = null, message = null)
         try {
-            repository.create(childId, start, end, reason)
+            repository.create(childId, start, end, reason, file, fileName, mime)
             val requests = repository.list(childId)
             mutable.value = mutable.value.copy(
                 saving = false, requests = requests,

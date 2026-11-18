@@ -6,6 +6,9 @@ import id.sch.santaagnes.sim.data.remote.LeaveApi
 import id.sch.santaagnes.sim.data.remote.PageMetaDto
 import retrofit2.HttpException
 import java.io.IOException
+import java.io.File
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 data class PendingLeavePage(val items: List<HomeroomLeaveDto>, val meta: PageMetaDto?)
@@ -21,6 +24,20 @@ class HomeroomLeaveRepository @Inject constructor(private val api: LeaveApi) {
         require(decision == "APPROVED" || decision == "REJECTED")
         val result = api.decideHomeroom(requestId, HomeroomDecisionRequest(decision))
         if (!result.success) error(result.error?.message ?: "Keputusan izin gagal disimpan.")
+    }
+
+    suspend fun downloadProof(requestId: Int, target: File): Unit = withContext(Dispatchers.IO) {
+        target.parentFile?.mkdirs()
+        try {
+            api.downloadHomeroomAttachment(requestId).use { response ->
+                response.byteStream().use { input ->
+                    target.outputStream().use { output -> input.copyTo(output) }
+                }
+            }
+        } catch (error: Exception) {
+            target.delete()
+            throw error
+        }
     }
 
     companion object {

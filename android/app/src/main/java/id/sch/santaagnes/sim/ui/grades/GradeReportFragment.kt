@@ -67,6 +67,14 @@ class GradeReportFragment : Fragment() {
                             state.options.map { it.name }
                         )
                     }
+                    // Ringkasan dihitung dari seluruh siswa pada hasil rekap (bukan dari filter UI).
+                    val isTeacher = state.role == "TEACHER"
+                    val total = state.entries.size
+                    val complete = state.entries.count { it.isComplete }
+                    binding.tvReportClassStats.apply {
+                        visibility = if (isTeacher && !state.loading && state.error == null) View.VISIBLE else View.GONE
+                        text = "Total siswa: $total     Lengkap: $complete/$total     Belum: ${total - complete}"
+                    }
                     binding.reportCards.removeAllViews()
                     if (!state.loading && state.error == null && state.entries.isEmpty()) {
                         binding.reportCards.addView(TextView(requireContext()).apply {
@@ -76,28 +84,92 @@ class GradeReportFragment : Fragment() {
                         })
                     }
                     state.entries.forEach { entry ->
-                        val card = LinearLayout(requireContext()).apply {
-                            orientation = LinearLayout.VERTICAL
-                            setPadding(18, 16, 18, 16)
-                            setBackgroundResource(R.drawable.bg_teacher_card)
+                        val card = layoutInflater.inflate(
+                            R.layout.item_grade_report_student,
+                            binding.reportCards,
+                            false
+                        )
+                        card.findViewById<TextView>(R.id.tvReportStudentName).text = entry.title
+                        card.findViewById<TextView>(R.id.tvReportStudentNis).apply {
+                            text = entry.subtitle
+                            visibility = if (entry.subtitle.isBlank()) View.GONE else View.VISIBLE
                         }
-                        val lines = entry.lines()
-                        card.addView(TextView(requireContext()).apply {
-                            text = lines.firstOrNull().orEmpty()
-                            textSize = 14f
-                            setTextColor(0xFF20242C.toInt())
-                            setTypeface(typeface, android.graphics.Typeface.BOLD)
-                        })
-                        card.addView(TextView(requireContext()).apply {
-                            text = lines.drop(1).joinToString("\n")
-                            textSize = 12f
-                            setTextColor(0xFF2D65D7.toInt())
-                            setPadding(0, 9, 0, 0)
-                        })
+                        val componentContainer = card.findViewById<LinearLayout>(
+                            R.id.reportComponentsContainer
+                        )
+                        // Format sama dengan halaman Nilai Siswa: angka biru di atas label.
+                        val values = entry.components.map { it.name to it.value } +
+                            ("Akhir" to if (entry.isComplete) entry.finalScore else "—")
+                        values.chunked(4).forEach { chunk ->
+                            val row = LinearLayout(requireContext()).apply {
+                                orientation = LinearLayout.HORIZONTAL
+                                setPadding(0, 0, 0, (8 * resources.displayMetrics.density).toInt())
+                            }
+                            chunk.forEach { (label, value) ->
+                                val cell = layoutInflater.inflate(
+                                    R.layout.item_grade_score_cell, row, false
+                                )
+                                cell.findViewById<TextView>(R.id.tvValue).text =
+                                    if (value == "-" || value == "Belum lengkap") "—" else value
+                                cell.findViewById<TextView>(R.id.tvLabel).text = label
+                                row.addView(cell)
+                            }
+                            repeat(4 - chunk.size) {
+                                row.addView(View(requireContext()), LinearLayout.LayoutParams(0, 1, 1f))
+                            }
+                            componentContainer.addView(row)
+                        }
+                        // Rincian nilai Tugas/Ulangan untuk Siswa dan Wali Murid saja.
+                        // Read-only: tidak ada field input atau request perubahan nilai.
+                        if (state.role == "STUDENT" || state.role == "GUARDIAN") {
+                            entry.components.filter { it.assessments.isNotEmpty() }.forEach { component ->
+                                val toggle = TextView(requireContext()).apply {
+                                    text = "Lihat rincian ${component.name}  ▾"
+                                    textSize = 12f
+                                    setTextColor(resources.getColor(R.color.teacher_blue, null))
+                                    setPadding(dp(4), dp(12), dp(4), dp(9))
+                                }
+                                val details = LinearLayout(requireContext()).apply {
+                                    orientation = LinearLayout.VERTICAL
+                                    visibility = View.GONE
+                                    setPadding(dp(10), dp(2), dp(10), dp(8))
+                                }
+                                component.assessments.forEach { assessment ->
+                                    val detailRow = LinearLayout(requireContext()).apply {
+                                        orientation = LinearLayout.HORIZONTAL
+                                        setPadding(0, dp(5), 0, dp(5))
+                                    }
+                                    val label = TextView(requireContext()).apply {
+                                        text = assessment.title
+                                        textSize = 12f
+                                        setTextColor(resources.getColor(R.color.teacher_muted, null))
+                                        layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+                                    }
+                                    val value = TextView(requireContext()).apply {
+                                        text = if (assessment.value == "-") "Belum dinilai" else assessment.value
+                                        textSize = 12f
+                                        setTextColor(resources.getColor(R.color.teacher_blue, null))
+                                    }
+                                    detailRow.addView(label)
+                                    detailRow.addView(value)
+                                    details.addView(detailRow)
+                                }
+                                toggle.setOnClickListener {
+                                    val opening = details.visibility != View.VISIBLE
+                                    details.visibility = if (opening) View.VISIBLE else View.GONE
+                                    toggle.text = (if (opening) "Tutup rincian " else "Lihat rincian ") +
+                                        component.name + (if (opening) "  ▴" else "  ▾")
+                                }
+                                componentContainer.addView(toggle)
+                                componentContainer.addView(details)
+                            }
+                        }
+                        card.findViewById<TextView>(R.id.tvReportPredicate).text =
+                            if (entry.isComplete) "Predikat: ${entry.predicate}" else "Nilai belum lengkap"
                         val params = LinearLayout.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT,
                             ViewGroup.LayoutParams.WRAP_CONTENT
-                        ).apply { bottomMargin = 12 }
+                        ).apply { bottomMargin = (12 * resources.displayMetrics.density).toInt() }
                         binding.reportCards.addView(card, params)
                     }
                 }
@@ -105,6 +177,8 @@ class GradeReportFragment : Fragment() {
         }
         viewModel.start(role)
     }
+
+    private fun dp(value: Int) = (value * resources.displayMetrics.density).toInt()
 
     override fun onDestroyView() {
         _binding = null

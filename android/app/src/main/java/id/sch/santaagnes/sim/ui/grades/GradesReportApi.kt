@@ -5,7 +5,20 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-data class ReportComponentDto(val id: Int, val name: String, val weight: Int, val value: Double?)
+data class ReportAssessmentDto(
+    val id: Int,
+    val title: String,
+    val sequence: Int,
+    val value: Double?
+)
+
+data class ReportComponentDto(
+    val id: Int,
+    val name: String,
+    val weight: Int,
+    val value: Double?,
+    val assessments: List<ReportAssessmentDto> = emptyList()
+)
 data class SubjectReportDto(
     val teachingAssignmentId: Int,
     val subjectName: String,

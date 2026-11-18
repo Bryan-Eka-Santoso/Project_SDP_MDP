@@ -3,6 +3,11 @@ package id.sch.santaagnes.sim.ui.leave
 import android.content.Intent
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import android.net.Uri
+import android.widget.Toast
+import androidx.core.content.FileProvider
+import id.sch.santaagnes.sim.data.repository.HomeroomLeaveRepository
+import java.io.File
+import javax.inject.Inject
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -30,6 +35,7 @@ class HomeroomPendingFragment : Fragment() {
     private var _binding: FragmentHomeroomPendingBinding? = null
     private val binding get() = _binding!!
     private val viewModel: HomeroomPendingViewModel by viewModels()
+    @Inject lateinit var leaveRepository: HomeroomLeaveRepository
     private val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale("id", "ID"))
 
     override fun onCreateView(inflater: LayoutInflater, parent: ViewGroup?, state: Bundle?): View {
@@ -72,18 +78,50 @@ class HomeroomPendingFragment : Fragment() {
             card.btnPendingProof.isEnabled = !busy
             card.btnPendingApprove.setOnClickListener { confirmDecision(item, approved = true) }
             card.btnPendingReject.setOnClickListener { confirmDecision(item, approved = false) }
-            val url = item.attachmentUrl
-            card.btnPendingProof.isVisible = !url.isNullOrBlank() &&
-                (url.startsWith("https://") || url.startsWith("http://"))
+            val hasProof = !item.attachmentUrl.isNullOrBlank()
+            card.btnPendingProof.isVisible = hasProof
             card.btnPendingProof.setOnClickListener {
-                if (!url.isNullOrBlank()) {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                    try { startActivity(intent) } catch (_: Exception) {
-                        binding.tvLeaveStatus.text = "Tidak ada aplikasi untuk membuka bukti izin."
-                    }
-                }
+                if (hasProof) openProof(item, card.btnPendingProof)
             }
             binding.listPending.addView(card.root)
+        }
+    }
+
+    private fun openProof(item: HomeroomLeaveDto, button: View) {
+        val context = requireContext()
+        val ext = item.attachmentUrl?.substringAfterLast('.')?.lowercase()
+        if (ext !in listOf("jpg", "png", "pdf")) {
+            Toast.makeText(context, "Format lampiran tidak didukung.", Toast.LENGTH_LONG).show()
+            return
+        }
+        button.isEnabled = false
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val target = File(File(context.cacheDir, "leave_proofs"), "izin_${item.id}.$ext")
+                leaveRepository.downloadProof(item.id, target)
+                val uri = FileProvider.getUriForFile(
+                    context, "${context.packageName}.fileprovider", target
+                )
+                val mime = when (ext) {
+                    "pdf" -> "application/pdf"
+                    "png" -> "image/png"
+                    else -> "image/jpeg"
+                }
+                val intent = Intent(Intent.ACTION_VIEW).apply {
+                    setDataAndType(uri, mime)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                startActivity(Intent.createChooser(intent, "Buka lampiran izin"))
+            } catch (error: Exception) {
+                if (error is kotlinx.coroutines.CancellationException) throw error
+                Toast.makeText(
+                    context,
+                    "Gagal membuka lampiran: ${HomeroomLeaveRepository.friendlyError(error)}",
+                    Toast.LENGTH_LONG
+                ).show()
+            } finally {
+                button.isEnabled = true
+            }
         }
     }
 
