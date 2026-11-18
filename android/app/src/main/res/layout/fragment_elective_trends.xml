@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="@color/agnesian_background">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:background="@drawable/bg_header" android:orientation="vertical"
+        android:paddingHorizontal="24dp" android:paddingTop="24dp" android:paddingBottom="26dp">
+        <TextView android:id="@+id/btnTrendsBack" android:layout_width="wrap_content"
+            android:layout_height="44dp" android:gravity="center_vertical"
+            android:clickable="true" android:focusable="true"
+            android:text="‹ Kembali ke Halaman Sebelumnya" android:textColor="@color/white"
+            android:textSize="12sp" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" android:text="Tren Paket Pilihan"
+            android:textColor="@color/white" android:textStyle="bold" android:textSize="23sp" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="6dp" android:text="Perbandingan peminat paket per tahun ajaran"
+            android:textColor="@color/white" android:textSize="12sp" />
+    </LinearLayout>
+
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/progressTrends" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:indeterminate="true" android:visibility="gone" />
+
+    <ScrollView android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1" android:fillViewport="true">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:padding="16dp" android:orientation="vertical">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:gravity="center_vertical" android:orientation="horizontal">
+                <TextView android:id="@+id/tvTrendsSummary"
+                    android:layout_width="0dp" android:layout_weight="1"
+                    android:layout_height="wrap_content" android:textSize="14sp"
+                    android:textStyle="bold" android:textColor="@color/agnesian_text" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnTrendsRefresh" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:text="Muat ulang" />
+            </LinearLayout>
+            <TextView android:id="@+id/tvTrendsError" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:padding="12dp"
+                android:visibility="gone" android:textColor="@color/change_cancel" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnTrendsRetry" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:text="Coba lagi"
+                android:visibility="gone" />
+            <TextView android:id="@+id/tvTrendsEmpty" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:padding="16dp"
+                android:text="Belum ada data paket pilihan. Tambahkan paket dan pilihan siswa untuk melihat tren."
+                android:textSize="13sp" android:textColor="@color/agnesian_muted"
+                android:visibility="gone" />
+            <LinearLayout android:id="@+id/trendsList"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:layout_marginTop="12dp" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" android:textSize="12sp"
+                android:text="Grafik membandingkan jumlah pilihan pada tahun ajaran ketika paket tersedia. Tahun tanpa paket tidak dianggap nol peminat."
+                android:textColor="@color/agnesian_muted" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

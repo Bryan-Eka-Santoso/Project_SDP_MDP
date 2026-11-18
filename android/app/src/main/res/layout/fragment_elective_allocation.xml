@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="@color/agnesian_background">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:background="@drawable/bg_header"
+        android:paddingHorizontal="24dp" android:paddingTop="24dp" android:paddingBottom="28dp">
+        <TextView android:id="@+id/btnElectiveBack" android:layout_width="wrap_content"
+            android:layout_height="44dp" android:gravity="center_vertical" android:clickable="true"
+            android:focusable="true" android:text="‹ Kembali ke Halaman Sebelumnya"
+            android:textColor="@color/white" android:textSize="12sp" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" android:text="Alokasi Paket Pilihan"
+            android:textColor="@color/white" android:textStyle="bold" android:textSize="23sp" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="6dp" android:text="Pratinjau pembagian kelas berdasarkan kapasitas"
+            android:textColor="@color/white" android:textSize="12sp" />
+    </LinearLayout>
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/progressElective" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:indeterminate="true" android:visibility="gone" />
+    <ScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
+        android:fillViewport="true">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:padding="16dp" android:paddingBottom="26dp">
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                app:cardCornerRadius="14dp" app:cardElevation="0dp" app:cardBackgroundColor="@color/white">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:text="Paket Mata Pelajaran" android:textStyle="bold" android:textSize="15sp"
+                        android:textColor="@color/agnesian_text" />
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp" style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:hint="Pilih paket dan tahun ajaran">
+                        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                            android:id="@+id/spinnerElectivePackage" android:layout_width="match_parent"
+                            android:layout_height="wrap_content" android:inputType="none" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp" style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:hint="Tingkat kelas (misal X, XI, XII)">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/inputElectiveGrade" android:layout_width="match_parent"
+                            android:layout_height="wrap_content" android:maxLength="10" android:singleLine="true"
+                            android:inputType="textCapCharacters" android:text="X" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnElectivePreview" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:layout_marginTop="12dp"
+                        android:text="Tampilkan Pratinjau Alokasi" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+            <TextView android:id="@+id/tvElectiveError" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:padding="12dp"
+                android:textColor="@color/change_cancel" android:visibility="gone" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnElectiveRetry" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:visibility="gone" android:text="Coba lagi" />
+            <TextView android:id="@+id/tvElectiveEmpty" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:padding="16dp" android:visibility="gone"
+                android:text="Belum ada paket pilihan. Buat paket dan catat pilihan siswa lebih dulu."
+                android:textColor="@color/agnesian_muted" />
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardElectiveResult" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginTop="16dp"
+                android:visibility="gone" app:cardCornerRadius="14dp" app:cardElevation="0dp"
+                app:cardBackgroundColor="@color/white">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:text="Hasil Pratinjau" android:textSize="16sp" android:textStyle="bold"
+                        android:textColor="@color/agnesian_blue" />
+                    <TextView android:id="@+id/tvElectiveSummary" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:layout_marginTop="8dp"
+                        android:textSize="13sp" android:textColor="@color/agnesian_text" />
+                    <TextView android:id="@+id/tvElectiveNoStudents" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:visibility="gone" android:layout_marginTop="12dp"
+                        android:text="Belum ada siswa yang memilih paket ini. Alokasi belum bisa dijalankan."
+                        android:textColor="@color/agnesian_muted" />
+                    <LinearLayout android:id="@+id/electiveClassList" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:orientation="vertical" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnElectiveApply" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:layout_marginTop="16dp"
+                        android:text="Konfirmasi dan Jalankan Alokasi" android:visibility="gone" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardElectiveApplied" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginTop="16dp"
+                android:visibility="gone" app:cardCornerRadius="14dp" app:cardElevation="0dp"
+                app:cardBackgroundColor="@color/white">
+                <TextView android:id="@+id/tvElectiveApplied" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:padding="16dp" android:textColor="@color/agnesian_text" />
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

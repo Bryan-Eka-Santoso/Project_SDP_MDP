@@ -2,6 +2,8 @@ package id.sch.santaagnes.sim.data.remote
 
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.PATCH
+import retrofit2.http.Path
 import retrofit2.http.POST
 import retrofit2.http.Query
 
@@ -26,6 +28,20 @@ interface LeaveApi {
 
     @GET("leave-requests")
     suspend fun list(@Query("studentId") studentId: Int, @Query("page") page: Int = 1): LeavePageDto<LeaveRequestDto>
+
+    // IZN-03: pengajuan izin pending untuk guru wali kelas aktif.
+    @GET("homeroom/leave-requests/pending")
+    suspend fun pendingHomeroom(
+        @Query("page") page: Int = 1,
+        @Query("limit") limit: Int = 20
+    ): ApiResponse<List<HomeroomLeaveDto>>
+
+    // IZN-04: persetujuan atau penolakan oleh wali kelas.
+    @PATCH("homeroom/leave-requests/{requestId}/decision")
+    suspend fun decideHomeroom(
+        @Path("requestId") requestId: Int,
+        @Body request: HomeroomDecisionRequest
+    ): ApiResponse<Any>
 
     @POST("leave-requests")
     suspend fun create(@Body request: CreateLeaveDto): ApiResponse<LeaveRequestDto>

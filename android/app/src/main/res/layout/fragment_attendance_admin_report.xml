@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@color/agnesian_background" android:orientation="vertical">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="145dp"
+        android:background="@drawable/bg_header" android:orientation="vertical"
+        android:paddingHorizontal="20dp" android:paddingTop="17dp">
+        <TextView android:id="@+id/btnBack" android:layout_width="wrap_content" android:layout_height="40dp"
+            android:gravity="center_vertical" android:text="‹ Kembali ke Halaman Sebelumnya"
+            android:textColor="@color/white" android:textSize="12sp" android:clickable="true" android:focusable="true"/>
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="Laporan Kehadiran" android:textColor="@color/white"
+            android:textSize="21sp" android:textStyle="bold"/>
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="4dp" android:text="Rekap hadir, sakit, izin dan alpa per siswa"
+            android:textColor="@color/white" android:textSize="12sp"/>
+    </LinearLayout>
+    <ScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
+        android:fillViewport="true">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:padding="16dp" android:orientation="vertical">
+            <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content"
+                app:cardCornerRadius="14dp" app:cardElevation="0dp" app:cardBackgroundColor="@color/white">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="14dp">
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:text="Filter laporan" android:textStyle="bold" android:textColor="@color/agnesian_text"/>
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp" android:hint="Pilih kelas"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+                        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                            android:id="@+id/spinnerClasses" android:layout_width="match_parent"
+                            android:layout_height="wrap_content" android:inputType="none"
+                            android:text="Semua kelas"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp" android:text="Rentang tanggal sesi presensi"
+                        android:textStyle="bold" android:textColor="@color/agnesian_text" />
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp" android:orientation="horizontal">
+                        <LinearLayout android:layout_width="0dp" android:layout_weight="1"
+                            android:layout_height="wrap_content" android:orientation="vertical">
+                            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                                android:text="Dari tanggal" android:textSize="12sp"
+                                android:textColor="@color/agnesian_muted" />
+                            <TextView android:id="@+id/inputDateFrom" android:layout_width="match_parent"
+                                android:layout_height="wrap_content" android:minHeight="48dp"
+                                android:layout_marginTop="4dp" android:padding="10dp"
+                                android:gravity="center_vertical" android:background="@drawable/bg_report_date_field"
+                                android:text="Semua tanggal" android:textColor="@color/agnesian_text"
+                                android:textSize="12sp" android:clickable="true" android:focusable="true" />
+                        </LinearLayout>
+                        <LinearLayout android:layout_width="0dp" android:layout_weight="1"
+                            android:layout_height="wrap_content" android:layout_marginStart="8dp"
+                            android:orientation="vertical">
+                            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                                android:text="Sampai tanggal" android:textSize="12sp"
+                                android:textColor="@color/agnesian_muted" />
+                            <TextView android:id="@+id/inputDateTo" android:layout_width="match_parent"
+                                android:layout_height="wrap_content" android:minHeight="48dp"
+                                android:layout_marginTop="4dp" android:padding="10dp"
+                                android:gravity="center_vertical" android:background="@drawable/bg_report_date_field"
+                                android:text="Semua tanggal" android:textColor="@color/agnesian_text"
+                                android:textSize="12sp" android:clickable="true" android:focusable="true" />
+                        </LinearLayout>
+                    </LinearLayout>
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnClearDates" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:layout_gravity="end"
+                        android:text="Hapus filter tanggal" style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:visibility="gone" />
+                    <TextView android:id="@+id/tvPeriod" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:layout_marginTop="8dp"
+                        android:text="Periode: seluruh tanggal dalam semester aktif"
+                        android:textSize="12sp" android:textColor="@color/agnesian_muted"/>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp" android:orientation="horizontal">
+                        <com.google.android.material.button.MaterialButton android:id="@+id/btnRefresh"
+                            android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                            android:text="Muat ulang"/>
+                        <com.google.android.material.button.MaterialButton android:id="@+id/btnExport"
+                            android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp" android:text="Export Excel"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+            <ProgressBar android:id="@+id/progress" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp" android:visibility="gone"/>
+            <TextView android:id="@+id/tvError" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginTop="12dp"
+                android:textColor="#B3261E" android:visibility="gone"/>
+            <TextView android:id="@+id/tvTotal" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginVertical="12dp"
+                android:textColor="@color/agnesian_text" android:textStyle="bold"
+                android:text="0 baris laporan kehadiran"/>
+            <TextView android:id="@+id/tvEmpty" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:visibility="gone"
+                android:text="Belum ada data presensi untuk filter ini." android:textColor="@color/agnesian_muted"/>
+            <LinearLayout android:id="@+id/reportRows" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="vertical"/>
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnLoadMore"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" android:text="Muat lebih banyak" android:visibility="gone"/>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

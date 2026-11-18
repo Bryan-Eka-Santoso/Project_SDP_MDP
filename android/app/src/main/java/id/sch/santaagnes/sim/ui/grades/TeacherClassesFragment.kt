@@ -79,6 +79,23 @@ class TeacherClassesFragment : Fragment() {
                                 )
                             )
                         }
+                        val notesButton = android.widget.Button(requireContext()).apply {
+                            text = "Catatan"
+                            isAllCaps = false
+                            setTextColor(android.graphics.Color.WHITE)
+                            backgroundTintList = android.content.res.ColorStateList.valueOf(
+                                requireContext().getColor(R.color.teacher_blue_light)
+                            )
+                            setOnClickListener {
+                                findNavController().navigate(
+                                    R.id.teacherProgressNotesFragment,
+                                    bundleOf("assignmentId" to assignment.id)
+                                )
+                            }
+                        }
+                        // Tambahkan ke baris action kartu, bukan mengganti action Absensi/Nilai.
+                        (card.findViewById<Button>(R.id.btnGrades).parent as? android.widget.LinearLayout)
+                            ?.addView(notesButton)
                         binding.classesContainer.addView(card)
                     }
                 }

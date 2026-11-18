@@ -80,6 +80,11 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    fun provideProgressNoteApi(retrofit: Retrofit): id.sch.santaagnes.sim.data.remote.ProgressNoteApi =
+        retrofit.create(id.sch.santaagnes.sim.data.remote.ProgressNoteApi::class.java)
+
+    @Provides
+    @Singleton
     fun provideGradesApi(
         retrofit: Retrofit
     ): id.sch.santaagnes.sim.data.remote.GradesApi {
@@ -178,6 +183,12 @@ object NetworkModule {
         retrofit: Retrofit
     ): DeviceTokenApi {
         return retrofit.create(DeviceTokenApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideElectiveAllocationApi(retrofit: Retrofit): id.sch.santaagnes.sim.data.remote.ElectiveAllocationApi {
+        return retrofit.create(id.sch.santaagnes.sim.data.remote.ElectiveAllocationApi::class.java)
     }
 
     @Provides

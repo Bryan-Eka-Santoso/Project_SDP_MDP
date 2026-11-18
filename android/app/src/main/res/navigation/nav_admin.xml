@@ -36,6 +36,14 @@
             app:destination="@id/adminMataPelajaranFragment" />
 
         <action
+            android:id="@+id/action_adminOperations_to_electiveAllocation"
+            app:destination="@id/adminElectiveAllocationFragment" />
+
+        <action
+            android:id="@+id/action_adminOperations_to_electiveTrends"
+            app:destination="@id/adminElectiveTrendsFragment" />
+
+        <action
             android:id="@+id/action_adminOperations_to_facilities"
             app:destination="@id/adminFasilitasFragment" />
 
@@ -184,6 +192,16 @@
         android:id="@+id/adminMataPelajaranFragment"
         android:name="id.sch.santaagnes.sim.ui.admin.matapelajaran.MataPelajaranFragment"
         android:label="Master Mata Pelajaran" />
+
+    <fragment
+        android:id="@+id/adminElectiveAllocationFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.elective.ElectiveAllocationFragment"
+        android:label="Alokasi Paket Pilihan" />
+
+    <fragment
+        android:id="@+id/adminElectiveTrendsFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.elective.ElectiveTrendsFragment"
+        android:label="Tren Paket Pilihan" />
 
     <fragment
         android:id="@+id/adminFasilitasFragment"

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp" android:padding="15dp" android:orientation="vertical"
+    android:background="@drawable/bg_teacher_card" android:elevation="1dp">
+    <TextView android:id="@+id/tvPendingName" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:textStyle="bold" android:textSize="15sp"
+        android:textColor="@color/teacher_ink"/>
+    <TextView android:id="@+id/tvPendingNis" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:layout_marginTop="4dp"
+        android:textSize="12sp" android:textColor="@color/teacher_muted"/>
+    <TextView android:id="@+id/tvPendingDate" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:layout_marginTop="10dp"
+        android:textSize="12sp" android:textColor="@color/teacher_blue"/>
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:layout_marginTop="12dp" android:text="Alasan izin" android:textStyle="bold"
+        android:textSize="12sp" android:textColor="@color/teacher_ink"/>
+    <TextView android:id="@+id/tvPendingReason" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:layout_marginTop="4dp"
+        android:textSize="13sp" android:textColor="@color/teacher_ink"/>
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:layout_marginTop="10dp" android:text="Menunggu persetujuan" android:textSize="12sp"
+        android:textColor="#B87819"/>
+    <Button android:id="@+id/btnPendingProof" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:layout_marginTop="8dp"
+        android:text="Lihat Bukti Izin" android:textAllCaps="false"
+        android:visibility="gone" android:backgroundTint="@color/teacher_blue_light"
+        android:textColor="#FFFFFF"/>
+    <LinearLayout android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:orientation="horizontal"
+        android:layout_marginTop="12dp" android:gravity="center_vertical">
+        <Button android:id="@+id/btnPendingReject"
+            android:layout_width="0dp" android:layout_weight="1"
+            android:layout_height="48dp" android:layout_marginEnd="6dp"
+            android:text="Tolak" android:textAllCaps="false"
+            android:backgroundTint="#C63636" android:textColor="#FFFFFF" />
+        <Button android:id="@+id/btnPendingApprove"
+            android:layout_width="0dp" android:layout_weight="1"
+            android:layout_height="48dp" android:layout_marginStart="6dp"
+            android:text="Setujui" android:textAllCaps="false"
+            android:backgroundTint="@color/teacher_blue_light" android:textColor="#FFFFFF" />
+    </LinearLayout>
+</LinearLayout>
