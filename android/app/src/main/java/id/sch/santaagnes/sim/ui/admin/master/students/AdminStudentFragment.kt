@@ -18,9 +18,11 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import dagger.hilt.android.AndroidEntryPoint
 import id.sch.santaagnes.sim.R
 import id.sch.santaagnes.sim.databinding.DialogAddStudentBinding
+import id.sch.santaagnes.sim.databinding.DialogStudentClassBinding
 import id.sch.santaagnes.sim.databinding.DialogStudentGuardiansBinding
 import id.sch.santaagnes.sim.databinding.FragmentAdminStudentsBinding
 import id.sch.santaagnes.sim.domain.model.MasterClassGroup
@@ -39,9 +41,11 @@ class AdminStudentFragment : Fragment() {
 
     private val viewModel: AdminStudentViewModel by viewModels()
     private var renderedClasses: List<MasterClassGroup> = emptyList()
+    private var hasStartedOnce = false
 
     private val studentAdapter by lazy {
         AdminStudentAdapter(
+            onAssignClass = ::showAssignClassDialog,
             onEdit = ::showEditStudentDialog,
             onManageGuardians = ::showManageGuardiansDialog,
             onDelete = ::confirmDeleteStudent
@@ -74,6 +78,14 @@ class AdminStudentFragment : Fragment() {
         setupMasterTabs(binding.tabs, nav, MasterTab.STUDENT)
         setupFilterAndSearch()
         observeViewModel()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (hasStartedOnce) {
+            viewModel.refreshAll()
+        }
+        hasStartedOnce = true
     }
 
     private fun setupFilterAndSearch() {
@@ -137,6 +149,48 @@ class AdminStudentFragment : Fragment() {
         }
     }
 
+    private fun setupStudentClassDropdown(
+        spinner: MaterialAutoCompleteTextView,
+        currentClassId: Int?
+    ): () -> Int? {
+        val allClasses = viewModel.uiState.value.classes
+        val selectable = allClasses.filter { it.isAcademicYearActive }.ifEmpty { allClasses }
+        val labels = buildList {
+            add(getString(R.string.student_class_none))
+            addAll(selectable.map { "${it.name} (${it.memberCount}/${it.capacity})" })
+        }.toTypedArray()
+
+        val initialIndex = currentClassId?.let { id ->
+            val idx = selectable.indexOfFirst { it.id == id }
+            if (idx >= 0) idx + 1 else 0
+        } ?: 0
+
+        var selectedClassId: Int? = if (initialIndex > 0) selectable[initialIndex - 1].id else null
+        spinner.setSimpleItems(labels)
+        spinner.setText(labels[initialIndex], false)
+        spinner.setOnItemClickListener { _, _, position, _ ->
+            selectedClassId = if (position == 0) null else selectable.getOrNull(position - 1)?.id
+        }
+        return { selectedClassId }
+    }
+
+    private fun showAssignClassDialog(student: MasterStudent) {
+        val dialogBinding = DialogStudentClassBinding.inflate(layoutInflater)
+        dialogBinding.tvStudentHeader.text = "${student.name} (NIS: ${student.nis})"
+        val currentLabel = student.className ?: getString(R.string.student_class_none)
+        dialogBinding.tvCurrentClass.text = "Kelas saat ini: $currentLabel"
+
+        val getSelectedClassId = setupStudentClassDropdown(dialogBinding.spinnerClass, student.classId)
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogBinding.root)
+            .setPositiveButton("Simpan") { _, _ ->
+                viewModel.assignStudentClass(student, getSelectedClassId())
+            }
+            .setNegativeButton("Batal", null)
+            .show()
+    }
+
     private fun showAddStudentDialog() {
         val dialogBinding = DialogAddStudentBinding.inflate(layoutInflater)
         dialogBinding.etBirthDate.setOnClickListener {
@@ -144,6 +198,7 @@ class AdminStudentFragment : Fragment() {
                 dialogBinding.etBirthDate.setText(it)
             }
         }
+        val getSelectedClassId = setupStudentClassDropdown(dialogBinding.spinnerClass, null)
 
         MaterialAlertDialogBuilder(requireContext())
             .setView(dialogBinding.root)
@@ -155,15 +210,23 @@ class AdminStudentFragment : Fragment() {
                 val password = dialogBinding.etPassword.text.toString()
                 val phone = dialogBinding.etPhone.text.toString().trim()
 
-                if (name.isBlank() || nis.isBlank() || birthDate.isBlank() || email.isBlank() || password.isBlank()) {
+                if (name.isBlank() || nis.isBlank() || birthDate.isBlank() || email.isBlank() || password.length < 8) {
                     Toast.makeText(
                         requireContext(),
-                        "Nama, NIS, Tanggal Lahir, Email, dan Password wajib diisi",
+                        "Nama, NIS, Tanggal Lahir, Email, dan Password (min. 8 karakter) wajib diisi",
                         Toast.LENGTH_SHORT
                     ).show()
                     return@setPositiveButton
                 }
-                viewModel.createStudent(name, email, password, nis, birthDate, phone)
+                viewModel.createStudent(
+                    name = name,
+                    email = email,
+                    password = password,
+                    nis = nis,
+                    birthDate = birthDate,
+                    phone = phone,
+                    classGroupId = getSelectedClassId()
+                )
             }
             .setNegativeButton("Batal", null)
             .show()
@@ -178,6 +241,7 @@ class AdminStudentFragment : Fragment() {
         dialogBinding.etEmail.setText(student.email)
         dialogBinding.etPhone.setText(student.phone.orEmpty())
         dialogBinding.layoutPassword.isVisible = false
+        val getSelectedClassId = setupStudentClassDropdown(dialogBinding.spinnerClass, student.classId)
 
         dialogBinding.etBirthDate.setOnClickListener {
             showIsoDatePicker(requireContext(), dialogBinding.etBirthDate.text?.toString()) {
@@ -198,7 +262,16 @@ class AdminStudentFragment : Fragment() {
                     Toast.makeText(requireContext(), "Nama, Email, NIS, dan Tanggal Lahir wajib diisi", Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
-                viewModel.updateStudent(student.id, name, email, nis, birthDate, phone)
+                viewModel.updateStudent(
+                    id = student.id,
+                    name = name,
+                    email = email,
+                    nis = nis,
+                    birthDate = birthDate,
+                    phone = phone,
+                    currentClassId = student.classId,
+                    targetClassId = getSelectedClassId()
+                )
             }
             .setNegativeButton("Batal", null)
             .show()

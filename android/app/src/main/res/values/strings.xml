@@ -433,6 +433,9 @@
     <string name="user_cd_reset">Reset password</string>
     <string name="user_cd_delete">Hapus akun</string>
     <string name="student_birthdate_hint">Tanggal Lahir (YYYY-MM-DD)</string>
+    <string name="student_class_action">Atur Kelas Siswa</string>
+    <string name="student_class_field_hint">Kelas (Tahun Ajaran Aktif)</string>
+    <string name="student_class_none">Belum ada kelas</string>
     <string name="student_guardians_action">Kelola Wali Murid</string>
     <string name="student_guardians_empty">Belum ada wali murid terhubung dengan siswa ini.</string>
 

@@ -164,14 +164,18 @@ class AdminMasterViewModelsTest {
 
     private class FakeClassRepository : ClassRepository {
         var classes = mutableListOf(
-            MasterClassGroup(1, "X-A", "10", 36, 1, "2025/2026", true, 1, "Wali Kelas A", "1001", 1, 2)
+            MasterClassGroup(1, "X-A", "10", 36, 1, "2025/2026", true, 1, "Wali Kelas A", "1001", 1, 2),
+            MasterClassGroup(2, "X-B", "10", 36, 1, "2025/2026", true, null, null, null, 0, 0)
         )
         var members = mutableListOf(MasterClassMember(1, "2026001", "Bryan", "b@s.id"))
+        val addCalls = mutableListOf<Pair<Int, List<Int>>>()
+        val moveCalls = mutableListOf<Triple<Int, Int, Int>>()
+        val removeCalls = mutableListOf<Pair<Int, Int>>()
 
         override suspend fun getClasses(page: Int, limit: Int, filter: ClassFilter) =
             Resource.Success(classes.toList() to classes.size)
         override suspend fun createClass(academicYearId: Int, name: String, gradeLevel: String, capacity: Int, homeroomTeacherId: Int?) =
-            Resource.Success(MasterClassGroup(2, name, gradeLevel, capacity, academicYearId, "2025/2026", true))
+            Resource.Success(MasterClassGroup(3, name, gradeLevel, capacity, academicYearId, "2025/2026", true))
         override suspend fun updateClass(id: Int, name: String?, gradeLevel: String?, capacity: Int?) =
             Resource.Success(classes.first())
         override suspend fun setHomeroomTeacher(classId: Int, homeroomTeacherId: Int?): Resource<MasterClassGroup> {
@@ -181,9 +185,18 @@ class AdminMasterViewModelsTest {
         }
         override suspend fun deleteClass(id: Int) = Resource.Success(Unit)
         override suspend fun getClassMembers(classId: Int) = Resource.Success(MasterClassMembersPage(classId, "X-A", 36, members.toList()))
-        override suspend fun addClassMembers(classId: Int, studentIds: List<Int>) = getClassMembers(classId)
-        override suspend fun moveClassMember(classId: Int, studentId: Int, targetClassGroupId: Int) = Resource.Success(Unit)
-        override suspend fun removeClassMember(classId: Int, studentId: Int) = Resource.Success(Unit)
+        override suspend fun addClassMembers(classId: Int, studentIds: List<Int>): Resource<MasterClassMembersPage> {
+            addCalls.add(classId to studentIds)
+            return getClassMembers(classId)
+        }
+        override suspend fun moveClassMember(classId: Int, studentId: Int, targetClassGroupId: Int): Resource<Unit> {
+            moveCalls.add(Triple(classId, studentId, targetClassGroupId))
+            return Resource.Success(Unit)
+        }
+        override suspend fun removeClassMember(classId: Int, studentId: Int): Resource<Unit> {
+            removeCalls.add(classId to studentId)
+            return Resource.Success(Unit)
+        }
     }
 
     private class FakeStudentRepository : StudentRepository {
@@ -239,10 +252,23 @@ class AdminMasterViewModelsTest {
     @Test
     fun adminStudentViewModelCreatesWithBirthDateAndLoadsGuardians() = runTest {
         val studentRepo = FakeStudentRepository()
-        val vm = AdminStudentViewModel(studentRepo, FakeClassRepository(), FakeGuardianRepository(), FakeAcademicYearRepository())
+        val classRepo = FakeClassRepository()
+        val vm = AdminStudentViewModel(studentRepo, classRepo, FakeGuardianRepository(), FakeAcademicYearRepository())
 
-        vm.createStudent("Siswa Baru", "s@s.id", "password123", "2026999", "2009-01-15", "0812")
+        vm.createStudent("Siswa Baru", "s@s.id", "password123", "2026999", "2009-01-15", "0812", classGroupId = 2)
         assertEquals("2009-01-15", studentRepo.lastCreateRequest?.birthDate)
+        assertEquals(listOf(2 to listOf(1)), classRepo.addCalls)
+
+        val unassigned = MasterStudent(5, 25, "Tanpa Kelas", "tk@s.id", "2026005", "ACTIVE", classId = null)
+        vm.assignStudentClass(unassigned, 1)
+        assertEquals(listOf(2 to listOf(1), 1 to listOf(5)), classRepo.addCalls)
+
+        val inClassA = unassigned.copy(classId = 1, className = "X-A")
+        vm.assignStudentClass(inClassA, 2)
+        assertEquals(listOf(Triple(1, 5, 2)), classRepo.moveCalls)
+
+        vm.assignStudentClass(inClassA, null)
+        assertEquals(listOf(1 to 5), classRepo.removeCalls)
 
         vm.loadGuardianPanel(1)
         assertEquals(1, vm.uiState.value.selectedStudentGuardians.size)

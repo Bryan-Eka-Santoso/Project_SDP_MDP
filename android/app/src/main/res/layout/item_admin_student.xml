@@ -83,7 +83,7 @@
             app:layout_constraintTop_toBottomOf="@id/tvStudentNisClass"
             tools:text="bryan@agnesian.sch.id" />
 
-        <!-- Tombol aksi kotak berjajar kanan bawah (Figma 219:1631 + Wali Murid) -->
+        <!-- Tombol aksi kotak berjajar kanan bawah (Kelas, Wali Murid, Edit, Hapus) -->
         <LinearLayout
             android:id="@+id/layoutActions"
             android:layout_width="wrap_content"
@@ -95,9 +95,19 @@
             app:layout_constraintTop_toBottomOf="@id/tvStudentNisClass">
 
             <ImageButton
+                android:id="@+id/btnAssignClass"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="@drawable/bg_icon_action"
+                android:contentDescription="@string/student_class_action"
+                android:padding="6dp"
+                android:src="@drawable/ic_school" />
+
+            <ImageButton
                 android:id="@+id/btnGuardians"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
+                android:layout_marginStart="8dp"
                 android:background="@drawable/bg_icon_action"
                 android:contentDescription="@string/student_guardians_action"
                 android:padding="6dp"

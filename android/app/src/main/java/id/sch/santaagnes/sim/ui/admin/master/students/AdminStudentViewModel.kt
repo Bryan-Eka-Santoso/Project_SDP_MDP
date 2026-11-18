@@ -133,13 +133,73 @@ class AdminStudentViewModel @Inject constructor(
         loadStudents(_uiState.value.currentFilter.copy(classGroupId = classGroupId))
     }
 
+    fun refreshAll() {
+        loadLookups()
+        loadStudents()
+    }
+
+    private sealed interface ClassChangeOutcome {
+        data object Unchanged : ClassChangeOutcome
+        data class Updated(val message: String) : ClassChangeOutcome
+        data class Failed(val error: String) : ClassChangeOutcome
+    }
+
+    private suspend fun assignClassInternal(
+        studentId: Int,
+        currentClassId: Int?,
+        targetClassId: Int?
+    ): ClassChangeOutcome {
+        if (currentClassId == targetClassId) return ClassChangeOutcome.Unchanged
+
+        val allClasses = _uiState.value.classes
+        val activeClasses = allClasses.filter { it.isAcademicYearActive }.ifEmpty { allClasses }
+
+        if (targetClassId == null) {
+            val sourceId = currentClassId ?: return ClassChangeOutcome.Unchanged
+            return when (val res = classRepository.removeClassMember(sourceId, studentId)) {
+                is Resource.Success -> ClassChangeOutcome.Updated("Siswa dikeluarkan dari kelas")
+                is Resource.Error -> ClassChangeOutcome.Failed(res.message)
+            }
+        }
+
+        val isCurrentInActiveYear = currentClassId != null && activeClasses.any { it.id == currentClassId }
+        return if (isCurrentInActiveYear) {
+            when (val res = classRepository.moveClassMember(currentClassId!!, studentId, targetClassId)) {
+                is Resource.Success -> ClassChangeOutcome.Updated("Kelas siswa berhasil dipindahkan")
+                is Resource.Error -> ClassChangeOutcome.Failed(res.message)
+            }
+        } else {
+            when (val res = classRepository.addClassMembers(targetClassId, listOf(studentId))) {
+                is Resource.Success -> ClassChangeOutcome.Updated("Siswa berhasil ditempatkan ke kelas")
+                is Resource.Error -> ClassChangeOutcome.Failed(res.message)
+            }
+        }
+    }
+
+    fun assignStudentClass(student: MasterStudent, targetClassId: Int?) {
+        viewModelScope.launch {
+            when (val outcome = assignClassInternal(student.id, student.classId, targetClassId)) {
+                ClassChangeOutcome.Unchanged -> _studentMessage.emit("Kelas siswa tidak berubah")
+                is ClassChangeOutcome.Updated -> {
+                    _studentMessage.emit(outcome.message)
+                    refreshAll()
+                }
+                is ClassChangeOutcome.Failed -> {
+                    _studentMessage.emit(outcome.error)
+                    refreshAll()
+                }
+            }
+        }
+    }
+
     fun createStudent(
         name: String,
         email: String,
         password: String,
         nis: String,
         birthDate: String,
-        phone: String?
+        phone: String?,
+        classGroupId: Int? = null
     ) {
         viewModelScope.launch {
             val req = CreateStudentRequest(
@@ -152,8 +212,21 @@ class AdminStudentViewModel @Inject constructor(
             )
             when (val result = repository.createStudent(req)) {
                 is Resource.Success -> {
-                    _studentMessage.emit("Siswa ${result.data.name} berhasil ditambahkan")
-                    loadStudents()
+                    val outcome = if (classGroupId != null) {
+                        assignClassInternal(result.data.id, null, classGroupId)
+                    } else {
+                        ClassChangeOutcome.Unchanged
+                    }
+                    val feedback = when (outcome) {
+                        is ClassChangeOutcome.Failed ->
+                            "Siswa ${result.data.name} dibuat, namun gagal atur kelas: ${outcome.error}"
+                        is ClassChangeOutcome.Updated ->
+                            "Siswa ${result.data.name} berhasil ditambahkan dan ditempatkan ke kelas"
+                        ClassChangeOutcome.Unchanged ->
+                            "Siswa ${result.data.name} berhasil ditambahkan"
+                    }
+                    _studentMessage.emit(feedback)
+                    refreshAll()
                 }
                 is Resource.Error -> _studentMessage.emit(result.message)
             }
@@ -166,7 +239,9 @@ class AdminStudentViewModel @Inject constructor(
         email: String,
         nis: String,
         birthDate: String,
-        phone: String?
+        phone: String?,
+        currentClassId: Int? = null,
+        targetClassId: Int? = currentClassId
     ) {
         viewModelScope.launch {
             val req = UpdateStudentRequest(
@@ -178,8 +253,17 @@ class AdminStudentViewModel @Inject constructor(
             )
             when (val result = repository.updateStudent(id, req)) {
                 is Resource.Success -> {
-                    _studentMessage.emit("Data siswa berhasil diperbarui")
-                    loadStudents()
+                    val outcome = assignClassInternal(id, currentClassId, targetClassId)
+                    val feedback = when (outcome) {
+                        is ClassChangeOutcome.Failed ->
+                            "Data siswa diperbarui, namun gagal atur kelas: ${outcome.error}"
+                        is ClassChangeOutcome.Updated ->
+                            "Data dan kelas siswa berhasil diperbarui"
+                        ClassChangeOutcome.Unchanged ->
+                            "Data siswa berhasil diperbarui"
+                    }
+                    _studentMessage.emit(feedback)
+                    refreshAll()
                 }
                 is Resource.Error -> _studentMessage.emit(result.message)
             }

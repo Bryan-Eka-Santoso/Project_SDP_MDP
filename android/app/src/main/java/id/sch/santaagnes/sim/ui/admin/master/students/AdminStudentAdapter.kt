@@ -11,6 +11,7 @@ import id.sch.santaagnes.sim.databinding.ItemAdminStudentBinding
 import id.sch.santaagnes.sim.domain.model.MasterStudent
 
 class AdminStudentAdapter(
+    private val onAssignClass: (MasterStudent) -> Unit,
     private val onEdit: (MasterStudent) -> Unit,
     private val onManageGuardians: (MasterStudent) -> Unit,
     private val onDelete: (MasterStudent) -> Unit
@@ -38,6 +39,7 @@ class AdminStudentAdapter(
                 )
             )
 
+            binding.btnAssignClass.setOnClickListener { onAssignClass(student) }
             binding.btnGuardians.setOnClickListener { onManageGuardians(student) }
             binding.btnEdit.setOnClickListener { onEdit(student) }
             binding.btnDelete.setOnClickListener { onDelete(student) }
