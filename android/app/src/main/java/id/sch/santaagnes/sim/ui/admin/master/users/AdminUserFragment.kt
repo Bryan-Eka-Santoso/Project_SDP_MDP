@@ -4,7 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -21,9 +24,12 @@ import id.sch.santaagnes.sim.databinding.DialogAddUserBinding
 import id.sch.santaagnes.sim.databinding.DialogResetPasswordBinding
 import id.sch.santaagnes.sim.databinding.FragmentAdminUsersBinding
 import id.sch.santaagnes.sim.domain.model.MasterUser
+import id.sch.santaagnes.sim.ui.admin.master.AgnesianOption
 import id.sch.santaagnes.sim.ui.admin.master.MasterTab
+import id.sch.santaagnes.sim.ui.admin.master.bindFilterPill
 import id.sch.santaagnes.sim.ui.admin.master.setupMasterHeader
 import id.sch.santaagnes.sim.ui.admin.master.setupMasterTabs
+import id.sch.santaagnes.sim.ui.admin.master.showAgnesianFormSheet
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -34,9 +40,19 @@ class AdminUserFragment : Fragment() {
 
     private val viewModel: AdminUserViewModel by viewModels()
 
+    private val roleFilterOptions by lazy {
+        listOf(
+            AgnesianOption("", getString(R.string.filter_all_roles), "Tampilkan seluruh akun pengguna"),
+            AgnesianOption("ADMIN", getString(R.string.role_admin), "Pengelola master data, jadwal & laporan"),
+            AgnesianOption("TEACHER", getString(R.string.role_teacher), "Guru pengajar dan wali kelas"),
+            AgnesianOption("STUDENT", getString(R.string.role_student), "Peserta didik terdaftar"),
+            AgnesianOption("GUARDIAN", getString(R.string.role_guardian), "Orang tua atau wali murid")
+        )
+    }
+
     private val userAdapter by lazy {
         AdminUserAdapter(
-            onEdit = ::showEditUserDialog,
+            onEdit = { showUserFormSheet(it) },
             onToggleStatus = ::confirmToggleStatus,
             onResetPassword = ::showResetPasswordDialog,
             onDelete = ::confirmDeleteUser
@@ -64,7 +80,7 @@ class AdminUserFragment : Fragment() {
             navController = nav,
             titleRes = R.string.title_management_user,
             showImport = true,
-            onAdd = ::showAddUserDialog
+            onAdd = { showUserFormSheet(null) }
         )
         setupMasterTabs(binding.tabs, nav, MasterTab.USER)
         setupFilterAndSearch()
@@ -72,14 +88,19 @@ class AdminUserFragment : Fragment() {
     }
 
     private fun setupFilterAndSearch() {
-        val roles = arrayOf("Semua Role", "ADMIN", "TEACHER", "STUDENT", "GUARDIAN")
-        binding.spinnerRole.setSimpleItems(roles)
-        binding.spinnerRole.setText("Semua Role", false)
-
-        binding.spinnerRole.setOnItemClickListener { _, _, position, _ ->
-            val selected = roles[position]
-            viewModel.setRoleFilter(if (selected == "Semua Role") null else selected)
-        }
+        binding.btnFilterRole.text = roleFilterOptions.first().title
+        bindFilterPill(
+            pill = binding.btnFilterRole,
+            sheetTitle = "Filter Role Pengguna",
+            options = { roleFilterOptions },
+            selectedIndex = {
+                val active = viewModel.uiState.value.currentFilter.role.orEmpty()
+                roleFilterOptions.indexOfFirst { it.id == active }.coerceAtLeast(0)
+            },
+            onSelected = { _, option ->
+                viewModel.setRoleFilter(option.id.ifBlank { null })
+            }
+        )
 
         binding.etSearchUser.addTextChangedListener { editable ->
             viewModel.setSearchQuery(editable?.toString().orEmpty())
@@ -125,74 +146,103 @@ class AdminUserFragment : Fragment() {
         }
     }
 
-    private fun showAddUserDialog() {
-        val dialogBinding = DialogAddUserBinding.inflate(layoutInflater)
-        val roles = arrayOf("STUDENT", "TEACHER", "GUARDIAN", "ADMIN")
-        dialogBinding.spinnerDialogRole.setSimpleItems(roles)
-        dialogBinding.spinnerDialogRole.setText("STUDENT", false)
+    private fun showUserFormSheet(existing: MasterUser?) {
+        val d = DialogAddUserBinding.inflate(layoutInflater)
+        val isEdit = existing != null
+        if (existing != null) {
+            d.etName.setText(existing.name)
+            d.etEmail.setText(existing.email)
+            d.layoutPassword.isVisible = false
+        }
 
-        MaterialAlertDialogBuilder(requireContext())
-            .setView(dialogBinding.root)
-            .setPositiveButton("Tambah") { _, _ ->
-                val name = dialogBinding.etName.text.toString().trim()
-                val email = dialogBinding.etEmail.text.toString().trim()
-                val password = dialogBinding.etPassword.text.toString()
-                val role = dialogBinding.spinnerDialogRole.text.toString().ifBlank { "STUDENT" }
+        var selectedRole = existing?.role ?: "STUDENT"
+        val roleCards: List<Triple<String, LinearLayout, TextView>> = listOf(
+            Triple("STUDENT", d.cardRoleStudent, d.tvRoleStudentTitle),
+            Triple("TEACHER", d.cardRoleTeacher, d.tvRoleTeacherTitle),
+            Triple("GUARDIAN", d.cardRoleGuardian, d.tvRoleGuardianTitle),
+            Triple("ADMIN", d.cardRoleAdmin, d.tvRoleAdminTitle)
+        )
 
-                if (name.isBlank() || email.isBlank() || password.isBlank()) {
-                    Toast.makeText(requireContext(), "Semua kolom wajib diisi", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
-                }
-                viewModel.createUser(name, email, password, role)
+        fun renderRoleSelection() {
+            roleCards.forEach { (role, card, title) ->
+                val active = role == selectedRole
+                card.setBackgroundResource(
+                    if (active) R.drawable.bg_option_selected else R.drawable.bg_option_unselected
+                )
+                title.setTextColor(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        if (active) R.color.agnesian_blue else R.color.agnesian_text
+                    )
+                )
             }
-            .setNegativeButton("Batal", null)
-            .show()
-    }
+        }
 
-    private fun showEditUserDialog(user: MasterUser) {
-        val dialogBinding = DialogAddUserBinding.inflate(layoutInflater)
-        dialogBinding.tvDialogTitle.text = getString(R.string.dialog_edit_user_title)
-        dialogBinding.etName.setText(user.name)
-        dialogBinding.etEmail.setText(user.email)
-        dialogBinding.layoutPassword.isVisible = false
-
-        val roles = arrayOf("STUDENT", "TEACHER", "GUARDIAN", "ADMIN")
-        dialogBinding.layoutRole.isVisible = true
-        dialogBinding.spinnerDialogRole.setSimpleItems(roles)
-        dialogBinding.spinnerDialogRole.setText(user.role, false)
-
-        MaterialAlertDialogBuilder(requireContext())
-            .setView(dialogBinding.root)
-            .setPositiveButton("Simpan") { _, _ ->
-                val name = dialogBinding.etName.text.toString().trim()
-                val email = dialogBinding.etEmail.text.toString().trim()
-                val role = dialogBinding.spinnerDialogRole.text.toString().ifBlank { user.role }
-                if (name.isBlank() || email.isBlank()) {
-                    Toast.makeText(requireContext(), "Nama dan email wajib diisi", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
-                }
-                viewModel.updateUser(user, name, email, role)
+        roleCards.forEach { (role, card, _) ->
+            card.setOnClickListener {
+                selectedRole = role
+                renderRoleSelection()
             }
-            .setNegativeButton("Batal", null)
-            .show()
+        }
+        renderRoleSelection()
+
+        showAgnesianFormSheet(
+            context = requireContext(),
+            title = getString(if (isEdit) R.string.dialog_edit_user_title else R.string.dialog_add_user_title),
+            subtitle = if (isEdit) "Perbarui identitas atau peran akun" else "Buat akun pengguna baru dengan peran yang sesuai",
+            contentView = d.root,
+            primaryLabel = if (isEdit) "Simpan" else "Tambah"
+        ) {
+            d.layoutName.error = null
+            d.layoutEmail.error = null
+            d.layoutPassword.error = null
+
+            val name = d.etName.text?.toString()?.trim().orEmpty()
+            val email = d.etEmail.text?.toString()?.trim().orEmpty()
+            val password = d.etPassword.text?.toString().orEmpty()
+
+            var valid = true
+            if (name.isBlank()) {
+                d.layoutName.error = "Nama lengkap wajib diisi"
+                valid = false
+            }
+            if (email.isBlank()) {
+                d.layoutEmail.error = "Email wajib diisi"
+                valid = false
+            }
+            if (!isEdit && password.length < 8) {
+                d.layoutPassword.error = "Password minimal 8 karakter"
+                valid = false
+            }
+            if (!valid) return@showAgnesianFormSheet false
+
+            if (existing == null) {
+                viewModel.createUser(name, email, password, selectedRole)
+            } else {
+                viewModel.updateUser(existing, name, email, selectedRole)
+            }
+            true
+        }
     }
 
     private fun showResetPasswordDialog(user: MasterUser) {
-        val dialogBinding = DialogResetPasswordBinding.inflate(layoutInflater)
-        dialogBinding.tvTargetUser.text = "Pengguna: ${user.name} (${user.email})"
-
-        MaterialAlertDialogBuilder(requireContext())
-            .setView(dialogBinding.root)
-            .setPositiveButton("Reset") { _, _ ->
-                val newPassword = dialogBinding.etNewPassword.text.toString()
-                if (newPassword.isBlank() || newPassword.length < 8) {
-                    Toast.makeText(requireContext(), "Password baru minimal 8 karakter", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
-                }
-                viewModel.resetPassword(user.id, newPassword)
+        val d = DialogResetPasswordBinding.inflate(layoutInflater)
+        showAgnesianFormSheet(
+            context = requireContext(),
+            title = getString(R.string.dialog_reset_password_title),
+            subtitle = "${user.name} (${user.email})",
+            contentView = d.root,
+            primaryLabel = "Reset Password"
+        ) {
+            d.layoutNewPassword.error = null
+            val newPassword = d.etNewPassword.text?.toString().orEmpty()
+            if (newPassword.length < 8) {
+                d.layoutNewPassword.error = "Password baru minimal 8 karakter"
+                return@showAgnesianFormSheet false
             }
-            .setNegativeButton("Batal", null)
-            .show()
+            viewModel.resetPassword(user.id, newPassword)
+            true
+        }
     }
 
     private fun confirmToggleStatus(user: MasterUser) {

@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -24,12 +25,16 @@ import id.sch.santaagnes.sim.databinding.DialogAddClassBinding
 import id.sch.santaagnes.sim.databinding.DialogClassMembersBinding
 import id.sch.santaagnes.sim.databinding.DialogHomeroomTeacherBinding
 import id.sch.santaagnes.sim.databinding.FragmentAdminClassesBinding
-import id.sch.santaagnes.sim.domain.model.MasterAcademicYear
 import id.sch.santaagnes.sim.domain.model.MasterClassGroup
 import id.sch.santaagnes.sim.domain.model.MasterStudent
+import id.sch.santaagnes.sim.ui.admin.master.AgnesianOption
 import id.sch.santaagnes.sim.ui.admin.master.MasterTab
+import id.sch.santaagnes.sim.ui.admin.master.bindFilterPill
+import id.sch.santaagnes.sim.ui.admin.master.bindSelectorField
 import id.sch.santaagnes.sim.ui.admin.master.setupMasterHeader
 import id.sch.santaagnes.sim.ui.admin.master.setupMasterTabs
+import id.sch.santaagnes.sim.ui.admin.master.showAgnesianFormSheet
+import id.sch.santaagnes.sim.ui.admin.master.showAgnesianOptionSheet
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -39,13 +44,12 @@ class AdminClassFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: AdminClassViewModel by viewModels()
-    private var renderedYears: List<MasterAcademicYear> = emptyList()
 
     private val classAdapter by lazy {
         AdminClassAdapter(
             onManageMembers = ::showMembersDialog,
             onSetHomeroom = ::showHomeroomDialog,
-            onEdit = ::showEditClassDialog,
+            onEdit = { showClassFormSheet(it) },
             onDelete = ::confirmDeleteClass
         )
     }
@@ -71,7 +75,7 @@ class AdminClassFragment : Fragment() {
             navController = nav,
             titleRes = R.string.title_management_class,
             showImport = true,
-            onAdd = ::showAddClassDialog
+            onAdd = { showClassFormSheet(null) }
         )
         setupMasterTabs(binding.tabs, nav, MasterTab.CLASS)
         setupFilterAndSearch()
@@ -79,13 +83,35 @@ class AdminClassFragment : Fragment() {
     }
 
     private fun setupFilterAndSearch() {
-        binding.spinnerYear.setSimpleItems(arrayOf(getString(R.string.filter_all_years)))
-        binding.spinnerYear.setText(getString(R.string.filter_all_years), false)
-
-        binding.spinnerYear.setOnItemClickListener { _, _, pos, _ ->
-            val yearId = if (pos == 0) null else renderedYears.getOrNull(pos - 1)?.id
-            viewModel.setYearFilter(yearId)
-        }
+        binding.btnFilterYear.text = getString(R.string.filter_all_years)
+        bindFilterPill(
+            pill = binding.btnFilterYear,
+            sheetTitle = "Filter Tahun Ajaran",
+            options = {
+                buildList {
+                    add(AgnesianOption("", getString(R.string.filter_all_years), "Tampilkan kelas semua periode"))
+                    addAll(
+                        viewModel.uiState.value.academicYears.map { yr ->
+                            AgnesianOption(
+                                id = yr.id.toString(),
+                                title = if (yr.isActive) "${yr.name} (Aktif)" else yr.name,
+                                subtitle = "${yr.startDate} s.d. ${yr.endDate}"
+                            )
+                        }
+                    )
+                }
+            },
+            selectedIndex = {
+                val activeId = viewModel.uiState.value.currentFilter.academicYearId
+                if (activeId == null) 0 else {
+                    val idx = viewModel.uiState.value.academicYears.indexOfFirst { it.id == activeId }
+                    if (idx >= 0) idx + 1 else 0
+                }
+            },
+            onSelected = { _, option ->
+                viewModel.setYearFilter(option.id.toIntOrNull())
+            }
+        )
 
         binding.etSearchClass.addTextChangedListener { editable ->
             viewModel.setSearchQuery(editable?.toString().orEmpty())
@@ -99,17 +125,6 @@ class AdminClassFragment : Fragment() {
                     viewModel.uiState.collect { state ->
                         state.activePeriodText?.let {
                             binding.header.tvSemesterBadge.text = "$it ▾"
-                        }
-
-                        if (state.academicYears != renderedYears) {
-                            renderedYears = state.academicYears
-                            val labels = buildList {
-                                add(getString(R.string.filter_all_years))
-                                addAll(state.academicYears.map {
-                                    if (it.isActive) "${it.name} (Aktif)" else it.name
-                                })
-                            }.toTypedArray()
-                            binding.spinnerYear.setSimpleItems(labels)
                         }
 
                         binding.progressBar.isVisible = state.isLoading
@@ -135,10 +150,10 @@ class AdminClassFragment : Fragment() {
         }
     }
 
-    private fun showAddClassDialog() {
+    private fun showClassFormSheet(existing: MasterClassGroup?) {
         val state = viewModel.uiState.value
         val years = state.academicYears
-        if (years.isEmpty()) {
+        if (existing == null && years.isEmpty()) {
             Toast.makeText(
                 requireContext(),
                 "Buat Tahun Ajaran terlebih dahulu di menu Tahun Ajaran & Semester.",
@@ -148,101 +163,133 @@ class AdminClassFragment : Fragment() {
         }
 
         val d = DialogAddClassBinding.inflate(layoutInflater)
+        val isEdit = existing != null
         var selectedYearIdx = years.indexOfFirst { it.isActive }.takeIf { it >= 0 } ?: 0
-        val yearLabels = years.map { if (it.isActive) "${it.name} (Aktif)" else it.name }.toTypedArray()
-        d.spinnerAcademicYear.setSimpleItems(yearLabels)
-        d.spinnerAcademicYear.setText(yearLabels[selectedYearIdx], false)
-        d.spinnerAcademicYear.setOnItemClickListener { _, _, pos, _ -> selectedYearIdx = pos }
-
-        val grades = arrayOf("10", "11", "12")
-        d.spinnerGradeLevel.setSimpleItems(grades)
-        d.spinnerGradeLevel.setText("10", false)
-
-        val teachers = state.teachers
         var selectedTeacherIdx = 0
-        val teacherLabels = buildList {
-            add("Belum diatur")
-            addAll(teachers.map { "${it.name} (${it.employeeNumber})" })
-        }.toTypedArray()
-        d.spinnerHomeroom.setSimpleItems(teacherLabels)
-        d.spinnerHomeroom.setText(teacherLabels[0], false)
-        d.spinnerHomeroom.setOnItemClickListener { _, _, pos, _ -> selectedTeacherIdx = pos }
+        var selectedGrade = existing?.gradeLevel ?: "10"
 
-        d.etCapacity.setText("36")
-
-        MaterialAlertDialogBuilder(requireContext())
-            .setView(d.root)
-            .setPositiveButton("Tambah") { _, _ ->
-                val year = years.getOrNull(selectedYearIdx) ?: return@setPositiveButton
-                val name = d.etClassName.text.toString().trim()
-                val grade = d.spinnerGradeLevel.text.toString().trim()
-                val cap = d.etCapacity.text.toString().toIntOrNull()
-                val teacherId = if (selectedTeacherIdx <= 0) null else teachers.getOrNull(selectedTeacherIdx - 1)?.id
-
-                if (name.isBlank() || grade.isBlank() || cap == null || cap <= 0) {
-                    Toast.makeText(requireContext(), "Nama kelas, tingkat, dan kapasitas valid wajib diisi", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
-                }
-                viewModel.createClass(year.id, name, grade, cap, teacherId)
+        if (existing != null) {
+            d.layoutAcademicYear.isVisible = false
+            d.layoutHomeroom.isVisible = false
+            d.etClassName.setText(existing.name)
+            d.etCapacity.setText(existing.capacity.toString())
+        } else {
+            val yearOptions = years.map {
+                AgnesianOption(
+                    id = it.id.toString(),
+                    title = if (it.isActive) "${it.name} (Aktif)" else it.name,
+                    subtitle = "${it.startDate} s.d. ${it.endDate}"
+                )
             }
-            .setNegativeButton("Batal", null)
-            .show()
-    }
+            d.etAcademicYearSelector.setText(yearOptions[selectedYearIdx].title)
+            bindSelectorField(
+                layout = d.layoutAcademicYear,
+                input = d.etAcademicYearSelector,
+                sheetTitle = "Pilih Tahun Ajaran",
+                options = { yearOptions },
+                selectedIndex = { selectedYearIdx },
+                onSelected = { idx, _ -> selectedYearIdx = idx }
+            )
 
-    private fun showEditClassDialog(item: MasterClassGroup) {
-        val d = DialogAddClassBinding.inflate(layoutInflater)
-        d.tvDialogTitle.setText(R.string.dialog_edit_class_title)
-        d.layoutAcademicYear.isVisible = false
-        d.layoutHomeroom.isVisible = false
-        d.etClassName.setText(item.name)
-        d.etCapacity.setText(item.capacity.toString())
-
-        val grades = arrayOf("10", "11", "12")
-        d.spinnerGradeLevel.setSimpleItems(grades)
-        d.spinnerGradeLevel.setText(item.gradeLevel, false)
-
-        MaterialAlertDialogBuilder(requireContext())
-            .setView(d.root)
-            .setPositiveButton("Simpan") { _, _ ->
-                val name = d.etClassName.text.toString().trim()
-                val grade = d.spinnerGradeLevel.text.toString().trim()
-                val cap = d.etCapacity.text.toString().toIntOrNull()
-                if (name.isBlank() || grade.isBlank() || cap == null || cap <= 0) {
-                    Toast.makeText(requireContext(), "Data kelas tidak valid", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
-                }
-                viewModel.updateClass(item.id, name, grade, cap)
+            val teachers = state.teachers
+            val teacherOptions = buildList {
+                add(AgnesianOption("", "Belum diatur", "Wali kelas bisa ditetapkan nanti"))
+                addAll(teachers.map { AgnesianOption(it.id.toString(), it.name, "NIP: ${it.employeeNumber}") })
             }
-            .setNegativeButton("Batal", null)
-            .show()
+            d.etHomeroomSelector.setText(teacherOptions[0].title)
+            bindSelectorField(
+                layout = d.layoutHomeroom,
+                input = d.etHomeroomSelector,
+                sheetTitle = "Pilih Wali Kelas (Opsional)",
+                options = { teacherOptions },
+                selectedIndex = { selectedTeacherIdx },
+                onSelected = { idx, _ -> selectedTeacherIdx = idx }
+            )
+            d.etCapacity.setText("36")
+        }
+
+        val gradeButtons = listOf(
+            "10" to d.btnGrade10,
+            "11" to d.btnGrade11,
+            "12" to d.btnGrade12
+        )
+        fun renderGrades() {
+            gradeButtons.forEach { (grade, btn) ->
+                val active = grade == selectedGrade
+                btn.setBackgroundResource(if (active) R.drawable.bg_option_selected else R.drawable.bg_option_unselected)
+                btn.setTextColor(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        if (active) R.color.agnesian_blue else R.color.agnesian_text
+                    )
+                )
+            }
+        }
+        gradeButtons.forEach { (grade, btn) ->
+            btn.setOnClickListener {
+                selectedGrade = grade
+                renderGrades()
+            }
+        }
+        renderGrades()
+
+        showAgnesianFormSheet(
+            context = requireContext(),
+            title = getString(if (isEdit) R.string.dialog_edit_class_title else R.string.dialog_add_class_title),
+            subtitle = if (isEdit) "Ubah nama, tingkat, atau kapasitas rombel" else "Tambahkan rombongan belajar baru",
+            contentView = d.root,
+            primaryLabel = if (isEdit) "Simpan" else "Tambah"
+        ) {
+            val name = d.etClassName.text?.toString()?.trim().orEmpty()
+            val cap = d.etCapacity.text?.toString()?.toIntOrNull()
+            if (name.isBlank() || cap == null || cap <= 0) {
+                Toast.makeText(requireContext(), "Nama kelas dan kapasitas valid wajib diisi", Toast.LENGTH_SHORT).show()
+                return@showAgnesianFormSheet false
+            }
+            if (existing == null) {
+                val year = years.getOrNull(selectedYearIdx) ?: return@showAgnesianFormSheet false
+                val teacherId = if (selectedTeacherIdx <= 0) null else state.teachers.getOrNull(selectedTeacherIdx - 1)?.id
+                viewModel.createClass(year.id, name, selectedGrade, cap, teacherId)
+            } else {
+                viewModel.updateClass(existing.id, name, selectedGrade, cap)
+            }
+            true
+        }
     }
 
     private fun showHomeroomDialog(item: MasterClassGroup) {
         val teachers = viewModel.uiState.value.teachers
         val d = DialogHomeroomTeacherBinding.inflate(layoutInflater)
-        d.tvClassInfo.text = "Kelas ${item.name} (${item.academicYearName})"
-
-        val labels = buildList {
-            add("Lepas Wali Kelas")
-            addAll(teachers.map { "${it.name} (${it.employeeNumber})" })
-        }.toTypedArray()
+        val teacherOptions = buildList {
+            add(AgnesianOption("", "Lepas Wali Kelas", "Kosongkan penugasan wali untuk kelas ini"))
+            addAll(teachers.map { AgnesianOption(it.id.toString(), it.name, "NIP: ${it.employeeNumber}") })
+        }
 
         var selectedIdx = if (item.homeroomTeacherId == null) 0 else {
             val found = teachers.indexOfFirst { it.id == item.homeroomTeacherId }
             if (found >= 0) found + 1 else 0
         }
-        d.spinnerTeacher.setSimpleItems(labels)
-        d.spinnerTeacher.setText(labels[selectedIdx], false)
-        d.spinnerTeacher.setOnItemClickListener { _, _, pos, _ -> selectedIdx = pos }
+        d.etTeacherSelector.setText(teacherOptions[selectedIdx].title)
+        bindSelectorField(
+            layout = d.layoutTeacher,
+            input = d.etTeacherSelector,
+            sheetTitle = "Pilih Guru Wali Kelas",
+            options = { teacherOptions },
+            selectedIndex = { selectedIdx },
+            onSelected = { idx, _ -> selectedIdx = idx }
+        )
 
-        MaterialAlertDialogBuilder(requireContext())
-            .setView(d.root)
-            .setPositiveButton("Simpan") { _, _ ->
-                val teacherId = if (selectedIdx == 0) null else teachers.getOrNull(selectedIdx - 1)?.id
-                viewModel.setHomeroomTeacher(item.id, teacherId)
-            }
-            .setNegativeButton("Batal", null)
-            .show()
+        showAgnesianFormSheet(
+            context = requireContext(),
+            title = getString(R.string.dialog_homeroom_title),
+            subtitle = "Kelas ${item.name} (${item.academicYearName})",
+            contentView = d.root,
+            primaryLabel = "Simpan"
+        ) {
+            val teacherId = if (selectedIdx == 0) null else teachers.getOrNull(selectedIdx - 1)?.id
+            viewModel.setHomeroomTeacher(item.id, teacherId)
+            true
+        }
     }
 
     private fun showMembersDialog(item: MasterClassGroup) {
@@ -252,10 +299,29 @@ class AdminClassFragment : Fragment() {
         var selectedStudentIdx = -1
         var renderedStudents: List<MasterStudent> = emptyList()
 
-        val dialog = MaterialAlertDialogBuilder(requireContext())
-            .setView(d.root)
-            .setNegativeButton("Tutup", null)
-            .create()
+        val sheet = showAgnesianFormSheet(
+            context = requireContext(),
+            title = getString(R.string.dialog_class_members_title),
+            subtitle = "Kelas ${item.name} (${item.academicYearName})",
+            contentView = d.root,
+            secondaryLabel = "Tutup",
+            showPrimary = false,
+            onPrimary = { true }
+        )
+
+        bindSelectorField(
+            layout = d.layoutStudent,
+            input = d.etStudentSelector,
+            sheetTitle = "Pilih Siswa untuk Kelas ${item.name}",
+            options = {
+                renderedStudents.map { st ->
+                    val cls = st.className ?: "Belum ada kelas"
+                    AgnesianOption(st.id.toString(), st.name, "NIS: ${st.nis} · $cls")
+                }
+            },
+            selectedIndex = { selectedStudentIdx },
+            onSelected = { idx, _ -> selectedStudentIdx = idx }
+        )
 
         d.btnAddMember.setOnClickListener {
             val student = renderedStudents.getOrNull(selectedStudentIdx)
@@ -269,15 +335,7 @@ class AdminClassFragment : Fragment() {
         val job = viewLifecycleOwner.lifecycleScope.launch {
             viewModel.uiState.collect { state ->
                 d.progressDialog.isVisible = state.isMembersLoading
-
-                if (state.studentsLookup != renderedStudents) {
-                    renderedStudents = state.studentsLookup
-                    val names = renderedStudents.map { "${it.name} (${it.nis})" }.toTypedArray()
-                    d.spinnerStudent.setSimpleItems(names)
-                    d.spinnerStudent.setOnItemClickListener { _, _, pos, _ ->
-                        selectedStudentIdx = pos
-                    }
-                }
+                renderedStudents = state.studentsLookup
 
                 val page = state.selectedMembersPage
                 if (page != null && page.classId == item.id) {
@@ -289,11 +347,17 @@ class AdminClassFragment : Fragment() {
                         val row = LinearLayout(requireContext()).apply {
                             orientation = LinearLayout.HORIZONTAL
                             gravity = android.view.Gravity.CENTER_VERTICAL
-                            setPadding(0, 8, 0, 8)
+                            setBackgroundResource(R.drawable.bg_option_unselected)
+                            setPadding(24, 18, 24, 18)
+                            layoutParams = LinearLayout.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.WRAP_CONTENT
+                            ).apply { bottomMargin = 12 }
                         }
                         val info = TextView(requireContext()).apply {
                             layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
                             text = "${member.name}\nNIS: ${member.nis}"
+                            setTextColor(ContextCompat.getColor(requireContext(), R.color.agnesian_text))
                             textSize = 13f
                         }
                         val btnMove = MaterialButton(
@@ -303,6 +367,8 @@ class AdminClassFragment : Fragment() {
                         ).apply {
                             text = "Pindah"
                             isAllCaps = false
+                            setTextColor(ContextCompat.getColor(requireContext(), R.color.agnesian_blue))
+                            strokeColor = ContextCompat.getColorStateList(requireContext(), R.color.agnesian_blue)
                             setOnClickListener { showMoveMemberPicker(item, member.studentId, member.name) }
                         }
                         val btnRemove = MaterialButton(
@@ -312,6 +378,12 @@ class AdminClassFragment : Fragment() {
                         ).apply {
                             text = "Hapus"
                             isAllCaps = false
+                            setTextColor(ContextCompat.getColor(requireContext(), R.color.change_cancel))
+                            strokeColor = ContextCompat.getColorStateList(requireContext(), R.color.change_cancel)
+                            layoutParams = LinearLayout.LayoutParams(
+                                ViewGroup.LayoutParams.WRAP_CONTENT,
+                                ViewGroup.LayoutParams.WRAP_CONTENT
+                            ).apply { marginStart = 12 }
                             setOnClickListener { viewModel.removeClassMember(item.id, member.studentId) }
                         }
                         row.addView(info)
@@ -323,8 +395,7 @@ class AdminClassFragment : Fragment() {
             }
         }
 
-        dialog.setOnDismissListener { job.cancel() }
-        dialog.show()
+        sheet.setOnDismissListener { job.cancel() }
         viewModel.loadClassMembers(item.id)
     }
 
@@ -344,14 +415,18 @@ class AdminClassFragment : Fragment() {
             ).show()
             return
         }
-        val names = targets.map { "${it.name} (${it.memberCount}/${it.capacity})" }.toTypedArray()
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Pindahkan $studentName ke Kelas:")
-            .setItems(names) { _, which ->
-                viewModel.moveClassMember(sourceClass.id, studentId, targets[which].id)
+        showAgnesianOptionSheet(
+            context = requireContext(),
+            title = "Pindahkan $studentName",
+            subtitle = "Pilih kelas tujuan di tahun ajaran ${sourceClass.academicYearName}",
+            options = targets.map {
+                AgnesianOption(it.id.toString(), it.name, "Terisi ${it.memberCount}/${it.capacity} siswa")
+            },
+            selectedIndex = -1,
+            onSelected = { idx, _ ->
+                viewModel.moveClassMember(sourceClass.id, studentId, targets[idx].id)
             }
-            .setNegativeButton("Batal", null)
-            .show()
+        )
     }
 
     private fun confirmDeleteClass(item: MasterClassGroup) {

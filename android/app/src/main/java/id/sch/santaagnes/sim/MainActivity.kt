@@ -2,9 +2,11 @@ package id.sch.santaagnes.sim
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
+import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.MenuRes
@@ -71,7 +73,10 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
 
-        enableEdgeToEdge()
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(ContextCompat.getColor(this, R.color.agnesian_blue)),
+            navigationBarStyle = SystemBarStyle.light(Color.WHITE, Color.WHITE)
+        )
         setContentView(binding.root)
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
@@ -79,9 +84,12 @@ class MainActivity : AppCompatActivity() {
                 WindowInsetsCompat.Type.systemBars()
             )
 
+            binding.statusBarScrim.layoutParams = binding.statusBarScrim.layoutParams.apply {
+                height = systemBars.top
+            }
             view.setPadding(
                 systemBars.left,
-                systemBars.top,
+                0,
                 systemBars.right,
                 systemBars.bottom
             )

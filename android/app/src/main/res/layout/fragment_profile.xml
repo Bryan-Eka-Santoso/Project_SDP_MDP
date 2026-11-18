@@ -240,8 +240,13 @@
                 android:layout_height="46dp"
                 android:layout_marginTop="12dp"
                 android:text="@string/profile_bills"
+                android:textAllCaps="false"
+                android:textColor="@color/agnesian_blue"
+                android:textStyle="bold"
                 android:visibility="gone"
-                app:cornerRadius="8dp" />
+                app:backgroundTint="@color/white"
+                app:cornerRadius="10dp"
+                app:strokeColor="@color/agnesian_border" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnReports"
@@ -250,8 +255,13 @@
                 android:layout_height="46dp"
                 android:layout_marginTop="8dp"
                 android:text="@string/profile_reports"
+                android:textAllCaps="false"
+                android:textColor="@color/agnesian_blue"
+                android:textStyle="bold"
                 android:visibility="gone"
-                app:cornerRadius="8dp" />
+                app:backgroundTint="@color/white"
+                app:cornerRadius="10dp"
+                app:strokeColor="@color/agnesian_border" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnChangePassword"
@@ -260,7 +270,12 @@
                 android:layout_height="46dp"
                 android:layout_marginTop="8dp"
                 android:text="@string/profile_change_password"
-                app:cornerRadius="8dp" />
+                android:textAllCaps="false"
+                android:textColor="@color/agnesian_blue"
+                android:textStyle="bold"
+                app:backgroundTint="@color/white"
+                app:cornerRadius="10dp"
+                app:strokeColor="@color/agnesian_border" />
 
             <!-- Tombol Logout merah membulat (Figma 144:5389) -->
             <com.google.android.material.button.MaterialButton
@@ -270,8 +285,10 @@
                 android:layout_marginTop="12dp"
                 android:backgroundTint="@color/change_cancel"
                 android:text="@string/action_logout"
+                android:textAllCaps="false"
                 android:textColor="@color/white"
-                app:cornerRadius="8dp" />
+                android:textStyle="bold"
+                app:cornerRadius="10dp" />
 
         </LinearLayout>
     </FrameLayout>

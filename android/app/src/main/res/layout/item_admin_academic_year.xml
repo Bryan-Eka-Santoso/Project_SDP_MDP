@@ -74,7 +74,10 @@
                 android:paddingHorizontal="12dp"
                 android:text="Jadikan Aktif"
                 android:textAllCaps="false"
-                android:textSize="12sp" />
+                android:textColor="@color/agnesian_blue"
+                android:textSize="12sp"
+                app:cornerRadius="8dp"
+                app:strokeColor="@color/agnesian_blue" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSemesters"
@@ -87,7 +90,10 @@
                 android:paddingHorizontal="12dp"
                 android:text="Semester"
                 android:textAllCaps="false"
-                android:textSize="12sp" />
+                android:textColor="@color/agnesian_blue"
+                android:textSize="12sp"
+                app:backgroundTint="@color/agnesian_tile"
+                app:cornerRadius="8dp" />
 
             <View
                 android:layout_width="0dp"

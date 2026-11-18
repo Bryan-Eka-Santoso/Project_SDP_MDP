@@ -338,6 +338,7 @@
     <string name="dialog_edit_user_title">Ubah Pengguna</string>
     <string name="dialog_reset_password_title">Reset Password</string>
     <string name="dialog_add_student_title">Tambah Siswa</string>
+    <string name="dialog_edit_student_title">Ubah Data Siswa</string>
     <string name="user_empty">Belum ada data pengguna yang cocok.</string>
     <string name="student_empty">Belum ada data siswa yang cocok.</string>
     <string name="action_block">Blokir Akun</string>

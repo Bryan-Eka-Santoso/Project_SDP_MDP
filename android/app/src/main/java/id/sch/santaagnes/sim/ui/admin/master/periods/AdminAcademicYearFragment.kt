@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -23,8 +24,9 @@ import id.sch.santaagnes.sim.databinding.DialogAddAcademicYearBinding
 import id.sch.santaagnes.sim.databinding.DialogManageSemestersBinding
 import id.sch.santaagnes.sim.databinding.FragmentAdminAcademicYearsBinding
 import id.sch.santaagnes.sim.domain.model.MasterAcademicYear
+import id.sch.santaagnes.sim.ui.admin.master.bindDateField
 import id.sch.santaagnes.sim.ui.admin.master.setupMasterHeader
-import id.sch.santaagnes.sim.ui.admin.master.showIsoDatePicker
+import id.sch.santaagnes.sim.ui.admin.master.showAgnesianFormSheet
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -39,7 +41,7 @@ class AdminAcademicYearFragment : Fragment() {
         AdminAcademicYearAdapter(
             onSetActive = { year -> viewModel.setActiveYear(year.id) },
             onManageSemesters = ::showSemestersDialog,
-            onEdit = ::showEditYearDialog,
+            onEdit = { showYearFormSheet(it) },
             onDelete = ::confirmDeleteYear
         )
     }
@@ -65,7 +67,7 @@ class AdminAcademicYearFragment : Fragment() {
             navController = nav,
             titleRes = R.string.title_management_period,
             showImport = false,
-            onAdd = ::showAddYearDialog
+            onAdd = { showYearFormSheet(null) }
         )
         observeViewModel()
     }
@@ -96,84 +98,79 @@ class AdminAcademicYearFragment : Fragment() {
         }
     }
 
-    private fun showAddYearDialog() {
+    private fun showYearFormSheet(existing: MasterAcademicYear?) {
         val d = DialogAddAcademicYearBinding.inflate(layoutInflater)
-        d.etStartDate.setOnClickListener {
-            showIsoDatePicker(requireContext(), d.etStartDate.text?.toString()) { d.etStartDate.setText(it) }
-        }
-        d.etEndDate.setOnClickListener {
-            showIsoDatePicker(requireContext(), d.etEndDate.text?.toString()) { d.etEndDate.setText(it) }
+        val isEdit = existing != null
+        if (existing != null) {
+            d.etName.setText(existing.name)
+            d.etStartDate.setText(existing.startDate)
+            d.etEndDate.setText(existing.endDate)
+            d.switchActive.isVisible = false
         }
 
-        MaterialAlertDialogBuilder(requireContext())
-            .setView(d.root)
-            .setPositiveButton("Tambah") { _, _ ->
-                val name = d.etName.text.toString().trim()
-                val start = d.etStartDate.text.toString().trim()
-                val end = d.etEndDate.text.toString().trim()
-                if (name.isBlank() || start.isBlank() || end.isBlank()) {
-                    Toast.makeText(requireContext(), "Nama dan tanggal mulai/selesai wajib diisi", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
-                }
+        bindDateField(d.layoutStartDate, d.etStartDate, childFragmentManager, "Pilih Tanggal Mulai")
+        bindDateField(d.layoutEndDate, d.etEndDate, childFragmentManager, "Pilih Tanggal Selesai")
+
+        showAgnesianFormSheet(
+            context = requireContext(),
+            title = getString(if (isEdit) R.string.dialog_edit_period_title else R.string.dialog_add_period_title),
+            subtitle = if (isEdit) "Ubah rentang tanggal atau nama tahun ajaran" else "Buat periode tahun ajaran baru",
+            contentView = d.root,
+            primaryLabel = if (isEdit) "Simpan" else "Tambah"
+        ) {
+            val name = d.etName.text?.toString()?.trim().orEmpty()
+            val start = d.etStartDate.text?.toString()?.trim().orEmpty()
+            val end = d.etEndDate.text?.toString()?.trim().orEmpty()
+            if (name.isBlank() || start.isBlank() || end.isBlank()) {
+                Toast.makeText(requireContext(), "Nama dan tanggal mulai/selesai wajib diisi", Toast.LENGTH_SHORT).show()
+                return@showAgnesianFormSheet false
+            }
+            if (existing == null) {
                 viewModel.createYear(name, start, end, d.switchActive.isChecked)
+            } else {
+                viewModel.updateYear(existing.id, name, start, end)
             }
-            .setNegativeButton("Batal", null)
-            .show()
-    }
-
-    private fun showEditYearDialog(year: MasterAcademicYear) {
-        val d = DialogAddAcademicYearBinding.inflate(layoutInflater)
-        d.tvDialogTitle.setText(R.string.dialog_edit_period_title)
-        d.etName.setText(year.name)
-        d.etStartDate.setText(year.startDate)
-        d.etEndDate.setText(year.endDate)
-        d.switchActive.isVisible = false
-
-        d.etStartDate.setOnClickListener {
-            showIsoDatePicker(requireContext(), d.etStartDate.text?.toString()) { d.etStartDate.setText(it) }
+            true
         }
-        d.etEndDate.setOnClickListener {
-            showIsoDatePicker(requireContext(), d.etEndDate.text?.toString()) { d.etEndDate.setText(it) }
-        }
-
-        MaterialAlertDialogBuilder(requireContext())
-            .setView(d.root)
-            .setPositiveButton("Simpan") { _, _ ->
-                val name = d.etName.text.toString().trim()
-                val start = d.etStartDate.text.toString().trim()
-                val end = d.etEndDate.text.toString().trim()
-                if (name.isBlank() || start.isBlank() || end.isBlank()) {
-                    Toast.makeText(requireContext(), "Semua kolom wajib diisi", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
-                }
-                viewModel.updateYear(year.id, name, start, end)
-            }
-            .setNegativeButton("Batal", null)
-            .show()
     }
 
     private fun showSemestersDialog(year: MasterAcademicYear) {
         val d = DialogManageSemestersBinding.inflate(layoutInflater)
-        d.tvYearHeader.text = "Tahun Ajaran ${year.name} (${year.startDate} s.d. ${year.endDate})"
 
-        val types = arrayOf("ODD (Ganjil)", "EVEN (Genap)")
         var selectedType = "ODD"
-        d.spinnerSemesterType.setSimpleItems(types)
-        d.spinnerSemesterType.setText(types[0], false)
-        d.spinnerSemesterType.setOnItemClickListener { _, _, pos, _ ->
-            selectedType = if (pos == 0) "ODD" else "EVEN"
+        fun renderSemesterType() {
+            val isOdd = selectedType == "ODD"
+            d.btnSemOdd.setBackgroundResource(if (isOdd) R.drawable.bg_option_selected else R.drawable.bg_option_unselected)
+            d.btnSemOdd.setTextColor(
+                ContextCompat.getColor(
+                    requireContext(),
+                    if (isOdd) R.color.agnesian_blue else R.color.agnesian_text
+                )
+            )
+            d.btnSemEven.setBackgroundResource(if (!isOdd) R.drawable.bg_option_selected else R.drawable.bg_option_unselected)
+            d.btnSemEven.setTextColor(
+                ContextCompat.getColor(
+                    requireContext(),
+                    if (!isOdd) R.color.agnesian_blue else R.color.agnesian_text
+                )
+            )
         }
+        d.btnSemOdd.setOnClickListener {
+            selectedType = "ODD"
+            renderSemesterType()
+        }
+        d.btnSemEven.setOnClickListener {
+            selectedType = "EVEN"
+            renderSemesterType()
+        }
+        renderSemesterType()
 
-        d.etSemStart.setOnClickListener {
-            showIsoDatePicker(requireContext(), d.etSemStart.text?.toString()) { d.etSemStart.setText(it) }
-        }
-        d.etSemEnd.setOnClickListener {
-            showIsoDatePicker(requireContext(), d.etSemEnd.text?.toString()) { d.etSemEnd.setText(it) }
-        }
+        bindDateField(d.layoutSemStart, d.etSemStart, childFragmentManager, "Mulai Semester")
+        bindDateField(d.layoutSemEnd, d.etSemEnd, childFragmentManager, "Selesai Semester")
 
         d.btnAddSemester.setOnClickListener {
-            val start = d.etSemStart.text.toString().trim()
-            val end = d.etSemEnd.text.toString().trim()
+            val start = d.etSemStart.text?.toString()?.trim().orEmpty()
+            val end = d.etSemEnd.text?.toString()?.trim().orEmpty()
             if (start.isBlank() || end.isBlank()) {
                 Toast.makeText(requireContext(), "Tanggal mulai & selesai semester wajib diisi", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -181,10 +178,15 @@ class AdminAcademicYearFragment : Fragment() {
             viewModel.createSemester(year.id, selectedType, start, end, d.switchSemActive.isChecked)
         }
 
-        val dialog = MaterialAlertDialogBuilder(requireContext())
-            .setView(d.root)
-            .setNegativeButton("Tutup", null)
-            .create()
+        val sheet = showAgnesianFormSheet(
+            context = requireContext(),
+            title = getString(R.string.dialog_manage_semesters_title),
+            subtitle = "Tahun Ajaran ${year.name} (${year.startDate} s.d. ${year.endDate})",
+            contentView = d.root,
+            secondaryLabel = "Tutup",
+            showPrimary = false,
+            onPrimary = { true }
+        )
 
         val job = viewLifecycleOwner.lifecycleScope.launch {
             viewModel.uiState.collect { state ->
@@ -196,14 +198,28 @@ class AdminAcademicYearFragment : Fragment() {
                     val row = LinearLayout(requireContext()).apply {
                         orientation = LinearLayout.HORIZONTAL
                         gravity = android.view.Gravity.CENTER_VERTICAL
-                        setPadding(0, 8, 0, 8)
+                        setBackgroundResource(
+                            if (sem.isActive) R.drawable.bg_option_selected else R.drawable.bg_option_unselected
+                        )
+                        setPadding(24, 18, 24, 18)
+                        layoutParams = LinearLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT
+                        ).apply { bottomMargin = 12 }
                     }
-                    val statusTag = if (sem.isActive) " [AKTIF]" else ""
+                    val statusTag = if (sem.isActive) " · AKTIF" else ""
                     val info = TextView(requireContext()).apply {
                         layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
                         text = "${sem.label}$statusTag\n${sem.startDate} s.d. ${sem.endDate}"
+                        setTextColor(
+                            ContextCompat.getColor(
+                                requireContext(),
+                                if (sem.isActive) R.color.agnesian_blue else R.color.agnesian_text
+                            )
+                        )
                         textSize = 13f
                     }
+                    row.addView(info)
                     if (!sem.isActive) {
                         val btnActivate = MaterialButton(
                             requireContext(),
@@ -212,12 +228,11 @@ class AdminAcademicYearFragment : Fragment() {
                         ).apply {
                             text = "Aktifkan"
                             isAllCaps = false
+                            setTextColor(ContextCompat.getColor(requireContext(), R.color.agnesian_blue))
+                            strokeColor = ContextCompat.getColorStateList(requireContext(), R.color.agnesian_blue)
                             setOnClickListener { viewModel.setActiveSemester(year.id, sem.id) }
                         }
-                        row.addView(info)
                         row.addView(btnActivate)
-                    } else {
-                        row.addView(info)
                     }
                     val btnDel = MaterialButton(
                         requireContext(),
@@ -226,6 +241,12 @@ class AdminAcademicYearFragment : Fragment() {
                     ).apply {
                         text = "Hapus"
                         isAllCaps = false
+                        setTextColor(ContextCompat.getColor(requireContext(), R.color.change_cancel))
+                        strokeColor = ContextCompat.getColorStateList(requireContext(), R.color.change_cancel)
+                        layoutParams = LinearLayout.LayoutParams(
+                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT
+                        ).apply { marginStart = 10 }
                         setOnClickListener { viewModel.deleteSemester(year.id, sem.id) }
                     }
                     row.addView(btnDel)
@@ -234,8 +255,7 @@ class AdminAcademicYearFragment : Fragment() {
             }
         }
 
-        dialog.setOnDismissListener { job.cancel() }
-        dialog.show()
+        sheet.setOnDismissListener { job.cancel() }
         viewModel.loadSemesters(year.id)
     }
 

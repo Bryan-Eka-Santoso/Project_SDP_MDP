@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -18,7 +19,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.textfield.MaterialAutoCompleteTextView
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import dagger.hilt.android.AndroidEntryPoint
 import id.sch.santaagnes.sim.R
 import id.sch.santaagnes.sim.databinding.DialogAddStudentBinding
@@ -26,11 +28,16 @@ import id.sch.santaagnes.sim.databinding.DialogStudentClassBinding
 import id.sch.santaagnes.sim.databinding.DialogStudentGuardiansBinding
 import id.sch.santaagnes.sim.databinding.FragmentAdminStudentsBinding
 import id.sch.santaagnes.sim.domain.model.MasterClassGroup
+import id.sch.santaagnes.sim.domain.model.MasterGuardian
 import id.sch.santaagnes.sim.domain.model.MasterStudent
+import id.sch.santaagnes.sim.ui.admin.master.AgnesianOption
 import id.sch.santaagnes.sim.ui.admin.master.MasterTab
+import id.sch.santaagnes.sim.ui.admin.master.bindDateField
+import id.sch.santaagnes.sim.ui.admin.master.bindFilterPill
+import id.sch.santaagnes.sim.ui.admin.master.bindSelectorField
 import id.sch.santaagnes.sim.ui.admin.master.setupMasterHeader
 import id.sch.santaagnes.sim.ui.admin.master.setupMasterTabs
-import id.sch.santaagnes.sim.ui.admin.master.showIsoDatePicker
+import id.sch.santaagnes.sim.ui.admin.master.showAgnesianFormSheet
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -40,13 +47,12 @@ class AdminStudentFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: AdminStudentViewModel by viewModels()
-    private var renderedClasses: List<MasterClassGroup> = emptyList()
     private var hasStartedOnce = false
 
     private val studentAdapter by lazy {
         AdminStudentAdapter(
             onAssignClass = ::showAssignClassDialog,
-            onEdit = ::showEditStudentDialog,
+            onEdit = { showStudentFormSheet(it) },
             onManageGuardians = ::showManageGuardiansDialog,
             onDelete = ::confirmDeleteStudent
         )
@@ -73,7 +79,7 @@ class AdminStudentFragment : Fragment() {
             navController = nav,
             titleRes = R.string.title_management_student,
             showImport = true,
-            onAdd = ::showAddStudentDialog
+            onAdd = { showStudentFormSheet(null) }
         )
         setupMasterTabs(binding.tabs, nav, MasterTab.STUDENT)
         setupFilterAndSearch()
@@ -89,13 +95,35 @@ class AdminStudentFragment : Fragment() {
     }
 
     private fun setupFilterAndSearch() {
-        binding.spinnerClass.setSimpleItems(arrayOf(getString(R.string.filter_all_classes)))
-        binding.spinnerClass.setText(getString(R.string.filter_all_classes), false)
-
-        binding.spinnerClass.setOnItemClickListener { _, _, position, _ ->
-            val classId = if (position == 0) null else renderedClasses.getOrNull(position - 1)?.id
-            viewModel.setClassFilter(classId)
-        }
+        binding.btnFilterClass.text = getString(R.string.filter_all_classes)
+        bindFilterPill(
+            pill = binding.btnFilterClass,
+            sheetTitle = "Filter Kelas Siswa",
+            options = {
+                buildList {
+                    add(AgnesianOption("", getString(R.string.filter_all_classes), "Tampilkan seluruh siswa"))
+                    addAll(
+                        viewModel.uiState.value.classes.map { cls ->
+                            AgnesianOption(
+                                id = cls.id.toString(),
+                                title = cls.name,
+                                subtitle = "Tingkat ${cls.gradeLevel} · ${cls.memberCount}/${cls.capacity} siswa"
+                            )
+                        }
+                    )
+                }
+            },
+            selectedIndex = {
+                val activeId = viewModel.uiState.value.currentFilter.classGroupId
+                if (activeId == null) 0 else {
+                    val idx = viewModel.uiState.value.classes.indexOfFirst { it.id == activeId }
+                    if (idx >= 0) idx + 1 else 0
+                }
+            },
+            onSelected = { _, option ->
+                viewModel.setClassFilter(option.id.toIntOrNull())
+            }
+        )
 
         binding.etSearchStudent.addTextChangedListener { editable ->
             viewModel.setSearchQuery(editable?.toString().orEmpty())
@@ -112,15 +140,6 @@ class AdminStudentFragment : Fragment() {
                     viewModel.uiState.collect { state ->
                         state.activePeriodText?.let {
                             binding.header.tvSemesterBadge.text = "$it ▾"
-                        }
-
-                        if (state.classes != renderedClasses) {
-                            renderedClasses = state.classes
-                            val labels = buildList {
-                                add(getString(R.string.filter_all_classes))
-                                addAll(state.classes.map { it.name })
-                            }.toTypedArray()
-                            binding.spinnerClass.setSimpleItems(labels)
                         }
 
                         binding.progressBar.isVisible = state.isLoading
@@ -149,75 +168,129 @@ class AdminStudentFragment : Fragment() {
         }
     }
 
-    private fun setupStudentClassDropdown(
-        spinner: MaterialAutoCompleteTextView,
+    private fun selectableActiveClasses(): List<MasterClassGroup> {
+        val all = viewModel.uiState.value.classes
+        return all.filter { it.isAcademicYearActive }.ifEmpty { all }
+    }
+
+    private fun setupClassSelector(
+        layout: TextInputLayout,
+        input: TextInputEditText,
         currentClassId: Int?
     ): () -> Int? {
-        val allClasses = viewModel.uiState.value.classes
-        val selectable = allClasses.filter { it.isAcademicYearActive }.ifEmpty { allClasses }
-        val labels = buildList {
-            add(getString(R.string.student_class_none))
-            addAll(selectable.map { "${it.name} (${it.memberCount}/${it.capacity})" })
-        }.toTypedArray()
-
-        val initialIndex = currentClassId?.let { id ->
-            val idx = selectable.indexOfFirst { it.id == id }
-            if (idx >= 0) idx + 1 else 0
-        } ?: 0
-
-        var selectedClassId: Int? = if (initialIndex > 0) selectable[initialIndex - 1].id else null
-        spinner.setSimpleItems(labels)
-        spinner.setText(labels[initialIndex], false)
-        spinner.setOnItemClickListener { _, _, position, _ ->
-            selectedClassId = if (position == 0) null else selectable.getOrNull(position - 1)?.id
+        val selectable = selectableActiveClasses()
+        val options = buildList {
+            add(AgnesianOption("", getString(R.string.student_class_none), "Siswa belum masuk kelas"))
+            addAll(
+                selectable.map { cls ->
+                    AgnesianOption(
+                        id = cls.id.toString(),
+                        title = cls.name,
+                        subtitle = "Tingkat ${cls.gradeLevel} · Terisi ${cls.memberCount}/${cls.capacity}"
+                    )
+                }
+            )
         }
+
+        var selectedIdx = currentClassId?.let { id ->
+            val found = selectable.indexOfFirst { it.id == id }
+            if (found >= 0) found + 1 else 0
+        } ?: 0
+        var selectedClassId = if (selectedIdx > 0) selectable[selectedIdx - 1].id else null
+        input.setText(options[selectedIdx].title)
+
+        bindSelectorField(
+            layout = layout,
+            input = input,
+            sheetTitle = "Pilih Kelas Siswa",
+            subtitle = "Kelas pada tahun ajaran aktif",
+            options = { options },
+            selectedIndex = { selectedIdx },
+            onSelected = { idx, _ ->
+                selectedIdx = idx
+                selectedClassId = if (idx == 0) null else selectable.getOrNull(idx - 1)?.id
+            }
+        )
         return { selectedClassId }
     }
 
     private fun showAssignClassDialog(student: MasterStudent) {
-        val dialogBinding = DialogStudentClassBinding.inflate(layoutInflater)
-        dialogBinding.tvStudentHeader.text = "${student.name} (NIS: ${student.nis})"
+        val d = DialogStudentClassBinding.inflate(layoutInflater)
         val currentLabel = student.className ?: getString(R.string.student_class_none)
-        dialogBinding.tvCurrentClass.text = "Kelas saat ini: $currentLabel"
+        d.tvCurrentClass.text = "Kelas saat ini: $currentLabel"
+        val getSelectedClassId = setupClassSelector(d.layoutClass, d.etClassSelector, student.classId)
 
-        val getSelectedClassId = setupStudentClassDropdown(dialogBinding.spinnerClass, student.classId)
-
-        MaterialAlertDialogBuilder(requireContext())
-            .setView(dialogBinding.root)
-            .setPositiveButton("Simpan") { _, _ ->
-                viewModel.assignStudentClass(student, getSelectedClassId())
-            }
-            .setNegativeButton("Batal", null)
-            .show()
+        showAgnesianFormSheet(
+            context = requireContext(),
+            title = getString(R.string.student_class_action),
+            subtitle = "${student.name} (NIS: ${student.nis})",
+            contentView = d.root,
+            primaryLabel = "Simpan Kelas"
+        ) {
+            viewModel.assignStudentClass(student, getSelectedClassId())
+            true
+        }
     }
 
-    private fun showAddStudentDialog() {
-        val dialogBinding = DialogAddStudentBinding.inflate(layoutInflater)
-        dialogBinding.etBirthDate.setOnClickListener {
-            showIsoDatePicker(requireContext(), dialogBinding.etBirthDate.text?.toString()) {
-                dialogBinding.etBirthDate.setText(it)
-            }
+    private fun showStudentFormSheet(existing: MasterStudent?) {
+        val d = DialogAddStudentBinding.inflate(layoutInflater)
+        val isEdit = existing != null
+        if (existing != null) {
+            d.etName.setText(existing.name)
+            d.etNis.setText(existing.nis)
+            d.etBirthDate.setText(existing.birthDate.orEmpty())
+            d.etEmail.setText(existing.email)
+            d.etPhone.setText(existing.phone.orEmpty())
+            d.layoutPassword.isVisible = false
         }
-        val getSelectedClassId = setupStudentClassDropdown(dialogBinding.spinnerClass, null)
 
-        MaterialAlertDialogBuilder(requireContext())
-            .setView(dialogBinding.root)
-            .setPositiveButton("Tambah") { _, _ ->
-                val name = dialogBinding.etName.text.toString().trim()
-                val nis = dialogBinding.etNis.text.toString().trim()
-                val birthDate = dialogBinding.etBirthDate.text.toString().trim()
-                val email = dialogBinding.etEmail.text.toString().trim()
-                val password = dialogBinding.etPassword.text.toString()
-                val phone = dialogBinding.etPhone.text.toString().trim()
+        bindDateField(d.layoutBirthDate, d.etBirthDate, childFragmentManager, "Pilih Tanggal Lahir")
+        val getSelectedClassId = setupClassSelector(d.layoutClass, d.etClassSelector, existing?.classId)
 
-                if (name.isBlank() || nis.isBlank() || birthDate.isBlank() || email.isBlank() || password.length < 8) {
-                    Toast.makeText(
-                        requireContext(),
-                        "Nama, NIS, Tanggal Lahir, Email, dan Password (min. 8 karakter) wajib diisi",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    return@setPositiveButton
-                }
+        showAgnesianFormSheet(
+            context = requireContext(),
+            title = getString(if (isEdit) R.string.dialog_edit_student_title else R.string.dialog_add_student_title),
+            subtitle = if (isEdit) "Perbarui profil siswa atau pindahkan kelas" else "Daftarkan akun siswa baru",
+            contentView = d.root,
+            primaryLabel = if (isEdit) "Simpan" else "Tambah"
+        ) {
+            d.layoutName.error = null
+            d.layoutNis.error = null
+            d.layoutBirthDate.error = null
+            d.layoutEmail.error = null
+            d.layoutPassword.error = null
+
+            val name = d.etName.text?.toString()?.trim().orEmpty()
+            val nis = d.etNis.text?.toString()?.trim().orEmpty()
+            val birthDate = d.etBirthDate.text?.toString()?.trim().orEmpty()
+            val email = d.etEmail.text?.toString()?.trim().orEmpty()
+            val password = d.etPassword.text?.toString().orEmpty()
+            val phone = d.etPhone.text?.toString()?.trim().orEmpty()
+
+            var valid = true
+            if (name.isBlank()) {
+                d.layoutName.error = "Nama siswa wajib diisi"
+                valid = false
+            }
+            if (nis.isBlank()) {
+                d.layoutNis.error = "NIS wajib diisi"
+                valid = false
+            }
+            if (birthDate.isBlank()) {
+                d.layoutBirthDate.error = "Tanggal lahir wajib dipilih"
+                valid = false
+            }
+            if (email.isBlank()) {
+                d.layoutEmail.error = "Email akun wajib diisi"
+                valid = false
+            }
+            if (!isEdit && password.length < 8) {
+                d.layoutPassword.error = "Password minimal 8 karakter"
+                valid = false
+            }
+            if (!valid) return@showAgnesianFormSheet false
+
+            if (existing == null) {
                 viewModel.createStudent(
                     name = name,
                     email = email,
@@ -227,88 +300,75 @@ class AdminStudentFragment : Fragment() {
                     phone = phone,
                     classGroupId = getSelectedClassId()
                 )
-            }
-            .setNegativeButton("Batal", null)
-            .show()
-    }
-
-    private fun showEditStudentDialog(student: MasterStudent) {
-        val dialogBinding = DialogAddStudentBinding.inflate(layoutInflater)
-        dialogBinding.tvDialogTitle.text = "Ubah Data Siswa"
-        dialogBinding.etName.setText(student.name)
-        dialogBinding.etNis.setText(student.nis)
-        dialogBinding.etBirthDate.setText(student.birthDate.orEmpty())
-        dialogBinding.etEmail.setText(student.email)
-        dialogBinding.etPhone.setText(student.phone.orEmpty())
-        dialogBinding.layoutPassword.isVisible = false
-        val getSelectedClassId = setupStudentClassDropdown(dialogBinding.spinnerClass, student.classId)
-
-        dialogBinding.etBirthDate.setOnClickListener {
-            showIsoDatePicker(requireContext(), dialogBinding.etBirthDate.text?.toString()) {
-                dialogBinding.etBirthDate.setText(it)
-            }
-        }
-
-        MaterialAlertDialogBuilder(requireContext())
-            .setView(dialogBinding.root)
-            .setPositiveButton("Simpan") { _, _ ->
-                val name = dialogBinding.etName.text.toString().trim()
-                val email = dialogBinding.etEmail.text.toString().trim()
-                val nis = dialogBinding.etNis.text.toString().trim()
-                val birthDate = dialogBinding.etBirthDate.text.toString().trim()
-                val phone = dialogBinding.etPhone.text.toString().trim()
-
-                if (name.isBlank() || email.isBlank() || nis.isBlank() || birthDate.isBlank()) {
-                    Toast.makeText(requireContext(), "Nama, Email, NIS, dan Tanggal Lahir wajib diisi", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
-                }
+            } else {
                 viewModel.updateStudent(
-                    id = student.id,
+                    id = existing.id,
                     name = name,
                     email = email,
                     nis = nis,
                     birthDate = birthDate,
                     phone = phone,
-                    currentClassId = student.classId,
+                    currentClassId = existing.classId,
                     targetClassId = getSelectedClassId()
                 )
             }
-            .setNegativeButton("Batal", null)
-            .show()
+            true
+        }
     }
 
     private fun showManageGuardiansDialog(student: MasterStudent) {
-        val dialogBinding = DialogStudentGuardiansBinding.inflate(layoutInflater)
-        dialogBinding.tvStudentHeader.text = "${student.name} (NIS: ${student.nis})"
+        val d = DialogStudentGuardiansBinding.inflate(layoutInflater)
+        var selectedGuardian: MasterGuardian? = null
 
-        var selectedGuardianIndex = -1
-        val dialog = MaterialAlertDialogBuilder(requireContext())
-            .setView(dialogBinding.root)
-            .setNegativeButton("Tutup", null)
-            .create()
+        val sheet = showAgnesianFormSheet(
+            context = requireContext(),
+            title = getString(R.string.student_guardians_action),
+            subtitle = "${student.name} (NIS: ${student.nis})",
+            contentView = d.root,
+            secondaryLabel = "Tutup",
+            showPrimary = false,
+            onPrimary = { true }
+        )
 
-        dialogBinding.btnToggleCreateGuardian.setOnClickListener {
-            dialogBinding.layoutCreateGuardian.isVisible = !dialogBinding.layoutCreateGuardian.isVisible
+        bindSelectorField(
+            layout = d.layoutGuardian,
+            input = d.etGuardianSelector,
+            sheetTitle = "Pilih Wali Murid",
+            options = {
+                viewModel.uiState.value.guardians.map { g ->
+                    AgnesianOption(g.id.toString(), g.name, "${g.email} · ${g.phone}")
+                }
+            },
+            selectedIndex = {
+                val id = selectedGuardian?.id
+                viewModel.uiState.value.guardians.indexOfFirst { it.id == id }
+            },
+            onSelected = { idx, _ ->
+                selectedGuardian = viewModel.uiState.value.guardians.getOrNull(idx)
+            }
+        )
+
+        d.btnToggleCreateGuardian.setOnClickListener {
+            d.layoutCreateGuardian.isVisible = !d.layoutCreateGuardian.isVisible
         }
 
-        dialogBinding.btnLinkExisting.setOnClickListener {
-            val guardians = viewModel.uiState.value.guardians
-            val guardian = guardians.getOrNull(selectedGuardianIndex)
-            val relationship = dialogBinding.etRelationship.text.toString().trim()
+        d.btnLinkExisting.setOnClickListener {
+            val guardian = selectedGuardian
+            val relationship = d.etRelationship.text?.toString()?.trim().orEmpty()
             if (guardian == null || relationship.isBlank()) {
                 Toast.makeText(requireContext(), "Pilih wali murid dan isi hubungan", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             viewModel.linkGuardian(student.id, guardian.id, relationship)
-            dialogBinding.etRelationship.setText("")
+            d.etRelationship.setText("")
         }
 
-        dialogBinding.btnCreateAndLinkGuardian.setOnClickListener {
-            val gName = dialogBinding.etGuardianName.text.toString().trim()
-            val gEmail = dialogBinding.etGuardianEmail.text.toString().trim()
-            val gPwd = dialogBinding.etGuardianPassword.text.toString()
-            val gPhone = dialogBinding.etGuardianPhone.text.toString().trim()
-            val rel = dialogBinding.etNewGuardianRelationship.text.toString().trim()
+        d.btnCreateAndLinkGuardian.setOnClickListener {
+            val gName = d.etGuardianName.text?.toString()?.trim().orEmpty()
+            val gEmail = d.etGuardianEmail.text?.toString()?.trim().orEmpty()
+            val gPwd = d.etGuardianPassword.text?.toString().orEmpty()
+            val gPhone = d.etGuardianPhone.text?.toString()?.trim().orEmpty()
+            val rel = d.etNewGuardianRelationship.text?.toString()?.trim().orEmpty()
             if (gName.isBlank() || gEmail.isBlank() || gPwd.length < 8 || gPhone.isBlank() || rel.isBlank()) {
                 Toast.makeText(
                     requireContext(),
@@ -318,40 +378,36 @@ class AdminStudentFragment : Fragment() {
                 return@setOnClickListener
             }
             viewModel.createAndLinkGuardian(student.id, gName, gEmail, gPwd, gPhone, rel)
-            dialogBinding.etGuardianName.setText("")
-            dialogBinding.etGuardianEmail.setText("")
-            dialogBinding.etGuardianPassword.setText("")
-            dialogBinding.etGuardianPhone.setText("")
-            dialogBinding.etNewGuardianRelationship.setText("")
-            dialogBinding.layoutCreateGuardian.isVisible = false
+            d.etGuardianName.setText("")
+            d.etGuardianEmail.setText("")
+            d.etGuardianPassword.setText("")
+            d.etGuardianPhone.setText("")
+            d.etNewGuardianRelationship.setText("")
+            d.layoutCreateGuardian.isVisible = false
         }
 
-        var renderedGuardians = emptyList<id.sch.santaagnes.sim.domain.model.MasterGuardian>()
         val job = viewLifecycleOwner.lifecycleScope.launch {
             viewModel.uiState.collect { state ->
-                dialogBinding.progressDialog.isVisible = state.isGuardianLoading
-                dialogBinding.tvLinkedEmpty.isVisible =
+                d.progressDialog.isVisible = state.isGuardianLoading
+                d.tvLinkedEmpty.isVisible =
                     !state.isGuardianLoading && state.selectedStudentGuardians.isEmpty()
 
-                if (state.guardians != renderedGuardians) {
-                    renderedGuardians = state.guardians
-                    val guardianNames = state.guardians.map { "${it.name} (${it.email})" }.toTypedArray()
-                    dialogBinding.spinnerGuardian.setSimpleItems(guardianNames)
-                    dialogBinding.spinnerGuardian.setOnItemClickListener { _, _, position, _ ->
-                        selectedGuardianIndex = position
-                    }
-                }
-
-                dialogBinding.containerLinkedGuardians.removeAllViews()
+                d.containerLinkedGuardians.removeAllViews()
                 state.selectedStudentGuardians.forEach { link ->
                     val row = LinearLayout(requireContext()).apply {
                         orientation = LinearLayout.HORIZONTAL
                         gravity = android.view.Gravity.CENTER_VERTICAL
-                        setPadding(0, 8, 0, 8)
+                        setBackgroundResource(R.drawable.bg_option_unselected)
+                        setPadding(24, 18, 24, 18)
+                        layoutParams = LinearLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT
+                        ).apply { bottomMargin = 12 }
                     }
                     val info = TextView(requireContext()).apply {
                         layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
                         text = "${link.name} (${link.relationship})\n${link.phone ?: link.email}"
+                        setTextColor(ContextCompat.getColor(requireContext(), R.color.agnesian_text))
                         textSize = 13f
                     }
                     val btnRemove = MaterialButton(
@@ -361,17 +417,18 @@ class AdminStudentFragment : Fragment() {
                     ).apply {
                         text = "Putus"
                         isAllCaps = false
+                        setTextColor(ContextCompat.getColor(requireContext(), R.color.change_cancel))
+                        strokeColor = ContextCompat.getColorStateList(requireContext(), R.color.change_cancel)
                         setOnClickListener { viewModel.unlinkGuardian(student.id, link.guardianId) }
                     }
                     row.addView(info)
                     row.addView(btnRemove)
-                    dialogBinding.containerLinkedGuardians.addView(row)
+                    d.containerLinkedGuardians.addView(row)
                 }
             }
         }
 
-        dialog.setOnDismissListener { job.cancel() }
-        dialog.show()
+        sheet.setOnDismissListener { job.cancel() }
         viewModel.loadGuardianPanel(student.id)
     }
 

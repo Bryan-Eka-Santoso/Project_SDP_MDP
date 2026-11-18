@@ -23,9 +23,13 @@ import id.sch.santaagnes.sim.databinding.DialogAddTeacherBinding
 import id.sch.santaagnes.sim.databinding.FragmentAdminTeachersBinding
 import id.sch.santaagnes.sim.domain.model.MasterTeacher
 import id.sch.santaagnes.sim.domain.model.MasterTeachingAssignment
+import id.sch.santaagnes.sim.ui.admin.master.AgnesianOption
 import id.sch.santaagnes.sim.ui.admin.master.MasterTab
+import id.sch.santaagnes.sim.ui.admin.master.bindFilterPill
+import id.sch.santaagnes.sim.ui.admin.master.bindSelectorField
 import id.sch.santaagnes.sim.ui.admin.master.setupMasterHeader
 import id.sch.santaagnes.sim.ui.admin.master.setupMasterTabs
+import id.sch.santaagnes.sim.ui.admin.master.showAgnesianFormSheet
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -36,12 +40,20 @@ class AdminTeacherFragment : Fragment() {
 
     private val viewModel: AdminTeacherViewModel by viewModels()
 
+    private val teacherTypeOptions by lazy {
+        listOf(
+            AgnesianOption("", getString(R.string.filter_all_teachers), "Tampilkan wali kelas & guru biasa"),
+            AgnesianOption("HOMEROOM", getString(R.string.filter_homeroom_teachers), "Akses mengajar + pantau kelas binaan"),
+            AgnesianOption("REGULAR", getString(R.string.filter_regular_teachers), "Hanya mengajar jadwal & mapel diampu")
+        )
+    }
+
     private val teacherAdapter by lazy {
         AdminTeacherAdapter(
             onViewAssignments = { teacher ->
                 viewModel.setMode(TeacherSectionMode.ASSIGNMENTS, teacher)
             },
-            onEdit = ::showEditTeacherDialog,
+            onEdit = { showTeacherFormSheet(it) },
             onDelete = ::confirmDeleteTeacher
         )
     }
@@ -75,7 +87,7 @@ class AdminTeacherFragment : Fragment() {
             showImport = true,
             onAdd = {
                 if (viewModel.uiState.value.mode == TeacherSectionMode.TEACHERS) {
-                    showAddTeacherDialog()
+                    showTeacherFormSheet(null)
                 } else {
                     showAddAssignmentDialog()
                 }
@@ -93,22 +105,27 @@ class AdminTeacherFragment : Fragment() {
     }
 
     private fun setupFilterAndSearch() {
-        val types = arrayOf(
-            getString(R.string.filter_all_teachers),
-            getString(R.string.filter_homeroom_teachers),
-            getString(R.string.filter_regular_teachers)
-        )
-        binding.spinnerTeacherType.setSimpleItems(types)
-        binding.spinnerTeacherType.setText(types[0], false)
-
-        binding.spinnerTeacherType.setOnItemClickListener { _, _, pos, _ ->
-            val filter = when (pos) {
-                1 -> true
-                2 -> false
-                else -> null
+        binding.btnFilterTeacherType.text = teacherTypeOptions.first().title
+        bindFilterPill(
+            pill = binding.btnFilterTeacherType,
+            sheetTitle = "Filter Jenis Akses Guru",
+            options = { teacherTypeOptions },
+            selectedIndex = {
+                when (viewModel.uiState.value.homeroomFilter) {
+                    true -> 1
+                    false -> 2
+                    null -> 0
+                }
+            },
+            onSelected = { idx, _ ->
+                val filter = when (idx) {
+                    1 -> true
+                    2 -> false
+                    else -> null
+                }
+                viewModel.setHomeroomFilter(filter)
             }
-            viewModel.setHomeroomFilter(filter)
-        }
+        )
 
         binding.etSearchTeacher.addTextChangedListener { editable ->
             viewModel.setSearchQuery(editable?.toString().orEmpty())
@@ -135,7 +152,7 @@ class AdminTeacherFragment : Fragment() {
                         binding.modeTeachers.setTextColor(
                             ContextCompat.getColor(
                                 requireContext(),
-                                if (isTeachersMode) R.color.white else R.color.agnesian_button
+                                if (isTeachersMode) R.color.white else R.color.agnesian_blue
                             )
                         )
                         binding.modeAssignments.setBackgroundResource(
@@ -144,12 +161,12 @@ class AdminTeacherFragment : Fragment() {
                         binding.modeAssignments.setTextColor(
                             ContextCompat.getColor(
                                 requireContext(),
-                                if (!isTeachersMode) R.color.white else R.color.agnesian_button
+                                if (!isTeachersMode) R.color.white else R.color.agnesian_blue
                             )
                         )
 
                         binding.header.btnImport.isVisible = isTeachersMode
-                        binding.layoutFilterTeacherType.isVisible = isTeachersMode
+                        binding.btnFilterTeacherType.isVisible = isTeachersMode
                         binding.layoutTeacherCounters.isVisible = isTeachersMode
                         binding.etSearchTeacher.setHint(
                             if (isTeachersMode) R.string.search_teacher_hint else R.string.search_assignment_hint
@@ -201,51 +218,42 @@ class AdminTeacherFragment : Fragment() {
         }
     }
 
-    private fun showAddTeacherDialog() {
+    private fun showTeacherFormSheet(existing: MasterTeacher?) {
         val d = DialogAddTeacherBinding.inflate(layoutInflater)
-        MaterialAlertDialogBuilder(requireContext())
-            .setView(d.root)
-            .setPositiveButton("Tambah") { _, _ ->
-                val name = d.etName.text.toString().trim()
-                val nip = d.etNip.text.toString().trim()
-                val email = d.etEmail.text.toString().trim()
-                val pwd = d.etPassword.text.toString()
-                if (name.isBlank() || nip.isBlank() || email.isBlank() || pwd.length < 8) {
-                    Toast.makeText(
-                        requireContext(),
-                        "Nama, NIP, Email, dan Password (min. 8 karakter) wajib diisi",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    return@setPositiveButton
-                }
+        val isEdit = existing != null
+        if (existing != null) {
+            d.etName.setText(existing.name)
+            d.etNip.setText(existing.employeeNumber)
+            d.etEmail.setText(existing.email)
+            d.layoutPassword.isVisible = false
+        }
+
+        showAgnesianFormSheet(
+            context = requireContext(),
+            title = getString(if (isEdit) R.string.dialog_edit_teacher_title else R.string.dialog_add_teacher_title),
+            subtitle = if (isEdit) "Perbarui profil & akun guru" else "Tambahkan guru pengajar baru",
+            contentView = d.root,
+            primaryLabel = if (isEdit) "Simpan" else "Tambah"
+        ) {
+            val name = d.etName.text?.toString()?.trim().orEmpty()
+            val nip = d.etNip.text?.toString()?.trim().orEmpty()
+            val email = d.etEmail.text?.toString()?.trim().orEmpty()
+            val pwd = d.etPassword.text?.toString().orEmpty()
+            if (name.isBlank() || nip.isBlank() || email.isBlank() || (!isEdit && pwd.length < 8)) {
+                Toast.makeText(
+                    requireContext(),
+                    if (isEdit) "Nama, NIP, dan Email wajib diisi" else "Nama, NIP, Email, dan Password (min. 8 karakter) wajib diisi",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@showAgnesianFormSheet false
+            }
+            if (existing == null) {
                 viewModel.createTeacher(name, email, pwd, nip)
+            } else {
+                viewModel.updateTeacher(existing.id, name, email, nip)
             }
-            .setNegativeButton("Batal", null)
-            .show()
-    }
-
-    private fun showEditTeacherDialog(teacher: MasterTeacher) {
-        val d = DialogAddTeacherBinding.inflate(layoutInflater)
-        d.tvDialogTitle.setText(R.string.dialog_edit_teacher_title)
-        d.etName.setText(teacher.name)
-        d.etNip.setText(teacher.employeeNumber)
-        d.etEmail.setText(teacher.email)
-        d.layoutPassword.isVisible = false
-
-        MaterialAlertDialogBuilder(requireContext())
-            .setView(d.root)
-            .setPositiveButton("Simpan") { _, _ ->
-                val name = d.etName.text.toString().trim()
-                val nip = d.etNip.text.toString().trim()
-                val email = d.etEmail.text.toString().trim()
-                if (name.isBlank() || nip.isBlank() || email.isBlank()) {
-                    Toast.makeText(requireContext(), "Nama, NIP, dan Email wajib diisi", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
-                }
-                viewModel.updateTeacher(teacher.id, name, email, nip)
-            }
-            .setNegativeButton("Batal", null)
-            .show()
+            true
+        }
     }
 
     private fun confirmDeleteTeacher(teacher: MasterTeacher) {
@@ -281,35 +289,56 @@ class AdminTeacherFragment : Fragment() {
         var selectedSubjectIdx = -1
         var selectedClassIdx = -1
 
-        val teacherLabels = teachers.map { "${it.name} (${it.employeeNumber})" }.toTypedArray()
-        d.spinnerTeacher.setSimpleItems(teacherLabels)
+        val teacherOptions = teachers.map { AgnesianOption(it.id.toString(), it.name, "NIP: ${it.employeeNumber}") }
         if (selectedTeacherIdx >= 0) {
-            d.spinnerTeacher.setText(teacherLabels[selectedTeacherIdx], false)
+            d.etTeacherSelector.setText(teacherOptions[selectedTeacherIdx].title)
         }
-        d.spinnerTeacher.setOnItemClickListener { _, _, pos, _ -> selectedTeacherIdx = pos }
+        bindSelectorField(
+            layout = d.layoutTeacher,
+            input = d.etTeacherSelector,
+            sheetTitle = "Pilih Guru Pengajar",
+            options = { teacherOptions },
+            selectedIndex = { selectedTeacherIdx },
+            onSelected = { idx, _ -> selectedTeacherIdx = idx }
+        )
 
-        val subjectLabels = subjects.map { "${it.code} · ${it.name}" }.toTypedArray()
-        d.spinnerSubject.setSimpleItems(subjectLabels)
-        d.spinnerSubject.setOnItemClickListener { _, _, pos, _ -> selectedSubjectIdx = pos }
+        val subjectOptions = subjects.map { AgnesianOption(it.id.toString(), it.name, "Kode: ${it.code} · ${it.type}") }
+        bindSelectorField(
+            layout = d.layoutSubject,
+            input = d.etSubjectSelector,
+            sheetTitle = "Pilih Mata Pelajaran",
+            options = { subjectOptions },
+            selectedIndex = { selectedSubjectIdx },
+            onSelected = { idx, _ -> selectedSubjectIdx = idx }
+        )
 
-        val classLabels = classes.map { it.name }.toTypedArray()
-        d.spinnerClass.setSimpleItems(classLabels)
-        d.spinnerClass.setOnItemClickListener { _, _, pos, _ -> selectedClassIdx = pos }
+        val classOptions = classes.map { AgnesianOption(it.id.toString(), it.name, "Tingkat ${it.gradeLevel}") }
+        bindSelectorField(
+            layout = d.layoutClass,
+            input = d.etClassSelector,
+            sheetTitle = "Pilih Kelas",
+            options = { classOptions },
+            selectedIndex = { selectedClassIdx },
+            onSelected = { idx, _ -> selectedClassIdx = idx }
+        )
 
-        MaterialAlertDialogBuilder(requireContext())
-            .setView(d.root)
-            .setPositiveButton("Tambah") { _, _ ->
-                val t = teachers.getOrNull(selectedTeacherIdx)
-                val s = subjects.getOrNull(selectedSubjectIdx)
-                val c = classes.getOrNull(selectedClassIdx)
-                if (t == null || s == null || c == null) {
-                    Toast.makeText(requireContext(), "Pilih guru, mata pelajaran, dan kelas", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
-                }
-                viewModel.createTeachingAssignment(t.id, s.id, c.id)
+        showAgnesianFormSheet(
+            context = requireContext(),
+            title = getString(R.string.dialog_add_assignment_title),
+            subtitle = "Tetapkan guru mengajar mapel & kelas di semester aktif",
+            contentView = d.root,
+            primaryLabel = "Tambah"
+        ) {
+            val t = teachers.getOrNull(selectedTeacherIdx)
+            val s = subjects.getOrNull(selectedSubjectIdx)
+            val c = classes.getOrNull(selectedClassIdx)
+            if (t == null || s == null || c == null) {
+                Toast.makeText(requireContext(), "Pilih guru, mata pelajaran, dan kelas", Toast.LENGTH_SHORT).show()
+                return@showAgnesianFormSheet false
             }
-            .setNegativeButton("Batal", null)
-            .show()
+            viewModel.createTeachingAssignment(t.id, s.id, c.id)
+            true
+        }
     }
 
     private fun showEditAssignmentDialog(item: MasterTeachingAssignment) {
@@ -318,27 +347,39 @@ class AdminTeacherFragment : Fragment() {
         if (teachers.isEmpty()) return
 
         val d = DialogAddAssignmentBinding.inflate(layoutInflater)
-        d.tvDialogTitle.setText(R.string.dialog_edit_assignment_title)
         d.tvSemesterInfo.text = "${item.subjectName} · Kelas ${item.className}"
         d.layoutSubject.isVisible = false
         d.layoutClass.isVisible = false
 
         var selectedTeacherIdx = teachers.indexOfFirst { it.id == item.teacherId }
-        val teacherLabels = teachers.map { "${it.name} (${it.employeeNumber})" }.toTypedArray()
-        d.spinnerTeacher.setSimpleItems(teacherLabels)
+        val teacherOptions = teachers.map { AgnesianOption(it.id.toString(), it.name, "NIP: ${it.employeeNumber}") }
         if (selectedTeacherIdx >= 0) {
-            d.spinnerTeacher.setText(teacherLabels[selectedTeacherIdx], false)
+            d.etTeacherSelector.setText(teacherOptions[selectedTeacherIdx].title)
         }
-        d.spinnerTeacher.setOnItemClickListener { _, _, pos, _ -> selectedTeacherIdx = pos }
+        bindSelectorField(
+            layout = d.layoutTeacher,
+            input = d.etTeacherSelector,
+            sheetTitle = "Ganti Guru Pengajar",
+            options = { teacherOptions },
+            selectedIndex = { selectedTeacherIdx },
+            onSelected = { idx, _ -> selectedTeacherIdx = idx }
+        )
 
-        MaterialAlertDialogBuilder(requireContext())
-            .setView(d.root)
-            .setPositiveButton("Simpan") { _, _ ->
-                val t = teachers.getOrNull(selectedTeacherIdx) ?: return@setPositiveButton
-                viewModel.updateTeachingAssignmentTeacher(item.id, t.id)
+        showAgnesianFormSheet(
+            context = requireContext(),
+            title = getString(R.string.dialog_edit_assignment_title),
+            subtitle = "${item.subjectName} · Kelas ${item.className}",
+            contentView = d.root,
+            primaryLabel = "Simpan"
+        ) {
+            val t = teachers.getOrNull(selectedTeacherIdx)
+            if (t == null) {
+                Toast.makeText(requireContext(), "Pilih guru pengajar terlebih dahulu", Toast.LENGTH_SHORT).show()
+                return@showAgnesianFormSheet false
             }
-            .setNegativeButton("Batal", null)
-            .show()
+            viewModel.updateTeachingAssignmentTeacher(item.id, t.id)
+            true
+        }
     }
 
     private fun confirmDeleteAssignment(item: MasterTeachingAssignment) {
