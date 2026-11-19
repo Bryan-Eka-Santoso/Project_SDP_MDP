@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Bilah tab manajemen master (Figma 216:711): User | Siswa | Guru | Kelas -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginTop="14dp"
+    android:orientation="horizontal"
+    android:weightSum="4">
+
+    <TextView
+        android:id="@+id/tabUser"
+        android:layout_width="0dp"
+        android:layout_height="34dp"
+        android:layout_weight="1"
+        android:background="@drawable/bg_tab_inactive"
+        android:gravity="center"
+        android:text="@string/tab_master_user"
+        android:textColor="@color/agnesian_button"
+        android:textSize="13sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/tabStudent"
+        android:layout_width="0dp"
+        android:layout_height="34dp"
+        android:layout_marginStart="8dp"
+        android:layout_weight="1"
+        android:background="@drawable/bg_tab_inactive"
+        android:gravity="center"
+        android:text="@string/tab_master_student"
+        android:textColor="@color/agnesian_button"
+        android:textSize="13sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/tabTeacher"
+        android:layout_width="0dp"
+        android:layout_height="34dp"
+        android:layout_marginStart="8dp"
+        android:layout_weight="1"
+        android:background="@drawable/bg_tab_inactive"
+        android:gravity="center"
+        android:text="@string/tab_master_teacher"
+        android:textColor="@color/agnesian_button"
+        android:textSize="13sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/tabClass"
+        android:layout_width="0dp"
+        android:layout_height="34dp"
+        android:layout_marginStart="8dp"
+        android:layout_weight="1"
+        android:background="@drawable/bg_tab_inactive"
+        android:gravity="center"
+        android:text="@string/tab_master_class"
+        android:textColor="@color/agnesian_button"
+        android:textSize="13sp"
+        android:textStyle="bold" />
+
+</LinearLayout>

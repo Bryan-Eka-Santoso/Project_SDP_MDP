@@ -70,6 +70,12 @@ interface LocalDao {
     @Query("SELECT COUNT(*) FROM notifications WHERE accountId = :accountId AND isRead = 0")
     fun observeUnreadNotificationCount(accountId: Int): Flow<Int>
 
+    @Query(
+        "SELECT EXISTS(SELECT 1 FROM notifications " +
+            "WHERE accountId = :accountId AND type = :type AND referenceId = :referenceId)"
+    )
+    suspend fun hasNotification(accountId: Int, type: String, referenceId: String): Boolean
+
 
     // =========================
     // TO-DO

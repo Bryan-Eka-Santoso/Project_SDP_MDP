@@ -8,6 +8,7 @@ const {
   listAcademicYearsQuery,
   createAcademicYearBody,
   updateAcademicYearBody,
+  replaceGradePredicatesBody,
 } = require('./academic-years.validation');
 
 const router = express.Router();
@@ -43,6 +44,19 @@ router.delete(
   authorize('ADMIN'),
   validate({ params: idParams }),
   controller.deleteAcademicYear,
+);
+
+// F-NIL-06: Skala predikat nilai per tahun ajaran
+router.get(
+  '/:id/grade-predicates',
+  validate({ params: idParams }),
+  controller.listGradePredicates,
+);
+router.patch(
+  '/:id/grade-predicates',
+  authorize('ADMIN'),
+  validate({ params: idParams, body: replaceGradePredicatesBody }),
+  controller.replaceGradePredicates,
 );
 
 module.exports = router;

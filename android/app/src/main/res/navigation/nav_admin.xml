@@ -30,6 +30,10 @@
         <action
             android:id="@+id/action_adminDashboard_to_operations"
             app:destination="@id/adminOperationsFragment" />
+
+        <action
+            android:id="@+id/action_adminDashboard_to_academicYear"
+            app:destination="@id/adminAcademicYearFragment" />
     </fragment>
 
     <fragment
@@ -41,6 +45,9 @@
             app:destination="@id/adminMataPelajaranFragment" />
 
         <action
+            android:id="@+id/action_adminOperations_to_subjectPackages"
+            app:destination="@id/adminSubjectPackageFragment" />
+      <action
             android:id="@+id/action_adminOperations_to_electiveAllocation"
             app:destination="@id/adminElectiveAllocationFragment" />
 
@@ -201,13 +208,76 @@
         <action
             android:id="@+id/action_adminStudent_to_adminUser"
             app:destination="@id/adminUserFragment" />
+
+        <action
+            android:id="@+id/action_adminStudent_to_import"
+            app:destination="@id/masterImportFragment">
+            <argument
+                android:name="importType"
+                android:defaultValue="STUDENT"
+                app:argType="string" />
+        </action>
     </fragment>
+
+    <fragment
+        android:id="@+id/adminTeacherFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.master.teachers.AdminTeacherFragment">
+
+        <action
+            android:id="@+id/action_adminTeacher_to_import"
+            app:destination="@id/masterImportFragment">
+            <argument
+                android:name="importType"
+                android:defaultValue="TEACHER"
+                app:argType="string" />
+        </action>
+    </fragment>
+
+    <fragment
+        android:id="@+id/masterImportFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.master.MasterImportFragment">
+        <argument
+            android:name="importType"
+            android:defaultValue="STUDENT"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminClassFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.master.classes.AdminClassFragment" />
+
+    <fragment
+        android:id="@+id/adminAcademicYearFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.master.periods.AdminAcademicYearFragment">
+
+        <action
+            android:id="@+id/action_adminAcademicYear_to_gradePredicate"
+            app:destination="@id/gradePredicateFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/gradePredicateFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.master.periods.GradePredicateFragment">
+        <argument
+            android:name="academicYearId"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <argument
+            android:name="academicYearName"
+            android:defaultValue=""
+            app:argType="string" />
+    </fragment>
+
     <fragment
         android:id="@+id/adminMataPelajaranFragment"
         android:name="id.sch.santaagnes.sim.ui.admin.matapelajaran.MataPelajaranFragment"
         android:label="Master Mata Pelajaran" />
 
     <fragment
+        android:id="@+id/adminSubjectPackageFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.elective.SubjectPackageFragment"
+        android:label="Paket Mata Pelajaran Pilihan" />
+  <fragment
         android:id="@+id/adminElectiveAllocationFragment"
         android:name="id.sch.santaagnes.sim.ui.admin.elective.ElectiveAllocationFragment"
         android:label="Alokasi Paket Pilihan" />

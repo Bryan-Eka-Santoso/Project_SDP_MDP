@@ -45,6 +45,10 @@ class SessionManager(
         it[ACCESS_TOKEN]
     }
 
+    val userId = context.dataStore.data.map {
+        it[USER_ID]
+    }
+
     suspend fun getAccessToken(): String? {
         return accessToken.first()
     }

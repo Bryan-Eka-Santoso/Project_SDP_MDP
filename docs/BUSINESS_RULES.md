@@ -50,6 +50,10 @@ Contoh: slot A Senin 07.00–08.30, slot B Senin 08.00–09.30, guru sama → `0
 - Jadwal yang persis sama (penugasan, hari, jam, ruangan) dengan slot yang sudah ada atau baris di atasnya dilaporkan satu kali sebagai duplikat (`column` null), bukan sebagai bentrok guru + kelas + ruangan sekaligus.
 - Semua baris valid → semua slot disimpan dalam satu transaksi; respons `201` berisi `{ semesterId, imported }`. Tidak ada notifikasi.
 
+#### 2.3.2 Impor siswa dan guru (F-MST-04, F-MST-05)
+- `POST /students/import` (template `docs/import-templates/siswa.xlsx`), hanya Admin, form multipart `file` (.xlsx, maks. 10 MB). Kolom: `Nama`, `NIS`, `Tanggal Lahir` (`YYYY-MM-DD`, `DD/MM/YYYY`, atau sel tanggal Excel), `Email`, `Password` (opsional, min. 8 karakter; jika kosong otomatis diisi `12345678`), `No. Telepon` (opsional, maks. 20 karakter), `Kelas` (opsional, nama kelas pada tahun ajaran aktif dan memeriksa sisa kapasitas). Duplikat `NIS` atau `Email` (baik di file maupun database) ditolak sekaligus; respons `201` berisi `{ imported, assignedToClass }`.
+- `POST /teachers/import` (template `docs/import-templates/guru.xlsx`), hanya Admin, form multipart `file` (.xlsx, maks. 10 MB). Kolom: `Nama`, `NIP`, `Email`, `Password` (opsional, min. 8 karakter; jika kosong otomatis diisi `12345678`). Duplikat `NIP` atau `Email` ditolak sekaligus; setiap guru baru dibuat dengan `isHomeroomTeacher = false` dan respons `201` berisi `{ imported }`.
+
 ### 2.4 Perubahan jadwal (F-JDW-04)
 - Perubahan disimpan sebagai `ScheduleChange` untuk **satu tanggal** tertentu; `ScheduleSlot` aslinya tidak diubah.
 - Jenis: `SUBSTITUTE` (guru pengganti), `RESCHEDULE` (pindah tanggal, jam, dan/atau ruangan), `CANCEL` (batal).
@@ -98,7 +102,7 @@ Contoh: slot A Senin 07.00–08.30, slot B Senin 08.00–09.30, guru sama → `0
 - Jika ada komponen yang belum dinilai, nilai akhir **tidak** ditampilkan sebagai angka; tampilkan status "belum lengkap" beserta komponen yang belum ada. Jangan menganggap nilai kosong sebagai 0.
 - Mengubah bobot setelah nilai diinput diperbolehkan; nilai akhir otomatis mengikuti bobot baru.
 - Pembulatan hanya untuk tampilan: 2 angka desimal.
-- **Predikat** diambil dari `GradePredicate` tahun ajaran semester tersebut: label dengan `minScore` tertinggi yang ≤ nilai akhir (sebelum pembulatan). Skala diatur admin (F-NIL-06).
+- **Predikat** diambil dari `GradePredicate` tahun ajaran semester tersebut: label dengan `minScore` tertinggi yang ≤ nilai akhir (sebelum pembulatan). Skala diatur admin (F-NIL-06) melalui `GET/PATCH /academic-years/:id/grade-predicates`.
   Contoh skala A 90, B 80, C 70, D 0: nilai akhir 79,5 → **C**; 80 → **B**; 100 → **A**.
 - Skala predikat satu tahun ajaran wajib punya baris `minScore = 0`, label unik, dan `minScore` unik di rentang 0–100. Jika nilai akhir belum lengkap, predikat tidak ditampilkan.
 
@@ -140,15 +144,15 @@ Contoh: 40 sesi, 36 hadir, 2 sakit, 1 izin, 1 alpa → 36/40 × 100 = **90%**.
 
 ## 7. Pengumuman dan kalender
 
-- `SCHOOL`: dibuat admin, diterima semua user.
-- `CLASS`: dibuat wali kelas untuk kelas binaannya, diterima siswa kelas tersebut dan wali muridnya.
-- Setiap pengumuman baru mengirim notifikasi ke penerimanya. Lampiran opsional (Cloudinary).
-- `AcademicEvent` memiliki `startDate` dan `endDate` (`startDate ≤ endDate`).
+- `SCHOOL`: dibuat admin (`POST /announcements`, `scope = SCHOOL`), diterima dan dibaca semua user.
+- `CLASS`: dibuat wali kelas untuk kelas binaannya atau **admin untuk kelas tertentu** di tahun ajaran aktif (`POST /announcements`, `scope = CLASS`, `classGroupId`), diterima dan dibaca siswa kelas tersebut, wali muridnya, serta guru pengampu/wali kelas tersebut. Admin berhak mengelola pengumuman `SCHOOL` maupun `CLASS`; wali kelas mengelola pengumuman `CLASS` untuk kelas binaannya.
+- Setiap pengumuman baru mengirim notifikasi FCM (`ANNOUNCEMENT`) ke penerimanya. Lampiran opsional (JPG/PNG/PDF maks. 5 MB) diunggah via `POST /announcements/attachment` (disimpan ke Cloudinary jika `CLOUDINARY_*` dikonfigurasi, atau sementara ke local storage server `/uploads` bila belum dikonfigurasi) dan dihapus saat pengumuman dihapus/lampiran diganti.
+- `AcademicEvent` (`GET /academic-events` semua role; `POST/PATCH/DELETE /academic-events` Admin) memiliki `startDate` dan `endDate` (`startDate ≤ endDate`).
 
 ## 8. Mata pelajaran pilihan
 
 1. Admin membuat `ElectiveSurvey` untuk tahun ajaran dan tingkat kelas tertentu → `PUBLISHED` → `CLOSED`. Siswa hanya bisa mengisi saat `PUBLISHED`, satu jawaban per siswa per survei (boleh diubah selama masih `PUBLISHED`).
-2. Admin menyusun `SubjectPackage` (kumpulan mapel + kapasitas per kelas) berdasarkan rekap survei.
+2. Admin menyusun `SubjectPackage` (F-MPP-03: kumpulan mapel + kapasitas kelas 1–100, nama unik per tahun ajaran) melalui `GET/POST/PATCH/DELETE /subject-packages`; paket yang sudah dipilih siswa tidak dapat dihapus (`409 INVALID_STATE`).
 3. Siswa memilih **satu** paket per tahun ajaran selama periode pemilihan dibuka.
 4. Pembagian kelas (F-MPP-05) per paket:
    - jumlah kelas `k = ⌈n / kapasitas⌉`;

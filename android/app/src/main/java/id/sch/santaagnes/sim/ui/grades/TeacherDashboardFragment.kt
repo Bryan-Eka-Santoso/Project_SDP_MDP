@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
@@ -17,6 +18,8 @@ import id.sch.santaagnes.sim.core.Resource
 import id.sch.santaagnes.sim.data.repository.AuthRepository
 import id.sch.santaagnes.sim.data.repository.GradesRepository
 import id.sch.santaagnes.sim.databinding.FragmentTeacherDashboardBinding
+import id.sch.santaagnes.sim.ui.calendar.AcademicCalendarViewModel
+import id.sch.santaagnes.sim.ui.calendar.bindDashboardCalendar
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -34,6 +37,7 @@ class TeacherDashboardFragment : Fragment() {
     @Inject
     lateinit var gradesRepository: GradesRepository
 
+    private val calendarViewModel: AcademicCalendarViewModel by viewModels()
     @Inject
     lateinit var profilSiswaApi: ProfilSiswaBinaanApi
 
@@ -184,6 +188,14 @@ class TeacherDashboardFragment : Fragment() {
             )
         }
 
+        // Pengumuman sekolah/kelas binaan & Kalender Akademik
+        binding.btnAnnouncements.setOnClickListener {
+            findNavController().navigate(R.id.action_global_announcements)
+        }
+        binding.btnCalendar.setOnClickListener {
+            findNavController().navigate(R.id.action_global_calendar)
+        }
+        bindDashboardCalendar(binding.calendarCard, calendarViewModel)
         // IZN-03: daftar izin siswa yang menunggu tinjauan wali kelas.
         binding.btnPendingLeaves.setOnClickListener {
             findNavController().navigate(R.id.homeroomPendingFragment)
@@ -191,6 +203,11 @@ class TeacherDashboardFragment : Fragment() {
 
         // Memuat data dashboard
         refreshDashboard()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        calendarViewModel.load()
     }
 
     private fun refreshDashboard() {

@@ -61,20 +61,24 @@ class ProfileFragment : Fragment() {
 
     private fun render(profile: Profile) {
         binding.tvName.text = profile.name
-        val roleStr = roleLabel(profile.role)
-        binding.tvRole.text = roleStr
+        val baseRole = roleLabel(profile.role)
+        val roleDisplay = if (profile.role == "TEACHER" && profile.homeroomClasses.isNotEmpty()) {
+            "$baseRole · ${getString(R.string.profile_homeroom_badge)}"
+        } else {
+            baseRole
+        }
+        binding.tvRole.text = roleDisplay
+        binding.tvSemesterBadge.text = baseRole
         binding.btnBills.isVisible = profile.canViewBills
         binding.btnReports.isVisible = profile.canViewReports
 
-        // Inisial avatar
         val initials = profile.name.trim().split(" ")
             .filter { it.isNotEmpty() }
             .take(2)
             .map { it.first().uppercaseChar() }
             .joinToString("")
-        binding.tvAvatarInitials.text = if (initials.isNotEmpty()) initials else "SA"
+        binding.tvAvatarInitials.text = initials.ifEmpty { "SA" }
 
-        // NIS / NIP
         if (!profile.identifier.isNullOrBlank()) {
             binding.layoutIdentifier.isVisible = true
             binding.tvIdentifierLabel.text = if (profile.role == "STUDENT") "NIS" else "NIP"
@@ -83,15 +87,19 @@ class ProfileFragment : Fragment() {
             binding.layoutIdentifier.isVisible = false
         }
 
-        // Nama Lengkap
         binding.tvFullNameValue.text = profile.name
-
+        binding.tvRoleLabel.text = if (profile.role == "STUDENT") {
+            getString(R.string.profile_class_role_label)
+        } else {
+            getString(R.string.profile_role_label)
+        }
+          
         // Peran sudah tampil sebagai chip di bawah nama; untuk siswa barisnya diganti Kelas dan
         // Wali Kelas (Figma Halaman Profil).
         val isStudent = profile.role == "STUDENT"
         binding.layoutRoleField.isVisible = !isStudent
         binding.tvRoleLabel.setText(R.string.profile_label_role)
-        binding.tvRoleValue.text = roleStr
+        binding.tvRoleValue.text = roleDisplay
         binding.layoutClass.isVisible = isStudent && profile.classNames.isNotEmpty()
         binding.tvClassValue.text = profile.classNames.joinToString(", ")
         binding.layoutHomeroomTeacher.isVisible = isStudent && profile.homeroomTeachers.isNotEmpty()
@@ -110,6 +118,8 @@ class ProfileFragment : Fragment() {
         val lines = buildList {
             if (profile.homeroomClasses.isNotEmpty()) {
                 add(getString(R.string.profile_homeroom, profile.homeroomClasses.joinToString(", ")))
+            } else if (profile.role == "TEACHER") {
+                add(getString(R.string.profile_teacher_regular_note))
             }
             if (profile.children.isNotEmpty()) {
                 add(getString(R.string.profile_children, profile.children.joinToString(", ")))

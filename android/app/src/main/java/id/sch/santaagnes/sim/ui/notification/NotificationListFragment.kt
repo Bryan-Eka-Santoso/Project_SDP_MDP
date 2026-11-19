@@ -10,9 +10,12 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import dagger.hilt.android.AndroidEntryPoint
+import id.sch.santaagnes.sim.R
 import id.sch.santaagnes.sim.databinding.FragmentNotificationListBinding
+import id.sch.santaagnes.sim.domain.model.NotificationType
 import kotlinx.coroutines.launch
 
 /** Tab Notifikasi semua role (F-NTF-01): riwayat dari Room. */
@@ -24,7 +27,12 @@ class NotificationListFragment : Fragment() {
 
     private val viewModel: NotificationListViewModel by viewModels()
 
-    private val adapter = NotificationAdapter { item -> if (!item.isRead) viewModel.markRead(item.id) }
+    private val adapter = NotificationAdapter { item ->
+        if (!item.isRead) viewModel.markRead(item.id)
+        if (item.type == NotificationType.ANNOUNCEMENT) {
+            findNavController().navigate(R.id.action_global_announcements)
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -50,6 +58,11 @@ class NotificationListFragment : Fragment() {
                 }
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        viewModel.refresh()
     }
 
     override fun onDestroyView() {

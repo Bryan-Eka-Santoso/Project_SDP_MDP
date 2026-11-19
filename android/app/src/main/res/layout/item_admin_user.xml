@@ -1,98 +1,124 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginStart="16dp"
-    android:layout_marginEnd="16dp"
-    android:layout_marginTop="6dp"
-    android:layout_marginBottom="6dp"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="2dp"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="5dp"
     app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="10dp"
+    app:cardElevation="2dp"
     app:strokeWidth="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:padding="14dp">
 
         <TextView
             android:id="@+id/tvUserName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Ahmad Fauzi"
+            android:layout_marginEnd="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
             android:textColor="@color/black"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@id/tvRoleStatus"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/btnOptions" />
+            tools:text="Ahmad Fauzi" />
 
-        <ImageButton
-            android:id="@+id/btnOptions"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Opsi"
-            android:src="@drawable/ic_more_vert"
+        <TextView
+            android:id="@+id/tvRoleStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/agnesian_button"
+            android:textSize="12sp"
+            android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Admin | Aktif" />
 
         <TextView
             android:id="@+id/tvUserEmail"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="ahmad@agnesian.sch.id"
+            android:layout_marginTop="3dp"
+            android:layout_marginEnd="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
             android:textColor="@color/agnesian_muted"
-            android:textSize="13sp"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toStartOf="@id/tvUserMeta"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvUserName"
-            app:layout_constraintEnd_toStartOf="@id/btnOptions" />
+            tools:text="ahmad@agnesian.sch.id" />
 
+        <TextView
+            android:id="@+id/tvUserMeta"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:textColor="@color/agnesian_muted"
+            android:textSize="11sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvRoleStatus"
+            tools:text="18 Nov 2026" />
+
+        <!-- 4 Tombol aksi kotak berjajar kanan bawah (Figma 216:711) -->
         <LinearLayout
-            android:layout_width="0dp"
+            android:id="@+id/layoutActions"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:orientation="horizontal"
-            android:gravity="center_vertical"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvUserEmail">
 
-            <TextView
-                android:id="@+id/tvRoleBadge"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_badge_role"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp"
-                android:text="ADMIN"
-                android:textColor="@color/agnesian_blue"
-                android:textSize="11sp"
-                android:textStyle="bold" />
+            <ImageButton
+                android:id="@+id/btnEdit"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="@drawable/bg_icon_action"
+                android:contentDescription="@string/user_cd_edit"
+                android:padding="6dp"
+                android:src="@drawable/ic_edit" />
 
-            <TextView
-                android:id="@+id/tvStatusBadge"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+            <ImageButton
+                android:id="@+id/btnToggleStatus"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_marginStart="8dp"
-                android:background="@drawable/bg_badge_active"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp"
-                android:text="Aktif"
-                android:textColor="#137333"
-                android:textSize="11sp"
-                android:textStyle="bold" />
+                android:background="@drawable/bg_icon_action"
+                android:contentDescription="@string/user_cd_block"
+                android:padding="6dp"
+                android:src="@drawable/ic_block" />
 
+            <ImageButton
+                android:id="@+id/btnResetPassword"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_icon_action"
+                android:contentDescription="@string/user_cd_reset"
+                android:padding="6dp"
+                android:src="@drawable/ic_key" />
+
+            <ImageButton
+                android:id="@+id/btnDelete"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_icon_action"
+                android:contentDescription="@string/user_cd_delete"
+                android:padding="6dp"
+                android:src="@drawable/ic_delete"
+                app:tint="@color/black" />
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 </com.google.android.material.card.MaterialCardView>

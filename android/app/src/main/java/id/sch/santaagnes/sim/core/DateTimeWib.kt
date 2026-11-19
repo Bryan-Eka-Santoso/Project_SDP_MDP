@@ -4,6 +4,7 @@ import java.time.Clock
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.YearMonth
 import java.time.ZoneId
 import java.time.temporal.TemporalAdjusters
 
@@ -70,6 +71,10 @@ object DateTimeWib {
         return "${time.dayOfMonth} ${shortMonthNames[time.monthValue - 1]} ${time.year}, " +
             formatTime(time.toLocalTime())
     }
+
+    /** "November 2026". */
+    fun formatMonthYear(yearMonth: YearMonth): String =
+        "${monthNames[yearMonth.monthValue - 1]} ${yearMonth.year}"
 
     /** "07:00". */
     fun formatTime(time: LocalTime): String = time.toString().take(5)

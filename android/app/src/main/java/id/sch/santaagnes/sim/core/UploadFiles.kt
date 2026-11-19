@@ -29,15 +29,63 @@ class UploadFiles @Inject constructor(
 
     /** Bagian multipart `file` berisi berkas Excel; [IOException] bila berkas tidak dapat dibaca. */
     suspend fun xlsxPart(uri: String, fallbackName: String): MultipartBody.Part {
-        val bytes = withContext(Dispatchers.IO) {
-            context.contentResolver.openInputStream(Uri.parse(uri))?.use { it.readBytes() }
-        } ?: throw IOException("Berkas tidak dapat dibaca.")
+        val bytes = readBytes(uri)
         // Server memeriksa tipe dari isi berkas, bukan header, jadi tipe umum Excel sudah cukup.
         val body = bytes.toRequestBody(XLSX.toMediaType())
         return MultipartBody.Part.createFormData("file", name(uri) ?: fallbackName, body)
     }
 
+    /**
+     * Bagian multipart `file` untuk lampiran pengumuman/izin (JPG, PNG, PDF maks. 5 MB).
+     * Memastikan nama berkas memiliki ekstensi yang sesuai agar validasi server konsisten.
+     */
+    suspend fun attachmentPart(uri: String): MultipartBody.Part {
+        val bytes = readBytes(uri)
+        if (bytes.isEmpty()) throw IOException("Berkas lampiran kosong.")
+        if (bytes.size > MAX_ATTACHMENT_BYTES) {
+            throw IOException("Ukuran lampiran melebihi batas 5 MB.")
+        }
+
+        val parsed = Uri.parse(uri)
+        val rawMime = context.contentResolver.getType(parsed)?.lowercase()
+        val rawName = name(uri)?.trim().orEmpty()
+        val mime = when {
+            rawMime in ALLOWED_ATTACHMENT_MIMES -> rawMime!!
+            rawName.lowercase().endsWith(".png") -> MIME_PNG
+            rawName.lowercase().endsWith(".pdf") -> MIME_PDF
+            rawName.lowercase().endsWith(".jpg") || rawName.lowercase().endsWith(".jpeg") -> MIME_JPEG
+            else -> throw IOException("Gunakan berkas berformat JPG, PNG, atau PDF.")
+        }
+
+        val ext = when (mime) {
+            MIME_PNG -> ".png"
+            MIME_PDF -> ".pdf"
+            else -> ".jpg"
+        }
+        val base = rawName.ifEmpty { "lampiran$ext" }
+        val fileName = if (base.lowercase().let {
+                it.endsWith(".jpg") || it.endsWith(".jpeg") || it.endsWith(".png") || it.endsWith(".pdf")
+            }
+        ) {
+            base
+        } else {
+            "$base$ext"
+        }
+
+        val body = bytes.toRequestBody(mime.toMediaType())
+        return MultipartBody.Part.createFormData("file", fileName, body)
+    }
+
+    private suspend fun readBytes(uri: String): ByteArray = withContext(Dispatchers.IO) {
+        context.contentResolver.openInputStream(Uri.parse(uri))?.use { it.readBytes() }
+    } ?: throw IOException("Berkas tidak dapat dibaca.")
+
     private companion object {
         const val XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        const val MIME_JPEG = "image/jpeg"
+        const val MIME_PNG = "image/png"
+        const val MIME_PDF = "application/pdf"
+        val ALLOWED_ATTACHMENT_MIMES = setOf(MIME_JPEG, MIME_PNG, MIME_PDF)
+        const val MAX_ATTACHMENT_BYTES = 5 * 1024 * 1024
     }
 }

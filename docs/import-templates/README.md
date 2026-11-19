@@ -48,6 +48,37 @@ Ketentuan khusus pembayaran:
 - Setelah impor yang mengubah data, siswa dan wali murid yang punya tagihan menunggak (belum dibayar dan lewat jatuh tempo) di file itu menerima notifikasi.
 - Tiga baris contoh memakai NIS data demo (seeder) dan jatuh tempo yang sudah lewat, jadi mengimpornya akan menghasilkan notifikasi tunggakan. Hapus baris contoh sebelum mengisi rekap sebenarnya.
 
+## `siswa.xlsx`: impor data siswa (F-MST-04)
+
+| Kolom | Isi | Contoh |
+|---|---|---|
+| `Nama` | Nama lengkap siswa (maks. 100 karakter) | `Angela Putri Contoh` |
+| `NIS` | NIS unik siswa (format Teks, maks. 30 karakter) | `2026901` |
+| `Tanggal Lahir` | Tanggal lahir `YYYY-MM-DD`, `DD/MM/YYYY`, atau sel tanggal | `2010-03-14` |
+| `Email` | Email unik untuk login siswa | `siswa.contoh1@santaagnes.test` |
+| `Password` | Opsional; min. 8 karakter. Kosong → bawaan `12345678` | `Siswa1234` |
+| `No. Telepon` | Opsional; nomor HP siswa (format Teks, maks. 20 karakter) | `085700009001` |
+| `Kelas` | Opsional; nama kelas pada tahun ajaran aktif | `X-1` |
+
+Ketentuan khusus siswa:
+
+- Akun `User` (`role: STUDENT`) dan profil `Student` dibuat dalam satu transaksi; jika `Kelas` diisi, siswa langsung dimasukkan ke kelas tahun ajaran aktif (dicek ketersediaan kapasitas).
+- NIS dan email harus unik terhadap database maupun antarbaris di dalam file.
+
+## `guru.xlsx`: impor data guru (F-MST-05)
+
+| Kolom | Isi | Contoh |
+|---|---|---|
+| `Nama` | Nama lengkap guru beserta gelar (maks. 100 karakter) | `Antonius Wijaya Contoh` |
+| `NIP` | NIP / kode guru unik (format Teks agar 18 digit tidak rusak) | `199204102020011001` |
+| `Email` | Email unik untuk login guru | `guru.contoh1@santaagnes.test` |
+| `Password` | Opsional; min. 8 karakter. Kosong → bawaan `12345678` | `GuruPass123` |
+
+Ketentuan khusus guru:
+
+- Akun `User` (`role: TEACHER`) dan profil `Teacher` dibuat dalam satu transaksi (`isHomeroomTeacher` awal `false`; penetapan wali kelas diatur dari Master Kelas).
+- NIP dan email harus unik terhadap database maupun antarbaris di dalam file.
+
 ## Berkas contoh (`docs/import-samples/`)
 
 Template di atas sudah pernah diimpor ke data demo, jadi mengunggahnya lagi hanya menghasilkan duplikat atau "tidak berubah". Untuk mencoba impor, pakai berkas di `docs/import-samples/` (dibuat dari template ini, setiap berkas punya lembar "Tentang berkas ini" yang menjelaskan isinya):

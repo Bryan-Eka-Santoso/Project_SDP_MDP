@@ -2,6 +2,7 @@ const express = require('express');
 const authenticate = require('../../../middlewares/authenticate');
 const authorize = require('../../../middlewares/authorize');
 const validate = require('../../../middlewares/validate');
+const { uploadXlsx } = require('../../../middlewares/upload');
 const controller = require('./students.controller');
 const {
   idParams,
@@ -21,6 +22,12 @@ router.get('/', validate({ query: listStudentsQuery }), controller.listStudents)
 router.get('/:id', validate({ params: idParams }), controller.getStudentById);
 
 // F-MST-04: Kelola siswa & relasi wali murid (Admin)
+router.post(
+  '/import',
+  authorize('ADMIN'),
+  uploadXlsx('file'),
+  controller.importStudents,
+);
 router.post(
   '/',
   authorize('ADMIN'),

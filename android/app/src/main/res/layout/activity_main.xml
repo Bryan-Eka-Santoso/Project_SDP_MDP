@@ -3,7 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     android:orientation="vertical">
+
+    <View
+        android:id="@+id/statusBarScrim"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@color/agnesian_blue" />
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/navHostFragment"
@@ -16,16 +23,15 @@
 
     <!-- paddingBottomSystemWindowInsets=false: inset bawah sudah dipasang MainActivity pada root;
          tanpa ini BottomNavigationView menambah inset yang sama lagi (ruang kosong di bawah ikon). -->
-    <com.google.android.material.bottomnavigation.BottomNavigationView
+   <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNav"
+        style="@style/Widget.Agnesian.BottomNav"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
         android:visibility="gone"
-        app:itemActiveIndicatorStyle="@style/Widget.Agnesian.BottomNav.Indicator"
-        app:itemIconTint="@color/bottom_nav_item"
-        app:itemTextColor="@color/bottom_nav_item"
-        app:labelVisibilityMode="labeled"
+        app:elevation="8dp"
+        app:itemIconSize="22dp"
         app:paddingBottomSystemWindowInsets="false" />
-
 </LinearLayout>

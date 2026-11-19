@@ -35,6 +35,7 @@ class AdminOperationsFragment : Fragment() {
         }
         binding.btnBack.setOnClickListener { nav.popBackStack() }
         binding.cardSubjects.setOnClickListener { nav.navigate(R.id.action_adminOperations_to_subjects) }
+        binding.cardSubjectPackages.setOnClickListener { nav.navigate(R.id.action_adminOperations_to_subjectPackages) }
         binding.cardElectiveAllocation.setOnClickListener { nav.navigate(R.id.action_adminOperations_to_electiveAllocation) }
         binding.cardElectiveTrends.setOnClickListener { nav.navigate(R.id.action_adminOperations_to_electiveTrends) }
         binding.cardFacilities.setOnClickListener { nav.navigate(R.id.action_adminOperations_to_facilities) }

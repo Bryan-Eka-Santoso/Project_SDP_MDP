@@ -18,6 +18,7 @@ class FakeNotificationRepository : NotificationRepository {
     // false = tidak ada akun yang login
     var loggedIn = true
     val items = MutableStateFlow<List<AppNotification>>(emptyList())
+    val pendingSyncedAnnouncements = mutableListOf<PushPayload>()
     private var nextId = 1L
 
     override fun observe(): Flow<List<AppNotification>> = items
@@ -37,6 +38,16 @@ class FakeNotificationRepository : NotificationRepository {
         )
         items.value = listOf(saved) + items.value
         return saved
+    }
+
+    override suspend fun syncAnnouncements() {
+        if (!loggedIn) return
+        pendingSyncedAnnouncements.forEach { payload ->
+            val alreadyExists = items.value.any {
+                it.type == payload.type && it.title == payload.title && it.message == payload.body
+            }
+            if (!alreadyExists) save(payload)
+        }
     }
 
     override suspend fun markRead(id: Long) {

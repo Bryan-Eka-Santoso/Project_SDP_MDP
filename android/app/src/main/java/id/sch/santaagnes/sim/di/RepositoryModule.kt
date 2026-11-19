@@ -8,8 +8,12 @@ import id.sch.santaagnes.sim.data.repository.AccountRepository
 import id.sch.santaagnes.sim.data.repository.AccountRepositoryImpl
 import id.sch.santaagnes.sim.data.repository.AdminScheduleRepository
 import id.sch.santaagnes.sim.data.repository.AdminScheduleRepositoryImpl
+import id.sch.santaagnes.sim.data.repository.AnnouncementRepository
+import id.sch.santaagnes.sim.data.repository.AnnouncementRepositoryImpl
 import id.sch.santaagnes.sim.data.repository.BillRepository
 import id.sch.santaagnes.sim.data.repository.BillRepositoryImpl
+import id.sch.santaagnes.sim.data.repository.CalendarRepository
+import id.sch.santaagnes.sim.data.repository.CalendarRepositoryImpl
 import id.sch.santaagnes.sim.data.repository.ReportRepository
 import id.sch.santaagnes.sim.data.repository.ReportRepositoryImpl
 import id.sch.santaagnes.sim.data.repository.RescheduleRepository
@@ -53,4 +57,10 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindTodoRepository(impl: TodoRepositoryImpl): TodoRepository
+
+    @Binds
+    abstract fun bindAnnouncementRepository(impl: AnnouncementRepositoryImpl): AnnouncementRepository
+
+    @Binds
+    abstract fun bindCalendarRepository(impl: CalendarRepositoryImpl): CalendarRepository
 }

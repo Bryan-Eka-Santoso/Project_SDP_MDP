@@ -82,6 +82,13 @@
         android:name="id.sch.santaagnes.sim.ui.admin.report.TeachingLoadReportFragment" />
 
     <fragment
+        android:id="@+id/announcementListFragment"
+        android:name="id.sch.santaagnes.sim.ui.announcement.AnnouncementListFragment" />
+
+    <fragment
+        android:id="@+id/academicCalendarFragment"
+        android:name="id.sch.santaagnes.sim.ui.calendar.AcademicCalendarFragment" />
+  <fragment
         android:id="@+id/gradesAdminReportFragment"
         android:name="id.sch.santaagnes.sim.ui.admin.report.GradesAdminReportFragment" />
 
@@ -108,6 +115,14 @@
     <action
         android:id="@+id/action_global_bills"
         app:destination="@id/billListFragment" />
+
+    <action
+        android:id="@+id/action_global_announcements"
+        app:destination="@id/announcementListFragment" />
+
+    <action
+        android:id="@+id/action_global_calendar"
+        app:destination="@id/academicCalendarFragment" />
 
     <include app:graph="@navigation/nav_admin" />
     <include app:graph="@navigation/nav_teacher" />

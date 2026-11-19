@@ -20,7 +20,8 @@ class AuthRepository @Inject constructor(
     private val sessionManager: SessionManager,
     private val errors: ApiErrorMapper,
     private val pushTokens: PushTokenRegistrar,
-    private val tokenProvider: PushTokenProvider
+    private val tokenProvider: PushTokenProvider,
+    private val notifications: NotificationRepository
 ) {
 
     suspend fun login(
@@ -34,8 +35,11 @@ class AuthRepository @Inject constructor(
         sessionManager.saveTokens(data.accessToken, data.refreshToken)
         data.user.toDomain().also {
             saveUser(it)
-            // Gagal mendaftarkan token tidak menggagalkan login; dicoba lagi saat aplikasi dibuka.
-            withTimeoutOrNull(TOKEN_TIMEOUT_MS) { pushTokens.register() }
+            // Gagal mendaftarkan token/sinkron pengumuman tidak menggagalkan login.
+            withTimeoutOrNull(TOKEN_TIMEOUT_MS) {
+                pushTokens.register()
+                notifications.syncAnnouncements()
+            }
         }
     }
 

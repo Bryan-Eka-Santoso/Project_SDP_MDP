@@ -400,6 +400,68 @@ async function deleteSemester(id) {
   await prisma.semester.delete({ where: { id } });
 }
 
+// ==========================================
+// C. SKALA PREDIKAT NILAI (F-NIL-06)
+// ==========================================
+
+function mapPredicate(item) {
+  return {
+    id: item.id,
+    academicYearId: item.academicYearId,
+    label: item.label,
+    minScore: Number(item.minScore),
+    description: item.description,
+  };
+}
+
+async function ensureAcademicYearSummary(id) {
+  const academicYear = await prisma.academicYear.findUnique({
+    where: { id },
+    select: { id: true, name: true, isActive: true },
+  });
+  if (!academicYear) {
+    throw new AppError(404, 'NOT_FOUND', 'Tahun ajaran tidak ditemukan.');
+  }
+  return academicYear;
+}
+
+async function listGradePredicates(academicYearId) {
+  const academicYear = await ensureAcademicYearSummary(academicYearId);
+  const items = await prisma.gradePredicate.findMany({
+    where: { academicYearId },
+    orderBy: { minScore: 'desc' },
+  });
+  return {
+    academicYear,
+    predicates: items.map(mapPredicate),
+  };
+}
+
+async function replaceGradePredicates(academicYearId, { predicates }) {
+  const academicYear = await ensureAcademicYearSummary(academicYearId);
+
+  const saved = await prisma.$transaction(async (tx) => {
+    await tx.gradePredicate.deleteMany({ where: { academicYearId } });
+    await tx.gradePredicate.createMany({
+      data: predicates.map((item) => ({
+        academicYearId,
+        label: item.label,
+        minScore: item.minScore,
+        description: item.description ?? null,
+      })),
+    });
+    return tx.gradePredicate.findMany({
+      where: { academicYearId },
+      orderBy: { minScore: 'desc' },
+    });
+  });
+
+  return {
+    academicYear,
+    predicates: saved.map(mapPredicate),
+  };
+}
+
 module.exports = {
   listAcademicYears,
   getActiveAcademicYear,
@@ -415,4 +477,6 @@ module.exports = {
   updateSemester,
   setActiveSemester,
   deleteSemester,
+  listGradePredicates,
+  replaceGradePredicates,
 };

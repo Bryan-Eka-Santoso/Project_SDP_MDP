@@ -5,33 +5,51 @@
     android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:layout_columnWeight="1"
-    android:layout_margin="6dp"
+    android:layout_margin="4dp"
     app:cardBackgroundColor="@color/white"
-    app:cardCornerRadius="12dp"
+    app:cardCornerRadius="10dp"
     app:cardElevation="1dp"
     app:strokeWidth="0dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:orientation="vertical"
-        android:padding="14dp">
+        android:paddingHorizontal="6dp"
+        android:paddingVertical="10dp">
+
+        <ImageView
+            android:id="@+id/ivStatIcon"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_bar_chart"
+            app:tint="#7A869A" />
 
         <TextView
             android:id="@+id/tvValue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:maxLines="1"
             android:textColor="@color/agnesian_blue"
-            android:textSize="24sp"
+            android:textSize="17sp"
             android:textStyle="bold"
-            tools:text="21" />
+            tools:text="213" />
 
         <TextView
             android:id="@+id/tvLabel"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:maxLines="1"
             android:textColor="@color/agnesian_text"
-            android:textSize="13sp"
-            tools:text="Total Guru" />
+            android:textSize="11sp"
+            android:textStyle="bold"
+            tools:text="Siswa" />
+
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

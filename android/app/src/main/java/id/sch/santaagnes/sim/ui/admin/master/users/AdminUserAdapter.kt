@@ -2,7 +2,7 @@ package id.sch.santaagnes.sim.ui.admin.master.users
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.PopupMenu
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -22,38 +22,40 @@ class AdminUserAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(user: MasterUser) {
+            val context = binding.root.context
             binding.tvUserName.text = user.name
             binding.tvUserEmail.text = user.email
-            binding.tvRoleBadge.text = user.role
 
-            if (user.isActive) {
-                binding.tvStatusBadge.text = binding.root.context.getString(R.string.status_active)
-                binding.tvStatusBadge.setBackgroundResource(R.drawable.bg_badge_active)
-                binding.tvStatusBadge.setTextColor(0xFF137333.toInt())
-            } else {
-                binding.tvStatusBadge.text = binding.root.context.getString(R.string.status_inactive)
-                binding.tvStatusBadge.setBackgroundResource(R.drawable.bg_badge_inactive)
-                binding.tvStatusBadge.setTextColor(0xFFC5221F.toInt())
+            val roleName = when (user.role) {
+                "ADMIN" -> context.getString(R.string.role_admin)
+                "TEACHER" -> context.getString(R.string.role_teacher)
+                "STUDENT" -> context.getString(R.string.role_student)
+                "GUARDIAN" -> context.getString(R.string.role_guardian)
+                else -> user.role
             }
+            val statusText = context.getString(
+                if (user.isActive) R.string.status_active else R.string.status_inactive
+            )
+            binding.tvRoleStatus.text = "$roleName | $statusText"
+            binding.tvRoleStatus.setTextColor(
+                ContextCompat.getColor(
+                    context,
+                    if (user.isActive) R.color.agnesian_button else R.color.change_cancel
+                )
+            )
+            binding.tvUserMeta.text = user.createdAt?.take(10).orEmpty()
 
-            binding.btnOptions.setOnClickListener { view ->
-                val popup = PopupMenu(view.context, view)
-                popup.menu.add(0, 1, 0, "Ubah Data")
-                popup.menu.add(0, 2, 1, if (user.isActive) "Blokir Akun" else "Buka Blokir")
-                popup.menu.add(0, 3, 2, "Reset Password")
-                popup.menu.add(0, 4, 3, "Hapus Akun")
+            binding.btnToggleStatus.setColorFilter(
+                ContextCompat.getColor(
+                    context,
+                    if (user.isActive) R.color.black else R.color.change_cancel
+                )
+            )
 
-                popup.setOnMenuItemClickListener { item ->
-                    when (item.itemId) {
-                        1 -> { onEdit(user); true }
-                        2 -> { onToggleStatus(user); true }
-                        3 -> { onResetPassword(user); true }
-                        4 -> { onDelete(user); true }
-                        else -> false
-                    }
-                }
-                popup.show()
-            }
+            binding.btnEdit.setOnClickListener { onEdit(user) }
+            binding.btnToggleStatus.setOnClickListener { onToggleStatus(user) }
+            binding.btnResetPassword.setOnClickListener { onResetPassword(user) }
+            binding.btnDelete.setOnClickListener { onDelete(user) }
         }
     }
 
@@ -71,12 +73,10 @@ class AdminUserAdapter(
     }
 
     companion object DiffCallback : DiffUtil.ItemCallback<MasterUser>() {
-        override fun areItemsTheSame(oldItem: MasterUser, newItem: MasterUser): Boolean {
-            return oldItem.id == newItem.id
-        }
+        override fun areItemsTheSame(oldItem: MasterUser, newItem: MasterUser): Boolean =
+            oldItem.id == newItem.id
 
-        override fun areContentsTheSame(oldItem: MasterUser, newItem: MasterUser): Boolean {
-            return oldItem == newItem
-        }
+        override fun areContentsTheSame(oldItem: MasterUser, newItem: MasterUser): Boolean =
+            oldItem == newItem
     }
 }

@@ -378,6 +378,7 @@
     <string name="dialog_edit_user_title">Ubah Pengguna</string>
     <string name="dialog_reset_password_title">Reset Password</string>
     <string name="dialog_add_student_title">Tambah Siswa</string>
+    <string name="dialog_edit_student_title">Ubah Data Siswa</string>
     <string name="user_empty">Belum ada data pengguna yang cocok.</string>
     <string name="student_empty">Belum ada data siswa yang cocok.</string>
     <string name="action_block">Blokir Akun</string>
@@ -391,14 +392,14 @@
     <string name="greeting_night">Selamat malam,</string>
     <string name="admin_stats_title">Ringkasan Data</string>
     <string name="admin_shortcuts_title">Menu Cepat</string>
-    <string name="admin_stat_students">Total Siswa</string>
-    <string name="admin_stat_teachers">Total Guru</string>
-    <string name="admin_stat_classes">Total Kelas</string>
-    <string name="admin_stat_users">Total Pengguna</string>
-    <string name="admin_stat_subjects">Total Mata Pelajaran</string>
-    <string name="admin_stat_slots">Total Jadwal</string>
-    <string name="admin_stat_changes">Total Perubahan Jadwal</string>
-    <string name="admin_stat_facilities">Total Fasilitas</string>
+    <string name="admin_stat_students">Siswa</string>
+    <string name="admin_stat_teachers">Guru</string>
+    <string name="admin_stat_classes">Kelas</string>
+    <string name="admin_stat_users">Pengguna</string>
+    <string name="admin_stat_subjects">Mapel</string>
+    <string name="admin_stat_slots">Jadwal</string>
+    <string name="admin_stat_changes">Perubahan</string>
+    <string name="admin_stat_facilities">Fasilitas</string>
     <string name="admin_stat_unknown">-</string>
     <string name="admin_menu_management">Manajemen</string>
     <string name="admin_menu_payments">Pembayaran</string>
@@ -448,4 +449,144 @@
     <string name="master_bookings_daftar_pengajuan">Daftar Pengajuan</string>
     <string name="master_bookings_belum_ada_pengajuan_peminjam">Belum ada pengajuan peminjaman</string>
     <string name="master_add">Tambah</string>
+
+    <!-- Tambahan UI Admin & Master Data (F-MST-01..10, Figma konsisten) -->
+    <string name="action_import">Import</string>
+    <string name="master_period_loading">Periode Aktif</string>
+    <string name="master_period_badge">%1$s | %2$s ▾</string>
+    <string name="master_total_count">Total: %1$d data</string>
+    <string name="master_import_unavailable">Impor Excel untuk modul ini belum tersedia di server.</string>
+    <string name="admin_period_card_title">Periode Akademik Aktif</string>
+    <string name="admin_period_manage_btn">Kelola Tahun Ajaran &amp; Semester</string>
+    <string name="profile_header_title">Profil Saya</string>
+    <string name="profile_full_name_label">Nama Lengkap</string>
+    <string name="profile_role_label">Peran</string>
+    <string name="profile_class_role_label">Kelas / Peran</string>
+    <string name="profile_email_label">Email</string>
+    <string name="profile_homeroom_badge">Wali Kelas</string>
+    <string name="profile_teacher_regular_note">Guru Pengajar (akses kelas &amp; mapel yang diajar)</string>
+
+    <!-- Master User & Siswa -->
+    <string name="user_edit_role_hint">Role Akun</string>
+    <string name="user_cd_edit">Ubah data dan role</string>
+    <string name="user_cd_block">Blokir atau aktifkan akun</string>
+    <string name="user_cd_reset">Reset password</string>
+    <string name="user_cd_delete">Hapus akun</string>
+    <string name="student_birthdate_hint">Tanggal Lahir (YYYY-MM-DD)</string>
+    <string name="student_class_action">Atur Kelas Siswa</string>
+    <string name="student_class_field_hint">Kelas (Tahun Ajaran Aktif)</string>
+    <string name="student_class_none">Belum ada kelas</string>
+    <string name="student_guardians_action">Kelola Wali Murid</string>
+    <string name="student_guardians_empty">Belum ada wali murid terhubung dengan siswa ini.</string>
+
+    <!-- Master Guru & Guru Pengajar (F-MST-05 & F-MST-10) -->
+    <string name="title_management_teacher">Manajemen Guru</string>
+    <string name="teacher_mode_list">Daftar Guru</string>
+    <string name="teacher_mode_assignments">Guru Pengajar</string>
+    <string name="search_teacher_hint">Cari nama, email, atau NIP</string>
+    <string name="search_assignment_hint">Cari guru, mapel, atau kelas</string>
+    <string name="filter_all_teachers">Semua Guru</string>
+    <string name="filter_homeroom_teachers">Wali Kelas</string>
+    <string name="filter_regular_teachers">Guru Biasa</string>
+    <string name="chip_teacher_count">(%1$d) Guru</string>
+    <string name="chip_homeroom_count">(%1$d) Wali Kelas</string>
+    <string name="chip_regular_count">(%1$d) Guru Biasa</string>
+    <string name="teacher_empty">Belum ada data guru yang cocok.</string>
+    <string name="assignment_empty">Belum ada penugasan guru mengajar di semester aktif.</string>
+    <string name="teacher_badge_homeroom">Wali Kelas</string>
+    <string name="teacher_badge_regular">Guru Pengajar</string>
+    <string name="teacher_access_homeroom">Akses: Mengajar + Wali Kelas (izin, tagihan &amp; pantau kelas binaan)</string>
+    <string name="teacher_access_regular">Akses: Guru Biasa (hanya jadwal, nilai, presensi &amp; tugas mapel diampu)</string>
+    <string name="dialog_add_teacher_title">Tambah Guru</string>
+    <string name="dialog_edit_teacher_title">Ubah Data Guru</string>
+    <string name="dialog_add_assignment_title">Tambah Guru Pengajar</string>
+    <string name="dialog_edit_assignment_title">Ganti Guru Pengajar</string>
+
+    <!-- Master Kelas, Wali Kelas & Anggota (F-MST-07, F-MST-08, F-MST-09) -->
+    <string name="title_management_class">Manajemen Kelas</string>
+    <string name="search_class_hint">Cari nama kelas</string>
+    <string name="filter_all_years">Semua Tahun Ajaran</string>
+    <string name="chip_class_count">(%1$d) Kelas</string>
+    <string name="chip_class_with_homeroom">(%1$d) Ada Wali</string>
+    <string name="chip_class_no_homeroom">(%1$d) Tanpa Wali</string>
+    <string name="class_empty">Belum ada data kelas yang cocok.</string>
+    <string name="dialog_add_class_title">Tambah Kelas</string>
+    <string name="dialog_edit_class_title">Ubah Data Kelas</string>
+    <string name="dialog_homeroom_title">Atur Wali Kelas</string>
+    <string name="dialog_class_members_title">Anggota Kelas</string>
+
+    <!-- Master Tahun Ajaran & Semester (F-MST-06) -->
+    <string name="title_management_period">Tahun Ajaran &amp; Semester</string>
+    <string name="period_empty">Belum ada data tahun ajaran.</string>
+    <string name="dialog_add_period_title">Tambah Tahun Ajaran</string>
+    <string name="dialog_edit_period_title">Ubah Tahun Ajaran</string>
+    <string name="dialog_manage_semesters_title">Kelola Semester</string>
+
+    <!-- Impor Excel Data Master (F-MST-04 Siswa, F-MST-05 Guru) -->
+    <string name="import_master_title_student">Impor Data Siswa</string>
+    <string name="import_master_title_teacher">Impor Data Guru</string>
+    <string name="import_student_info">Impor akun dan profil siswa dari berkas Excel (.xlsx). Password yang dikosongkan otomatis diisi 12345678, dan siswa otomatis masuk kelas jika kolom Kelas diisi.</string>
+    <string-array name="import_student_columns">
+        <item>Nama|Nama lengkap siswa (wajib)</item>
+        <item>NIS|Nomor Induk Siswa, format Teks dan unik (wajib)</item>
+        <item>Tanggal Lahir|Format YYYY-MM-DD atau DD/MM/YYYY, mis. 2009-05-14 (wajib)</item>
+        <item>Email|Email aktif dan unik untuk login (wajib)</item>
+        <item>Password|Opsional, min. 8 karakter (kosong = 12345678)</item>
+        <item>No. Telepon|Opsional, format Teks maks. 20 karakter</item>
+        <item>Kelas|Opsional, nama kelas aktif persis seperti di data master, mis. X-1</item>
+    </string-array>
+    <string name="import_teacher_info">Impor akun dan profil guru dari berkas Excel (.xlsx). Format kolom NIP wajib sebagai Teks agar angka 18 digit tidak terpotong Excel; password kosong otomatis diisi 12345678.</string>
+    <string-array name="import_teacher_columns">
+        <item>Nama|Nama lengkap guru beserta gelar (wajib)</item>
+        <item>NIP|Nomor Induk Pegawai, format Teks dan unik (wajib)</item>
+        <item>Email|Email aktif dan unik untuk login (wajib)</item>
+        <item>Password|Opsional, min. 8 karakter (kosong = 12345678)</item>
+    </string-array>
+    <string name="import_master_student_success">%1$d siswa berhasil diimpor.</string>
+    <string name="import_master_student_success_with_class">%1$d siswa berhasil diimpor (%2$d ditempatkan ke kelas).</string>
+    <string name="import_master_teacher_success">%1$d guru berhasil diimpor.</string>
+
+    <!-- Skala Predikat Nilai (F-NIL-06) -->
+    <string name="action_edit">Ubah</string>
+    <string name="action_delete">Hapus</string>
+    <string name="btn_year_predicates">Predikat</string>
+    <string name="title_grade_predicates">Skala Predikat Nilai</string>
+    <string name="predicate_rule_hint">Nilai akhir dicocokkan ke ambang minimum tertinggi. Skala wajib memiliki satu baris dengan nilai minimum 0.</string>
+    <string name="predicate_zero_missing_warning">Skala wajib memiliki satu baris dengan nilai minimum 0 sebelum disimpan.</string>
+    <string name="predicate_empty">Belum ada skala predikat untuk tahun ajaran ini.</string>
+    <string name="predicate_apply_default">Pakai Skala Bawaan (A/B/C/D)</string>
+    <string name="predicate_save_scale">Simpan Skala</string>
+    <string name="predicate_add_title">Tambah Predikat</string>
+    <string name="predicate_edit_title">Ubah Predikat</string>
+    <string name="predicate_saved_success">Skala predikat nilai berhasil disimpan</string>
+
+    <!-- Master Paket Mata Pelajaran Pilihan (F-MPP-03) -->
+    <string name="ops_subject_packages_title">Paket Mapel Pilihan</string>
+    <string name="ops_subject_packages_desc">Kelola paket mata pelajaran pilihan dan kapasitas per tahun ajaran.</string>
+    <string name="title_subject_packages">Paket Mapel Pilihan</string>
+    <string name="search_package_hint">Cari nama paket</string>
+    <string name="package_empty">Belum ada paket mata pelajaran pilihan pada tahun ajaran ini.</string>
+    <string name="dialog_add_package_title">Tambah Paket Mapel</string>
+    <string name="dialog_edit_package_title">Ubah Paket Mapel</string>
+
+    <!-- Pengumuman & Kalender Akademik (F-PGM-01..03, F-KAL-01..02) -->
+    <string name="title_announcements">Pengumuman</string>
+    <string name="announcement_subtitle">Informasi resmi sekolah &amp; kelas</string>
+    <string name="announcement_search_hint">Cari judul atau isi pengumuman</string>
+    <string name="announcement_empty">Belum ada pengumuman yang tersedia.</string>
+    <string name="announcement_offline_copy">Offline — menampilkan salinan pengumuman tersimpan.</string>
+    <string name="announcement_open_attachment">Lihat Lampiran</string>
+    <string name="announcement_no_attachment">Belum ada lampiran</string>
+    <string name="announcement_remove_attachment">Hapus lampiran</string>
+    <string name="announcement_add_title">Buat Pengumuman</string>
+    <string name="announcement_edit_title">Ubah Pengumuman</string>
+    <string name="title_calendar">Kalender Akademik</string>
+    <string name="calendar_subtitle">Jadwal ujian, libur, dan kegiatan sekolah</string>
+    <string name="calendar_search_hint">Cari agenda akademik</string>
+    <string name="calendar_empty">Belum ada agenda pada kalender akademik.</string>
+    <string name="calendar_save_to_device">Simpan ke Kalender HP</string>
+    <string name="calendar_add_title">Tambah Agenda Kalender</string>
+    <string name="calendar_edit_title">Ubah Agenda Kalender</string>
+    <string name="shortcut_announcements">Pengumuman</string>
+    <string name="shortcut_calendar">Kalender</string>
 </resources>

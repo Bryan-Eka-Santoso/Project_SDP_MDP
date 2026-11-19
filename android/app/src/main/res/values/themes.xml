@@ -1,14 +1,135 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.Android" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    <style name="Base.Theme.Android" parent="Theme.Material3.Light.NoActionBar" />
+
+    <style name="Theme.Android" parent="Base.Theme.Android">
+        <!-- Palet resmi SMAK Santa Agnes -->
+        <item name="colorPrimary">@color/agnesian_blue</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/agnesian_tile</item>
+        <item name="colorOnPrimaryContainer">@color/agnesian_blue</item>
+        <item name="colorSecondary">@color/agnesian_button</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorSecondaryContainer">@color/agnesian_tile</item>
+        <item name="colorOnSecondaryContainer">@color/agnesian_blue</item>
+        <item name="colorTertiary">@color/agnesian_blue_dark</item>
+        <item name="colorOnTertiary">@color/white</item>
+
+        <item name="android:windowBackground">@color/agnesian_background</item>
+        <item name="colorSurface">@color/white</item>
+        <item name="colorOnSurface">@color/agnesian_text</item>
+        <item name="colorSurfaceVariant">@color/agnesian_surface_soft</item>
+        <item name="colorOnSurfaceVariant">@color/agnesian_muted</item>
+        <item name="colorSurfaceContainerLowest">@color/white</item>
+        <item name="colorSurfaceContainerLow">@color/agnesian_surface_soft</item>
+        <item name="colorSurfaceContainer">#F3F4F6</item>
+        <item name="colorSurfaceContainerHigh">#EEF2F7</item>
+        <item name="colorSurfaceContainerHighest">@color/agnesian_divider</item>
+        <item name="colorOutline">@color/agnesian_border</item>
+        <item name="colorOutlineVariant">@color/agnesian_divider</item>
+        <item name="colorError">@color/change_cancel</item>
+        <item name="colorOnError">@color/white</item>
+
+        <item name="android:statusBarColor">@color/agnesian_blue</item>
+        <item name="android:navigationBarColor">@color/white</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
+
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.Agnesian.AlertDialog</item>
+        <item name="materialCalendarTheme">@style/ThemeOverlay.Agnesian.DatePicker</item>
+        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.Agnesian.BottomSheetDialog</item>
+        <item name="textInputOutlinedStyle">@style/Widget.Agnesian.TextInputLayout</item>
     </style>
 
-    <style name="Theme.Android" parent="Base.Theme.Android" />
+    <style name="ThemeOverlay.Agnesian.AlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="colorPrimary">@color/agnesian_blue</item>
+        <item name="colorSurface">@color/white</item>
+        <item name="colorSurfaceContainerHigh">@color/white</item>
+        <item name="colorOnSurface">@color/agnesian_text</item>
+        <item name="colorOnSurfaceVariant">@color/agnesian_muted</item>
+        <item name="dialogCornerRadius">18dp</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.Agnesian.DialogButton.Positive</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.Agnesian.DialogButton.Negative</item>
+    </style>
 
-    <!-- Figma tidak memakai kapsul penanda tab aktif; cukup warna ikon dan label. -->
+    <style name="Widget.Agnesian.DialogButton.Positive" parent="Widget.Material3.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/agnesian_blue</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="Widget.Agnesian.DialogButton.Negative" parent="Widget.Material3.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/agnesian_muted</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+
+    <style name="ThemeOverlay.Agnesian.DatePicker" parent="ThemeOverlay.Material3.MaterialCalendar">
+        <item name="colorPrimary">@color/agnesian_blue</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/agnesian_tile</item>
+        <item name="colorOnPrimaryContainer">@color/agnesian_blue</item>
+        <item name="colorSurface">@color/white</item>
+        <item name="colorSurfaceContainerHigh">@color/white</item>
+        <item name="colorOnSurface">@color/agnesian_text</item>
+        <item name="colorOnSurfaceVariant">@color/agnesian_muted</item>
+    </style>
+
+    <style name="ThemeOverlay.Agnesian.BottomSheetDialog" parent="ThemeOverlay.Material3.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/Widget.Agnesian.BottomSheet</item>
+        <item name="colorSurface">@color/white</item>
+        <item name="colorPrimary">@color/agnesian_blue</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
+    </style>
+
+    <style name="Widget.Agnesian.BottomSheet" parent="Widget.Material3.BottomSheet.Modal">
+        <item name="backgroundTint">@color/white</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.Agnesian.BottomSheet</item>
+    </style>
+
+    <style name="ShapeAppearance.Agnesian.BottomSheet" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">24dp</item>
+        <item name="cornerSizeTopRight">24dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+    </style>
+
+    <style name="Widget.Agnesian.TextInputLayout" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxBackgroundColor">@color/white</item>
+        <item name="boxStrokeColor">@color/agnesian_blue</item>
+        <item name="boxStrokeWidth">1dp</item>
+        <item name="boxStrokeWidthFocused">1.5dp</item>
+        <item name="boxCornerRadiusTopStart">10dp</item>
+        <item name="boxCornerRadiusTopEnd">10dp</item>
+        <item name="boxCornerRadiusBottomStart">10dp</item>
+        <item name="boxCornerRadiusBottomEnd">10dp</item>
+        <item name="hintTextColor">@color/agnesian_blue</item>
+    </style>
+
+    <style name="Widget.Agnesian.SelectorInputLayout" parent="Widget.Agnesian.TextInputLayout">
+        <item name="endIconMode">custom</item>
+        <item name="endIconDrawable">@drawable/ic_chevron_down</item>
+        <item name="endIconTint">@color/agnesian_muted</item>
+    </style>
+
+    <style name="Widget.Agnesian.DateInputLayout" parent="Widget.Agnesian.TextInputLayout">
+        <item name="endIconMode">custom</item>
+        <item name="endIconDrawable">@drawable/ic_calendar</item>
+        <item name="endIconTint">@color/agnesian_blue</item>
+    </style>
+
+    <style name="Widget.Agnesian.BottomNav" parent="Widget.Material3.BottomNavigationView">
+        <item name="android:background">@drawable/bg_bottom_nav</item>
+        <item name="itemActiveIndicatorStyle">@style/Widget.Agnesian.BottomNav.Indicator</item>
+        <item name="itemIconTint">@color/nav_item_color</item>
+        <item name="itemTextColor">@color/nav_item_color</item>
+        <item name="labelVisibilityMode">labeled</item>
+        <item name="itemRippleColor">@color/agnesian_tile</item>
+    </style>
+
     <style name="Widget.Agnesian.BottomNav.Indicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
-        <item name="android:color">@android:color/transparent</item>
+        <item name="android:color">@color/agnesian_tile</item>
+        <item name="android:height">28dp</item>
+        <item name="android:width">54dp</item>
     </style>
 </resources>

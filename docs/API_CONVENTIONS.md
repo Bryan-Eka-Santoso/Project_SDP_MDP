@@ -89,6 +89,8 @@ Gagal:
 | 422 | `IMPORT_INVALID` | Impor Excel ada baris tidak valid; `details` = `[{ row, column, message }]` |
 | 429 | `TOO_MANY_REQUESTS` | Terlalu banyak percobaan login/refresh/ganti password; tunggu sesuai header `Retry-After` (detik) |
 | 500 | `INTERNAL_ERROR` | Error tak terduga (detail hanya di log server) |
+| 502 | `EXTERNAL_SERVICE_ERROR` | Layanan eksternal (mis. Cloudinary) gagal merespons |
+| 503 | `SERVICE_UNAVAILABLE` | Layanan eksternal belum dikonfigurasi pada server |
 
 Menambah kode error baru: tambahkan ke tabel ini.
 

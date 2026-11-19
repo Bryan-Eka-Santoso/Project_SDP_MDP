@@ -1,3 +1,4 @@
+const path = require("node:path");
 const express = require("express");
 const { sendSuccess } = require("./utils/response");
 const { errorHandler, notFoundHandler } = require("./middlewares/errorHandler");
@@ -39,11 +40,16 @@ api.use(require("./modules/attendance/leave.review.routes"));
 api.use(require("./modules/elective/elective.allocation.routes"));
 api.use(require("./modules/notifications/notifications.routes"));
 api.use(require("./modules/schedules/schedules.routes"));
-api.use("/facility-bookings", require("./modules/bookings/peminjaman.routes"));
 api.use(require("./modules/bills/bills.routes"));
 api.use(require("./modules/reports/reports.routes"));
 api.use("/users", require("./modules/users/users.routes"));
 api.use(require("./modules/master/master.routes"));
+api.use("/subject-packages", require("./modules/elective/elective.routes"));
+api.use("/academic-events", require("./modules/calendar/calendar.routes"));
+api.use("/announcements", require("./modules/announcements/announcements.routes"));
+
+// File lampiran lokal sementara (fallback jika env Cloudinary belum diisi).
+app.use("/uploads", express.static(path.resolve(__dirname, "../uploads"), { dotfiles: "ignore" }));
 api.use("/violations", require("./modules/violations/pelanggaran.routes"));
 api.use(
   "/violation-history",

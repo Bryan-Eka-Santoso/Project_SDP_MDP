@@ -29,6 +29,7 @@ import id.sch.santaagnes.sim.data.remote.MataPelajaranApi
 import id.sch.santaagnes.sim.data.remote.FasilitasApi
 import id.sch.santaagnes.sim.data.remote.JenisPelanggaranApi
 import id.sch.santaagnes.sim.data.remote.PeminjamanApi
+import id.sch.santaagnes.sim.data.remote.SchoolInfoApi
 import id.sch.santaagnes.sim.data.remote.PelanggaranApi
 import id.sch.santaagnes.sim.data.remote.RiwayatPelanggaranApi
 import id.sch.santaagnes.sim.data.remote.AjukanPeminjamanApi
@@ -234,6 +235,11 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    fun provideSchoolInfoApi(
+        retrofit: Retrofit
+    ): SchoolInfoApi {
+        return retrofit.create(SchoolInfoApi::class.java)
+    }
     fun providePelanggaranApi(
         retrofit: Retrofit
     ): PelanggaranApi {
