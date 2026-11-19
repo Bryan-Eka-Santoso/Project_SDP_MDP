@@ -37,13 +37,13 @@ class ScheduleChangeReportViewModel @Inject constructor(
 
     // Rentang tanggal dijaga tetap valid (awal tidak setelah akhir) supaya server tidak menolaknya.
     fun selectDateFrom(date: LocalDate?) = updateFilter {
-        val to = it.dateTo
-        it.copy(dateFrom = date, dateTo = if (date != null && to != null && date > to) date else to)
+        val (from, to) = adjustDateFrom(date, it.dateTo)
+        it.copy(dateFrom = from, dateTo = to)
     }
 
     fun selectDateTo(date: LocalDate?) = updateFilter {
-        val from = it.dateFrom
-        it.copy(dateTo = date, dateFrom = if (date != null && from != null && date < from) date else from)
+        val (from, to) = adjustDateTo(it.dateFrom, date)
+        it.copy(dateFrom = from, dateTo = to)
     }
 
     fun clearDates() = updateFilter { it.copy(dateFrom = null, dateTo = null) }

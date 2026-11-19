@@ -201,7 +201,9 @@ Contoh: 40 sesi, 36 hadir, 2 sakit, 1 izin, 1 alpa → 36/40 × 100 = **90%**.
 - Tanpa `semesterId` laporan memakai semester aktif.
 - **`schedule-changes` (F-LAP-07), kolom usulan:** tanggal, hari, kelas, mata pelajaran, guru asli, jenis (Ganti guru / Pindah jadwal / Dibatalkan), guru pengganti, jam asli, jam baru, ruangan asli, ruangan baru, keterangan. Filter: `semesterId`, `classGroupId`, `teacherId` (guru asli atau pengganti), `type`, `dateFrom`, `dateTo`. Urut tanggal.
 - **`teaching-load` (F-LAP-09), kolom usulan:** per guru: nama, NIP, jumlah pertemuan per minggu, total jam per minggu (menit dibagi 60, dua desimal), jumlah kelas, mata pelajaran, dan jam per hari Senin sampai Sabtu. Filter: `semesterId`, `teacherId`. Dihitung dari jadwal master semester (slot mingguan); pengganti dan pembatalan per tanggal tidak mengubah angka. Semua guru tampil, termasuk yang belum punya jadwal (0 jam). Tanpa insentif atau tarif.
-- Laporan lain (F-LAP-01..06, 08, 10) belum dibuat; kolomnya menunggu keputusan PO-10. Laporan baru cukup menambah satu berkas definisi dan mendaftarkannya di `reports.service.js`.
+- **`payment-status` (F-LAP-05), disetujui (PO-10):** rincian per tagihan siswa: NIS, nama siswa, kelas (tahun ajaran aktif), kode tagihan, jenis pembayaran, nominal (`IDR` pada tampilan aplikasi, angka bulat `Nominal (IDR)` pada Excel), tanggal jatuh tempo, status (`Lunas` / `Belum dibayar` / `Menunggak`, dengan `Menunggak` = `UNPAID` dan `dueDate < hari ini WIB`), tanggal bayar. Filter: `classGroupId`, `status` (`PAID` / `UNPAID` / `OVERDUE`), `dueFrom`, `dueTo`. Urut jatuh tempo terbaru lalu `id` terbaru.
+- **`student-stats` (F-LAP-10), disetujui (PO-10):** rekap per kelas pada tahun ajaran dari semester terpilih (`semesterId`, default semester aktif): nama kelas, tingkat, wali kelas, kapasitas, jumlah siswa, jumlah hadir (`PRESENT`), sakit (`SICK`), izin (`EXCUSED`), alpa (`ABSENT`), persentase kehadiran (`(hadir / total presensi) × 100`, satu desimal, `0` bila belum ada presensi), jumlah kasus pelanggaran dan total poin pelanggaran dalam rentang tanggal semester. Filter: `semesterId`, `classGroupId`, `gradeLevel`. Urut tingkat lalu nama kelas. (Tabel `siswa` belum memiliki kolom jenis kelamin sehingga rekap tidak memecah L/P.)
+- Laporan lain (F-LAP-01..04, 06, 08) belum dibuat; kolomnya menunggu keputusan PO-10. Laporan baru cukup menambah satu berkas definisi dan mendaftarkannya di `reports.service.js`.
 
 ## Pertanyaan terbuka
 
@@ -218,4 +220,4 @@ Tanyakan ke pengguna sebelum mengimplementasikan bagian yang bergantung pada poi
 | PO-07 | Apakah buku penghubung satu arah (hanya wali kelas menulis) atau wali murid dapat membalas? |
 | PO-08 | Urutan pengisian siswa ke kelas paket saat pembagian otomatis (abjad, NIS, atau acak)? |
 | PO-09 | Daftar jam pelajaran (jam ke-n dan waktunya) serta hari sekolah (Senin–Jumat atau Senin–Sabtu). |
-| PO-10 | Kolom dan format setiap dari 10 laporan (lampiran laporan proyek). Kolom F-LAP-07 dan F-LAP-09 sudah dibuat sebagai **usulan** (bagian 12), menunggu persetujuan tim. |
+| PO-10 | Kolom dan format setiap dari 10 laporan (lampiran laporan proyek). `F-LAP-05` dan `F-LAP-10` telah disetujui pengguna (bagian 12); `F-LAP-07` dan `F-LAP-09` dibuat sebagai **usulan** menunggu persetujuan tim; lainnya menunggu keputusan. |

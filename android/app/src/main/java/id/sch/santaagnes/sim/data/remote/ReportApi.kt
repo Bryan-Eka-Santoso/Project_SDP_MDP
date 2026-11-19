@@ -98,6 +98,8 @@ data class TeachingJournalReportDto(
     val teacherId: Int,
     val teacherName: String,
     val subjectName: String
+)
+
 data class ViolationReportDto(
     val id: Int,
     val date: String,
@@ -143,6 +145,36 @@ data class ElectiveSurveyReportDto(
     val studentCount: Int,
     val respondentCount: Int,
     val percentage: Double
+)
+
+data class StudentStatsClassDto(
+    val id: Int,
+    val name: String,
+    val gradeLevel: String,
+    val capacity: Int
+)
+
+data class StudentStatsAttendanceDto(
+    val present: Int,
+    val sick: Int,
+    val excused: Int,
+    val absent: Int,
+    val total: Int
+)
+
+data class StudentStatsViolationsDto(
+    val count: Int,
+    val points: Int
+)
+
+/** Satu baris `GET /reports/student-stats` (F-LAP-10). */
+data class StudentStatsDto(
+    val classGroup: StudentStatsClassDto,
+    val homeroomTeacher: IdNameDto?,
+    val studentCount: Int,
+    val attendance: StudentStatsAttendanceDto,
+    val attendanceRate: Double,
+    val violations: StudentStatsViolationsDto
 )
 
 interface ReportApi {
@@ -228,6 +260,24 @@ interface ReportApi {
         @Query("teacherId") teacherId: Int?
     ): ApiResponse<List<TeachingLoadDto>>
 
+    @GET("reports/payment-status")
+    suspend fun getPaymentStatus(
+        @Query("page") page: Int,
+        @Query("limit") limit: Int,
+        @Query("classGroupId") classGroupId: Int?,
+        @Query("status") status: String?,
+        @Query("dueFrom") dueFrom: String?,
+        @Query("dueTo") dueTo: String?
+    ): ApiResponse<List<BillDto>>
+
+    @GET("reports/student-stats")
+    suspend fun getStudentStats(
+        @Query("page") page: Int,
+        @Query("limit") limit: Int,
+        @Query("classGroupId") classGroupId: Int?,
+        @Query("gradeLevel") gradeLevel: String?
+    ): ApiResponse<List<StudentStatsDto>>
+
     // F-LAP-11: berkas .xlsx berisi data dan filter yang sama dengan tampilan (tanpa paginasi).
     @Streaming
     @GET("reports/schedule-changes/export")
@@ -245,6 +295,21 @@ interface ReportApi {
         @Query("teacherId") teacherId: Int?
     ): ResponseBody
 
+    @Streaming
+    @GET("reports/payment-status/export")
+    suspend fun exportPaymentStatus(
+        @Query("classGroupId") classGroupId: Int?,
+        @Query("status") status: String?,
+        @Query("dueFrom") dueFrom: String?,
+        @Query("dueTo") dueTo: String?
+    ): ResponseBody
+
+    @Streaming
+    @GET("reports/student-stats/export")
+    suspend fun exportStudentStats(
+        @Query("classGroupId") classGroupId: Int?,
+        @Query("gradeLevel") gradeLevel: String?
+    ): ResponseBody
 
     @GET("reports/violations")
     suspend fun getViolations(
@@ -265,7 +330,6 @@ interface ReportApi {
         @Query("dateTo") dateTo: String? = null
     ): ResponseBody
 
-
     @GET("reports/facility-bookings")
     suspend fun getFacilityBookings(
         @Query("page") page: Int = 1,
@@ -284,7 +348,6 @@ interface ReportApi {
         @Query("dateFrom") dateFrom: String? = null,
         @Query("dateTo") dateTo: String? = null
     ): ResponseBody
-
 
     @GET("reports/elective-surveys")
     suspend fun getElectiveSurveys(

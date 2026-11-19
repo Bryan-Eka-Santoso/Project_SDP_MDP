@@ -14,6 +14,14 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+
+/** Menjaga rentang tanggal tetap valid (`from` tidak sesudah `to`). */
+internal fun adjustDateFrom(from: LocalDate?, to: LocalDate?): Pair<LocalDate?, LocalDate?> =
+    from to if (from != null && to != null && from > to) from else to
+
+internal fun adjustDateTo(from: LocalDate?, to: LocalDate?): Pair<LocalDate?, LocalDate?> =
+    (if (to != null && from != null && from > to) to else from) to to
 
 /** Status layar laporan: [R] = baris laporan, [F] = filter laporan itu. */
 data class ReportUiState<R, F>(

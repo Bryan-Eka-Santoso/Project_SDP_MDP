@@ -3,16 +3,23 @@ package id.sch.santaagnes.sim.data.repository
 import id.sch.santaagnes.sim.core.ApiErrorMapper
 import id.sch.santaagnes.sim.core.ExportFiles
 import id.sch.santaagnes.sim.core.Resource
+import id.sch.santaagnes.sim.data.remote.ApiResponse
+import id.sch.santaagnes.sim.data.remote.ClassApi
 import id.sch.santaagnes.sim.data.remote.MasterLookupApi
 import id.sch.santaagnes.sim.data.remote.ReportApi
 import id.sch.santaagnes.sim.data.remote.ScheduleChangeReportDto
+import id.sch.santaagnes.sim.data.remote.StudentStatsDto
 import id.sch.santaagnes.sim.data.remote.TeachingLoadDto
+import id.sch.santaagnes.sim.domain.model.Bill
 import id.sch.santaagnes.sim.domain.model.ChangeType
 import id.sch.santaagnes.sim.domain.model.NamedId
+import id.sch.santaagnes.sim.domain.model.PaymentStatusReportFilter
 import id.sch.santaagnes.sim.domain.model.ReportOptions
 import id.sch.santaagnes.sim.domain.model.ReportPage
 import id.sch.santaagnes.sim.domain.model.ScheduleChangeReportFilter
 import id.sch.santaagnes.sim.domain.model.ScheduleChangeReportRow
+import id.sch.santaagnes.sim.domain.model.StudentStatsFilter
+import id.sch.santaagnes.sim.domain.model.StudentStatsRow
 import id.sch.santaagnes.sim.domain.model.TeacherOption
 import id.sch.santaagnes.sim.domain.model.TeachingLoadFilter
 import id.sch.santaagnes.sim.domain.model.TeachingLoadRow
@@ -22,7 +29,7 @@ import java.time.LocalTime
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/** Laporan admin (F-LAP-07, F-LAP-09) dan ekspor Excel (F-LAP-11). Hanya online; backend membatasi ke ADMIN. */
+/** Laporan admin (F-LAP-05, F-LAP-07, F-LAP-09, F-LAP-10) dan ekspor Excel (F-LAP-11). Hanya online; backend membatasi ke ADMIN. */
 interface ReportRepository {
 
     suspend fun scheduleChanges(
@@ -32,12 +39,26 @@ interface ReportRepository {
 
     suspend fun teachingLoad(page: Int, filter: TeachingLoadFilter): Resource<ReportPage<TeachingLoadRow>>
 
+    suspend fun paymentStatus(
+        page: Int,
+        filter: PaymentStatusReportFilter
+    ): Resource<ReportPage<Bill>>
+
+    suspend fun studentStats(
+        page: Int,
+        filter: StudentStatsFilter
+    ): Resource<ReportPage<StudentStatsRow>>
+
     /** Success(true) = berkas tersimpan di [destination]; Success(false) = server menjawab tetapi berkas gagal ditulis. */
     suspend fun exportScheduleChanges(filter: ScheduleChangeReportFilter, destination: String): Resource<Boolean>
 
     suspend fun exportTeachingLoad(filter: TeachingLoadFilter, destination: String): Resource<Boolean>
 
-    /** Pilihan guru dan kelas untuk filter. */
+    suspend fun exportPaymentStatus(filter: PaymentStatusReportFilter, destination: String): Resource<Boolean>
+
+    suspend fun exportStudentStats(filter: StudentStatsFilter, destination: String): Resource<Boolean>
+
+    /** Pilihan guru, kelas, dan tingkat untuk filter. */
     suspend fun options(): Resource<ReportOptions>
 }
 
@@ -45,6 +66,7 @@ interface ReportRepository {
 class ReportRepositoryImpl @Inject constructor(
     private val api: ReportApi,
     private val master: MasterLookupApi,
+    private val classes: ClassApi,
     private val errors: ApiErrorMapper,
     private val files: ExportFiles
 ) : ReportRepository {
@@ -62,13 +84,7 @@ class ReportRepositoryImpl @Inject constructor(
             dateFrom = filter.dateFrom?.toString(),
             dateTo = filter.dateTo?.toString()
         )
-        check(response.success) { "Laporan gagal dimuat." }
-        ReportPage(
-            items = response.data.orEmpty().map { it.toDomain() },
-            page = page,
-            hasMore = page < (response.meta?.totalPages ?: page),
-            total = response.meta?.total ?: response.data.orEmpty().size
-        )
+        toReportPage(response, page) { it.toDomain() }
     }
 
     override suspend fun teachingLoad(
@@ -76,13 +92,35 @@ class ReportRepositoryImpl @Inject constructor(
         filter: TeachingLoadFilter
     ): Resource<ReportPage<TeachingLoadRow>> = errors.call {
         val response = api.getTeachingLoad(page = page, limit = PAGE_SIZE, teacherId = filter.teacherId)
-        check(response.success) { "Laporan gagal dimuat." }
-        ReportPage(
-            items = response.data.orEmpty().map { it.toDomain() },
+        toReportPage(response, page) { it.toDomain() }
+    }
+
+    override suspend fun paymentStatus(
+        page: Int,
+        filter: PaymentStatusReportFilter
+    ): Resource<ReportPage<Bill>> = errors.call {
+        val response = api.getPaymentStatus(
             page = page,
-            hasMore = page < (response.meta?.totalPages ?: page),
-            total = response.meta?.total ?: response.data.orEmpty().size
+            limit = PAGE_SIZE,
+            classGroupId = filter.classGroupId,
+            status = filter.status?.name,
+            dueFrom = filter.dueFrom?.toString(),
+            dueTo = filter.dueTo?.toString()
         )
+        toReportPage(response, page) { it.toDomain() }
+    }
+
+    override suspend fun studentStats(
+        page: Int,
+        filter: StudentStatsFilter
+    ): Resource<ReportPage<StudentStatsRow>> = errors.call {
+        val response = api.getStudentStats(
+            page = page,
+            limit = PAGE_SIZE,
+            classGroupId = filter.classGroupId,
+            gradeLevel = filter.gradeLevel
+        )
+        toReportPage(response, page) { it.toDomain() }
     }
 
     override suspend fun exportScheduleChanges(
@@ -104,31 +142,83 @@ class ReportRepositoryImpl @Inject constructor(
             files.write(api.exportTeachingLoad(filter.teacherId), destination)
         }
 
-    override suspend fun options(): Resource<ReportOptions> = errors.call {
-        val semesterId = checkNotNull(master.getActiveSemester().data) { "Tidak ada semester aktif." }.id
+    override suspend fun exportPaymentStatus(
+        filter: PaymentStatusReportFilter,
+        destination: String
+    ): Resource<Boolean> = errors.call {
+        val body = api.exportPaymentStatus(
+            classGroupId = filter.classGroupId,
+            status = filter.status?.name,
+            dueFrom = filter.dueFrom?.toString(),
+            dueTo = filter.dueTo?.toString()
+        )
+        files.write(body, destination)
+    }
 
-        val teachers = mutableListOf<TeacherOption>()
-        var page = 1
-        while (page <= MAX_PAGES) {
-            val response = master.getTeachers(page, LOOKUP_PAGE_SIZE)
-            teachers += response.data.orEmpty().map { TeacherOption(it.id, it.user.name) }
-            if (page >= (response.meta?.totalPages ?: page)) break
-            page += 1
+    override suspend fun exportStudentStats(filter: StudentStatsFilter, destination: String): Resource<Boolean> =
+        errors.call {
+            files.write(api.exportStudentStats(filter.classGroupId, filter.gradeLevel), destination)
         }
 
-        val classGroups = mutableListOf<NamedId>()
-        page = 1
-        while (page <= MAX_PAGES) {
-            val response = master.getTeachingAssignments(page, LOOKUP_PAGE_SIZE, semesterId)
-            classGroups += response.data.orEmpty().map { NamedId(it.classGroup.id, it.classGroup.name) }
-            if (page >= (response.meta?.totalPages ?: page)) break
-            page += 1
+    override suspend fun options(): Resource<ReportOptions> = errors.call {
+        val semester = checkNotNull(master.getActiveSemester().data) { "Tidak ada semester aktif." }
+
+        val teachers = collectPages { page ->
+            val response = master.getTeachers(page, LOOKUP_PAGE_SIZE)
+            response to response.data.orEmpty().map { TeacherOption(it.id, it.user.name) }
+        }
+
+        val yearId = semester.academicYearId
+        val (classGroups, gradeLevels) = if (yearId != null) {
+            val classDtos = collectPages { page ->
+                val response = classes.getClasses(page = page, limit = LOOKUP_PAGE_SIZE, academicYearId = yearId)
+                response to response.data.orEmpty()
+            }
+            val groups = classDtos.map { NamedId(it.id, it.name) }
+            val grades = classDtos.map { it.gradeLevel }.distinct().sorted()
+            groups to grades
+        } else {
+            val groups = collectPages { page ->
+                val response = master.getTeachingAssignments(page, LOOKUP_PAGE_SIZE, semester.id)
+                response to response.data.orEmpty().map { NamedId(it.classGroup.id, it.classGroup.name) }
+            }
+            groups to emptyList()
         }
 
         ReportOptions(
             teachers = teachers.distinctBy { it.id }.sortedBy { it.name },
-            classGroups = classGroups.distinctBy { it.id }.sortedBy { it.name }
+            classGroups = classGroups.distinctBy { it.id }.sortedBy { it.name },
+            gradeLevels = gradeLevels
         )
+    }
+
+    private fun <D, R> toReportPage(
+        response: ApiResponse<List<D>>,
+        page: Int,
+        map: (D) -> R
+    ): ReportPage<R> {
+        check(response.success) { "Laporan gagal dimuat." }
+        val data = response.data.orEmpty()
+        return ReportPage(
+            items = data.map(map),
+            page = page,
+            hasMore = page < (response.meta?.totalPages ?: page),
+            total = response.meta?.total ?: data.size
+        )
+    }
+
+    private suspend fun <T> collectPages(
+        fetch: suspend (Int) -> Pair<ApiResponse<*>, List<T>>
+    ): List<T> {
+        val result = mutableListOf<T>()
+        var page = 1
+        while (page <= MAX_PAGES) {
+            val (response, items) = fetch(page)
+            result += items
+            if (page >= (response.meta?.totalPages ?: page)) break
+            page += 1
+        }
+        return result
     }
 
     private companion object {
@@ -171,4 +261,21 @@ internal fun TeachingLoadDto.toDomain() = TeachingLoadRow(
     classCount = classCount,
     subjectNames = subjects.map { it.name },
     hoursPerDay = WEEK_DAYS.map { day -> (perDay[day.name]?.minutes ?: 0.0) / MINUTES_PER_HOUR }
+)
+
+internal fun StudentStatsDto.toDomain() = StudentStatsRow(
+    classGroupId = classGroup.id,
+    className = classGroup.name,
+    gradeLevel = classGroup.gradeLevel,
+    capacity = classGroup.capacity,
+    homeroomTeacherName = homeroomTeacher?.name,
+    studentCount = studentCount,
+    presentCount = attendance.present,
+    sickCount = attendance.sick,
+    excusedCount = attendance.excused,
+    absentCount = attendance.absent,
+    attendanceTotal = attendance.total,
+    attendanceRate = attendanceRate,
+    violationCount = violations.count,
+    violationPoints = violations.points
 )

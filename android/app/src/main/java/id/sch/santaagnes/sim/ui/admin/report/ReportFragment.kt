@@ -14,11 +14,22 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
 import id.sch.santaagnes.sim.R
 import id.sch.santaagnes.sim.core.DateTimeWib
 import id.sch.santaagnes.sim.databinding.FragmentReportBinding
 import kotlinx.coroutines.launch
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneOffset
+import java.util.Locale
+
+/** Angka desimal bergaya Indonesia dengan koma, tanpa nol di belakang: 18, 18,5, 92,5. */
+internal fun formatReportDecimal(value: Double): String =
+    DecimalFormat("0.##", DecimalFormatSymbols(Locale("id", "ID"))).format(value)
 
 /**
  * Kerangka bersama layar laporan admin: header + tombol Ekspor Excel (F-LAP-11), total, daftar kartu
@@ -114,6 +125,40 @@ abstract class ReportFragment<R : Any, F : Any> : Fragment() {
             is ReportEvent.ExportFailed -> event.message
         }
         Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG).show()
+    }
+
+    protected fun setupDateRange(
+        fromHintRes: Int = R.string.report_filter_date_from,
+        toHintRes: Int = R.string.report_filter_date_to,
+        currentFrom: () -> LocalDate?,
+        currentTo: () -> LocalDate?,
+        onDateFrom: (LocalDate) -> Unit,
+        onDateTo: (LocalDate) -> Unit,
+        onClear: () -> Unit
+    ) {
+        binding.dateRow.isVisible = true
+        binding.layoutDateFrom.hint = getString(fromHintRes)
+        binding.layoutDateTo.hint = getString(toHintRes)
+        binding.inputDateFrom.setOnClickListener { pickDate(fromHintRes, currentFrom(), onDateFrom) }
+        binding.inputDateTo.setOnClickListener { pickDate(toHintRes, currentTo(), onDateTo) }
+        binding.btnClearDates.setOnClickListener { onClear() }
+    }
+
+    protected fun renderDateRange(from: LocalDate?, to: LocalDate?) {
+        binding.inputDateFrom.setText(from?.let(DateTimeWib::formatDate).orEmpty())
+        binding.inputDateTo.setText(to?.let(DateTimeWib::formatDate).orEmpty())
+        binding.btnClearDates.isVisible = from != null || to != null
+    }
+
+    private fun pickDate(titleRes: Int, current: LocalDate?, onPicked: (LocalDate) -> Unit) {
+        val picker = MaterialDatePicker.Builder.datePicker()
+            .setTitleText(titleRes)
+            .setSelection((current ?: DateTimeWib.today()).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
+            .build()
+        picker.addOnPositiveButtonClickListener { millis ->
+            onPicked(Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate())
+        }
+        picker.show(childFragmentManager, "date")
     }
 
     override fun onDestroyView() {

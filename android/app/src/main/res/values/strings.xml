@@ -277,28 +277,46 @@
     <string name="profile_bills">Tagihan</string>
     <string name="profile_reports">Laporan</string>
 
-    <!-- Laporan admin (F-LAP-07, F-LAP-09, F-LAP-11) -->
+    <!-- Laporan admin (F-LAP-05, F-LAP-07, F-LAP-09, F-LAP-10, F-LAP-11) -->
     <string name="report_hub_title">Laporan</string>
     <string name="report_hub_hint">Pilih laporan. Data memakai semester aktif.</string>
     <string name="report_schedule_changes_title">Perubahan Jadwal</string>
     <string name="report_schedule_changes_desc">Penggantian guru, pemindahan jadwal, dan pembatalan, lengkap dengan jam dan ruangan semula.</string>
     <string name="report_teaching_load_title">Beban Mengajar Guru</string>
     <string name="report_teaching_load_desc">Jumlah jam mengajar tiap guru per minggu dan sebarannya dari Senin sampai Sabtu.</string>
+    <string name="report_payment_status_title">Status Pembayaran</string>
+    <string name="report_payment_status_desc">Rincian tagihan siswa beserta status lunas, belum dibayar, dan menunggak.</string>
+    <string name="report_student_stats_title">Statistik Kesiswaan</string>
+    <string name="report_student_stats_desc">Rekap siswa, presensi (hadir, sakit, izin, alpa), dan pelanggaran per kelas.</string>
     <string name="report_export">Ekspor Excel</string>
     <string name="report_export_saved">Laporan tersimpan.</string>
     <string name="report_export_write_failed">Berkas laporan gagal disimpan.</string>
     <string name="report_total_changes">%1$d perubahan</string>
     <string name="report_total_teachers">%1$d guru</string>
+    <string name="report_total_bills">%1$d tagihan</string>
+    <string name="report_total_classes">%1$d kelas</string>
     <string name="report_empty">Tidak ada data untuk filter ini.</string>
     <string name="report_filter_date_from">Dari tanggal</string>
     <string name="report_filter_date_to">Sampai tanggal</string>
+    <string name="report_filter_due_from">Jatuh tempo dari</string>
+    <string name="report_filter_due_to">Jatuh tempo sampai</string>
     <string name="report_filter_clear_dates">Hapus tanggal</string>
+    <string name="report_filter_all_grades">Semua tingkat</string>
+    <string name="report_filter_grade_level">Tingkat %1$s</string>
     <string name="report_original_time">Jam semula: %1$s – %2$s</string>
     <string name="report_original_room">Ruang semula: %1$s</string>
     <string name="report_load_hours">%1$s jam/minggu</string>
     <string name="report_load_summary">%1$d pertemuan · %2$d kelas</string>
     <string name="report_load_nip">NIP %1$s</string>
     <string name="report_load_no_schedule">Belum ada jadwal.</string>
+    <string name="report_stats_grade_homeroom">Tingkat %1$s · Wali kelas: %2$s</string>
+    <string name="report_stats_grade_no_homeroom">Tingkat %1$s · Belum ada wali kelas</string>
+    <string name="report_stats_attendance_rate">%1$s%% hadir</string>
+    <string name="report_stats_no_attendance_rate">Belum ada presensi</string>
+    <string name="report_stats_students">Siswa: %1$d / %2$d kursi</string>
+    <string name="report_stats_attendance">Hadir: %1$d · Sakit: %2$d · Izin: %3$d · Alpa: %4$d</string>
+    <string name="report_stats_no_attendance">Belum ada catatan presensi pada semester ini.</string>
+    <string name="report_stats_violations">Pelanggaran: %1$d kasus · %2$d poin</string>
     <string name="profile_change_password">Ubah password</string>
     <string name="password_title">Ubah Password</string>
     <string name="password_info">Setelah password diubah, akunmu otomatis keluar dari perangkat lain.</string>

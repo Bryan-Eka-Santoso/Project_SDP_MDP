@@ -46,6 +46,12 @@ class ReportHubFragment : Fragment() {
         binding.cardAdminJournals.setOnClickListener {
             findNavController().navigate(R.id.action_reportHub_to_adminJournals)
         }
+        binding.cardPaymentStatus.setOnClickListener {
+            findNavController().navigate(R.id.action_reportHub_to_paymentStatusReport)
+        }
+        binding.cardStudentStats.setOnClickListener {
+            findNavController().navigate(R.id.action_reportHub_to_studentStatsReport)
+        }
         binding.cardViolationReport.setOnClickListener {
             findNavController().navigate(
                 R.id.action_reportHub_to_violationReport

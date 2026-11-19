@@ -1,0 +1,83 @@
+package id.sch.santaagnes.sim.ui.admin.report
+
+import android.view.View
+import androidx.core.view.isVisible
+import androidx.fragment.app.viewModels
+import com.google.android.material.chip.Chip
+import dagger.hilt.android.AndroidEntryPoint
+import id.sch.santaagnes.sim.R
+import id.sch.santaagnes.sim.domain.model.Bill
+import id.sch.santaagnes.sim.domain.model.BillStatus
+import id.sch.santaagnes.sim.domain.model.PaymentStatusReportFilter
+import id.sch.santaagnes.sim.ui.bill.BillAdapter
+
+/** Laporan status pembayaran (F-LAP-05): filter kelas, status (lunas/belum dibayar/menunggak), dan jatuh tempo. */
+@AndroidEntryPoint
+class PaymentStatusReportFragment : ReportFragment<Bill, PaymentStatusReportFilter>() {
+
+    override val viewModel: ReportViewModel<Bill, PaymentStatusReportFilter> by
+        viewModels<PaymentStatusReportViewModel>()
+
+    override val adapter = BillAdapter(horizontalMarginDp = 8)
+    override val titleRes = R.string.report_payment_status_title
+    override val reportType = "payment-status"
+    override val totalRes = R.string.report_total_bills
+
+    private val paymentViewModel get() = viewModel as PaymentStatusReportViewModel
+
+    private val statuses: List<BillStatus?> = listOf(null, BillStatus.PAID, BillStatus.UNPAID, BillStatus.OVERDUE)
+    private var classDropdown: ReportDropdown? = null
+
+    override fun setupFilters() {
+        binding.layoutTeacher.isVisible = false
+        classDropdown = ReportDropdown(binding.inputClass) { paymentViewModel.selectClassGroup(it) }
+
+        binding.scrollTypes.isVisible = true
+        binding.chipTypes.removeAllViews()
+        statuses.forEach { status ->
+            val chip = Chip(requireContext()).apply {
+                id = View.generateViewId()
+                setText(
+                    when (status) {
+                        null -> R.string.bill_filter_all
+                        BillStatus.PAID -> R.string.bill_status_paid
+                        BillStatus.UNPAID -> R.string.bill_status_unpaid
+                        BillStatus.OVERDUE -> R.string.bill_status_overdue
+                    }
+                )
+                isCheckable = true
+                setOnClickListener { paymentViewModel.selectStatus(status) }
+            }
+            binding.chipTypes.addView(chip)
+        }
+
+        setupDateRange(
+            fromHintRes = R.string.report_filter_due_from,
+            toHintRes = R.string.report_filter_due_to,
+            currentFrom = { paymentViewModel.uiState.value.filter.dueFrom },
+            currentTo = { paymentViewModel.uiState.value.filter.dueTo },
+            onDateFrom = { paymentViewModel.selectDateFrom(it) },
+            onDateTo = { paymentViewModel.selectDateTo(it) },
+            onClear = { paymentViewModel.clearDates() }
+        )
+    }
+
+    override fun renderFilters(state: ReportUiState<Bill, PaymentStatusReportFilter>) {
+        val filter = state.filter
+        (binding.chipTypes.getChildAt(statuses.indexOf(filter.status)) as? Chip)?.isChecked = true
+
+        val classes = state.options.classGroups
+        binding.filterRow.isVisible = classes.isNotEmpty()
+        classDropdown?.render(
+            listOf<Pair<Int?, String>>(null to getString(R.string.admin_filter_all_classes)) +
+                classes.map { it.id to it.name },
+            filter.classGroupId
+        )
+
+        renderDateRange(filter.dueFrom, filter.dueTo)
+    }
+
+    override fun releaseFilters() {
+        classDropdown = null
+    }
+}

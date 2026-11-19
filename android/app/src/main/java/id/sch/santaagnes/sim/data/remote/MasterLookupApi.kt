@@ -7,7 +7,8 @@ import retrofit2.http.Query
 // sini; bila bentuknya berubah, sesuaikan DTO ini. Berlaku setelah branch itu masuk ke main.
 
 data class LookupSemesterDto(
-    val id: Int
+    val id: Int,
+    val academicYearId: Int? = null
 )
 
 data class LookupTeacherUserDto(

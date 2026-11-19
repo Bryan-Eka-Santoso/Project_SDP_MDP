@@ -60,8 +60,41 @@ data class TeachingLoadFilter(
     val teacherId: Int? = null
 )
 
-/** Pilihan filter laporan: semua guru dan kelas yang punya penugasan di semester aktif. */
+/** Filter laporan status pembayaran (F-LAP-05); null = tidak difilter. */
+data class PaymentStatusReportFilter(
+    val classGroupId: Int? = null,
+    val status: BillStatus? = null,
+    val dueFrom: LocalDate? = null,
+    val dueTo: LocalDate? = null
+)
+
+/** Satu baris laporan statistik kesiswaan per kelas (F-LAP-10) pada semester aktif. */
+data class StudentStatsRow(
+    val classGroupId: Int,
+    val className: String,
+    val gradeLevel: String,
+    val capacity: Int,
+    val homeroomTeacherName: String?,
+    val studentCount: Int,
+    val presentCount: Int,
+    val sickCount: Int,
+    val excusedCount: Int,
+    val absentCount: Int,
+    val attendanceTotal: Int,
+    val attendanceRate: Double,
+    val violationCount: Int,
+    val violationPoints: Int
+)
+
+/** Filter laporan statistik kesiswaan (F-LAP-10). */
+data class StudentStatsFilter(
+    val classGroupId: Int? = null,
+    val gradeLevel: String? = null
+)
+
+/** Pilihan filter laporan: semua guru, kelas tahun ajaran aktif, dan daftar tingkat. */
 data class ReportOptions(
     val teachers: List<TeacherOption> = emptyList(),
-    val classGroups: List<NamedId> = emptyList()
+    val classGroups: List<NamedId> = emptyList(),
+    val gradeLevels: List<String> = emptyList()
 )
