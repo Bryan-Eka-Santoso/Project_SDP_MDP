@@ -8,6 +8,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -41,6 +42,15 @@ class AdminAcademicYearFragment : Fragment() {
         AdminAcademicYearAdapter(
             onSetActive = { year -> viewModel.setActiveYear(year.id) },
             onManageSemesters = ::showSemestersDialog,
+            onManagePredicates = { year ->
+                findNavController().navigate(
+                    R.id.action_adminAcademicYear_to_gradePredicate,
+                    bundleOf(
+                        GradePredicateViewModel.ARG_ACADEMIC_YEAR_ID to year.id,
+                        GradePredicateViewModel.ARG_ACADEMIC_YEAR_NAME to year.name
+                    )
+                )
+            },
             onEdit = { showYearFormSheet(it) },
             onDelete = ::confirmDeleteYear
         )

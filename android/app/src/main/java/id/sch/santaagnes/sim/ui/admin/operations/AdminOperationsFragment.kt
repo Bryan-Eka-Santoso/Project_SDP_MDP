@@ -30,6 +30,7 @@ class AdminOperationsFragment : Fragment() {
         val nav = findNavController()
         binding.btnBack.setOnClickListener { nav.popBackStack() }
         binding.cardSubjects.setOnClickListener { nav.navigate(R.id.action_adminOperations_to_subjects) }
+        binding.cardSubjectPackages.setOnClickListener { nav.navigate(R.id.action_adminOperations_to_subjectPackages) }
         binding.cardFacilities.setOnClickListener { nav.navigate(R.id.action_adminOperations_to_facilities) }
         binding.cardViolationTypes.setOnClickListener { nav.navigate(R.id.action_adminOperations_to_violationTypes) }
         binding.cardBookings.setOnClickListener { nav.navigate(R.id.action_adminOperations_to_bookings) }

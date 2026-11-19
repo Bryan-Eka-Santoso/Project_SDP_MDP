@@ -13,6 +13,9 @@ const nodeGlobals = {
   setInterval: 'readonly',
   clearInterval: 'readonly',
   setImmediate: 'readonly',
+  fetch: 'readonly',
+  FormData: 'readonly',
+  Blob: 'readonly',
 };
 
 const jestGlobals = {

@@ -125,10 +125,20 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             if (!sessionManager.hasSession()) return@launch
             pushTokenRegistrar.register()
+            notificationRepository.syncAnnouncements()
         }
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 notificationRepository.observeUnreadCount().collect(::showUnreadBadge)
+            }
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        lifecycleScope.launch {
+            if (sessionManager.hasSession()) {
+                notificationRepository.syncAnnouncements()
             }
         }
     }

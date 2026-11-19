@@ -30,6 +30,14 @@ class NotificationListViewModel @Inject constructor(
         .map { NotificationListUiState(items = it) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), NotificationListUiState())
 
+    init {
+        refresh()
+    }
+
+    fun refresh() {
+        viewModelScope.launch { repository.syncAnnouncements() }
+    }
+
     fun markRead(id: Long) {
         viewModelScope.launch { repository.markRead(id) }
     }

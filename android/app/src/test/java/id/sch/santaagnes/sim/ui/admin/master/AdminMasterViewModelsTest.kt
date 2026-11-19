@@ -12,6 +12,8 @@ import id.sch.santaagnes.sim.data.repository.TeacherRepository
 import id.sch.santaagnes.sim.domain.model.MasterImportResult
 import id.sch.santaagnes.sim.data.repository.UserRepository
 import id.sch.santaagnes.sim.domain.model.ClassFilter
+import id.sch.santaagnes.sim.domain.model.GradePredicateItem
+import id.sch.santaagnes.sim.domain.model.GradePredicateScale
 import id.sch.santaagnes.sim.domain.model.MasterAcademicYear
 import id.sch.santaagnes.sim.domain.model.MasterAcademicYearDetail
 import id.sch.santaagnes.sim.domain.model.MasterClassGroup
@@ -97,6 +99,12 @@ class AdminMasterViewModelsTest {
         override suspend fun updateSemester(id: Int, startDate: String?, endDate: String?) = semesterResult
         override suspend fun setActiveSemester(id: Int) = semesterResult
         override suspend fun deleteSemester(id: Int) = Resource.Success(Unit)
+        override suspend fun getGradePredicates(academicYearId: Int) =
+            Resource.Success(GradePredicateScale(academicYearId, "2025/2026", emptyList()))
+        override suspend fun replaceGradePredicates(
+            academicYearId: Int,
+            predicates: List<GradePredicateItem>
+        ) = Resource.Success(GradePredicateScale(academicYearId, "2025/2026", predicates))
     }
 
     private class FakeUserRepository : UserRepository {

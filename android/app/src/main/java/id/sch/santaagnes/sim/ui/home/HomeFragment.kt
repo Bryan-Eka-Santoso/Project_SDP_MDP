@@ -19,6 +19,8 @@ import id.sch.santaagnes.sim.databinding.FragmentHomeBinding
 import id.sch.santaagnes.sim.databinding.ItemHomeTaskBinding
 import id.sch.santaagnes.sim.domain.model.NamedId
 import id.sch.santaagnes.sim.domain.model.Task
+import id.sch.santaagnes.sim.ui.calendar.AcademicCalendarViewModel
+import id.sch.santaagnes.sim.ui.calendar.bindDashboardCalendar
 import id.sch.santaagnes.sim.ui.task.countdownText
 import id.sch.santaagnes.sim.ui.task.dueColor
 import id.sch.santaagnes.sim.ui.task.dueDateText
@@ -32,6 +34,7 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: HomeViewModel by viewModels()
+    private val calendarViewModel: AcademicCalendarViewModel by viewModels()
 
     private var shownChildren: List<NamedId>? = null
 
@@ -47,6 +50,7 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.tvGreeting.setText(greeting())
         binding.btnRetry.setOnClickListener { viewModel.refresh() }
+        bindDashboardCalendar(binding.calendarCard, calendarViewModel)
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -58,6 +62,7 @@ class HomeFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         viewModel.refresh()
+        calendarViewModel.load()
     }
 
     private fun render(state: HomeUiState) {
@@ -123,6 +128,8 @@ class HomeFragment : Fragment() {
         }
         binding.btnLeave.isVisible = role == "GUARDIAN"
         binding.btnLeave.setOnClickListener { nav.navigate(R.id.guardianLeaveFragment) }
+        binding.btnAnnouncements.setOnClickListener { nav.navigate(R.id.action_global_announcements) }
+        binding.btnCalendar.setOnClickListener { nav.navigate(R.id.action_global_calendar) }
     }
 
     private fun greeting(): Int = when (DateTimeWib.now().hour) {

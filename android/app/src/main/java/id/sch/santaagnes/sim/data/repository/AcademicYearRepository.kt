@@ -5,15 +5,19 @@ import id.sch.santaagnes.sim.core.Resource
 import id.sch.santaagnes.sim.data.remote.AcademicYearApi
 import id.sch.santaagnes.sim.data.remote.CreateAcademicYearRequest
 import id.sch.santaagnes.sim.data.remote.CreateSemesterRequest
+import id.sch.santaagnes.sim.data.remote.GradePredicateInputDto
+import id.sch.santaagnes.sim.data.remote.ReplaceGradePredicatesRequest
 import id.sch.santaagnes.sim.data.remote.UpdateAcademicYearRequest
 import id.sch.santaagnes.sim.data.remote.UpdateSemesterRequest
+import id.sch.santaagnes.sim.domain.model.GradePredicateItem
+import id.sch.santaagnes.sim.domain.model.GradePredicateScale
 import id.sch.santaagnes.sim.domain.model.MasterAcademicYear
 import id.sch.santaagnes.sim.domain.model.MasterAcademicYearDetail
 import id.sch.santaagnes.sim.domain.model.MasterSemester
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/** Repository Tahun Ajaran dan Semester aktif/kelola (F-MST-06). */
+/** Repository Tahun Ajaran dan Semester aktif/kelola (F-MST-06) serta skala predikat nilai (F-NIL-06). */
 interface AcademicYearRepository {
     suspend fun getActiveSemester(): Resource<MasterSemester>
     suspend fun getAcademicYears(page: Int = 1, limit: Int = 50, search: String? = null): Resource<List<MasterAcademicYear>>
@@ -28,6 +32,12 @@ interface AcademicYearRepository {
     suspend fun updateSemester(id: Int, startDate: String?, endDate: String?): Resource<MasterSemester>
     suspend fun setActiveSemester(id: Int): Resource<MasterSemester>
     suspend fun deleteSemester(id: Int): Resource<Unit>
+
+    suspend fun getGradePredicates(academicYearId: Int): Resource<GradePredicateScale>
+    suspend fun replaceGradePredicates(
+        academicYearId: Int,
+        predicates: List<GradePredicateItem>
+    ): Resource<GradePredicateScale>
 }
 
 @Singleton
@@ -122,5 +132,31 @@ class AcademicYearRepositoryImpl @Inject constructor(
 
     override suspend fun deleteSemester(id: Int): Resource<Unit> = errorMapper.call {
         ensureDeleteSucceeded(api.deleteSemester(id))
+    }
+
+    override suspend fun getGradePredicates(academicYearId: Int): Resource<GradePredicateScale> =
+        errorMapper.call {
+            val dto = api.getGradePredicates(academicYearId).data
+                ?: error("Gagal memuat skala predikat nilai.")
+            dto.toDomain()
+        }
+
+    override suspend fun replaceGradePredicates(
+        academicYearId: Int,
+        predicates: List<GradePredicateItem>
+    ): Resource<GradePredicateScale> = errorMapper.call {
+        val dto = api.replaceGradePredicates(
+            academicYearId = academicYearId,
+            body = ReplaceGradePredicatesRequest(
+                predicates = predicates.map {
+                    GradePredicateInputDto(
+                        label = it.label,
+                        minScore = it.minScore,
+                        description = it.description
+                    )
+                }
+            )
+        ).data ?: error("Gagal menyimpan skala predikat nilai.")
+        dto.toDomain()
     }
 }

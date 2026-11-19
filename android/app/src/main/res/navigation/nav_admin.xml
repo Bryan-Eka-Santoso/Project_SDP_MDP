@@ -40,6 +40,10 @@
             app:destination="@id/adminMataPelajaranFragment" />
 
         <action
+            android:id="@+id/action_adminOperations_to_subjectPackages"
+            app:destination="@id/adminSubjectPackageFragment" />
+
+        <action
             android:id="@+id/action_adminOperations_to_facilities"
             app:destination="@id/adminFasilitasFragment" />
 
@@ -223,11 +227,35 @@
 
     <fragment
         android:id="@+id/adminAcademicYearFragment"
-        android:name="id.sch.santaagnes.sim.ui.admin.master.periods.AdminAcademicYearFragment" />
+        android:name="id.sch.santaagnes.sim.ui.admin.master.periods.AdminAcademicYearFragment">
+
+        <action
+            android:id="@+id/action_adminAcademicYear_to_gradePredicate"
+            app:destination="@id/gradePredicateFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/gradePredicateFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.master.periods.GradePredicateFragment">
+        <argument
+            android:name="academicYearId"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <argument
+            android:name="academicYearName"
+            android:defaultValue=""
+            app:argType="string" />
+    </fragment>
+
     <fragment
         android:id="@+id/adminMataPelajaranFragment"
         android:name="id.sch.santaagnes.sim.ui.admin.matapelajaran.MataPelajaranFragment"
         android:label="Master Mata Pelajaran" />
+
+    <fragment
+        android:id="@+id/adminSubjectPackageFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.elective.SubjectPackageFragment"
+        android:label="Paket Mata Pelajaran Pilihan" />
 
     <fragment
         android:id="@+id/adminFasilitasFragment"

@@ -352,14 +352,14 @@
     <string name="greeting_night">Selamat malam,</string>
     <string name="admin_stats_title">Ringkasan Data</string>
     <string name="admin_shortcuts_title">Menu Cepat</string>
-    <string name="admin_stat_students">Total Siswa</string>
-    <string name="admin_stat_teachers">Total Guru</string>
-    <string name="admin_stat_classes">Total Kelas</string>
-    <string name="admin_stat_users">Total Pengguna</string>
-    <string name="admin_stat_subjects">Total Mata Pelajaran</string>
-    <string name="admin_stat_slots">Total Jadwal</string>
-    <string name="admin_stat_changes">Total Perubahan Jadwal</string>
-    <string name="admin_stat_facilities">Total Fasilitas</string>
+    <string name="admin_stat_students">Siswa</string>
+    <string name="admin_stat_teachers">Guru</string>
+    <string name="admin_stat_classes">Kelas</string>
+    <string name="admin_stat_users">Pengguna</string>
+    <string name="admin_stat_subjects">Mapel</string>
+    <string name="admin_stat_slots">Jadwal</string>
+    <string name="admin_stat_changes">Perubahan</string>
+    <string name="admin_stat_facilities">Fasilitas</string>
     <string name="admin_stat_unknown">-</string>
     <string name="admin_menu_management">Manajemen</string>
     <string name="admin_menu_payments">Pembayaran</string>
@@ -416,7 +416,6 @@
     <string name="master_period_badge">%1$s | %2$s ▾</string>
     <string name="master_total_count">Total: %1$d data</string>
     <string name="master_import_unavailable">Impor Excel untuk modul ini belum tersedia di server.</string>
-    <string name="admin_stat_sub">SMA St. Agnes</string>
     <string name="admin_period_card_title">Periode Akademik Aktif</string>
     <string name="admin_period_manage_btn">Kelola Tahun Ajaran &amp; Semester</string>
     <string name="profile_header_title">Profil Saya</string>
@@ -506,4 +505,48 @@
     <string name="import_master_student_success">%1$d siswa berhasil diimpor.</string>
     <string name="import_master_student_success_with_class">%1$d siswa berhasil diimpor (%2$d ditempatkan ke kelas).</string>
     <string name="import_master_teacher_success">%1$d guru berhasil diimpor.</string>
+
+    <!-- Skala Predikat Nilai (F-NIL-06) -->
+    <string name="action_edit">Ubah</string>
+    <string name="action_delete">Hapus</string>
+    <string name="btn_year_predicates">Predikat</string>
+    <string name="title_grade_predicates">Skala Predikat Nilai</string>
+    <string name="predicate_rule_hint">Nilai akhir dicocokkan ke ambang minimum tertinggi. Skala wajib memiliki satu baris dengan nilai minimum 0.</string>
+    <string name="predicate_zero_missing_warning">Skala wajib memiliki satu baris dengan nilai minimum 0 sebelum disimpan.</string>
+    <string name="predicate_empty">Belum ada skala predikat untuk tahun ajaran ini.</string>
+    <string name="predicate_apply_default">Pakai Skala Bawaan (A/B/C/D)</string>
+    <string name="predicate_save_scale">Simpan Skala</string>
+    <string name="predicate_add_title">Tambah Predikat</string>
+    <string name="predicate_edit_title">Ubah Predikat</string>
+    <string name="predicate_saved_success">Skala predikat nilai berhasil disimpan</string>
+
+    <!-- Master Paket Mata Pelajaran Pilihan (F-MPP-03) -->
+    <string name="ops_subject_packages_title">Paket Mapel Pilihan</string>
+    <string name="ops_subject_packages_desc">Kelola paket mata pelajaran pilihan dan kapasitas per tahun ajaran.</string>
+    <string name="title_subject_packages">Paket Mapel Pilihan</string>
+    <string name="search_package_hint">Cari nama paket</string>
+    <string name="package_empty">Belum ada paket mata pelajaran pilihan pada tahun ajaran ini.</string>
+    <string name="dialog_add_package_title">Tambah Paket Mapel</string>
+    <string name="dialog_edit_package_title">Ubah Paket Mapel</string>
+
+    <!-- Pengumuman & Kalender Akademik (F-PGM-01..03, F-KAL-01..02) -->
+    <string name="title_announcements">Pengumuman</string>
+    <string name="announcement_subtitle">Informasi resmi sekolah &amp; kelas</string>
+    <string name="announcement_search_hint">Cari judul atau isi pengumuman</string>
+    <string name="announcement_empty">Belum ada pengumuman yang tersedia.</string>
+    <string name="announcement_offline_copy">Offline — menampilkan salinan pengumuman tersimpan.</string>
+    <string name="announcement_open_attachment">Lihat Lampiran</string>
+    <string name="announcement_no_attachment">Belum ada lampiran</string>
+    <string name="announcement_remove_attachment">Hapus lampiran</string>
+    <string name="announcement_add_title">Buat Pengumuman</string>
+    <string name="announcement_edit_title">Ubah Pengumuman</string>
+    <string name="title_calendar">Kalender Akademik</string>
+    <string name="calendar_subtitle">Jadwal ujian, libur, dan kegiatan sekolah</string>
+    <string name="calendar_search_hint">Cari agenda akademik</string>
+    <string name="calendar_empty">Belum ada agenda pada kalender akademik.</string>
+    <string name="calendar_save_to_device">Simpan ke Kalender HP</string>
+    <string name="calendar_add_title">Tambah Agenda Kalender</string>
+    <string name="calendar_edit_title">Ubah Agenda Kalender</string>
+    <string name="shortcut_announcements">Pengumuman</string>
+    <string name="shortcut_calendar">Kalender</string>
 </resources>

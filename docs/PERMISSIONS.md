@@ -29,8 +29,8 @@ Tanda `—` berarti tidak punya akses (backend mengembalikan 403).
 | Login, logout, profil, ubah password | ✓ | ✓ | | ✓ | ✓ |
 | Notifikasi (riwayat di perangkat sendiri) | milik sendiri | milik sendiri | | milik sendiri | milik sendiri |
 | Lihat pengumuman | `SCHOOL` + `CLASS` kelasnya | `SCHOOL` + `CLASS` kelas yang diampu | `CLASS` kelas binaan | `SCHOOL` + `CLASS` kelas anak | `ALL` |
-| Kelola pengumuman sekolah | — | — | — | — | ✓ |
-| Kirim pengumuman kelas | — | — | `HOMEROOM` | — | — |
+| Kelola pengumuman sekolah & kelas tertentu | — | — | — | — | ✓ (`SCHOOL` + `CLASS`) |
+| Kirim pengumuman kelas binaan | — | — | `HOMEROOM` | — | ✓ |
 | Lihat kalender akademik | ✓ | ✓ | | ✓ | ✓ |
 | Kelola kalender akademik | — | — | — | — | ✓ |
 | Lihat jadwal | `SELF` (kelas reguler + kelas paket) | jadwal mengajarnya | `HOMEROOM` | `CHILD` | `ALL` (lewat master jadwal) |

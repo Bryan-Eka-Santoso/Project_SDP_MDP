@@ -17,6 +17,8 @@ import id.sch.santaagnes.sim.core.DateTimeWib
 import id.sch.santaagnes.sim.databinding.FragmentAdminDashboardBinding
 import id.sch.santaagnes.sim.databinding.ItemAdminStatBinding
 import id.sch.santaagnes.sim.domain.model.AdminOverview
+import id.sch.santaagnes.sim.ui.calendar.AcademicCalendarViewModel
+import id.sch.santaagnes.sim.ui.calendar.bindDashboardCalendar
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -26,6 +28,7 @@ class AdminDashboardFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: AdminDashboardViewModel by viewModels()
+    private val calendarViewModel: AcademicCalendarViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -46,7 +49,10 @@ class AdminDashboardFragment : Fragment() {
         binding.btnMenuReports.setOnClickListener { nav.navigate(R.id.action_global_reports) }
         binding.tvPeriodBadge.setOnClickListener { nav.navigate(R.id.action_adminDashboard_to_academicYear) }
         binding.cardAcademicPeriod.setOnClickListener { nav.navigate(R.id.action_adminDashboard_to_academicYear) }
+        binding.cardAnnouncements.setOnClickListener { nav.navigate(R.id.action_global_announcements) }
+        binding.cardCalendar.setOnClickListener { nav.navigate(R.id.action_global_calendar) }
         binding.btnRetry.setOnClickListener { viewModel.refresh() }
+        bindDashboardCalendar(binding.calendarCard, calendarViewModel)
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -58,6 +64,7 @@ class AdminDashboardFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         viewModel.refresh()
+        calendarViewModel.load()
     }
 
     private fun render(state: AdminDashboardUiState) {

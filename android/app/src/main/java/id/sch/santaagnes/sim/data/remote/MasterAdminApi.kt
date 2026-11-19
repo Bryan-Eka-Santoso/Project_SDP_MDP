@@ -84,6 +84,29 @@ data class UpdateSemesterRequest(
     val endDate: String? = null
 )
 
+data class GradePredicateDto(
+    val id: Int = 0,
+    val academicYearId: Int = 0,
+    val label: String,
+    val minScore: Double,
+    val description: String? = null
+)
+
+data class GradePredicateScaleDto(
+    val academicYear: AcademicYearSummaryDto,
+    val predicates: List<GradePredicateDto>
+)
+
+data class GradePredicateInputDto(
+    val label: String,
+    val minScore: Double,
+    val description: String? = null
+)
+
+data class ReplaceGradePredicatesRequest(
+    val predicates: List<GradePredicateInputDto>
+)
+
 // =====================================================================
 // DTO — MASTER GURU & PENUGASAN MENGAJAR (F-MST-05, F-MST-10)
 // =====================================================================
@@ -350,6 +373,17 @@ interface AcademicYearApi {
     suspend fun deleteSemester(
         @Path("id") id: Int
     ): Response<Unit>
+
+    @GET("academic-years/{id}/grade-predicates")
+    suspend fun getGradePredicates(
+        @Path("id") academicYearId: Int
+    ): ApiResponse<GradePredicateScaleDto>
+
+    @PATCH("academic-years/{id}/grade-predicates")
+    suspend fun replaceGradePredicates(
+        @Path("id") academicYearId: Int,
+        @Body body: ReplaceGradePredicatesRequest
+    ): ApiResponse<GradePredicateScaleDto>
 }
 
 interface TeacherApi {

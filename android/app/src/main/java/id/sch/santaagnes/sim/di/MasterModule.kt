@@ -7,6 +7,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import id.sch.santaagnes.sim.data.remote.AcademicYearApi
 import id.sch.santaagnes.sim.data.remote.ClassApi
+import id.sch.santaagnes.sim.data.remote.ElectiveApi
 import id.sch.santaagnes.sim.data.remote.GuardianApi
 import id.sch.santaagnes.sim.data.remote.StudentApi
 import id.sch.santaagnes.sim.data.remote.TeacherApi
@@ -16,6 +17,8 @@ import id.sch.santaagnes.sim.data.repository.AcademicYearRepository
 import id.sch.santaagnes.sim.data.repository.AcademicYearRepositoryImpl
 import id.sch.santaagnes.sim.data.repository.ClassRepository
 import id.sch.santaagnes.sim.data.repository.ClassRepositoryImpl
+import id.sch.santaagnes.sim.data.repository.ElectiveRepository
+import id.sch.santaagnes.sim.data.repository.ElectiveRepositoryImpl
 import id.sch.santaagnes.sim.data.repository.GuardianRepository
 import id.sch.santaagnes.sim.data.repository.GuardianRepositoryImpl
 import id.sch.santaagnes.sim.data.repository.StudentRepository
@@ -61,6 +64,11 @@ object MasterNetworkModule {
     @Singleton
     fun provideGuardianApi(retrofit: Retrofit): GuardianApi =
         retrofit.create(GuardianApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideElectiveApi(retrofit: Retrofit): ElectiveApi =
+        retrofit.create(ElectiveApi::class.java)
 }
 
 @Module
@@ -90,4 +98,8 @@ abstract class MasterRepositoryModule {
     @Binds
     @Singleton
     abstract fun bindGuardianRepository(impl: GuardianRepositoryImpl): GuardianRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindElectiveRepository(impl: ElectiveRepositoryImpl): ElectiveRepository
 }

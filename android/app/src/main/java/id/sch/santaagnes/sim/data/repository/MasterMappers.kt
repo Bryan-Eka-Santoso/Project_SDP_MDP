@@ -1,6 +1,7 @@
 package id.sch.santaagnes.sim.data.repository
 
 import id.sch.santaagnes.sim.data.remote.ClassMembersResponseDto
+import id.sch.santaagnes.sim.data.remote.GradePredicateScaleDto
 import id.sch.santaagnes.sim.data.remote.MasterAcademicYearDto
 import id.sch.santaagnes.sim.data.remote.MasterClassGroupDto
 import id.sch.santaagnes.sim.data.remote.MasterGuardianDto
@@ -9,7 +10,10 @@ import id.sch.santaagnes.sim.data.remote.MasterSemesterDto
 import id.sch.santaagnes.sim.data.remote.MasterTeacherDto
 import id.sch.santaagnes.sim.data.remote.MasterTeachingAssignmentDto
 import id.sch.santaagnes.sim.data.remote.StudentItemDto
+import id.sch.santaagnes.sim.data.remote.SubjectPackageDto
 import id.sch.santaagnes.sim.data.remote.UserItemDto
+import id.sch.santaagnes.sim.domain.model.GradePredicateItem
+import id.sch.santaagnes.sim.domain.model.GradePredicateScale
 import id.sch.santaagnes.sim.domain.model.MasterAcademicYear
 import id.sch.santaagnes.sim.domain.model.MasterAcademicYearDetail
 import id.sch.santaagnes.sim.domain.model.MasterClassGroup
@@ -25,6 +29,8 @@ import id.sch.santaagnes.sim.domain.model.MasterTeacher
 import id.sch.santaagnes.sim.domain.model.MasterTeacherDetail
 import id.sch.santaagnes.sim.domain.model.MasterTeachingAssignment
 import id.sch.santaagnes.sim.domain.model.MasterUser
+import id.sch.santaagnes.sim.domain.model.PackageSubject
+import id.sch.santaagnes.sim.domain.model.SubjectPackage
 import retrofit2.HttpException
 import retrofit2.Response
 
@@ -184,4 +190,35 @@ fun MasterGuardianDto.toDomain(): MasterGuardian = MasterGuardian(
 fun MasterImportDto.toDomain(): MasterImportResult = MasterImportResult(
     imported = imported,
     assignedToClass = assignedToClass
+)
+
+fun GradePredicateScaleDto.toDomain(): GradePredicateScale = GradePredicateScale(
+    academicYearId = academicYear.id,
+    academicYearName = academicYear.name,
+    predicates = predicates.map {
+        GradePredicateItem(
+            id = it.id,
+            label = it.label,
+            minScore = it.minScore,
+            description = it.description
+        )
+    }
+)
+
+fun SubjectPackageDto.toDomain(): SubjectPackage = SubjectPackage(
+    id = id,
+    academicYearId = academicYearId,
+    academicYearName = academicYear?.name ?: "-",
+    isAcademicYearActive = academicYear?.isActive ?: false,
+    name = name,
+    capacity = capacity,
+    subjects = subjects.map {
+        PackageSubject(
+            id = it.id,
+            code = it.code,
+            name = it.name,
+            type = it.type
+        )
+    },
+    selectionCount = selectionCount
 )

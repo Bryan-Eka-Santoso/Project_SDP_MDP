@@ -12,6 +12,7 @@ import id.sch.santaagnes.sim.domain.model.MasterAcademicYear
 class AdminAcademicYearAdapter(
     private val onSetActive: (MasterAcademicYear) -> Unit,
     private val onManageSemesters: (MasterAcademicYear) -> Unit,
+    private val onManagePredicates: (MasterAcademicYear) -> Unit,
     private val onEdit: (MasterAcademicYear) -> Unit,
     private val onDelete: (MasterAcademicYear) -> Unit
 ) : ListAdapter<MasterAcademicYear, AdminAcademicYearAdapter.ViewHolder>(DiffCallback) {
@@ -29,6 +30,7 @@ class AdminAcademicYearAdapter(
 
             binding.btnSetActive.setOnClickListener { onSetActive(item) }
             binding.btnSemesters.setOnClickListener { onManageSemesters(item) }
+            binding.btnPredicates.setOnClickListener { onManagePredicates(item) }
             binding.btnEdit.setOnClickListener { onEdit(item) }
             binding.btnDelete.setOnClickListener { onDelete(item) }
         }

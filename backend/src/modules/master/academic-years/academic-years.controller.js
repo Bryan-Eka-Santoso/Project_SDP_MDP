@@ -101,6 +101,25 @@ async function deleteSemester(req, res) {
   res.status(204).send();
 }
 
+// ==========================================
+// SKALA PREDIKAT NILAI CONTROLLER (F-NIL-06)
+// ==========================================
+
+async function listGradePredicates(req, res) {
+  const result = await academicYearsService.listGradePredicates(
+    req.validated.params.id,
+  );
+  sendSuccess(res, result);
+}
+
+async function replaceGradePredicates(req, res) {
+  const result = await academicYearsService.replaceGradePredicates(
+    req.validated.params.id,
+    req.validated.body,
+  );
+  sendSuccess(res, result);
+}
+
 module.exports = {
   listAcademicYears,
   getActiveAcademicYear,
@@ -116,4 +135,6 @@ module.exports = {
   updateSemester,
   setActiveSemester,
   deleteSemester,
+  listGradePredicates,
+  replaceGradePredicates,
 };
