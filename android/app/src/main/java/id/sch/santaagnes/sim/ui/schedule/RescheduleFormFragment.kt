@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.ui.schedule
 
+import id.sch.santaagnes.sim.core.setLoading
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -117,8 +118,8 @@ class RescheduleFormFragment : Fragment() {
     }
 
     private fun render(state: RescheduleFormUiState) {
-        binding.progress.isVisible = state.isLoadingRooms || state.isSaving
-        binding.btnSave.isEnabled = !state.isSaving
+        binding.progress.isVisible = state.isLoadingRooms
+        binding.btnSave.setLoading(state.isSaving)
         binding.btnCancelMove.isEnabled = !state.isSaving
         binding.btnCancelClass.isEnabled = !state.isSaving
         binding.layoutNewDate.error = state.dateError?.let(::getString)

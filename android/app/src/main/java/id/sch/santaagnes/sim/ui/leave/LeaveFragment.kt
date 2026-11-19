@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.ui.leave
 
+import id.sch.santaagnes.sim.core.setLoading
 import android.app.DatePickerDialog
 import android.net.Uri
 import android.os.Bundle
@@ -150,8 +151,9 @@ class LeaveFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
-                    binding.progressBar.visibility = if (state.loading || state.saving) View.VISIBLE else View.GONE
-                    binding.btnSubmit.isEnabled = !state.loading && !state.saving && selectedChildId != null
+                    binding.progressBar.visibility = if (state.loading) View.VISIBLE else View.GONE
+                    binding.btnSubmit.isEnabled = !state.loading && selectedChildId != null
+                    binding.btnSubmit.setLoading(state.saving)
                     binding.tvFeedback.text = state.error ?: state.message ?: if (!state.loading && state.children.isEmpty()) "Belum ada anak yang terhubung." else ""
                     if (!state.saving && state.message != null) {
                         binding.etReason.text?.clear()

@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.ui.attendance
 
+import id.sch.santaagnes.sim.core.setLoading
 import android.app.DatePickerDialog
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -84,8 +85,9 @@ class AttendanceFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
-                    binding.progressBar.visibility = if (state.loading || state.saving) View.VISIBLE else View.GONE
-                    binding.btnSave.isEnabled = !state.loading && !state.saving && state.session != null
+                    binding.progressBar.visibility = if (state.loading) View.VISIBLE else View.GONE
+                    binding.btnSave.isEnabled = !state.loading && state.session != null
+                    binding.btnSave.setLoading(state.saving)
                     binding.tvFeedback.text = state.error ?: state.message ?: if (!state.loading && state.slots.isEmpty()) "Belum ada slot mengajar aktif." else ""
                     val signature = state.slots.joinToString { it.id.toString() }
                     if (signature != lastSlotsSignature) {

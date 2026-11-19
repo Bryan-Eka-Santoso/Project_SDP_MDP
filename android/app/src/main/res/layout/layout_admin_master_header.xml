@@ -16,10 +16,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="?attr/selectableItemBackground"
-        android:paddingVertical="4dp"
+        android:drawablePadding="8dp"
+        android:drawableStart="@drawable/ic_arrow_back"
+        android:gravity="center_vertical"
+        android:minHeight="44dp"
         android:text="@string/btn_back_previous"
         android:textColor="@color/white"
-        android:textSize="12sp"
+        android:textSize="15sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

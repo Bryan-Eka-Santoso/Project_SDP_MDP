@@ -10,8 +10,8 @@
         <TextView android:id="@+id/btnTrendsBack" android:layout_width="wrap_content"
             android:layout_height="44dp" android:gravity="center_vertical"
             android:clickable="true" android:focusable="true"
-            android:text="‹ Kembali ke Halaman Sebelumnya" android:textColor="@color/white"
-            android:textSize="12sp" />
+            android:text="@string/back_previous" android:drawableStart="@drawable/ic_arrow_back" android:drawablePadding="8dp" android:minHeight="44dp" android:textStyle="bold" android:textColor="@color/white"
+            android:textSize="15sp" />
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginTop="8dp" android:text="Tren Paket Pilihan"
             android:textColor="@color/white" android:textStyle="bold" android:textSize="23sp" />

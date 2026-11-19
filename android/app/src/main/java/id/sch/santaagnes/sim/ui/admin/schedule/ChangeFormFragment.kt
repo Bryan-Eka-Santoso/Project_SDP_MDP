@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.ui.admin.schedule
 
+import id.sch.santaagnes.sim.core.setLoading
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -107,8 +108,9 @@ class ChangeFormFragment : Fragment() {
     }
 
     private fun render(state: ChangeFormUiState) {
-        binding.progress.isVisible = state.isLoading || state.isSaving
-        binding.btnSave.isEnabled = !state.isSaving && state.isReady
+        binding.progress.isVisible = state.isLoading
+        binding.btnSave.isEnabled = state.isReady
+        binding.btnSave.setLoading(state.isSaving)
         binding.layoutSlot.error = state.slotError?.let(::getString)
         binding.layoutDate.error = state.dateError?.let(::getString)
         binding.layoutType.error = state.typeError?.let(::getString)

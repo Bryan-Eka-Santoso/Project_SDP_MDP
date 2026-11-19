@@ -32,8 +32,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="50dp"
                 android:gravity="center_vertical"
-                android:text="‹ Kembali ke Halaman Kelas"
-                android:textSize="12sp"
+                android:text="@string/back_to_classes" android:drawableStart="@drawable/ic_arrow_back" android:drawablePadding="8dp" android:minHeight="44dp" android:textStyle="bold"
+                android:textSize="15sp"
                 android:textColor="#FFFFFF" />
 
             <TextView

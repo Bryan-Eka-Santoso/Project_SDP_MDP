@@ -9,7 +9,7 @@
         <LinearLayout android:id="@+id/reportHeaderContent" android:layout_width="match_parent" android:layout_height="match_parent"
             android:padding="18dp" android:orientation="vertical">
             <TextView android:id="@+id/btnReportBack" android:layout_width="wrap_content" android:layout_height="39dp"
-                android:gravity="center_vertical" android:text="‹ Kembali ke Halaman Sebelumnya" android:textSize="12sp" android:textColor="#FFFFFF"/>
+                android:gravity="center_vertical" android:text="@string/back_previous" android:drawableStart="@drawable/ic_arrow_back" android:drawablePadding="8dp" android:minHeight="44dp" android:textStyle="bold" android:textSize="15sp" android:textColor="#FFFFFF"/>
             <TextView android:id="@+id/tvReportTitle" android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:layout_marginTop="13dp" android:text="Rekap Nilai Kelas" android:textColor="#FFFFFF"
                 android:textSize="23sp" android:textStyle="bold"/>
