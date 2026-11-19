@@ -24,6 +24,7 @@ import androidx.navigation.fragment.NavHostFragment
 import dagger.hilt.android.AndroidEntryPoint
 import id.sch.santaagnes.sim.core.SessionEvents
 import id.sch.santaagnes.sim.data.local.SessionManager
+import id.sch.santaagnes.sim.data.repository.CalendarSyncRepository
 import id.sch.santaagnes.sim.data.repository.NotificationRepository
 import id.sch.santaagnes.sim.databinding.ActivityMainBinding
 import id.sch.santaagnes.sim.notification.PushTokenRegistrar
@@ -47,6 +48,9 @@ class MainActivity : AppCompatActivity() {
 
     @Inject
     lateinit var notificationRepository: NotificationRepository
+
+    @Inject
+    lateinit var calendarSyncRepository: CalendarSyncRepository
 
     // Izin tampil notifikasi (Android 13+); jika ditolak, riwayat tetap tersimpan di tab Notifikasi.
     private val notificationPermission =
@@ -139,8 +143,16 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             if (sessionManager.hasSession()) {
                 notificationRepository.syncAnnouncements()
+                syncDeviceCalendar()
             }
         }
+    }
+
+    // Sinkron kalender perangkat (F-JDW-06) hanya jalan bila pengguna menyalakannya di Profil; gagal diabaikan.
+    private suspend fun syncDeviceCalendar() {
+        val userId = sessionManager.getUserId() ?: return
+        val role = sessionManager.getRole() ?: return
+        calendarSyncRepository.syncIfEnabled(userId, role)
     }
 
     private fun requestNotificationPermission() {

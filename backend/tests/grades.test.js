@@ -3,6 +3,7 @@ jest.mock('../src/lib/prisma', () => ({
   gradeComponent: { findMany: jest.fn(), aggregate: jest.fn(), create: jest.fn(), findUnique: jest.fn(), update: jest.fn() },
   classMember: { findUnique: jest.fn() },
   score: { upsert: jest.fn(), findMany: jest.fn(), count: jest.fn() },
+  gradeAssessment: { count: jest.fn() },
 }));
 
 const prisma = require('../src/lib/prisma');
@@ -13,6 +14,7 @@ beforeEach(() => {
   prisma.teachingAssignment.findFirst.mockResolvedValue({ id: 3, classGroupId: 7, semesterId: 1 });
   prisma.gradeComponent.findMany.mockResolvedValue([{ id: 9, weight: 60 }, { id: 10, weight: 40 }]);
   prisma.classMember.findUnique.mockResolvedValue({ studentId: 8 });
+  prisma.gradeAssessment.count.mockResolvedValue(0);
 });
 
 test('guru tidak dapat membaca komponen penugasan yang bukan miliknya', async () => {
@@ -48,6 +50,14 @@ test('input ulang skor memakai upsert kunci siswa dan komponen', async () => {
   }));
   expect(result.value).toBe(79.5);
   expect(result.inputDate).toBe('2026-11-11');
+});
+
+test('menolak input rata-rata manual jika komponen sudah punya nilai per penilaian', async () => {
+  prisma.gradeAssessment.count.mockResolvedValue(2);
+  await expect(service.saveScore(42, {
+    teachingAssignmentId: 3, gradeComponentId: 9, studentId: 8, value: 80,
+  })).rejects.toMatchObject({ statusCode: 409, code: 'GRADE_USE_ASSESSMENTS' });
+  expect(prisma.score.upsert).not.toHaveBeenCalled();
 });
 
 test('menolak komponen baru jika jumlah bobot melebihi 100%', async () => {

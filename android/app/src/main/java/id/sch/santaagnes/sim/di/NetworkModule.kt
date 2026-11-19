@@ -240,6 +240,9 @@ object NetworkModule {
     ): SchoolInfoApi {
         return retrofit.create(SchoolInfoApi::class.java)
     }
+
+    @Provides
+    @Singleton
     fun providePelanggaranApi(
         retrofit: Retrofit
     ): PelanggaranApi {

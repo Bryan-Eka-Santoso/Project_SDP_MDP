@@ -37,6 +37,9 @@ class GradeReportFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val role = arguments?.getString("role") ?: "STUDENT"
         binding.tvReportTitle.text = if (role == "TEACHER") "Rekap Nilai Kelas" else "Nilai Siswa"
+        // Siswa dan wali murid membukanya sebagai tab Nilai: tanpa tautan kembali, header sama dengan tab lain.
+        binding.btnReportBack.visibility = if (role == "TEACHER") View.VISIBLE else View.GONE
+        if (role != "TEACHER") styleAsTabHeader()
         binding.btnReportBack.setOnClickListener { findNavController().navigateUp() }
         binding.btnReloadReport.setOnClickListener {
             val selected = viewModel.state.value.selectedId
@@ -56,9 +59,18 @@ class GradeReportFragment : Fragment() {
                 viewModel.state.collect { state ->
                     binding.progressReport.visibility = if (state.loading) View.VISIBLE else View.GONE
                     binding.tvReportError.text = state.error.orEmpty()
+                    // Teks kosong tetap memakan ruang (margin + tinggi baris); sembunyikan agar tidak ada celah.
+                    binding.tvReportError.visibility = if (state.error == null) View.GONE else View.VISIBLE
                     val selectionVisible = state.role != "STUDENT"
+                    // Siswa tidak punya pilihan: kartu hanya muncul saat gagal, supaya tombol muat ulang tetap ada.
+                    binding.cardReportSelection.visibility =
+                        if (selectionVisible || state.error != null) View.VISIBLE else View.GONE
                     binding.spReportSelection.visibility = if (selectionVisible) View.VISIBLE else View.GONE
                     binding.tvReportSelectionLabel.visibility = if (selectionVisible) View.VISIBLE else View.GONE
+                    // Wali murid memilih anak, bukan kelas/mapel.
+                    if (state.role == "GUARDIAN") {
+                        binding.tvReportSelectionLabel.setText(R.string.grade_report_child_label)
+                    }
                     if (renderedOptions != state.options) {
                         renderedOptions = state.options
                         binding.spReportSelection.adapter = ArrayAdapter(
@@ -179,6 +191,22 @@ class GradeReportFragment : Fragment() {
     }
 
     private fun dp(value: Int) = (value * resources.displayMetrics.density).toInt()
+
+    private fun styleAsTabHeader() {
+        val density = resources.displayMetrics.density
+        fun dp(value: Int) = (value * density).toInt()
+        binding.reportHeader.setBackgroundResource(R.drawable.bg_header)
+        binding.reportHeaderCircle.visibility = View.GONE
+        binding.reportHeader.layoutParams = binding.reportHeader.layoutParams.apply {
+            height = ViewGroup.LayoutParams.WRAP_CONTENT
+        }
+        binding.reportHeaderContent.layoutParams = binding.reportHeaderContent.layoutParams.apply {
+            height = ViewGroup.LayoutParams.WRAP_CONTENT
+        }
+        binding.reportHeaderContent.setPadding(dp(20), dp(28), dp(20), dp(20))
+        binding.tvReportTitle.textSize = 24f
+        (binding.tvReportTitle.layoutParams as ViewGroup.MarginLayoutParams).topMargin = 0
+    }
 
     override fun onDestroyView() {
         _binding = null

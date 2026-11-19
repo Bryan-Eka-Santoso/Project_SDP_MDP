@@ -171,7 +171,8 @@ class RiwayatPelanggaranFragment : Fragment() {
             viewModel.pilihSiswa(siswa.id)
         }
 
-        binding.layoutSiswa.isVisible = daftarSiswa.isNotEmpty()
+        // Siswa (atau wali dengan satu anak) hanya punya satu pilihan; dropdown tidak berguna.
+        binding.layoutSiswa.isVisible = daftarSiswa.size > 1
     }
 
     private fun filterKejadian() {
