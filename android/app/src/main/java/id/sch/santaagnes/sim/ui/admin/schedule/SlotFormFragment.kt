@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.ui.admin.schedule
 
+import id.sch.santaagnes.sim.core.setLoading
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -87,8 +88,9 @@ class SlotFormFragment : Fragment() {
     }
 
     private fun render(state: SlotFormUiState) {
-        binding.progress.isVisible = state.isLoadingLookups || state.isSaving
-        binding.btnSave.isEnabled = !state.isSaving && state.lookups != null
+        binding.progress.isVisible = state.isLoadingLookups
+        binding.btnSave.isEnabled = state.lookups != null
+        binding.btnSave.setLoading(state.isSaving)
         binding.layoutAssignment.error = state.assignmentError?.let(::getString)
         binding.layoutRoom.error = state.roomError?.let(::getString)
         binding.layoutDay.error = state.dayError?.let(::getString)

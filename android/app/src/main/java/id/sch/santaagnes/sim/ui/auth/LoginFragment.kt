@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -15,6 +14,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
 import id.sch.santaagnes.sim.R
+import id.sch.santaagnes.sim.core.setLoading
 import id.sch.santaagnes.sim.databinding.FragmentLoginBinding
 import kotlinx.coroutines.launch
 import androidx.navigation.NavOptions
@@ -56,11 +56,8 @@ class LoginFragment : Fragment() {
             ) {
                 viewModel.uiState.collect { state ->
 
-                    binding.progressBar.isVisible =
-                        state.isLoading
-
-                    binding.btnLogin.isEnabled =
-                        !state.isLoading
+                    // Animasi loading ada di dalam tombol Masuk.
+                    binding.btnLogin.setLoading(state.isLoading)
 
                     val errorText = state.errorMessage
                         ?: state.errorRes?.let { getString(it) }

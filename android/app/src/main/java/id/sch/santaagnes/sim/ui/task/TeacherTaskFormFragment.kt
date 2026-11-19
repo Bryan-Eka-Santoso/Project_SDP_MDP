@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.ui.task
 
+import id.sch.santaagnes.sim.core.setLoading
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -92,8 +93,8 @@ class TeacherTaskFormFragment : Fragment() {
     }
 
     private fun render(state: TeacherTaskFormUiState) {
-        binding.progress.isVisible = state.isLoadingAssignments || state.isSaving
-        binding.btnSave.isEnabled = !state.isSaving
+        binding.progress.isVisible = state.isLoadingAssignments
+        binding.btnSave.setLoading(state.isSaving)
         binding.layoutAssignment.error = state.assignmentError?.let(::getString)
         binding.layoutTitle.error = state.titleError?.let(::getString)
         binding.layoutDescription.error = state.descriptionError?.let(::getString)

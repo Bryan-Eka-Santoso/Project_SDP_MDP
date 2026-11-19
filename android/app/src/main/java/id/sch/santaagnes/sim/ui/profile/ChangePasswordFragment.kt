@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.ui.profile
 
+import id.sch.santaagnes.sim.core.setLoading
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -61,8 +62,7 @@ class ChangePasswordFragment : Fragment() {
     }
 
     private fun render(state: ChangePasswordUiState) {
-        binding.progress.isVisible = state.isSaving
-        binding.btnSave.isEnabled = !state.isSaving
+        binding.btnSave.setLoading(state.isSaving)
         binding.layoutCurrent.error = state.currentError?.let(::getString)
         binding.layoutNew.error = state.newError?.let(::getString)
         binding.layoutConfirm.error = state.confirmError?.let(::getString)

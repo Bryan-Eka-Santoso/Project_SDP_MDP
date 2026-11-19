@@ -23,7 +23,9 @@ import id.sch.santaagnes.sim.ui.calendar.bindDashboardCalendar
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import androidx.core.view.isVisible
+import androidx.recyclerview.widget.GridLayoutManager
+import id.sch.santaagnes.sim.ui.home.HomeShortcut
+import id.sch.santaagnes.sim.ui.home.HomeShortcutAdapter
 import id.sch.santaagnes.sim.data.remote.BukuPenghubungApi
 import id.sch.santaagnes.sim.data.remote.BacaBukuPenghubungApi
 import id.sch.santaagnes.sim.data.remote.ProfilSiswaBinaanApi
@@ -72,134 +74,25 @@ class TeacherDashboardFragment : Fragment() {
 
         // Navigasi menuju seluruh kelas
         binding.btnAllClasses.setOnClickListener {
-            findNavController().navigate(
-                R.id.teacherClassesFragment
-            )
+            findNavController().navigate(R.id.teacherClassesFragment)
         }
 
-        binding.btnInputPelanggaran.setOnClickListener {
-            findNavController().navigate(
-                R.id.action_teacherHome_to_inputPelanggaran
-            )
-        }
+        binding.rvShortcuts.layoutManager = GridLayoutManager(requireContext(), SHORTCUT_COLUMNS)
+        renderShortcuts()
 
-        binding.btnRiwayatPelanggaran.setOnClickListener {
-            findNavController().navigate(
-                R.id.action_teacherHome_to_riwayatPelanggaran
-            )
-        }
-
-        binding.btnBacaBukuPenghubung.setOnClickListener {
-            findNavController().navigate(
-                R.id.teacherBacaBukuPenghubungFragment
-            )
-        }
-
+        // Menu buku penghubung dan profil siswa binaan hanya untuk guru yang punya siswa binaan.
         viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                val response = bacaBukuApi.getSiswa()
-
-                if (_binding != null) {
-                    binding.btnBacaBukuPenghubung.isVisible =
-                        response.success &&
-                                !response.data.isNullOrEmpty()
-                }
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                if (_binding != null) {
-                    binding.btnBacaBukuPenghubung.isVisible = false
-                }
-            }
+            val canRead = hasData { bacaBukuApi.getSiswa().let { it.success && !it.data.isNullOrEmpty() } }
+            val canWrite = hasData { bukuPenghubungApi.getKelas().let { it.success && !it.data.isNullOrEmpty() } }
+            val canProfile = hasData { profilSiswaApi.getSiswa().let { it.success && !it.data.isNullOrEmpty() } }
+            if (_binding == null) return@launch
+            showReadLiaison = canRead
+            showWriteLiaison = canWrite
+            showHomeroomProfile = canProfile
+            renderShortcuts()
         }
 
-        // Menu Profil Siswa Binaan
-        binding.btnProfilSiswaBinaan.setOnClickListener {
-            findNavController().navigate(
-                R.id.action_teacherHome_to_profilSiswaBinaan
-            )
-        }
-
-        // Tampilkan menu hanya untuk Guru yang memiliki siswa binaan.
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                val response = profilSiswaApi.getSiswa()
-
-                if (_binding != null) {
-                    binding.btnProfilSiswaBinaan.isVisible =
-                        response.success &&
-                                !response.data.isNullOrEmpty()
-                }
-
-            } catch (e: CancellationException) {
-                throw e
-
-            } catch (e: Exception) {
-                if (_binding != null) {
-                    binding.btnProfilSiswaBinaan.isVisible = false
-                }
-            }
-        }
-
-        binding.btnAjukanPeminjaman.setOnClickListener {
-            findNavController().navigate(
-                R.id.teacherAjukanPeminjamanFragment
-            )
-        }
-
-        binding.btnRiwayatPeminjaman.setOnClickListener {
-            findNavController().navigate(
-                R.id.teacherRiwayatPeminjamanFragment
-            )
-        }
-
-        // Navigasi Buku Penghubung
-        binding.btnBukuPenghubung.setOnClickListener {
-            findNavController().navigate(
-                R.id.action_teacherHome_to_bukuPenghubung
-            )
-        }
-
-        // Memeriksa apakah Guru mempunyai kelas perwalian aktif
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                val response = bukuPenghubungApi.getKelas()
-
-                if (_binding != null) {
-                    binding.btnBukuPenghubung.isVisible =
-                        response.success &&
-                                !response.data.isNullOrEmpty()
-                }
-
-            } catch (e: CancellationException) {
-                throw e
-
-            } catch (e: Exception) {
-                if (_binding != null) {
-                    binding.btnBukuPenghubung.isVisible = false
-                }
-            }
-        }
-
-        // Navigasi menuju rekap nilai
-        binding.btnGradeReport.setOnClickListener {
-            findNavController().navigate(
-                R.id.teacherGradeReportFragment
-            )
-        }
-
-        // Pengumuman sekolah/kelas binaan & Kalender Akademik
-        binding.btnAnnouncements.setOnClickListener {
-            findNavController().navigate(R.id.action_global_announcements)
-        }
-        binding.btnCalendar.setOnClickListener {
-            findNavController().navigate(R.id.action_global_calendar)
-        }
         bindDashboardCalendar(binding.calendarCard, calendarViewModel)
-        // IZN-03: daftar izin siswa yang menunggu tinjauan wali kelas.
-        binding.btnPendingLeaves.setOnClickListener {
-            findNavController().navigate(R.id.homeroomPendingFragment)
-        }
 
         // Memuat data dashboard
         refreshDashboard()
@@ -208,6 +101,45 @@ class TeacherDashboardFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         calendarViewModel.load()
+    }
+
+    // Menu bersyarat: dipasang setelah pengecekan ke server selesai.
+    private var showWriteLiaison = false
+    private var showReadLiaison = false
+    private var showHomeroomProfile = false
+
+    private suspend fun hasData(check: suspend () -> Boolean): Boolean =
+        try {
+            check()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            false
+        }
+
+    private fun renderShortcuts() {
+        val nav = findNavController()
+        val go = { id: Int -> { nav.navigate(id) } }
+        val items = mutableListOf(
+            HomeShortcut(R.string.shortcut_teacher_leave, R.drawable.ic_check, go(R.id.homeroomPendingFragment)),
+            HomeShortcut(R.string.shortcut_teacher_grade_report, R.drawable.ic_grades, go(R.id.teacherGradeReportFragment)),
+            HomeShortcut(R.string.shortcut_violation_input, R.drawable.ic_warning, go(R.id.action_teacherHome_to_inputPelanggaran)),
+            HomeShortcut(R.string.shortcut_violation_history, R.drawable.ic_shield_person, go(R.id.action_teacherHome_to_riwayatPelanggaran)),
+            HomeShortcut(R.string.shortcut_booking_apply, R.drawable.ic_building, go(R.id.teacherAjukanPeminjamanFragment)),
+            HomeShortcut(R.string.home_shortcut_booking_history, R.drawable.ic_facility, go(R.id.teacherRiwayatPeminjamanFragment)),
+            HomeShortcut(R.string.shortcut_announcements, R.drawable.ic_bell, go(R.id.action_global_announcements)),
+            HomeShortcut(R.string.shortcut_calendar, R.drawable.ic_calendar, go(R.id.action_global_calendar))
+        )
+        if (showWriteLiaison) {
+            items += HomeShortcut(R.string.shortcut_liaison_write, R.drawable.ic_edit, go(R.id.action_teacherHome_to_bukuPenghubung))
+        }
+        if (showReadLiaison) {
+            items += HomeShortcut(R.string.shortcut_liaison_read, R.drawable.ic_book, go(R.id.teacherBacaBukuPenghubungFragment))
+        }
+        if (showHomeroomProfile) {
+            items += HomeShortcut(R.string.shortcut_homeroom_profile, R.drawable.ic_person, go(R.id.action_teacherHome_to_profilSiswaBinaan))
+        }
+        binding.rvShortcuts.adapter = HomeShortcutAdapter(items)
     }
 
     private fun refreshDashboard() {
@@ -321,5 +253,9 @@ class TeacherDashboardFragment : Fragment() {
     override fun onDestroyView() {
         _binding = null
         super.onDestroyView()
+    }
+
+    private companion object {
+        const val SHORTCUT_COLUMNS = 4
     }
 }

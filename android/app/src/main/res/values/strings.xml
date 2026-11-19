@@ -393,7 +393,9 @@
     <string name="tab_master_student">Siswa</string>
     <string name="tab_master_teacher">Guru</string>
     <string name="tab_master_class">Kelas</string>
-    <string name="btn_back_previous">&lt; Kembali ke Halaman Sebelumnya</string>
+    <string name="btn_back_previous">Kembali ke Halaman Sebelumnya</string>
+    <string name="back_previous">Kembali ke Halaman Sebelumnya</string>
+    <string name="back_to_classes">Kembali ke Halaman Kelas</string>
     <string name="search_user_hint">Cari nama atau Email</string>
     <string name="search_student_hint">Cari nama atau NIS</string>
     <string name="filter_all_roles">Semua Role</string>
@@ -636,4 +638,13 @@
     <string name="calendar_edit_title">Ubah Agenda Kalender</string>
     <string name="shortcut_announcements">Pengumuman</string>
     <string name="shortcut_calendar">Kalender</string>
+    <string name="teacher_menu_title">Menu Cepat</string>
+    <string name="shortcut_teacher_leave">Izin Siswa</string>
+    <string name="shortcut_teacher_grade_report">Rekap Nilai</string>
+    <string name="shortcut_violation_input">Input Pelanggaran</string>
+    <string name="shortcut_violation_history">Riwayat Pelanggaran</string>
+    <string name="shortcut_booking_apply">Ajukan Pinjam</string>
+    <string name="shortcut_liaison_write">Tulis Buku</string>
+    <string name="shortcut_liaison_read">Baca Buku</string>
+    <string name="shortcut_homeroom_profile">Profil Binaan</string>
 </resources>

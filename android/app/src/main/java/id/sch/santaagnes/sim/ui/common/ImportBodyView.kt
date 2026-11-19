@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.ui.common
 
+import id.sch.santaagnes.sim.core.setLoading
 import android.view.LayoutInflater
 import androidx.annotation.ArrayRes
 import androidx.annotation.StringRes
@@ -59,7 +60,8 @@ class ImportBodyView(
         errorRowCount: Int
     ) {
         val context = binding.root.context
-        binding.btnImport.isEnabled = canImport
+        binding.btnImport.isEnabled = canImport || isUploading
+        binding.btnImport.setLoading(isUploading)
         binding.btnPick.isEnabled = !isUploading
         binding.btnTemplate.isEnabled = !isUploading
 

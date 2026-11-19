@@ -125,58 +125,22 @@
                     android:textColor="#FFFFFF"
                     android:backgroundTint="@color/teacher_blue_light" />
 
-                <!-- IZN-03: pintasan wali kelas; tidak mengubah bottom navigation. -->
-                <Button
-                    android:id="@+id/btnPendingLeaves"
-                    android:layout_width="match_parent"
-                    android:layout_height="43dp"
-                    android:layout_marginTop="9dp"
-                    android:text="Pengajuan Izin Siswa"
-                    android:textAllCaps="false"
-                    android:textColor="#FFFFFF"
-                    android:backgroundTint="@color/teacher_blue_light" />
-
-                <!-- Tombol Rekap Nilai -->
-                <Button
-                    android:id="@+id/btnGradeReport"
-                    android:layout_width="match_parent"
-                    android:layout_height="43dp"
-                    android:layout_marginTop="9dp"
-                    android:text="Rekap Nilai Kelas"
-                    android:textAllCaps="false"
-                    android:textColor="@color/teacher_blue"
-                    android:backgroundTint="#E2EAFB" />
-
-                <!-- Pintasan Pengumuman & Kalender -->
-                <LinearLayout
+                <!-- Menu Cepat: tile 4 kolom (pola sama dengan Beranda siswa), diisi di TeacherDashboardFragment. -->
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:baselineAligned="false"
-                    android:orientation="horizontal"
-                    android:weightSum="2">
+                    android:layout_marginTop="22dp"
+                    android:text="@string/teacher_menu_title"
+                    android:textColor="@color/teacher_ink"
+                    android:textSize="17sp"
+                    android:textStyle="bold" />
 
-                    <Button
-                        android:id="@+id/btnAnnouncements"
-                        android:layout_width="0dp"
-                        android:layout_height="44dp"
-                        android:layout_weight="1"
-                        android:backgroundTint="#E2EAFB"
-                        android:text="@string/shortcut_announcements"
-                        android:textAllCaps="false"
-                        android:textColor="@color/teacher_blue" />
-
-                    <Button
-                        android:id="@+id/btnCalendar"
-                        android:layout_width="0dp"
-                        android:layout_height="44dp"
-                        android:layout_marginStart="8dp"
-                        android:layout_weight="1"
-                        android:backgroundTint="#E2EAFB"
-                        android:text="@string/shortcut_calendar"
-                        android:textAllCaps="false"
-                        android:textColor="@color/teacher_blue" />
-                </LinearLayout>
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvShortcuts"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:nestedScrollingEnabled="false" />
 
                 <include
                     android:id="@+id/calendarCard"
@@ -184,89 +148,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="14dp" />
-
-                <!-- MENU INPUT PELANGGARAN -->
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnInputPelanggaran"
-                    android:layout_width="match_parent"
-                    android:layout_height="46dp"
-                    android:layout_marginTop="10dp"
-                    android:text="Input Pelanggaran Siswa"
-                    android:textAllCaps="false"
-                    android:textColor="@color/white"
-                    android:textSize="14sp"
-                    app:backgroundTint="@color/agnesian_blue"
-                    app:cornerRadius="10dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnRiwayatPelanggaran"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="12dp"
-                    android:text="Lihat Riwayat Pelanggaran"
-                    android:textAllCaps="false"
-                    android:textColor="@color/white"
-                    app:backgroundTint="@color/agnesian_blue"
-                    app:cornerRadius="10dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnAjukanPeminjaman"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="12dp"
-                    android:text="Ajukan Peminjaman Fasilitas"
-                    android:textAllCaps="false"
-                    android:textColor="@color/white"
-                    app:backgroundTint="@color/agnesian_blue"
-                    app:cornerRadius="10dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnRiwayatPeminjaman"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="12dp"
-                    android:text="Status dan Riwayat Peminjaman"
-                    android:textAllCaps="false"
-                    android:textColor="@color/white"
-                    app:backgroundTint="@color/agnesian_blue"
-                    app:cornerRadius="10dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnBukuPenghubung"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="12dp"
-                    android:text="Tulis Buku Penghubung"
-                    android:textAllCaps="false"
-                    android:textSize="14sp"
-                    android:textColor="@color/white"
-                    android:visibility="gone"
-                    app:backgroundTint="@color/agnesian_blue"
-                    app:cornerRadius="10dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnBacaBukuPenghubung"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="12dp"
-                    android:text="Baca Buku Penghubung"
-                    android:textAllCaps="false"
-                    android:textColor="@color/white"
-                    android:visibility="gone"
-                    app:backgroundTint="@color/agnesian_blue"
-                    app:cornerRadius="10dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnProfilSiswaBinaan"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="12dp"
-                    android:text="Profil Siswa Binaan"
-                    android:textAllCaps="false"
-                    android:textColor="@color/white"
-                    android:visibility="gone"
-                    app:backgroundTint="@color/agnesian_blue"
-                    app:cornerRadius="10dp" />
             </LinearLayout>
 
         </LinearLayout>

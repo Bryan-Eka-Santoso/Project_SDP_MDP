@@ -101,6 +101,10 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+        // Inset bawah sudah dipasang pada root di atas; BottomNavigationView tidak boleh menambahnya lagi
+        // (kalau tidak, muncul ruang kosong besar di bawah label tab).
+        ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNav) { _, insets -> insets }
+
         val navHost = supportFragmentManager
             .findFragmentById(R.id.navHostFragment) as NavHostFragment
         val navController = navHost.navController
@@ -178,6 +182,11 @@ class MainActivity : AppCompatActivity() {
         binding.bottomNav.setOnItemSelectedListener { item ->
             // Tiap tab menyimpan back stack-nya sendiri; kembali ke tab awal graph role.
             val graph = navController.currentDestination?.parent
+            // Tab Home = tujuan awal graph. Bila layar lain didorong di atas Home (mis. "Lihat Semua Kelas"),
+            // kombinasi popUpTo + singleTop tidak mengganti layar, jadi cukup kembali ke Home.
+            if (item.itemId == graph?.startDestinationId && navController.popBackStack(item.itemId, false)) {
+                return@setOnItemSelectedListener true
+            }
             val options = NavOptions.Builder()
                 .setLaunchSingleTop(true)
                 .setRestoreState(true)

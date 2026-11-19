@@ -24,8 +24,8 @@
             android:gravity="center_vertical"
             android:clickable="true"
             android:focusable="true"
-            android:text="‹ Kembali ke Halaman Sebelumnya"
-            android:textSize="12sp"
+            android:text="@string/back_previous" android:drawableStart="@drawable/ic_arrow_back" android:drawablePadding="8dp" android:minHeight="44dp" android:textStyle="bold"
+            android:textSize="15sp"
             android:textColor="@color/white" />
 
         <TextView
