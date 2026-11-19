@@ -2,12 +2,18 @@ package id.sch.santaagnes.sim.ui.admin
 
 import id.sch.santaagnes.sim.core.Resource
 import id.sch.santaagnes.sim.data.repository.ReportRepository
+import id.sch.santaagnes.sim.domain.model.Bill
+import id.sch.santaagnes.sim.domain.model.BillStatus
+import id.sch.santaagnes.sim.domain.model.BillStudent
 import id.sch.santaagnes.sim.domain.model.ChangeType
 import id.sch.santaagnes.sim.domain.model.NamedId
+import id.sch.santaagnes.sim.domain.model.PaymentStatusReportFilter
 import id.sch.santaagnes.sim.domain.model.ReportOptions
 import id.sch.santaagnes.sim.domain.model.ReportPage
 import id.sch.santaagnes.sim.domain.model.ScheduleChangeReportFilter
 import id.sch.santaagnes.sim.domain.model.ScheduleChangeReportRow
+import id.sch.santaagnes.sim.domain.model.StudentStatsFilter
+import id.sch.santaagnes.sim.domain.model.StudentStatsRow
 import id.sch.santaagnes.sim.domain.model.TeacherOption
 import id.sch.santaagnes.sim.domain.model.TeachingLoadFilter
 import id.sch.santaagnes.sim.domain.model.TeachingLoadRow
@@ -18,16 +24,24 @@ import java.time.LocalTime
 class FakeReportRepository : ReportRepository {
     var changePages: List<List<ScheduleChangeReportRow>> = listOf(emptyList())
     var loadPages: List<List<TeachingLoadRow>> = listOf(emptyList())
+    var paymentPages: List<List<Bill>> = listOf(emptyList())
+    var studentStatPages: List<List<StudentStatsRow>> = listOf(emptyList())
     var changesError: String? = null
     var loadError: String? = null
+    var paymentError: String? = null
+    var studentStatsError: String? = null
     var exportError: String? = null
     var exportWritten = true
     var optionsResult: Resource<ReportOptions> = Resource.Success(sampleOptions())
 
     val requestedChanges = mutableListOf<Pair<Int, ScheduleChangeReportFilter>>()
     val requestedLoads = mutableListOf<Pair<Int, TeachingLoadFilter>>()
+    val requestedPayments = mutableListOf<Pair<Int, PaymentStatusReportFilter>>()
+    val requestedStudentStats = mutableListOf<Pair<Int, StudentStatsFilter>>()
     val exportedChanges = mutableListOf<Pair<ScheduleChangeReportFilter, String>>()
     val exportedLoads = mutableListOf<Pair<TeachingLoadFilter, String>>()
+    val exportedPayments = mutableListOf<Pair<PaymentStatusReportFilter, String>>()
+    val exportedStudentStats = mutableListOf<Pair<StudentStatsFilter, String>>()
     var optionsRequests = 0
 
     override suspend fun scheduleChanges(
@@ -47,6 +61,26 @@ class FakeReportRepository : ReportRepository {
         return Resource.Success(ReportPage(rows, page, page < loadPages.size, loadPages.sumOf { it.size }))
     }
 
+    override suspend fun paymentStatus(
+        page: Int,
+        filter: PaymentStatusReportFilter
+    ): Resource<ReportPage<Bill>> {
+        requestedPayments += page to filter
+        paymentError?.let { return Resource.Error(it) }
+        val rows = paymentPages.getOrElse(page - 1) { emptyList() }
+        return Resource.Success(ReportPage(rows, page, page < paymentPages.size, paymentPages.sumOf { it.size }))
+    }
+
+    override suspend fun studentStats(
+        page: Int,
+        filter: StudentStatsFilter
+    ): Resource<ReportPage<StudentStatsRow>> {
+        requestedStudentStats += page to filter
+        studentStatsError?.let { return Resource.Error(it) }
+        val rows = studentStatPages.getOrElse(page - 1) { emptyList() }
+        return Resource.Success(ReportPage(rows, page, page < studentStatPages.size, studentStatPages.sumOf { it.size }))
+    }
+
     override suspend fun exportScheduleChanges(
         filter: ScheduleChangeReportFilter,
         destination: String
@@ -59,6 +93,21 @@ class FakeReportRepository : ReportRepository {
     override suspend fun exportTeachingLoad(filter: TeachingLoadFilter, destination: String): Resource<Boolean> {
         exportError?.let { return Resource.Error(it) }
         exportedLoads += filter to destination
+        return Resource.Success(exportWritten)
+    }
+
+    override suspend fun exportPaymentStatus(
+        filter: PaymentStatusReportFilter,
+        destination: String
+    ): Resource<Boolean> {
+        exportError?.let { return Resource.Error(it) }
+        exportedPayments += filter to destination
+        return Resource.Success(exportWritten)
+    }
+
+    override suspend fun exportStudentStats(filter: StudentStatsFilter, destination: String): Resource<Boolean> {
+        exportError?.let { return Resource.Error(it) }
+        exportedStudentStats += filter to destination
         return Resource.Success(exportWritten)
     }
 
@@ -97,9 +146,38 @@ class FakeReportRepository : ReportRepository {
             hoursPerDay = listOf(3.0, 3.0, 3.0, 3.0, 3.0, 3.0)
         )
 
+        fun bill(id: Int, status: BillStatus = BillStatus.OVERDUE) = Bill(
+            id = id,
+            code = "SPP-$id",
+            paymentType = "SPP",
+            amount = 850_000L,
+            dueDate = LocalDate.of(2026, 11, 10),
+            paidDate = if (status == BillStatus.PAID) LocalDate.of(2026, 11, 8) else null,
+            status = status,
+            student = BillStudent(id = 10 + id, nis = "202600$id", name = "Siswa $id", classNames = listOf("X-1"))
+        )
+
+        fun studentStat(classGroupId: Int, gradeLevel: String = "10") = StudentStatsRow(
+            classGroupId = classGroupId,
+            className = "X-$classGroupId",
+            gradeLevel = gradeLevel,
+            capacity = 36,
+            homeroomTeacherName = "Wali $classGroupId",
+            studentCount = 30,
+            presentCount = 90,
+            sickCount = 5,
+            excusedCount = 3,
+            absentCount = 2,
+            attendanceTotal = 100,
+            attendanceRate = 90.0,
+            violationCount = 1,
+            violationPoints = 10
+        )
+
         fun sampleOptions() = ReportOptions(
             teachers = listOf(TeacherOption(3, "Guru Satu"), TeacherOption(4, "Guru Dua")),
-            classGroups = listOf(NamedId(5, "X-1"), NamedId(6, "X-2"))
+            classGroups = listOf(NamedId(5, "X-1"), NamedId(6, "X-2")),
+            gradeLevels = listOf("10", "11")
         )
     }
 }

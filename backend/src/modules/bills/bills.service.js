@@ -15,6 +15,34 @@ const billSelect = {
   paidDate: true,
 };
 
+const studentBillSelect = {
+  ...billSelect,
+  student: {
+    select: {
+      id: true,
+      nis: true,
+      user: { select: { name: true } },
+      // Kelas pada tahun ajaran aktif; siswa bisa ada di lebih dari satu kelas (kelas paket).
+      classMemberships: {
+        where: { classGroup: { academicYear: { isActive: true } } },
+        select: { classGroup: { select: { id: true, name: true } } },
+      },
+    },
+  },
+};
+
+function toStudentBillDto(row, today) {
+  return {
+    ...toBillDto(row, today),
+    student: {
+      id: row.student.id,
+      nis: row.student.nis,
+      name: row.student.user.name,
+      classGroups: row.student.classMemberships.map((m) => m.classGroup),
+    },
+  };
+}
+
 // Menunggak = belum dibayar DAN sudah lewat jatuh tempo, menurut tanggal WIB (hari jatuh tempo belum menunggak).
 function toBillDto(bill, today) {
   const dueDate = formatDateOnly(bill.dueDate);
@@ -86,21 +114,7 @@ async function listBills(user, { page, limit, classGroupId, q, ...filters }) {
   const [rows, total, studentCount] = await Promise.all([
     prisma.bill.findMany({
       where,
-      select: {
-        ...billSelect,
-        student: {
-          select: {
-            id: true,
-            nis: true,
-            user: { select: { name: true } },
-            // Kelas pada tahun ajaran aktif; siswa bisa ada di lebih dari satu kelas (kelas paket).
-            classMemberships: {
-              where: { classGroup: { academicYear: { isActive: true } } },
-              select: { classGroup: { select: { id: true, name: true } } },
-            },
-          },
-        },
-      },
+      select: studentBillSelect,
       orderBy: [{ dueDate: 'desc' }, { id: 'desc' }],
       ...toPrismaPagination({ page, limit }),
     }),
@@ -108,16 +122,8 @@ async function listBills(user, { page, limit, classGroupId, q, ...filters }) {
     studentCountPromise,
   ]);
 
-  const items = rows.map((row) => ({
-    ...toBillDto(row, today),
-    student: {
-      id: row.student.id,
-      nis: row.student.nis,
-      name: row.student.user.name,
-      classGroups: row.student.classMemberships.map((m) => m.classGroup),
-    },
-  }));
+  const items = rows.map((row) => toStudentBillDto(row, today));
   return { items, total, studentCount };
 }
 
-module.exports = { listStudentBills, listBills, toBillDto };
+module.exports = { listStudentBills, listBills, toBillDto, billFilters, studentBillSelect, toStudentBillDto };

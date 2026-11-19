@@ -32,7 +32,7 @@
         android:id="@+id/billImportFragment"
         android:name="id.sch.santaagnes.sim.ui.bill.BillImportFragment" />
 
-    <!-- Laporan admin (F-LAP-07, F-LAP-09, F-LAP-11); pintu masuknya tombol di tab Profil admin. -->
+    <!-- Laporan admin (F-LAP-05, F-LAP-07, F-LAP-09, F-LAP-10, F-LAP-11); pintu masuknya tombol di tab Profil admin. -->
     <fragment
         android:id="@+id/reportHubFragment"
         android:name="id.sch.santaagnes.sim.ui.admin.report.ReportHubFragment">
@@ -60,7 +60,16 @@
         <action
             android:id="@+id/action_reportHub_to_adminJournals"
             app:destination="@id/adminJournalFragment" />
-       <action
+
+        <action
+            android:id="@+id/action_reportHub_to_paymentStatusReport"
+            app:destination="@id/paymentStatusReportFragment" />
+
+        <action
+            android:id="@+id/action_reportHub_to_studentStatsReport"
+            app:destination="@id/studentStatsReportFragment" />
+
+        <action
             android:id="@+id/action_reportHub_to_violationReport"
             app:destination="@id/violationReportFragment" />
 
@@ -80,6 +89,14 @@
     <fragment
         android:id="@+id/teachingLoadReportFragment"
         android:name="id.sch.santaagnes.sim.ui.admin.report.TeachingLoadReportFragment" />
+
+    <fragment
+        android:id="@+id/paymentStatusReportFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.report.PaymentStatusReportFragment" />
+
+    <fragment
+        android:id="@+id/studentStatsReportFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.report.StudentStatsReportFragment" />
 
     <fragment
         android:id="@+id/announcementListFragment"

@@ -15,10 +15,21 @@ import id.sch.santaagnes.sim.databinding.ItemBillBinding
 import id.sch.santaagnes.sim.domain.model.Bill
 import id.sch.santaagnes.sim.domain.model.BillStatus
 
-class BillAdapter : ListAdapter<Bill, BillAdapter.BillViewHolder>(DiffCallback) {
+class BillAdapter(
+    private val horizontalMarginDp: Int? = null
+) : ListAdapter<Bill, BillAdapter.BillViewHolder>(DiffCallback) {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BillViewHolder =
-        BillViewHolder(ItemBillBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BillViewHolder {
+        val binding = ItemBillBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        horizontalMarginDp?.let { dp ->
+            val px = (dp * parent.resources.displayMetrics.density).toInt()
+            (binding.root.layoutParams as? ViewGroup.MarginLayoutParams)?.apply {
+                marginStart = px
+                marginEnd = px
+            }
+        }
+        return BillViewHolder(binding)
+    }
 
     override fun onBindViewHolder(holder: BillViewHolder, position: Int) {
         holder.bind(getItem(position))

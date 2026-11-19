@@ -1,34 +1,35 @@
 // Laporan admin (F-LAP-*) dan ekspornya ke Excel (F-LAP-11). Tiap jenis laporan didaftarkan di
 // REPORTS dengan filter, kolom ekspor, dan fungsi `load`; ekspor memakai data dan filter yang
 // sama dengan tampilan sehingga isi berkas = yang sedang ditampilkan.
-const AppError = require("../../utils/AppError");
-const { todayLocal } = require("../../utils/date");
-const {
-  toPrismaPagination,
-  paginationQuery,
-} = require("../../utils/pagination");
-const { writeXlsx } = require("../../lib/excel");
-const scheduleChanges = require("./reports.scheduleChanges");
-const teachingLoad = require("./reports.teachingLoad");
-const grades = require("./reports.grades");
-const attendance = require("./reports.attendance");
-const journals = require("./reports.journals");
-const violations = require("./reports.violations");
-const facilityBookings = require("./reports.facilityBookings");
-const electiveSurveys = require("./reports.electiveSurveys");
+const AppError = require('../../utils/AppError');
+const { todayLocal } = require('../../utils/date');
+const { toPrismaPagination, paginationQuery } = require('../../utils/pagination');
+const { writeXlsx } = require('../../lib/excel');
+const scheduleChanges = require('./reports.scheduleChanges');
+const teachingLoad = require('./reports.teachingLoad');
+const paymentStatus = require('./reports.paymentStatus');
+const studentStats = require('./reports.studentStats');
+const grades = require('./reports.grades');
+const attendance = require('./reports.attendance');
+const journals = require('./reports.journals');
+const violations = require('./reports.violations');
+const facilityBookings = require('./reports.facilityBookings');
+const electiveSurveys = require('./reports.electiveSurveys');
 
 // Kunci = segmen path `/reports/:type`.
 const REPORTS = Object.freeze({
-  "schedule-changes": scheduleChanges,
-  "teaching-load": teachingLoad,
+  'schedule-changes': scheduleChanges,
+  'teaching-load': teachingLoad,
+  'payment-status': paymentStatus,
+  'student-stats': studentStats,
 
-  // LAP-01, LAP-02, LAP-06
-  grades: grades,
-  attendance: attendance,
-  "teaching-journals": journals,
-  violations: violations,
-  "facility-bookings": facilityBookings,
-  "elective-surveys": electiveSurveys,
+  // LAP-01, LAP-02, LAP-03, LAP-04, LAP-06, LAP-08
+  grades,
+  attendance,
+  'teaching-journals': journals,
+  violations,
+  'facility-bookings': facilityBookings,
+  'elective-surveys': electiveSurveys,
 });
 
 // Ekspor lebih besar dari ini ditolak agar server tidak kehabisan memori; persempit filter.

@@ -11,14 +11,7 @@ import id.sch.santaagnes.sim.core.DateTimeWib
 import id.sch.santaagnes.sim.databinding.ItemReportDayBarBinding
 import id.sch.santaagnes.sim.databinding.ItemReportTeachingLoadBinding
 import id.sch.santaagnes.sim.domain.model.TeachingLoadRow
-import java.text.DecimalFormat
-import java.text.DecimalFormatSymbols
 import java.time.DayOfWeek
-import java.util.Locale
-
-/** Jam dengan koma desimal dan tanpa nol di belakang: 18, 18,5, 4,75. */
-internal fun formatHours(hours: Double): String =
-    DecimalFormat("0.##", DecimalFormatSymbols(Locale("id", "ID"))).format(hours)
 
 /** Kartu baris laporan beban mengajar guru (F-LAP-09), dengan batang jam per hari Senin sampai Sabtu. */
 class TeachingLoadReportAdapter :
@@ -40,7 +33,7 @@ class TeachingLoadReportAdapter :
             binding.tvName.text = row.teacherName
             binding.tvNip.isVisible = row.employeeNumber != null
             binding.tvNip.text = row.employeeNumber?.let { context.getString(R.string.report_load_nip, it) }
-            binding.tvHours.text = context.getString(R.string.report_load_hours, formatHours(row.totalHours))
+            binding.tvHours.text = context.getString(R.string.report_load_hours, formatReportDecimal(row.totalHours))
 
             if (row.sessionsPerWeek == 0) {
                 binding.tvSummary.setText(R.string.report_load_no_schedule)
@@ -64,7 +57,7 @@ class TeachingLoadReportAdapter :
                 val hours = row.hoursPerDay[index]
                 val bar = ItemReportDayBarBinding.inflate(inflater, binding.daysRow, false)
                 bar.tvDayName.text = DateTimeWib.dayName(day).take(DAY_LABEL_LENGTH)
-                bar.tvDayHours.text = formatHours(hours)
+                bar.tvDayHours.text = formatReportDecimal(hours)
                 // Skala tetap (bukan relatif per guru) supaya batang antar guru bisa dibandingkan.
                 val fraction = (hours / MAX_DAY_HOURS).coerceIn(0.0, 1.0)
                 bar.viewBar.layoutParams = bar.viewBar.layoutParams.also {

@@ -1,13 +1,20 @@
 package id.sch.santaagnes.sim.ui.admin
 
 import id.sch.santaagnes.sim.core.Resource
+import id.sch.santaagnes.sim.domain.model.BillStatus
 import id.sch.santaagnes.sim.domain.model.ChangeType
+import id.sch.santaagnes.sim.domain.model.PaymentStatusReportFilter
 import id.sch.santaagnes.sim.domain.model.ScheduleChangeReportFilter
+import id.sch.santaagnes.sim.domain.model.StudentStatsFilter
 import id.sch.santaagnes.sim.domain.model.TeachingLoadFilter
+import id.sch.santaagnes.sim.ui.admin.FakeReportRepository.Companion.bill
 import id.sch.santaagnes.sim.ui.admin.FakeReportRepository.Companion.change
 import id.sch.santaagnes.sim.ui.admin.FakeReportRepository.Companion.load
+import id.sch.santaagnes.sim.ui.admin.FakeReportRepository.Companion.studentStat
+import id.sch.santaagnes.sim.ui.admin.report.PaymentStatusReportViewModel
 import id.sch.santaagnes.sim.ui.admin.report.ReportEvent
 import id.sch.santaagnes.sim.ui.admin.report.ScheduleChangeReportViewModel
+import id.sch.santaagnes.sim.ui.admin.report.StudentStatsReportViewModel
 import id.sch.santaagnes.sim.ui.admin.report.TeachingLoadReportViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -254,5 +261,59 @@ class ReportViewModelTest {
 
         viewModel.exportTo("content://doc/9")
         assertEquals(listOf(TeachingLoadFilter(teacherId = 4) to "content://doc/9"), repository.exportedLoads)
+    }
+
+    @Test
+    fun paymentStatusFiltersClampDatesAndExport() = runTest {
+        val repository = FakeReportRepository().apply {
+            paymentPages = listOf(listOf(bill(1, BillStatus.OVERDUE), bill(2, BillStatus.PAID)))
+        }
+        val viewModel = PaymentStatusReportViewModel(repository)
+        viewModel.refresh()
+        assertEquals(listOf(1, 2), viewModel.uiState.value.rows.map { it.id })
+        assertEquals(2, viewModel.uiState.value.total)
+
+        viewModel.selectClassGroup(5)
+        viewModel.selectStatus(BillStatus.OVERDUE)
+        val nov20 = LocalDate.of(2026, 11, 20)
+        val nov10 = LocalDate.of(2026, 11, 10)
+        viewModel.selectDateTo(nov10)
+        viewModel.selectDateFrom(nov20)
+
+        assertEquals(
+            PaymentStatusReportFilter(classGroupId = 5, status = BillStatus.OVERDUE, dueFrom = nov20, dueTo = nov20),
+            viewModel.uiState.value.filter
+        )
+
+        viewModel.exportTo("content://doc/bill")
+        assertEquals(
+            listOf(viewModel.uiState.value.filter to "content://doc/bill"),
+            repository.exportedPayments
+        )
+
+        viewModel.clearDates()
+        assertNull(viewModel.uiState.value.filter.dueFrom)
+        assertNull(viewModel.uiState.value.filter.dueTo)
+    }
+
+    @Test
+    fun studentStatsFiltersByClassAndGradeAndExports() = runTest {
+        val repository = FakeReportRepository().apply {
+            studentStatPages = listOf(listOf(studentStat(5, "10"), studentStat(6, "11")))
+        }
+        val viewModel = StudentStatsReportViewModel(repository)
+        viewModel.refresh()
+        assertEquals(listOf(5, 6), viewModel.uiState.value.rows.map { it.classGroupId })
+        assertEquals(listOf("10", "11"), viewModel.uiState.value.options.gradeLevels)
+
+        viewModel.selectGradeLevel("10")
+        viewModel.selectClassGroup(5)
+        assertEquals(StudentStatsFilter(classGroupId = 5, gradeLevel = "10"), repository.requestedStudentStats.last().second)
+
+        viewModel.exportTo("content://doc/stats")
+        assertEquals(
+            listOf(StudentStatsFilter(classGroupId = 5, gradeLevel = "10") to "content://doc/stats"),
+            repository.exportedStudentStats
+        )
     }
 }

@@ -4,16 +4,11 @@ import android.view.View
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import com.google.android.material.chip.Chip
-import com.google.android.material.datepicker.MaterialDatePicker
 import dagger.hilt.android.AndroidEntryPoint
 import id.sch.santaagnes.sim.R
-import id.sch.santaagnes.sim.core.DateTimeWib
 import id.sch.santaagnes.sim.domain.model.ChangeType
 import id.sch.santaagnes.sim.domain.model.ScheduleChangeReportFilter
 import id.sch.santaagnes.sim.domain.model.ScheduleChangeReportRow
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneOffset
 
 /** Laporan perubahan jadwal (F-LAP-07): filter kelas, guru (asli/pengganti), jenis, dan rentang tanggal. */
 @AndroidEntryPoint
@@ -58,14 +53,13 @@ class ScheduleChangeReportFragment : ReportFragment<ScheduleChangeReportRow, Sch
             binding.chipTypes.addView(chip)
         }
 
-        binding.dateRow.isVisible = true
-        binding.inputDateFrom.setOnClickListener {
-            pickDate(R.string.report_filter_date_from, currentFilter().dateFrom) { scheduleViewModel.selectDateFrom(it) }
-        }
-        binding.inputDateTo.setOnClickListener {
-            pickDate(R.string.report_filter_date_to, currentFilter().dateTo) { scheduleViewModel.selectDateTo(it) }
-        }
-        binding.btnClearDates.setOnClickListener { scheduleViewModel.clearDates() }
+        setupDateRange(
+            currentFrom = { scheduleViewModel.uiState.value.filter.dateFrom },
+            currentTo = { scheduleViewModel.uiState.value.filter.dateTo },
+            onDateFrom = { scheduleViewModel.selectDateFrom(it) },
+            onDateTo = { scheduleViewModel.selectDateTo(it) },
+            onClear = { scheduleViewModel.clearDates() }
+        )
     }
 
     override fun renderFilters(state: ReportUiState<ScheduleChangeReportRow, ScheduleChangeReportFilter>) {
@@ -85,26 +79,11 @@ class ScheduleChangeReportFragment : ReportFragment<ScheduleChangeReportRow, Sch
             filter.teacherId
         )
 
-        binding.inputDateFrom.setText(filter.dateFrom?.let(DateTimeWib::formatDate).orEmpty())
-        binding.inputDateTo.setText(filter.dateTo?.let(DateTimeWib::formatDate).orEmpty())
-        binding.btnClearDates.isVisible = filter.dateFrom != null || filter.dateTo != null
+        renderDateRange(filter.dateFrom, filter.dateTo)
     }
 
     override fun releaseFilters() {
         classDropdown = null
         teacherDropdown = null
-    }
-
-    private fun currentFilter(): ScheduleChangeReportFilter = scheduleViewModel.uiState.value.filter
-
-    private fun pickDate(titleRes: Int, current: LocalDate?, onPicked: (LocalDate) -> Unit) {
-        val picker = MaterialDatePicker.Builder.datePicker()
-            .setTitleText(titleRes)
-            .setSelection((current ?: DateTimeWib.today()).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
-            .build()
-        picker.addOnPositiveButtonClickListener { millis ->
-            onPicked(Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate())
-        }
-        picker.show(childFragmentManager, "date")
     }
 }
