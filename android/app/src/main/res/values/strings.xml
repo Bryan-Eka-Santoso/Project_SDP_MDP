@@ -74,6 +74,9 @@
     <string name="task_error_time_past">Jam tenggat hari ini harus setelah jam sekarang.</string>
 
     <string name="student_tasks_title">Tugas &amp; Pengingat</string>
+    <!-- Teks tombol di layar Jadwal; sama dengan Figma -->
+    <string name="schedule_open_tasks">Tambahkan Pengingat Tugas</string>
+    <string name="grade_report_child_label">Pilih Anak</string>
     <string name="student_tasks_tab_teacher">Tugas dari Guru</string>
     <string name="student_tasks_tab_reminders">Pengingat Saya</string>
     <string name="task_empty_student">Belum ada tugas dari guru.</string>
@@ -274,6 +277,12 @@
     <string name="profile_label_homeroom_teacher">Wali Kelas</string>
     <string name="profile_label_phone">No. Telepon</string>
     <string name="profile_label_role">Peran</string>
+    <string name="calendar_sync_title">Sinkronkan ke kalender perangkat</string>
+    <string name="calendar_sync_desc_with_bookings">Agenda kalender akademik dan peminjaman fasilitas yang disetujui ikut masuk ke aplikasi Kalender di HP. Jadwal pelajaran tidak ikut.</string>
+    <string name="calendar_sync_desc_academic">Agenda kalender akademik ikut masuk ke aplikasi Kalender di HP.</string>
+    <string name="calendar_sync_busy">Menyinkronkan…</string>
+    <string name="calendar_sync_status">Terakhir sinkron %1$s · %2$d agenda di kalender (%3$d baru, %4$d diperbarui, %5$d dihapus)</string>
+    <string name="calendar_sync_status_time_only">Terakhir sinkron %1$s</string>
     <string name="profile_bills">Tagihan</string>
     <string name="profile_reports">Laporan</string>
 
@@ -439,6 +448,26 @@
     <string name="home_shortcut_tasks">Tugas</string>
     <string name="home_shortcut_grades">Nilai</string>
     <string name="home_shortcut_leave">Izin</string>
+    <string name="home_shortcut_attendance">Absensi</string>
+    <string name="home_shortcut_violations">Pelanggaran</string>
+    <string name="home_shortcut_booking">Peminjaman</string>
+    <string name="home_shortcut_booking_history">Riwayat Pinjam</string>
+    <string name="home_shortcut_survey">Survei</string>
+    <string name="home_shortcut_notes">Catatan</string>
+    <string name="home_shortcut_liaison">Buku Penghubung</string>
+    <string name="home_stat_empty">-</string>
+    <string name="home_stat_percent">%1$d%%</string>
+    <string name="home_announcement_meta">%1$s · %2$s</string>
+    <string name="home_stat_score">Rata-rata nilai</string>
+    <string name="home_stat_score_hint">Semester ini</string>
+    <string name="home_stat_attendance">Kehadiran</string>
+    <string name="home_stat_attendance_hint">Bulan ini</string>
+    <string name="home_stat_today">Jadwal Hari Ini</string>
+    <string name="home_stat_today_hint">Mata pelajaran</string>
+    <string name="home_stat_points">Poin Pelanggaran</string>
+    <string name="home_stat_points_hint">Total poin</string>
+    <string name="home_see_all">Lihat Semua</string>
+    <string name="home_announcements_empty">Belum ada pengumuman.</string>
     <string name="master_subjects_title">Master Mata Pelajaran</string>
     <string name="master_subjects_subtitle">Kelola mata pelajaran sekolah</string>
     <string name="master_total_subjects">Total: %1$d mata pelajaran</string>

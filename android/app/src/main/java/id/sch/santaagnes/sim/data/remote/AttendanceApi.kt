@@ -50,4 +50,12 @@ interface AttendanceApi {
         @Query("startDate") startDate: String? = null,
         @Query("endDate") endDate: String? = null
     ): ApiResponse<AttendanceSummaryDto>
+
+    // ABS-03: Rekap presensi anak yang terhubung ke wali murid
+    @GET("students/{studentId}/attendance-summary")
+    suspend fun studentAttendanceSummary(
+        @Path("studentId") studentId: Int,
+        @Query("startDate") startDate: String? = null,
+        @Query("endDate") endDate: String? = null
+    ): ApiResponse<AttendanceSummaryDto>
 }

@@ -17,6 +17,17 @@ class AttendanceRepository @Inject constructor(private val api: AttendanceApi) {
         return response.data ?: error("Rekap presensi tidak tersedia.")
     }
 
+    /** Rekap bulanan anak untuk wali murid; backend memeriksa bahwa anak itu terhubung ke wali. */
+    suspend fun studentSummary(
+        studentId: Int,
+        startDate: String,
+        endDate: String
+    ): id.sch.santaagnes.sim.data.remote.AttendanceSummaryDto {
+        val response = api.studentAttendanceSummary(studentId, startDate, endDate)
+        if (!response.success) error(response.error?.message ?: "Gagal mengambil rekap presensi.")
+        return response.data ?: error("Rekap presensi tidak tersedia.")
+    }
+
     suspend fun slots(assignmentId: Int): List<AttendanceSlotDto> =
         api.slots().data.orEmpty().filter { it.assignmentId == assignmentId }
 

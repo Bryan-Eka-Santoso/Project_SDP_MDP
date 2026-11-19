@@ -159,12 +159,8 @@ async function simpan(userId, body) {
     },
   });
 
-  let guardianCount = 0;
-
   try {
     const waliIds = await guardianUserIdsOfStudents([siswa.id]);
-
-    guardianCount = waliIds.length;
 
     if (waliIds.length > 0) {
       notify(waliIds, {

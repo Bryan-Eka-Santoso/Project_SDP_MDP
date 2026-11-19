@@ -1,9 +1,13 @@
 package id.sch.santaagnes.sim.ui.profile
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -13,6 +17,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
 import id.sch.santaagnes.sim.R
+import id.sch.santaagnes.sim.core.DateTimeWib
 import id.sch.santaagnes.sim.databinding.FragmentProfileBinding
 import id.sch.santaagnes.sim.domain.model.Profile
 import id.sch.santaagnes.sim.ui.auth.SessionViewModel
@@ -28,6 +33,13 @@ class ProfileFragment : Fragment() {
 
     private val viewModel: ProfileViewModel by viewModels()
     private val sessionViewModel: SessionViewModel by viewModels()
+    private val calendarSyncViewModel: CalendarSyncViewModel by viewModels()
+
+    // Izin kalender diminta saat tombol sinkron dinyalakan, bukan saat aplikasi dibuka.
+    private val calendarPermission =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { grants ->
+            if (grants.values.all { it }) calendarSyncViewModel.enable() else calendarSyncViewModel.permissionDenied()
+        }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -47,6 +59,24 @@ class ProfileFragment : Fragment() {
         binding.btnReports.setOnClickListener { findNavController().navigate(R.id.action_global_reports) }
         observeLogout(sessionViewModel)
 
+        binding.switchCalendarSync.setOnCheckedChangeListener { _, checked ->
+            if (checked == calendarSyncViewModel.uiState.value.enabled) return@setOnCheckedChangeListener
+            if (!checked) {
+                calendarSyncViewModel.disable()
+            } else if (hasCalendarPermission()) {
+                calendarSyncViewModel.enable()
+            } else {
+                calendarPermission.launch(
+                    arrayOf(Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR)
+                )
+            }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                calendarSyncViewModel.uiState.collect(::renderCalendarSync)
+            }
+        }
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
@@ -57,6 +87,46 @@ class ProfileFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun hasCalendarPermission() = listOf(
+        Manifest.permission.READ_CALENDAR,
+        Manifest.permission.WRITE_CALENDAR
+    ).all { ContextCompat.checkSelfPermission(requireContext(), it) == PackageManager.PERMISSION_GRANTED }
+
+    private fun renderCalendarSync(state: CalendarSyncUiState) {
+        // Listener mengabaikan perubahan yang sama dengan state, jadi menyetel dari kode aman.
+        binding.switchCalendarSync.isChecked = state.enabled
+        binding.switchCalendarSync.isEnabled = !state.busy
+        binding.tvCalendarSyncDesc.setText(
+            if (state.includesBookings) R.string.calendar_sync_desc_with_bookings
+            else R.string.calendar_sync_desc_academic
+        )
+        val status = when {
+            state.busy -> getString(R.string.calendar_sync_busy)
+            state.errorMessage != null -> state.errorMessage
+            state.enabled && state.result != null && state.lastSyncMillis != null -> getString(
+                R.string.calendar_sync_status,
+                DateTimeWib.formatTimestamp(state.lastSyncMillis),
+                state.result.total,
+                state.result.added,
+                state.result.updated,
+                state.result.removed
+            )
+            state.enabled && state.lastSyncMillis != null -> getString(
+                R.string.calendar_sync_status_time_only,
+                DateTimeWib.formatTimestamp(state.lastSyncMillis)
+            )
+            else -> null
+        }
+        binding.tvCalendarSyncStatus.isVisible = status != null
+        binding.tvCalendarSyncStatus.text = status
+        binding.tvCalendarSyncStatus.setTextColor(
+            ContextCompat.getColor(
+                requireContext(),
+                if (state.errorMessage != null) R.color.change_cancel else R.color.agnesian_blue
+            )
+        )
     }
 
     private fun render(profile: Profile) {

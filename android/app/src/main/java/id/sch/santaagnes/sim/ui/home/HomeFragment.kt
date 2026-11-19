@@ -11,12 +11,15 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.chip.Chip
 import dagger.hilt.android.AndroidEntryPoint
 import id.sch.santaagnes.sim.R
 import id.sch.santaagnes.sim.core.DateTimeWib
 import id.sch.santaagnes.sim.databinding.FragmentHomeBinding
+import id.sch.santaagnes.sim.databinding.ItemHomeAnnouncementBinding
 import id.sch.santaagnes.sim.databinding.ItemHomeTaskBinding
+import id.sch.santaagnes.sim.domain.model.Announcement
 import id.sch.santaagnes.sim.domain.model.NamedId
 import id.sch.santaagnes.sim.domain.model.Task
 import id.sch.santaagnes.sim.ui.calendar.AcademicCalendarViewModel
@@ -25,8 +28,10 @@ import id.sch.santaagnes.sim.ui.task.countdownText
 import id.sch.santaagnes.sim.ui.task.dueColor
 import id.sch.santaagnes.sim.ui.task.dueDateText
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.util.Locale
 
-/** Beranda siswa dan wali murid. Pintasan Nilai dan Izin tetap ada di sini karena belum punya tab sendiri. */
+/** Beranda siswa dan wali murid (Figma Halaman Dashboard). */
 @AndroidEntryPoint
 class HomeFragment : Fragment() {
 
@@ -37,6 +42,7 @@ class HomeFragment : Fragment() {
     private val calendarViewModel: AcademicCalendarViewModel by viewModels()
 
     private var shownChildren: List<NamedId>? = null
+    private var shownRole: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -50,6 +56,8 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.tvGreeting.setText(greeting())
         binding.btnRetry.setOnClickListener { viewModel.refresh() }
+        binding.rvShortcuts.layoutManager = GridLayoutManager(requireContext(), SHORTCUT_COLUMNS)
+        binding.btnAnnouncementsAll.setOnClickListener { findNavController().navigate(R.id.action_global_announcements) }
         bindDashboardCalendar(binding.calendarCard, calendarViewModel)
 
         viewLifecycleOwner.lifecycleScope.launch {
@@ -67,6 +75,8 @@ class HomeFragment : Fragment() {
 
     private fun render(state: HomeUiState) {
         binding.tvName.text = state.name.orEmpty()
+        binding.tvClass.text = state.className
+        binding.tvClass.isVisible = !state.className.isNullOrBlank()
         binding.progress.isVisible = state.isLoading
         binding.errorBanner.isVisible = state.errorMessage != null
         binding.tvError.text = state.errorMessage
@@ -75,6 +85,8 @@ class HomeFragment : Fragment() {
         renderReminders(state.reminders)
         renderChildren(state)
         renderShortcuts(state)
+        renderStats(state)
+        renderAnnouncements(state.announcements)
     }
 
     private fun renderReminders(tasks: List<Task>) {
@@ -116,83 +128,63 @@ class HomeFragment : Fragment() {
         (binding.chipChildren.getChildAt(selected) as? Chip)?.isChecked = true
     }
 
-    // Tugas hanya ada di graph siswa; izin hanya diajukan wali murid; nilai untuk keduanya.
+    private fun renderStats(state: HomeUiState) {
+        val stats = state.stats
+        binding.tvStatScore.text = stats.averageScore?.let { String.format(Locale.US, "%.1f", it) } ?: dash()
+        binding.tvStatAttendance.text = stats.attendancePercent?.let { getString(R.string.home_stat_percent, it) } ?: dash()
+        binding.tvStatToday.text = stats.lessonsToday?.toString() ?: dash()
+        binding.tvStatPoints.text = stats.violationPoints?.toString() ?: dash()
+    }
+
+    private fun dash(): String = getString(R.string.home_stat_empty)
+
+    private fun renderAnnouncements(items: List<Announcement>) {
+        val list = binding.announcementList
+        list.removeAllViews()
+        binding.tvAnnouncementsEmpty.isVisible = items.isEmpty()
+        val inflater = LayoutInflater.from(requireContext())
+        items.forEach { item ->
+            val row = ItemHomeAnnouncementBinding.inflate(inflater, list, false)
+            row.tvTitle.text = item.title
+            val date = runCatching { DateTimeWib.formatDate(LocalDate.parse(item.date)) }.getOrDefault(item.date)
+            row.tvMeta.text = getString(R.string.home_announcement_meta, item.authorName, date)
+            row.root.setOnClickListener { findNavController().navigate(R.id.action_global_announcements) }
+            list.addView(row.root)
+        }
+    }
+
+    // Tile dibangun ulang hanya bila role berubah. Tugas hanya ada di graph siswa; izin dan buku
+    // penghubung hanya wali murid; nilai dan pelanggaran untuk keduanya.
     private fun renderShortcuts(state: HomeUiState) {
         val role = state.role
+        if (role == shownRole) return
+        shownRole = role
         val nav = findNavController()
-        binding.btnProgressNotes.isVisible = role == "STUDENT"
-        binding.btnProgressNotes.setOnClickListener {
-            nav.navigate(R.id.studentProgressNotesFragment)
+        val go = { id: Int -> { nav.navigate(id) } }
+        val items = when (role) {
+            "STUDENT" -> listOf(
+                HomeShortcut(R.string.home_shortcut_attendance, R.drawable.ic_location, go(R.id.studentAttendanceSummaryFragment)),
+                HomeShortcut(R.string.home_shortcut_violations, R.drawable.ic_warning, go(R.id.studentRiwayatPelanggaranFragment)),
+                HomeShortcut(R.string.home_shortcut_booking, R.drawable.ic_building, go(R.id.studentAjukanPeminjamanFragment)),
+                HomeShortcut(R.string.home_shortcut_survey, R.drawable.ic_edit, go(R.id.studentIsiSurveiMinatFragment)),
+                HomeShortcut(R.string.home_shortcut_tasks, R.drawable.ic_book, go(R.id.studentTasksFragment)),
+                HomeShortcut(R.string.home_shortcut_grades, R.drawable.ic_grades, go(R.id.studentGradesFragment)),
+                HomeShortcut(R.string.home_shortcut_booking_history, R.drawable.ic_facility, go(R.id.studentRiwayatPeminjamanFragment)),
+                HomeShortcut(R.string.home_shortcut_notes, R.drawable.ic_person, go(R.id.studentProgressNotesFragment)),
+                HomeShortcut(R.string.shortcut_announcements, R.drawable.ic_bell, go(R.id.action_global_announcements)),
+                HomeShortcut(R.string.shortcut_calendar, R.drawable.ic_calendar, go(R.id.action_global_calendar))
+            )
+            "GUARDIAN" -> listOf(
+                HomeShortcut(R.string.home_shortcut_violations, R.drawable.ic_warning, go(R.id.guardianRiwayatPelanggaranFragment)),
+                HomeShortcut(R.string.home_shortcut_grades, R.drawable.ic_grades, go(R.id.guardianGradesFragment)),
+                HomeShortcut(R.string.home_shortcut_leave, R.drawable.ic_check, go(R.id.guardianLeaveFragment)),
+                HomeShortcut(R.string.home_shortcut_liaison, R.drawable.ic_book, go(R.id.guardianBacaBukuPenghubungFragment)),
+                HomeShortcut(R.string.shortcut_announcements, R.drawable.ic_bell, go(R.id.action_global_announcements)),
+                HomeShortcut(R.string.shortcut_calendar, R.drawable.ic_calendar, go(R.id.action_global_calendar))
+            )
+            else -> emptyList()
         }
-        binding.btnAttendance.isVisible = role == "STUDENT"
-        binding.btnAttendance.setOnClickListener {
-            nav.navigate(R.id.studentAttendanceSummaryFragment)
-        }
-        binding.btnTasks.isVisible = role == "STUDENT"
-        binding.btnTasks.setOnClickListener { nav.navigate(R.id.studentTasksFragment) }
-        binding.btnGrades.isVisible = role == "STUDENT" || role == "GUARDIAN"
-        binding.btnGrades.setOnClickListener {
-            nav.navigate(if (role == "GUARDIAN") R.id.guardianGradeReportFragment else R.id.studentGradeReportFragment)
-        }
-        binding.btnLeave.isVisible = role == "GUARDIAN"
-        binding.btnLeave.setOnClickListener { nav.navigate(R.id.guardianLeaveFragment) }
-        binding.btnAnnouncements.setOnClickListener { nav.navigate(R.id.action_global_announcements) }
-        binding.btnCalendar.setOnClickListener { nav.navigate(R.id.action_global_calendar) }
-
-        binding.btnRiwayatPelanggaran.isVisible =
-            role == "STUDENT" || role == "GUARDIAN"
-
-        binding.btnRiwayatPelanggaran.setOnClickListener {
-            val destination = if (role == "STUDENT") {
-                R.id.studentRiwayatPelanggaranFragment
-            } else {
-                R.id.guardianRiwayatPelanggaranFragment
-            }
-
-            findNavController().navigate(destination)
-        }
-
-        binding.btnAjukanPeminjaman.isVisible =
-            role == "STUDENT"
-
-        binding.btnAjukanPeminjaman.setOnClickListener {
-            if (role == "STUDENT") {
-                nav.navigate(R.id.studentAjukanPeminjamanFragment)
-            }
-        }
-
-        binding.btnRiwayatPeminjaman.isVisible =
-            role == "STUDENT"
-
-        binding.btnRiwayatPeminjaman.setOnClickListener {
-            if (role == "STUDENT") {
-                nav.navigate(
-                    R.id.studentRiwayatPeminjamanFragment
-                )
-            }
-        }
-
-        binding.btnBacaBukuPenghubung.isVisible =
-            role == "GUARDIAN"
-
-        binding.btnBacaBukuPenghubung.setOnClickListener {
-            if (role == "GUARDIAN") {
-                nav.navigate(
-                    R.id.guardianBacaBukuPenghubungFragment
-                )
-            }
-        }
-
-        binding.btnIsiSurveiMinat.isVisible =
-            role == "STUDENT"
-
-        binding.btnIsiSurveiMinat.setOnClickListener {
-            if (role == "STUDENT") {
-                nav.navigate(
-                    R.id.studentIsiSurveiMinatFragment
-                )
-            }
-        }
+        binding.rvShortcuts.adapter = HomeShortcutAdapter(items)
     }
 
     private fun greeting(): Int = when (DateTimeWib.now().hour) {
@@ -203,7 +195,13 @@ class HomeFragment : Fragment() {
     }
 
     override fun onDestroyView() {
+        shownRole = null
+        shownChildren = null
         _binding = null
         super.onDestroyView()
+    }
+
+    private companion object {
+        const val SHORTCUT_COLUMNS = 4
     }
 }

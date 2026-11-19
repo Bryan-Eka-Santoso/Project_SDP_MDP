@@ -1,12 +1,12 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent"
     android:orientation="vertical" android:background="@color/teacher_screen">
-    <FrameLayout android:layout_width="match_parent" android:layout_height="150dp"
+    <FrameLayout android:id="@+id/reportHeader" android:layout_width="match_parent" android:layout_height="150dp"
         android:background="@drawable/bg_teacher_header" android:clipChildren="true">
-        <View android:layout_width="128dp" android:layout_height="128dp" android:layout_gravity="top|end"
+        <View android:id="@+id/reportHeaderCircle" android:layout_width="128dp" android:layout_height="128dp" android:layout_gravity="top|end"
             android:translationX="38dp" android:translationY="-34dp"
             android:background="@drawable/bg_teacher_header_circle"/>
-        <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
+        <LinearLayout android:id="@+id/reportHeaderContent" android:layout_width="match_parent" android:layout_height="match_parent"
             android:padding="18dp" android:orientation="vertical">
             <TextView android:id="@+id/btnReportBack" android:layout_width="wrap_content" android:layout_height="39dp"
                 android:gravity="center_vertical" android:text="‹ Kembali ke Halaman Sebelumnya" android:textSize="12sp" android:textColor="#FFFFFF"/>
@@ -21,7 +21,7 @@
         android:fillViewport="true">
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
             android:orientation="vertical" android:padding="16dp">
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            <LinearLayout android:id="@+id/cardReportSelection" android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:padding="15dp" android:orientation="vertical" android:background="@drawable/bg_teacher_card">
                 <TextView android:id="@+id/tvReportSelectionLabel" android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:text="Kelas | Mata Pelajaran" android:textColor="@color/teacher_muted" android:textSize="12sp"/>

@@ -23,5 +23,10 @@
             android:minWidth="80dp" android:minHeight="0dp" android:layout_marginStart="8dp"
             android:text="Nilai" android:textAllCaps="false" android:textSize="12sp" android:textColor="#FFFFFF"
             android:backgroundTint="@color/teacher_blue_light"/>
+        <!-- Hanya ditampilkan di tab Kelas (TeacherClassesFragment); di Home tetap tersembunyi. -->
+        <Button android:id="@+id/btnNotes" android:layout_width="wrap_content" android:layout_height="36dp"
+            android:minWidth="80dp" android:minHeight="0dp" android:layout_marginStart="8dp"
+            android:text="Catatan" android:textAllCaps="false" android:textSize="12sp" android:textColor="#FFFFFF"
+            android:backgroundTint="@color/teacher_blue_light" android:visibility="gone"/>
     </LinearLayout>
 </LinearLayout>

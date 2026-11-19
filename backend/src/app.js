@@ -60,6 +60,10 @@ api.use(
   require("./modules/bookings/ajukan_peminjaman.routes"),
 );
 api.use("/facility-bookings", require("./modules/bookings/peminjaman.routes"));
+api.use(
+  "/booking-history",
+  require("./modules/bookings/riwayat_peminjaman.routes"),
+);
 api.use("/liaison-notes", require("./modules/liaison/buku_penghubung.routes"));
 api.use(
   "/liaison-history",

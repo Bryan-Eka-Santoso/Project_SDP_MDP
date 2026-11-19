@@ -21,7 +21,8 @@ class AuthRepository @Inject constructor(
     private val errors: ApiErrorMapper,
     private val pushTokens: PushTokenRegistrar,
     private val tokenProvider: PushTokenProvider,
-    private val notifications: NotificationRepository
+    private val notifications: NotificationRepository,
+    private val calendarSync: CalendarSyncRepository
 ) {
 
     suspend fun login(
@@ -70,6 +71,8 @@ class AuthRepository @Inject constructor(
             errors.call { authApi.logout(LogoutRequest(refreshToken, deviceToken)) }
         }
         withTimeoutOrNull(TOKEN_TIMEOUT_MS) { tokenProvider.deleteToken() }
+        // Agenda sekolah dibuang dari kalender HP; pilihan sinkron tetap ada dan menulis ulang saat login lagi.
+        sessionManager.getUserId()?.let { calendarSync.clearDeviceEvents(it) }
         sessionManager.clearSession()
         return Resource.Success(Unit)
     }

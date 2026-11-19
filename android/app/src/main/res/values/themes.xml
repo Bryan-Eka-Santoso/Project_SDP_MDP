@@ -16,6 +16,8 @@
 
         <item name="android:windowBackground">@color/agnesian_background</item>
         <item name="colorSurface">@color/white</item>
+        <!-- Tanpa overlay elevasi: kartu putih tetap putih seperti di Figma (bukan kebiruan). -->
+        <item name="elevationOverlayEnabled">false</item>
         <item name="colorOnSurface">@color/agnesian_text</item>
         <item name="colorSurfaceVariant">@color/agnesian_surface_soft</item>
         <item name="colorOnSurfaceVariant">@color/agnesian_muted</item>
