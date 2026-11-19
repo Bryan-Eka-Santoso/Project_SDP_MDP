@@ -19,6 +19,16 @@
             app:argType="string" />
     </fragment>
 
+    <!-- ABS-03: destination turunan, bukan tab bottom-navigation Vincent. -->
+    <fragment
+        android:id="@+id/studentAttendanceSummaryFragment"
+        android:name="id.sch.santaagnes.sim.ui.attendance.StudentAttendanceSummaryFragment" />
+
+    <!-- NIL-05: catatan perkembangan khusus siswa. -->
+    <fragment
+        android:id="@+id/studentProgressNotesFragment"
+        android:name="id.sch.santaagnes.sim.ui.progress.StudentProgressNotesFragment" />
+
     <fragment
         android:id="@+id/studentGradeReportFragment"
         android:name="id.sch.santaagnes.sim.ui.grades.GradeReportFragment">

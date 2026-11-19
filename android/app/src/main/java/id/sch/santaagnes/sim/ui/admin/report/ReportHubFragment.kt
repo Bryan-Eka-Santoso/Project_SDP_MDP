@@ -34,6 +34,18 @@ class ReportHubFragment : Fragment() {
         binding.cardTeachingLoad.setOnClickListener {
             findNavController().navigate(R.id.action_reportHub_to_teachingLoadReport)
         }
+        binding.cardGradesAdmin.setOnClickListener {
+            findNavController().navigate(R.id.action_reportHub_to_gradesAdminReport)
+        }
+        binding.cardAttendanceAdmin.setOnClickListener {
+            findNavController().navigate(R.id.action_reportHub_to_attendanceAdminReport)
+        }
+        binding.cardTeachingJournalReport.setOnClickListener {
+            findNavController().navigate(R.id.action_reportHub_to_teachingJournalReport)
+        }
+        binding.cardAdminJournals.setOnClickListener {
+            findNavController().navigate(R.id.action_reportHub_to_adminJournals)
+        }
         binding.cardViolationReport.setOnClickListener {
             findNavController().navigate(
                 R.id.action_reportHub_to_violationReport

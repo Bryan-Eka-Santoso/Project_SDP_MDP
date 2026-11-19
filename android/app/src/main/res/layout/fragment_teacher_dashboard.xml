@@ -125,6 +125,17 @@
                     android:textColor="#FFFFFF"
                     android:backgroundTint="@color/teacher_blue_light" />
 
+                <!-- IZN-03: pintasan wali kelas; tidak mengubah bottom navigation. -->
+                <Button
+                    android:id="@+id/btnPendingLeaves"
+                    android:layout_width="match_parent"
+                    android:layout_height="43dp"
+                    android:layout_marginTop="9dp"
+                    android:text="Pengajuan Izin Siswa"
+                    android:textAllCaps="false"
+                    android:textColor="#FFFFFF"
+                    android:backgroundTint="@color/teacher_blue_light" />
+
                 <!-- Tombol Rekap Nilai -->
                 <Button
                     android:id="@+id/btnGradeReport"

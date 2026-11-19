@@ -81,6 +81,42 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Timeline MPP-05: fitur akademik paket pilihan, mengikuti style kartu Figma Bryan. -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardElectiveAllocation"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp" android:layout_marginTop="12dp"
+                android:clickable="true" android:focusable="true"
+                app:cardBackgroundColor="@color/white" app:cardCornerRadius="12dp" app:cardElevation="1dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:text="Alokasi Paket Pilihan" android:textStyle="bold" android:textSize="16sp"
+                        android:textColor="@color/agnesian_text" />
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp" android:text="Pratinjau dan pembagian kelas paket mata pelajaran"
+                        android:textSize="13sp" android:textColor="@color/agnesian_muted" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- MPP-06: Tren peminat paket lintas tahun ajaran. -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardElectiveTrends"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp" android:layout_marginTop="12dp"
+                android:clickable="true" android:focusable="true"
+                app:cardBackgroundColor="@color/white" app:cardCornerRadius="12dp" app:cardElevation="1dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:padding="16dp" android:orientation="vertical">
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:text="Tren Paket Pilihan" android:textStyle="bold" android:textSize="16sp"
+                        android:textColor="@color/agnesian_text" />
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp" android:text="Bandingkan jumlah pemilih paket antar tahun ajaran"
+                        android:textSize="13sp" android:textColor="@color/agnesian_muted" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardFacilities"
                 android:layout_width="match_parent"

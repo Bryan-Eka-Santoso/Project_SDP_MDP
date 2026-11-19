@@ -3,6 +3,7 @@ package id.sch.santaagnes.sim.data.remote
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.PATCH
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -33,6 +34,14 @@ data class GradeScoreRequest(val teachingAssignmentId: Int, val gradeComponentId
 data class GradePaginationDto(val page: Int, val limit: Int, val total: Int, val totalPages: Int)
 data class GradePageResponse<T>(val success: Boolean, val data: List<T>, val meta: GradePaginationDto)
 
+data class GradeAssessmentScoreDto(val studentId: Int, val value: Double)
+data class GradeAssessmentDto(
+    val id: Int, val gradeComponentId: Int, val title: String, val sequence: Int,
+    val scores: List<GradeAssessmentScoreDto> = emptyList()
+)
+data class GradeAssessmentRequest(val gradeComponentId: Int, val title: String?)
+data class GradeAssessmentScoreRequest(val studentId: Int, val value: Double)
+
 interface GradesApi {
     @GET("me/grade-teaching-assignments")
     suspend fun assignments(): ApiResponse<List<GradeAssignmentDto>>
@@ -48,6 +57,15 @@ interface GradesApi {
 
     @PATCH("grade-components/{id}")
     suspend fun updateComponent(@Path("id") id: Int, @Body body: GradeComponentRequest): ApiResponse<GradeComponentDto>
+
+    @GET("teaching-assignments/{assignmentId}/grade-assessments")
+    suspend fun assessments(@Path("assignmentId") assignmentId: Int): ApiResponse<List<GradeAssessmentDto>>
+
+    @POST("teaching-assignments/{assignmentId}/grade-assessments")
+    suspend fun createAssessment(@Path("assignmentId") assignmentId: Int, @Body body: GradeAssessmentRequest): ApiResponse<GradeAssessmentDto>
+
+    @PUT("grade-assessments/{id}/scores")
+    suspend fun saveAssessmentScore(@Path("id") id: Int, @Body body: GradeAssessmentScoreRequest): ApiResponse<GradeAssessmentScoreDto>
 
     @GET("scores")
     suspend fun scores(@Query("teachingAssignmentId") assignmentId: Int, @Query("page") page: Int = 1, @Query("limit") limit: Int = 100): GradePageResponse<GradeScoreDto>

@@ -10,6 +10,13 @@ import java.io.IOException
 import javax.inject.Inject
 
 class AttendanceRepository @Inject constructor(private val api: AttendanceApi) {
+    // ABS-03: pengambilan rekap bulanan siswa yang sedang login.
+    suspend fun mySummary(startDate: String, endDate: String): id.sch.santaagnes.sim.data.remote.AttendanceSummaryDto {
+        val response = api.myAttendanceSummary(startDate, endDate)
+        if (!response.success) error(response.error?.message ?: "Gagal mengambil rekap presensi.")
+        return response.data ?: error("Rekap presensi tidak tersedia.")
+    }
+
     suspend fun slots(assignmentId: Int): List<AttendanceSlotDto> =
         api.slots().data.orEmpty().filter { it.assignmentId == assignmentId }
 

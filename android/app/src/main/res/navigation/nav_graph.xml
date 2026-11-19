@@ -46,6 +46,21 @@
             app:destination="@id/teachingLoadReportFragment" />
 
         <action
+            android:id="@+id/action_reportHub_to_gradesAdminReport"
+            app:destination="@id/gradesAdminReportFragment" />
+
+        <action
+            android:id="@+id/action_reportHub_to_attendanceAdminReport"
+            app:destination="@id/attendanceAdminReportFragment" />
+
+        <action
+            android:id="@+id/action_reportHub_to_teachingJournalReport"
+            app:destination="@id/teachingJournalReportFragment" />
+
+        <action
+            android:id="@+id/action_reportHub_to_adminJournals"
+            app:destination="@id/adminJournalFragment" />
+       <action
             android:id="@+id/action_reportHub_to_violationReport"
             app:destination="@id/violationReportFragment" />
 
@@ -65,6 +80,22 @@
     <fragment
         android:id="@+id/teachingLoadReportFragment"
         android:name="id.sch.santaagnes.sim.ui.admin.report.TeachingLoadReportFragment" />
+
+    <fragment
+        android:id="@+id/gradesAdminReportFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.report.GradesAdminReportFragment" />
+
+    <fragment
+        android:id="@+id/attendanceAdminReportFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.report.AttendanceAdminReportFragment" />
+
+    <fragment
+        android:id="@+id/teachingJournalReportFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.report.TeachingJournalReportFragment" />
+
+    <fragment
+        android:id="@+id/adminJournalFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.journal.AdminJournalFragment" />
 
     <action
         android:id="@+id/action_global_reports"

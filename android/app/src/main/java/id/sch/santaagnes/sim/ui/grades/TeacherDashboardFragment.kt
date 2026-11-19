@@ -184,6 +184,11 @@ class TeacherDashboardFragment : Fragment() {
             )
         }
 
+        // IZN-03: daftar izin siswa yang menunggu tinjauan wali kelas.
+        binding.btnPendingLeaves.setOnClickListener {
+            findNavController().navigate(R.id.homeroomPendingFragment)
+        }
+
         // Memuat data dashboard
         refreshDashboard()
     }

@@ -19,4 +19,13 @@ const scoreBody = z.object({
 });
 const scoresQuery = paginationQuery.extend({ teachingAssignmentId: id });
 
-module.exports = { assignmentParams, componentParams, componentBody, componentUpdateBody, scoreBody, scoresQuery };
+const assessmentParams = z.object({ id });
+const assessmentCreateBody = z.object({
+  gradeComponentId: z.number().int().positive(),
+  title: z.string().trim().min(1).max(80).optional(),
+});
+const assessmentScoreBody = z.object({
+  studentId: z.number().int().positive(),
+  value: z.number().min(0).max(100).refine((v) => Math.round(v * 100) === v * 100, { message: 'Maksimal dua desimal.' }),
+});
+module.exports = { assignmentParams, componentParams, componentBody, componentUpdateBody, scoreBody, scoresQuery, assessmentParams, assessmentCreateBody, assessmentScoreBody };

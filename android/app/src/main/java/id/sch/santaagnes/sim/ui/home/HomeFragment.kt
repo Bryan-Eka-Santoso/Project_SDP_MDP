@@ -115,6 +115,14 @@ class HomeFragment : Fragment() {
     private fun renderShortcuts(state: HomeUiState) {
         val role = state.role
         val nav = findNavController()
+        binding.btnProgressNotes.isVisible = role == "STUDENT"
+        binding.btnProgressNotes.setOnClickListener {
+            nav.navigate(R.id.studentProgressNotesFragment)
+        }
+        binding.btnAttendance.isVisible = role == "STUDENT"
+        binding.btnAttendance.setOnClickListener {
+            nav.navigate(R.id.studentAttendanceSummaryFragment)
+        }
         binding.btnTasks.isVisible = role == "STUDENT"
         binding.btnTasks.setOnClickListener { nav.navigate(R.id.studentTasksFragment) }
         binding.btnGrades.isVisible = role == "STUDENT" || role == "GUARDIAN"

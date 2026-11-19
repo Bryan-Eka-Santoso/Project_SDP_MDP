@@ -23,8 +23,20 @@ api.use(require("./modules/auth/auth.routes"));
 api.use(require("./modules/grades/grades.routes"));
 api.use(require("./modules/grades/grades.lookup.routes"));
 api.use(require("./modules/grades/grades.read.routes"));
+// NIL-05: Catatan perkembangan siswa
+api.use(require("./modules/grades/grades.progress.routes"));
 api.use(require("./modules/attendance/attendance.routes"));
+
+// ABS-03 & ABS-04: Rekap presensi dan monitoring jurnal mengajar
+api.use(require("./modules/attendance/attendance.read.routes"));
+
 api.use(require("./modules/attendance/leave.routes"));
+
+// IZN-03 & IZN-04: Pemeriksaan izin oleh Wali Kelas
+api.use(require("./modules/attendance/leave.review.routes"));
+
+// MPP-05 & MPP-06: Pembagian kelas dan tren paket mapel
+api.use(require("./modules/elective/elective.allocation.routes"));
 api.use(require("./modules/notifications/notifications.routes"));
 api.use(require("./modules/schedules/schedules.routes"));
 api.use("/facility-bookings", require("./modules/bookings/peminjaman.routes"));

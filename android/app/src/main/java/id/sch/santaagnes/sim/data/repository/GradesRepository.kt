@@ -1,5 +1,8 @@
 package id.sch.santaagnes.sim.data.repository
 
+import id.sch.santaagnes.sim.data.remote.GradeAssessmentDto
+import id.sch.santaagnes.sim.data.remote.GradeAssessmentRequest
+import id.sch.santaagnes.sim.data.remote.GradeAssessmentScoreRequest
 import id.sch.santaagnes.sim.data.remote.GradeComponentRequest
 import id.sch.santaagnes.sim.data.remote.GradeScoreRequest
 import id.sch.santaagnes.sim.data.remote.GradesApi
@@ -40,6 +43,17 @@ class GradesRepository @Inject constructor(private val api: GradesApi) {
         val body = GradeComponentRequest(name, weight)
         if (currentId == null) api.createComponent(assignmentId, body)
         else api.updateComponent(currentId, body)
+    }
+
+    suspend fun assessments(assignmentId: Int): List<GradeAssessmentDto> =
+        api.assessments(assignmentId).data.orEmpty()
+
+    suspend fun createAssessment(assignmentId: Int, componentId: Int, title: String?) {
+        api.createAssessment(assignmentId, GradeAssessmentRequest(componentId, title))
+    }
+
+    suspend fun saveAssessmentScore(assessmentId: Int, studentId: Int, value: Double) {
+        api.saveAssessmentScore(assessmentId, GradeAssessmentScoreRequest(studentId, value))
     }
 
     suspend fun saveScore(assignmentId: Int, studentId: Int, componentId: Int, score: Double) {

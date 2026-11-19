@@ -10,6 +10,9 @@ const {
 const { writeXlsx } = require("../../lib/excel");
 const scheduleChanges = require("./reports.scheduleChanges");
 const teachingLoad = require("./reports.teachingLoad");
+const grades = require("./reports.grades");
+const attendance = require("./reports.attendance");
+const journals = require("./reports.journals");
 const violations = require("./reports.violations");
 const facilityBookings = require("./reports.facilityBookings");
 const electiveSurveys = require("./reports.electiveSurveys");
@@ -18,6 +21,11 @@ const electiveSurveys = require("./reports.electiveSurveys");
 const REPORTS = Object.freeze({
   "schedule-changes": scheduleChanges,
   "teaching-load": teachingLoad,
+
+  // LAP-01, LAP-02, LAP-06
+  grades: grades,
+  attendance: attendance,
+  "teaching-journals": journals,
   violations: violations,
   "facility-bookings": facilityBookings,
   "elective-surveys": electiveSurveys,

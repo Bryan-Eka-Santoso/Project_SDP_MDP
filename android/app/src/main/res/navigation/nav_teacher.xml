@@ -30,6 +30,12 @@
             app:destination="@id/teacherProfilSiswaBinaanFragment" />
     </fragment>
 
+    <!-- IZN-03: route tambahan untuk wali kelas; tab Vincent tidak berubah. -->
+    <fragment
+        android:id="@+id/homeroomPendingFragment"
+        android:name="id.sch.santaagnes.sim.ui.leave.HomeroomPendingFragment"
+        android:label="Pengajuan Izin Siswa" />
+
     <fragment
         android:id="@+id/teacherClassesFragment"
         android:name="id.sch.santaagnes.sim.ui.grades.TeacherClassesFragment"
@@ -47,6 +53,12 @@
         <argument
             android:name="assignmentLabel"
             app:argType="string" />
+    </fragment>
+
+    <!-- NIL-05: catatan perkembangan siswa oleh guru mata pelajaran. -->
+    <fragment android:id="@+id/teacherProgressNotesFragment"
+        android:name="id.sch.santaagnes.sim.ui.progress.TeacherProgressNotesFragment">
+        <argument android:name="assignmentId" app:argType="integer" />
     </fragment>
 
     <fragment

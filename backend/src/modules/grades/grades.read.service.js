@@ -82,6 +82,13 @@ async function studentScores(user, studentId) {
         select: {
           id: true, name: true, weight: true,
           scores: { where: { studentId }, select: { value: true } },
+          assessments: {
+            orderBy: { sequence: 'asc' },
+            select: {
+              id: true, title: true, sequence: true,
+              scores: { where: { studentId }, select: { value: true } },
+            },
+          },
         },
         orderBy: { id: 'asc' },
       },
@@ -91,7 +98,10 @@ async function studentScores(user, studentId) {
 
   return assignments.map((a) => {
     const components = a.gradeComponents;
-    const values = new Map(components.filter((c) => c.scores.length > 0)
+    // Nilai detail yang belum lengkap harus tetap ditandai kosong meskipun
+    // masih ada nilai komponen legacy dari sebelum fitur per-tugas digunakan.
+    const values = new Map(components.filter((c) => c.scores.length > 0 &&
+      (c.assessments.length === 0 || c.assessments.every((a) => a.scores.length > 0)))
       .map((c) => [c.id, c.scores[0].value]));
     const grade = calculateGrade(components, values);
     return {
@@ -99,6 +109,22 @@ async function studentScores(user, studentId) {
       subjectName: a.subject.name,
       className: a.classGroup.name,
       ...grade,
+      // Hanya nilai detail siswa yang sudah lolos assertStudentScope di atas.
+      // Jika belum dinilai, kirim null agar UI tidak menganggapnya sebagai 0.
+      components: grade.components.map((part) => {
+        const source = components.find((component) => component.id === part.id);
+        return {
+          ...part,
+          assessments: (source?.assessments || []).map((assessment) => ({
+            id: assessment.id,
+            title: assessment.title,
+            sequence: assessment.sequence,
+            value: assessment.scores.length > 0
+              ? Number(assessment.scores[0].value)
+              : null,
+          })),
+        };
+      }),
       predicate: findPredicate(grade.finalScore, predicates),
     };
   });
@@ -147,10 +173,23 @@ async function classSummary(user, assignmentId, page, limit) {
     where: { teachingAssignmentId: assignment.id, studentId: { in: studentIds } },
     select: { studentId: true, gradeComponentId: true, value: true },
   });
+  const details = studentIds.length === 0 ? [] : await prisma.gradeAssessment.findMany({
+    where: { teachingAssignmentId: assignment.id },
+    select: { gradeComponentId: true, scores: {
+      where: { studentId: { in: studentIds } }, select: { studentId: true },
+    } },
+  });
   const valueMap = new Map();
   for (const score of scores) {
     if (!valueMap.has(score.studentId)) valueMap.set(score.studentId, new Map());
     valueMap.get(score.studentId).set(score.gradeComponentId, score.value);
+  }
+  // Mask rata-rata lama saat satu atau lebih detail belum dinilai.
+  for (const detail of details) {
+    const filledIds = new Set(detail.scores.map((x) => x.studentId));
+    for (const studentId of studentIds) {
+      if (!filledIds.has(studentId)) valueMap.get(studentId)?.delete(detail.gradeComponentId);
+    }
   }
   return {
     label: `${assignment.subject.name} - ${assignment.classGroup.name}`,

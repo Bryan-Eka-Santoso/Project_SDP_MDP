@@ -1,7 +1,7 @@
 const { z } = require('zod');
 const date = z.iso.date();
 const createLeaveBody = z.object({
-  studentId: z.number().int().positive(),
+  studentId: z.coerce.number().int().positive(),
   startDate: date,
   endDate: date,
   reason: z.string().trim().min(5).max(255),
