@@ -67,6 +67,8 @@ const saveChangeBody = z
       newRoomId: z.number().int().positive().optional(),
       newStartTime: timeOfDay.optional(),
       newEndTime: timeOfDay.optional(),
+      // Pindah ke tanggal lain (lintas hari). Sama dengan `date` berarti tidak pindah tanggal.
+      newDate: dateOnly.optional(),
     }),
     z.object({ ...changeBase, type: z.literal('CANCEL') }),
   ])
@@ -74,9 +76,9 @@ const saveChangeBody = z
     path: ['newEndTime'],
     message: 'Jam mulai dan jam selesai baru harus diisi bersamaan.',
   })
-  .refine((d) => d.type !== 'RESCHEDULE' || d.newRoomId || d.newStartTime, {
+  .refine((d) => d.type !== 'RESCHEDULE' || d.newRoomId || d.newStartTime || d.newDate, {
     path: ['newRoomId'],
-    message: 'Isi ruangan baru dan/atau jam baru.',
+    message: 'Isi tanggal baru, ruangan baru, dan/atau jam baru.',
   })
   .refine((d) => d.type !== 'RESCHEDULE' || !d.newStartTime || d.newStartTime < d.newEndTime, {
     path: ['newEndTime'],

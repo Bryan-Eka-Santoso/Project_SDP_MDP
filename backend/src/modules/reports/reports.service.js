@@ -13,6 +13,9 @@ const teachingLoad = require("./reports.teachingLoad");
 const grades = require("./reports.grades");
 const attendance = require("./reports.attendance");
 const journals = require("./reports.journals");
+const violations = require("./reports.violations");
+const facilityBookings = require("./reports.facilityBookings");
+const electiveSurveys = require("./reports.electiveSurveys");
 
 // Kunci = segmen path `/reports/:type`.
 const REPORTS = Object.freeze({
@@ -23,6 +26,9 @@ const REPORTS = Object.freeze({
   grades: grades,
   attendance: attendance,
   "teaching-journals": journals,
+  violations: violations,
+  "facility-bookings": facilityBookings,
+  "elective-surveys": electiveSurveys,
 });
 
 // Ekspor lebih besar dari ini ditolak agar server tidak kehabisan memori; persempit filter.

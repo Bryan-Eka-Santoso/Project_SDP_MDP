@@ -116,6 +116,40 @@
     <string name="schedule_original_teacher">Guru semula: %1$s</string>
     <string name="schedule_original_time">Jam semula: %1$s – %2$s</string>
     <string name="schedule_original_room">Ruang semula: %1$s</string>
+    <string name="schedule_moved_to">Dipindah ke %1$s</string>
+    <string name="schedule_moved_from">Pindahan dari %1$s</string>
+    <string name="schedule_action_reschedule">Pindah jadwal</string>
+    <string name="schedule_action_edit_reschedule">Ubah pemindahan</string>
+
+    <!-- Guru memindah jadwal mengajarnya (F-JDW-04) -->
+    <string name="reschedule_title">Pindah Jadwal</string>
+    <string name="reschedule_original">%1$s · %2$s – %3$s · %4$s</string>
+    <string name="reschedule_info">Isi yang ingin diubah saja: tanggal, jam, dan/atau ruangan. Siswa dan wali murid kelas ini akan diberi tahu.</string>
+    <string name="reschedule_new_date">Tanggal baru</string>
+    <string name="reschedule_new_start">Jam mulai baru</string>
+    <string name="reschedule_new_end">Jam selesai baru</string>
+    <string name="reschedule_new_room">Ruangan baru</string>
+    <string name="reschedule_description">Keterangan</string>
+    <string name="reschedule_save">Simpan</string>
+    <string name="reschedule_cancel_move">Batalkan pemindahan</string>
+    <string name="reschedule_cancel_title">Batalkan pemindahan?</string>
+    <string name="reschedule_cancel_message">Pertemuan kembali ke jadwal aslinya dan semua pihak diberi tahu.</string>
+    <string name="reschedule_cancel_class">Batalkan kelas ini</string>
+    <string name="reschedule_cancel_class_title">Batalkan kelas?</string>
+    <string name="reschedule_cancel_class_message">Kelas pada tanggal ini dibatalkan dan siswa serta wali murid diberi tahu dengan keterangan yang Anda isi.</string>
+    <string name="reschedule_cancel_class_confirm">Batalkan kelas</string>
+    <string name="reschedule_cancelled_info">Kelas pada tanggal ini sudah dibatalkan. Pulihkan jadwal bila kelas tetap berlangsung.</string>
+    <string name="reschedule_restore">Pulihkan jadwal</string>
+    <string name="reschedule_restored">Jadwal dipulihkan.</string>
+    <string name="reschedule_class_cancelled">Kelas dibatalkan.</string>
+    <string name="schedule_action_restore">Pulihkan jadwal</string>
+    <string name="reschedule_saved">Jadwal dipindah.</string>
+    <string name="reschedule_cancelled">Pemindahan dibatalkan.</string>
+    <string name="reschedule_error_nothing">Ubah tanggal, jam, atau ruangan terlebih dahulu.</string>
+    <string name="reschedule_error_time_order">Jam selesai harus setelah jam mulai.</string>
+    <string name="reschedule_error_date_past">Tanggal baru tidak boleh sebelum hari ini.</string>
+    <string name="reschedule_error_sunday">Hari Minggu bukan hari sekolah.</string>
+    <string name="reschedule_error_same_weekday">Tanggal baru jatuh pada hari jadwal ini sendiri. Pilih hari lain atau ubah jamnya saja.</string>
 
     <!-- Admin: kelola jadwal (JDW-01..04) -->
     <string name="admin_schedule_title">Jadwal</string>
@@ -194,7 +228,9 @@
     <string name="change_date_hint">Tanggal</string>
     <string name="change_type_hint">Jenis perubahan</string>
     <string name="change_teacher_hint">Guru pengganti</string>
-    <string name="change_reschedule_info">Isi ruangan baru, jam baru, atau keduanya.</string>
+    <string name="change_reschedule_info">Isi yang berubah saja: tanggal baru (pindah hari), ruangan baru, dan/atau jam baru.</string>
+    <string name="change_new_date_hint">Tanggal baru (bila pindah hari)</string>
+    <string name="change_new_date">Tanggal baru: %1$s</string>
     <string name="change_room_hint">Ruangan baru</string>
     <string name="change_start_hint">Jam mulai baru</string>
     <string name="change_end_hint">Jam selesai baru</string>
@@ -205,7 +241,7 @@
     <string name="change_error_description">Keterangan wajib diisi.</string>
     <string name="change_error_description_long">Keterangan maksimal 255 karakter.</string>
     <string name="change_error_teacher">Pilih guru pengganti.</string>
-    <string name="change_error_reschedule">Isi ruangan baru atau jam baru.</string>
+    <string name="change_error_reschedule">Isi tanggal baru, ruangan baru, atau jam baru.</string>
     <string name="change_error_time_pair">Isi jam mulai dan jam selesai baru bersamaan.</string>
 
     <!-- Notifikasi (NTF-01/02) -->
@@ -234,6 +270,10 @@
     <string name="profile_nip">NIP: %1$s</string>
     <string name="profile_homeroom">Wali kelas: %1$s</string>
     <string name="profile_children">Anak: %1$s</string>
+    <string name="profile_label_class">Kelas</string>
+    <string name="profile_label_homeroom_teacher">Wali Kelas</string>
+    <string name="profile_label_phone">No. Telepon</string>
+    <string name="profile_label_role">Peran</string>
     <string name="profile_bills">Tagihan</string>
     <string name="profile_reports">Laporan</string>
 

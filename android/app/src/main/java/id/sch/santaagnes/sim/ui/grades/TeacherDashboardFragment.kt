@@ -20,6 +20,10 @@ import id.sch.santaagnes.sim.databinding.FragmentTeacherDashboardBinding
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import androidx.core.view.isVisible
+import id.sch.santaagnes.sim.data.remote.BukuPenghubungApi
+import id.sch.santaagnes.sim.data.remote.BacaBukuPenghubungApi
+import id.sch.santaagnes.sim.data.remote.ProfilSiswaBinaanApi
 
 @AndroidEntryPoint
 class TeacherDashboardFragment : Fragment() {
@@ -29,6 +33,15 @@ class TeacherDashboardFragment : Fragment() {
 
     @Inject
     lateinit var gradesRepository: GradesRepository
+
+    @Inject
+    lateinit var profilSiswaApi: ProfilSiswaBinaanApi
+
+    @Inject
+    lateinit var bukuPenghubungApi: BukuPenghubungApi
+
+    @Inject
+    lateinit var bacaBukuApi: BacaBukuPenghubungApi
 
     private var _binding: FragmentTeacherDashboardBinding? = null
     private val binding get() = _binding!!
@@ -58,6 +71,110 @@ class TeacherDashboardFragment : Fragment() {
             findNavController().navigate(
                 R.id.teacherClassesFragment
             )
+        }
+
+        binding.btnInputPelanggaran.setOnClickListener {
+            findNavController().navigate(
+                R.id.action_teacherHome_to_inputPelanggaran
+            )
+        }
+
+        binding.btnRiwayatPelanggaran.setOnClickListener {
+            findNavController().navigate(
+                R.id.action_teacherHome_to_riwayatPelanggaran
+            )
+        }
+
+        binding.btnBacaBukuPenghubung.setOnClickListener {
+            findNavController().navigate(
+                R.id.teacherBacaBukuPenghubungFragment
+            )
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = bacaBukuApi.getSiswa()
+
+                if (_binding != null) {
+                    binding.btnBacaBukuPenghubung.isVisible =
+                        response.success &&
+                                !response.data.isNullOrEmpty()
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                if (_binding != null) {
+                    binding.btnBacaBukuPenghubung.isVisible = false
+                }
+            }
+        }
+
+        // Menu Profil Siswa Binaan
+        binding.btnProfilSiswaBinaan.setOnClickListener {
+            findNavController().navigate(
+                R.id.action_teacherHome_to_profilSiswaBinaan
+            )
+        }
+
+        // Tampilkan menu hanya untuk Guru yang memiliki siswa binaan.
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = profilSiswaApi.getSiswa()
+
+                if (_binding != null) {
+                    binding.btnProfilSiswaBinaan.isVisible =
+                        response.success &&
+                                !response.data.isNullOrEmpty()
+                }
+
+            } catch (e: CancellationException) {
+                throw e
+
+            } catch (e: Exception) {
+                if (_binding != null) {
+                    binding.btnProfilSiswaBinaan.isVisible = false
+                }
+            }
+        }
+
+        binding.btnAjukanPeminjaman.setOnClickListener {
+            findNavController().navigate(
+                R.id.teacherAjukanPeminjamanFragment
+            )
+        }
+
+        binding.btnRiwayatPeminjaman.setOnClickListener {
+            findNavController().navigate(
+                R.id.teacherRiwayatPeminjamanFragment
+            )
+        }
+
+        // Navigasi Buku Penghubung
+        binding.btnBukuPenghubung.setOnClickListener {
+            findNavController().navigate(
+                R.id.action_teacherHome_to_bukuPenghubung
+            )
+        }
+
+        // Memeriksa apakah Guru mempunyai kelas perwalian aktif
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = bukuPenghubungApi.getKelas()
+
+                if (_binding != null) {
+                    binding.btnBukuPenghubung.isVisible =
+                        response.success &&
+                                !response.data.isNullOrEmpty()
+                }
+
+            } catch (e: CancellationException) {
+                throw e
+
+            } catch (e: Exception) {
+                if (_binding != null) {
+                    binding.btnBukuPenghubung.isVisible = false
+                }
+            }
         }
 
         // Navigasi menuju rekap nilai

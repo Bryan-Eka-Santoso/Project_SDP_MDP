@@ -63,6 +63,9 @@ class AdminChangeAdapter(
                     change.substituteTeacherName?.let { lines += context.getString(R.string.change_substitute_line, it) }
                 }
                 ChangeType.RESCHEDULE -> {
+                    change.newDate?.let {
+                        lines += context.getString(R.string.change_new_date, DateTimeWib.formatDate(it))
+                    }
                     val start = change.newStartTime
                     val end = change.newEndTime
                     if (start != null && end != null) {

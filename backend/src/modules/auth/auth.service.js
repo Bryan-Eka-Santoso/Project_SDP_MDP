@@ -30,7 +30,28 @@ const PROFILE_SELECT = {
       },
     },
   },
-  student: { select: { id: true, nis: true, birthDate: true } },
+  student: {
+    select: {
+      id: true,
+      nis: true,
+      birthDate: true,
+      phone: true,
+      // Kelas pada tahun ajaran aktif (kelas reguler dan kelas paket) + wali kelasnya, untuk layar Profil.
+      classMemberships: {
+        where: { classGroup: { academicYear: { isActive: true } } },
+        select: {
+          classGroup: {
+            select: {
+              id: true,
+              name: true,
+              homeroomTeacher: { select: { user: { select: { name: true } } } },
+            },
+          },
+        },
+        orderBy: { classGroup: { name: 'asc' } },
+      },
+    },
+  },
   guardian: {
     select: {
       id: true,
@@ -63,8 +84,15 @@ function toProfile(user) {
       homeroomClassGroups: (user.teacher.homeroomClasses ?? []).map(({ id, name }) => ({ id, name })),
     },
     student: user.student && {
-      ...user.student,
+      id: user.student.id,
+      nis: user.student.nis,
       birthDate: formatDateOnly(user.student.birthDate),
+      phone: user.student.phone ?? null,
+      classGroups: (user.student.classMemberships ?? []).map(({ classGroup }) => ({
+        id: classGroup.id,
+        name: classGroup.name,
+        homeroomTeacherName: classGroup.homeroomTeacher?.user.name ?? null,
+      })),
     },
     guardian: user.guardian && {
       id: user.guardian.id,

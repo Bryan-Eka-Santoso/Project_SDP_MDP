@@ -62,6 +62,9 @@ class ScheduleChangeReportAdapter :
                         DateTimeWib.formatTime(row.originalStart),
                         DateTimeWib.formatTime(row.originalEnd)
                     )
+                    row.newDate?.let {
+                        lines += context.getString(R.string.change_new_date, DateTimeWib.formatDate(it))
+                    }
                     val start = row.newStart
                     val end = row.newEnd
                     if (start != null && end != null) {

@@ -26,7 +26,15 @@ fun ScheduleEntryDto.toDomain(): ScheduleEntry {
         teacherName = teacher.name,
         roomName = room?.name,
         classGroupName = classGroup.name,
-        change = type?.let { ScheduleChange(it, change?.description) },
+        change = type?.let {
+            ScheduleChange(
+                type = it,
+                description = change?.description,
+                id = change?.id ?: 0,
+                movedTo = change?.movedTo?.let(LocalDate::parse),
+                movedFrom = change?.movedFrom?.let(LocalDate::parse)
+            )
+        },
         original = if (type != null) {
             original?.let {
                 ScheduleOriginal(
@@ -60,7 +68,10 @@ fun ScheduleEntry.toEntity(accountId: Int, scope: Int): ScheduleEntity = Schedul
     originalStartTime = original?.startTime?.toString(),
     originalEndTime = original?.endTime?.toString(),
     originalRoomName = original?.roomName,
-    originalTeacherName = original?.teacherName
+    originalTeacherName = original?.teacherName,
+    changeId = change?.id?.takeIf { it != 0 },
+    changeMovedTo = change?.movedTo?.toString(),
+    changeMovedFrom = change?.movedFrom?.toString()
 )
 
 fun ScheduleEntity.toDomain(): ScheduleEntry {
@@ -76,7 +87,15 @@ fun ScheduleEntity.toDomain(): ScheduleEntry {
         teacherName = teacherName,
         roomName = roomName,
         classGroupName = classGroupName,
-        change = type?.let { ScheduleChange(it, changeDescription) },
+        change = type?.let {
+            ScheduleChange(
+                type = it,
+                description = changeDescription,
+                id = changeId ?: 0,
+                movedTo = changeMovedTo?.let(LocalDate::parse),
+                movedFrom = changeMovedFrom?.let(LocalDate::parse)
+            )
+        },
         original = if (type != null && originalStartTime != null && originalEndTime != null) {
             ScheduleOriginal(
                 startTime = LocalTime.parse(originalStartTime),

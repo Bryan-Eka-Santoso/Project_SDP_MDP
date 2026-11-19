@@ -197,6 +197,122 @@
                         android:textSize="13sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
+
+
+            <!-- F-LAP-03: LAPORAN PELANGGARAN -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardViolationReport"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Laporan Pelanggaran Siswa"
+                        android:textColor="@color/agnesian_text"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Lihat data kejadian, poin pelanggaran, filter, dan ekspor Excel"
+                        android:textColor="@color/agnesian_muted"
+                        android:textSize="13sp" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardFacilityBookingReport"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Laporan Peminjaman Fasilitas"
+                        android:textColor="@color/agnesian_text"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Lihat peminjaman ruangan dan barang, status, periode, serta ekspor Excel"
+                        android:textColor="@color/agnesian_muted"
+                        android:textSize="13sp" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardElectiveSurveyReport"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Laporan Survei Mata Pelajaran Pilihan"
+                        android:textColor="@color/agnesian_text"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Lihat jumlah peminat, persentase, dan ekspor hasil survei"
+                        android:textColor="@color/agnesian_muted"
+                        android:textSize="13sp" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

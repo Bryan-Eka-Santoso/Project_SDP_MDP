@@ -84,15 +84,18 @@ class ChangeFormViewModel @Inject constructor(
         teacher: TeacherOption?,
         room: RoomOption?,
         start: LocalTime?,
-        end: LocalTime?
+        end: LocalTime?,
+        // Pindah ke hari lain; sama dengan `date` berarti tidak pindah tanggal.
+        newDate: LocalDate? = null
     ) {
         if (_uiState.value.isSaving) return
 
         val text = description.trim()
+        val movedDate = newDate?.takeIf { it != date }
         // Jenis perubahan menentukan kolom yang wajib; kolom lain dikosongkan agar tidak ikut terkirim.
         val rescheduleError = if (type == ChangeType.RESCHEDULE) {
             when {
-                room == null && start == null && end == null -> R.string.change_error_reschedule
+                room == null && start == null && end == null && movedDate == null -> R.string.change_error_reschedule
                 (start == null) != (end == null) -> R.string.change_error_time_pair
                 start != null && end != null && !end.isAfter(start) -> R.string.slot_error_order
                 else -> null
@@ -129,7 +132,8 @@ class ChangeFormViewModel @Inject constructor(
             substituteTeacherId = teacher?.id.takeIf { type == ChangeType.SUBSTITUTE },
             newRoomId = room?.id.takeIf { type == ChangeType.RESCHEDULE },
             newStartTime = start.takeIf { type == ChangeType.RESCHEDULE },
-            newEndTime = end.takeIf { type == ChangeType.RESCHEDULE }
+            newEndTime = end.takeIf { type == ChangeType.RESCHEDULE },
+            newDate = movedDate.takeIf { type == ChangeType.RESCHEDULE }
         )
         viewModelScope.launch {
             when (val result = repository.saveChange(input)) {

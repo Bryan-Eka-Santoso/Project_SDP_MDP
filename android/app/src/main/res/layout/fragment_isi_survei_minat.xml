@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/agnesian_background">
+
+    <!-- HEADER -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="110dp"
+        android:orientation="vertical"
+        android:background="@drawable/bg_header"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="20dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical">
+
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginEnd="8dp"
+                android:src="@drawable/ic_arrow_back"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Kembali"
+                app:tint="@color/white" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Survei Minat"
+                android:textColor="@color/white"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="48dp"
+            android:text="Isi pilihan mata pelajaran yang diminati"
+            android:textColor="#E2EAFF"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <!-- CONTENT -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <!-- LOADING -->
+            <ProgressBar
+                android:id="@+id/progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+
+            <!-- ERROR -->
+            <TextView
+                android:id="@+id/tvError"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="#B73636"
+                android:textSize="12sp"
+                android:visibility="gone" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRetry"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Coba Lagi"
+                android:textAllCaps="false"
+                android:visibility="gone" />
+
+            <!-- DAFTAR SURVEI -->
+            <LinearLayout
+                android:id="@+id/layoutDaftar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardBackgroundColor="@color/white"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="0dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="18dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Total Survei"
+                            android:textColor="@color/agnesian_muted"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/tvTotal"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="0"
+                            android:textSize="30sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/agnesian_blue" />
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="10dp"
+                    android:text="Daftar Survei Minat"
+                    android:textColor="@color/agnesian_text"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvEmpty"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="20dp"
+                    android:gravity="center"
+                    android:text="Belum ada survei minat yang diterbitkan."
+                    android:textColor="@color/agnesian_muted"
+                    android:visibility="gone" />
+
+                <LinearLayout
+                    android:id="@+id/containerSurvei"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+
+            </LinearLayout>
+
+            <!-- DETAIL SURVEI -->
+            <LinearLayout
+                android:id="@+id/layoutDetail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardBackgroundColor="@color/white"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="0dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="18dp">
+
+                        <TextView
+                            android:id="@+id/tvJudulSurvei"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Judul Survei"
+                            android:textColor="@color/agnesian_text"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvPeriode"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:textColor="@color/agnesian_muted"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/tvStatus"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:textColor="@color/agnesian_blue"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginVertical="16dp"
+                            android:background="#EDF0F3" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Pilih Mata Pelajaran"
+                            android:textColor="@color/agnesian_text"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <LinearLayout
+                            android:id="@+id/containerMapel"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:orientation="vertical" />
+
+                        <TextView
+                            android:id="@+id/tvJumlahPilihan"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:text="0 mata pelajaran dipilih"
+                            android:textColor="@color/agnesian_blue"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnSubmit"
+                            android:layout_width="match_parent"
+                            android:layout_height="50dp"
+                            android:layout_marginTop="18dp"
+                            android:text="Simpan Jawaban"
+                            android:textAllCaps="false"
+                            android:textColor="@color/white"
+                            app:backgroundTint="@color/agnesian_blue"
+                            app:cornerRadius="10dp" />
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <TextView
+                    android:id="@+id/tvInfo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:padding="12dp"
+                    android:textColor="@color/agnesian_muted"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

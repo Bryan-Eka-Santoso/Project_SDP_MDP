@@ -21,6 +21,9 @@ import id.sch.santaagnes.sim.data.remote.SimpanJenisPelanggaranRequest
 import id.sch.santaagnes.sim.databinding.DialogJenisPelanggaranBinding
 import id.sch.santaagnes.sim.databinding.FragmentJenisPelanggaranBinding
 import kotlinx.coroutines.launch
+import android.text.Editable
+import android.text.TextWatcher
+import androidx.navigation.fragment.findNavController
 
 @AndroidEntryPoint
 class JenisPelanggaranFragment : Fragment() {
@@ -29,6 +32,10 @@ class JenisPelanggaranFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: JenisPelanggaranViewModel by viewModels()
+
+    private var semuaJenisPelanggaran = listOf<JenisPelanggaranDto>()
+    private var sedangLoading = false
+    private var adaError = false
 
     private val adapter = JenisPelanggaranAdapter(
         onEdit = { tampilForm(it) },
@@ -61,6 +68,33 @@ class JenisPelanggaranFragment : Fragment() {
             LinearLayoutManager(requireContext())
 
         binding.rvPelanggaran.adapter = adapter
+
+        binding.btnBack.setOnClickListener {
+            findNavController().navigateUp()
+        }
+
+        binding.etSearch.addTextChangedListener(
+            object : TextWatcher {
+
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {}
+
+                override fun onTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    before: Int,
+                    count: Int
+                ) {
+                    filterJenisPelanggaran()
+                }
+
+                override fun afterTextChanged(s: Editable?) {}
+            }
+        )
 
         binding.btnAdd.setOnClickListener {
             tampilForm(null)
@@ -95,7 +129,11 @@ class JenisPelanggaranFragment : Fragment() {
                     binding.tvTotal.isVisible = !state.loading && state.error == null
                     binding.tvTotal.text = getString(R.string.master_total_violations, state.daftar.size)
 
-                    adapter.setData(state.daftar)
+                    semuaJenisPelanggaran = state.daftar
+                    sedangLoading = state.loading
+                    adaError = state.error != null
+
+                    filterJenisPelanggaran()
 
                     state.pesan?.let { pesan ->
                         Toast.makeText(
@@ -121,6 +159,33 @@ class JenisPelanggaranFragment : Fragment() {
         }
 
         viewModel.getJenisPelanggaran()
+    }
+
+    private fun filterJenisPelanggaran() {
+
+        val keyword = binding.etSearch.text
+            ?.toString()
+            ?.trim()
+            .orEmpty()
+
+        val hasil = semuaJenisPelanggaran.filter { item ->
+            item.name.contains(keyword, ignoreCase = true)
+        }.sortedBy { it.name.lowercase() }
+
+        adapter.setData(hasil)
+
+        // Total jenis pelanggaran, tidak terpengaruh pencarian
+        binding.tvTotal.text =
+            semuaJenisPelanggaran.size.toString()
+
+        binding.tvEmpty.isVisible =
+            hasil.isEmpty() && !sedangLoading && !adaError
+
+        binding.tvEmpty.text = if (keyword.isNotBlank()) {
+            "Jenis pelanggaran tidak ditemukan"
+        } else {
+            "Belum ada jenis pelanggaran terdaftar"
+        }
     }
 
     private fun tampilForm(item: JenisPelanggaranDto?) {

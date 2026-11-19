@@ -5,6 +5,11 @@
     app:startDestination="@id/studentScheduleFragment">
 
     <fragment
+        android:id="@+id/studentRiwayatPelanggaranFragment"
+        android:name="id.sch.santaagnes.sim.ui.pelanggaran.RiwayatPelanggaranFragment"
+        android:label="Riwayat Pelanggaran" />
+
+    <fragment
         android:id="@+id/studentHomeFragment"
         android:name="id.sch.santaagnes.sim.ui.home.HomeFragment">
 
@@ -73,4 +78,19 @@
     <fragment
         android:id="@+id/studentProfileFragment"
         android:name="id.sch.santaagnes.sim.ui.profile.ProfileFragment" />
+
+    <fragment
+        android:id="@+id/studentAjukanPeminjamanFragment"
+        android:name="id.sch.santaagnes.sim.ui.peminjaman.AjukanPeminjamanFragment"
+        android:label="Ajukan Peminjaman" />
+
+    <fragment
+        android:id="@+id/studentRiwayatPeminjamanFragment"
+        android:name="id.sch.santaagnes.sim.ui.peminjaman.RiwayatPeminjamanFragment"
+        android:label="Riwayat Peminjaman" />
+
+    <fragment
+        android:id="@+id/studentIsiSurveiMinatFragment"
+        android:name="id.sch.santaagnes.sim.ui.student.survei.IsiSurveiMinatFragment"
+        android:label="Isi Survei Minat" />
 </navigation>

@@ -41,7 +41,9 @@ data class ChangeDto(
     val newStartTime: String?,
     val newEndTime: String?,
     val description: String,
-    val slot: SlotDto
+    val slot: SlotDto,
+    // Tanggal tujuan bila pertemuan dipindah ke hari lain; null = tetap di `date`.
+    val newDate: String? = null
 )
 
 // Gson tidak menulis field null, sehingga kolom opsional yang kosong tidak ikut terkirim.
@@ -61,7 +63,8 @@ data class SaveChangeRequest(
     val substituteTeacherId: Int? = null,
     val newRoomId: Int? = null,
     val newStartTime: String? = null,
-    val newEndTime: String? = null
+    val newEndTime: String? = null,
+    val newDate: String? = null
 )
 
 data class ImportResultDto(

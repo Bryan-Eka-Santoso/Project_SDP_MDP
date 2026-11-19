@@ -54,6 +54,7 @@ const change = (overrides) => ({
   newRoom: null,
   newStartTime: null,
   newEndTime: null,
+  newDate: null,
   ...overrides,
 });
 
@@ -104,7 +105,9 @@ describe('GET /api/v1/schedule: siswa', () => {
       ['2026-11-16', 'CANCEL'],
       ['2026-11-23', null],
     ]);
-    expect(res.body.data[0].change).toEqual({ id: 90, type: 'CANCEL', description: 'Rapat guru' });
+    expect(res.body.data[0].change).toEqual({
+      id: 90, type: 'CANCEL', description: 'Rapat guru', movedTo: null, movedFrom: null,
+    });
   });
 
   it('RESCHEDULE: jam dan ruangan efektif memakai nilai baru, aslinya di `original`', async () => {
@@ -130,6 +133,54 @@ describe('GET /api/v1/schedule: siswa', () => {
       change: { type: 'RESCHEDULE' },
       original: { startTime: '07:00', endTime: '08:30', room: { id: 1, name: 'Ruang X-1' } },
     });
+  });
+
+  // Senin 16 Nov dipindah ke Rabu 18 Nov pukul 10:00–11:30.
+  const moved = () =>
+    change({ type: 'RESCHEDULE', description: 'Guru dinas', newDate: d('2026-11-18'), newStartTime: t('10:00'), newEndTime: t('11:30') });
+
+  it('RESCHEDULE lintas hari: tanggal asal ditandai pindah, pertemuannya muncul di tanggal baru', async () => {
+    prisma.scheduleSlot.findMany.mockResolvedValue([slot({ changes: [moved()] })]);
+
+    const res = await get('/api/v1/schedule?dateFrom=2026-11-16&dateTo=2026-11-22', loginAs('STUDENT'));
+
+    expect(res.body.data).toHaveLength(2);
+    // Tanggal asal: jam dan ruangan tetap yang asli, dengan keterangan dipindah ke mana.
+    expect(res.body.data[0]).toMatchObject({
+      date: '2026-11-16',
+      dayOfWeek: 'MONDAY',
+      startTime: '07:00',
+      endTime: '08:30',
+      change: { id: 90, type: 'RESCHEDULE', description: 'Guru dinas', movedTo: '2026-11-18', movedFrom: null },
+    });
+    // Tanggal tujuan: jam baru berlaku, nilai asli dan tanggal asalnya ikut dikirim.
+    expect(res.body.data[1]).toMatchObject({
+      date: '2026-11-18',
+      slotId: 1,
+      dayOfWeek: 'WEDNESDAY',
+      startTime: '10:00',
+      endTime: '11:30',
+      room: { id: 1, name: 'Ruang X-1' },
+      change: { id: 90, type: 'RESCHEDULE', movedTo: null, movedFrom: '2026-11-16' },
+      original: { startTime: '07:00', endTime: '08:30' },
+    });
+  });
+
+  it('RESCHEDULE lintas hari tetap tampil bila rentang hanya memuat tanggal tujuan atau hanya tanggal asal', async () => {
+    prisma.scheduleSlot.findMany.mockResolvedValue([slot({ changes: [moved()] })]);
+
+    const target = await get('/api/v1/schedule?dateFrom=2026-11-17&dateTo=2026-11-21', loginAs('STUDENT'));
+    expect(target.body.data.map((e) => [e.date, e.change.movedFrom])).toEqual([['2026-11-18', '2026-11-16']]);
+    // Perubahan dicari dari tanggal asal maupun tanggal tujuan.
+    expect(query().select.changes.where).toEqual({
+      OR: [
+        { date: { gte: d('2026-11-17'), lte: d('2026-11-21') } },
+        { newDate: { gte: d('2026-11-17'), lte: d('2026-11-21') } },
+      ],
+    });
+
+    const origin = await get('/api/v1/schedule?dateFrom=2026-11-16&dateTo=2026-11-16', loginAs('STUDENT'));
+    expect(origin.body.data.map((e) => [e.date, e.change.movedTo])).toEqual([['2026-11-16', '2026-11-18']]);
   });
 
   it('RESCHEDULE yang hanya pindah ruangan mempertahankan jam asli', async () => {

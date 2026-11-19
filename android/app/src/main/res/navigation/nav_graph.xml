@@ -60,6 +60,17 @@
         <action
             android:id="@+id/action_reportHub_to_adminJournals"
             app:destination="@id/adminJournalFragment" />
+       <action
+            android:id="@+id/action_reportHub_to_violationReport"
+            app:destination="@id/violationReportFragment" />
+
+        <action
+            android:id="@+id/action_reportHub_to_facilityBookingReport"
+            app:destination="@id/facilityBookingReportFragment" />
+
+        <action
+            android:id="@+id/action_reportHub_to_electiveSurveyReport"
+            app:destination="@id/electiveSurveyReportFragment" />
     </fragment>
 
     <fragment
@@ -109,4 +120,18 @@
         android:name="id.sch.santaagnes.sim.ui.grades.GradeComponentFragment"
         android:label="@string/grade_title" />
 
+    <fragment
+        android:id="@+id/violationReportFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.report.ViolationReportFragment"
+        android:label="Laporan Pelanggaran Siswa" />
+
+    <fragment
+        android:id="@+id/facilityBookingReportFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.report.FacilityBookingReportFragment"
+        android:label="Laporan Peminjaman Fasilitas" />
+
+    <fragment
+        android:id="@+id/electiveSurveyReportFragment"
+        android:name="id.sch.santaagnes.sim.ui.admin.report.ElectiveSurveyReportFragment"
+        android:label="Laporan Survei Mata Pelajaran Pilihan" />
 </navigation>
