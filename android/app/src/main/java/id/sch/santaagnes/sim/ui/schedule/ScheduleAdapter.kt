@@ -30,8 +30,31 @@ class ScheduleAdapter : ListAdapter<ScheduleEntry, ScheduleAdapter.LessonViewHol
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LessonViewHolder =
         LessonViewHolder(ItemScheduleEntryBinding.inflate(LayoutInflater.from(parent.context), parent, false))
 
+    /** true hanya di jadwal mengajar guru: pertemuan miliknya yang belum lewat bisa dipindah atau dibatalkan. */
+    var canReschedule: Boolean = false
+        set(value) {
+            if (field != value) {
+                field = value
+                notifyItemRangeChanged(0, itemCount)
+            }
+        }
+
+    var onReschedule: ((ScheduleEntry) -> Unit)? = null
+
     override fun onBindViewHolder(holder: LessonViewHolder, position: Int) {
-        holder.bind(getItem(position), showTeacher)
+        val entry = getItem(position)
+        holder.bind(entry, showTeacher)
+        holder.bindAction(entry, canReschedule && isReschedulable(entry), onReschedule)
+    }
+
+    // Aturan yang sama dengan server: belum lewat, tanpa guru pengganti dari admin, dan bukan tanda
+    // "sudah dipindah" (pindah lintas hari dikelola dari entri di tanggal tujuan).
+    private fun isReschedulable(entry: ScheduleEntry): Boolean {
+        val change = entry.change
+        val editable = change == null ||
+            change.type == ChangeType.CANCEL ||
+            (change.type == ChangeType.RESCHEDULE && change.movedTo == null)
+        return editable && !entry.date.isBefore(DateTimeWib.today())
     }
 
     class LessonViewHolder(
@@ -40,7 +63,8 @@ class ScheduleAdapter : ListAdapter<ScheduleEntry, ScheduleAdapter.LessonViewHol
 
         fun bind(entry: ScheduleEntry, showTeacher: Boolean) {
             val context = binding.root.context
-            val cancelled = entry.change?.type == ChangeType.CANCEL
+            // Dicoret: tidak berlangsung pada tanggal ini (dibatalkan atau dipindah ke tanggal lain).
+            val cancelled = entry.isAway
 
             binding.tvTime.text = context.getString(
                 R.string.schedule_time_range,
@@ -63,6 +87,19 @@ class ScheduleAdapter : ListAdapter<ScheduleEntry, ScheduleAdapter.LessonViewHol
                 ?: context.getString(R.string.schedule_room_none)
 
             bindChange(context, entry)
+        }
+
+        fun bindAction(entry: ScheduleEntry, enabled: Boolean, onReschedule: ((ScheduleEntry) -> Unit)?) {
+            binding.tvAction.isVisible = enabled
+            binding.tvAction.setText(
+                when (entry.change?.type) {
+                    null -> R.string.schedule_action_reschedule
+                    ChangeType.CANCEL -> R.string.schedule_action_restore
+                    else -> R.string.schedule_action_edit_reschedule
+                }
+            )
+            binding.cardLesson.isClickable = enabled
+            binding.cardLesson.setOnClickListener(if (enabled) { _ -> onReschedule?.invoke(entry) } else null)
         }
 
         private fun bindChange(context: Context, entry: ScheduleEntry) {
@@ -94,6 +131,8 @@ class ScheduleAdapter : ListAdapter<ScheduleEntry, ScheduleAdapter.LessonViewHol
             val original = entry.original
             val lines = mutableListOf<String>()
 
+            change.movedTo?.let { lines += context.getString(R.string.schedule_moved_to, DateTimeWib.formatDate(it)) }
+            change.movedFrom?.let { lines += context.getString(R.string.schedule_moved_from, DateTimeWib.formatDate(it)) }
             if (original != null) {
                 when (change.type) {
                     ChangeType.SUBSTITUTE -> original.teacherName?.let {

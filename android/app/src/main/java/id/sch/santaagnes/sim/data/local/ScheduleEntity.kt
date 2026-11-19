@@ -28,5 +28,9 @@ data class ScheduleEntity(
     val originalStartTime: String?,
     val originalEndTime: String?,
     val originalRoomName: String?,
-    val originalTeacherName: String?
+    val originalTeacherName: String?,
+    // v5: id perubahan dan pindah lintas hari (tanggal YYYY-MM-DD).
+    val changeId: Int? = null,
+    val changeMovedTo: String? = null,
+    val changeMovedFrom: String? = null
 )

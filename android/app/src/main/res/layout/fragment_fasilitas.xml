@@ -10,121 +10,263 @@
     <!-- HEADER -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/bg_header"
+        android:layout_height="160dp"
         android:orientation="vertical"
-        android:paddingHorizontal="8dp"
-        android:paddingTop="20dp"
-        android:paddingBottom="12dp">
+        android:background="@drawable/bg_header"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:minHeight="56dp"
             android:orientation="horizontal">
 
             <ImageButton
                 android:id="@+id/btnBack"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="36dp"
+                android:layout_height="40dp"
+                android:layout_marginEnd="8dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/cd_back"
-                android:src="@drawable/ic_arrow_back" />
+                android:src="@drawable/ic_arrow_back"
+                android:contentDescription="Kembali"
+                app:tint="@color/white" />
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/master_facilities_title"
+                android:text="Master Fasilitas"
                 android:textColor="@color/white"
-                android:textSize="22sp"
-                android:textStyle="bold" />
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnAdd"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/master_add"
-            android:textColor="@color/white" />
+                android:textStyle="bold"
+                android:textSize="23sp" />
+
         </LinearLayout>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="56dp"
-            android:alpha="0.85"
-            android:text="@string/master_facilities_subtitle"
-            android:textColor="@color/white"
+            android:layout_marginStart="44dp"
+            android:layout_marginTop="4dp"
+            android:text="Kelola ruangan dan barang sekolah"
+            android:textColor="#E2EAFF"
             android:textSize="12sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="bottom|end">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAdd"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:text="+ Tambah"
+                android:textAllCaps="false"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:textColor="@color/agnesian_blue"
+                app:backgroundTint="@color/white"
+                app:cornerRadius="11dp"
+                app:elevation="0dp" />
+
+        </LinearLayout>
     </LinearLayout>
 
-    <!-- Jumlah seluruh data (dari daftar yang dimuat). -->
-    <TextView
-        android:id="@+id/tvTotal"
+    <!-- TOTAL FASILITAS -->
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="12dp"
-        android:textColor="@color/agnesian_blue"
-        android:textSize="13sp"
-        android:textStyle="bold"
-        android:visibility="gone" />
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="16dp"
+        app:cardBackgroundColor="@color/white"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="0dp">
 
-    <!-- FILTER -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="18dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Total Fasilitas"
+                    android:textColor="@color/agnesian_muted"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/tvTotal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:text="0"
+                    android:textColor="@color/agnesian_blue"
+                    android:textSize="30sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Fasilitas terdaftar"
+                    android:textColor="@color/agnesian_muted"
+                    android:textSize="11sp" />
+
+            </LinearLayout>
+
+            <ImageView
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:src="@drawable/ic_building"
+                android:contentDescription="Total Fasilitas"
+                app:tint="@color/agnesian_blue" />
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- FILTER JENIS -->
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fillViewport="false"
+        android:layout_marginTop="14dp"
         android:scrollbars="none">
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:padding="16dp">
+            android:paddingHorizontal="20dp">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSemua"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:text="@string/master_facilities_semua"
+                android:layout_height="38dp"
+                android:text="Semua"
+                android:textSize="12sp"
                 android:textAllCaps="false"
-                android:textColor="@color/white"
-                app:backgroundTint="@color/agnesian_blue"
+                android:textColor="@color/agnesian_blue"
+                app:backgroundTint="@color/white"
+                app:strokeColor="@color/agnesian_blue"
+                app:strokeWidth="1dp"
                 app:cornerRadius="10dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnRuangan"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="wrap_content"
-                android:layout_height="40dp"
+                android:layout_height="38dp"
                 android:layout_marginStart="8dp"
-                android:text="@string/master_facilities_ruangan"
+                android:text="Ruangan"
+                android:textSize="12sp"
                 android:textAllCaps="false"
+                android:textColor="@color/agnesian_blue"
+                app:backgroundTint="@color/white"
+                app:strokeColor="@color/agnesian_blue"
+                app:strokeWidth="1dp"
                 app:cornerRadius="10dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnBarang"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="wrap_content"
-                android:layout_height="40dp"
+                android:layout_height="38dp"
                 android:layout_marginStart="8dp"
-                android:text="@string/master_facilities_barang"
+                android:text="Barang"
+                android:textSize="12sp"
                 android:textAllCaps="false"
+                android:textColor="@color/agnesian_blue"
+                app:backgroundTint="@color/white"
+                app:strokeColor="@color/agnesian_blue"
+                app:strokeWidth="1dp"
                 app:cornerRadius="10dp" />
 
         </LinearLayout>
     </HorizontalScrollView>
 
-    <TextView
+    <!-- SEARCH -->
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
-        android:layout_marginBottom="12dp"
-        android:text="@string/master_facilities_daftar_fasilitas"
-        android:textStyle="bold"
-        android:textColor="@color/agnesian_text"
-        android:textSize="15sp" />
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="12dp"
+        app:cardBackgroundColor="@color/white"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="0dp">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="15dp">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_search"
+                android:contentDescription="Cari fasilitas"
+                app:tint="@color/agnesian_muted" />
+
+            <EditText
+                android:id="@+id/etSearch"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginStart="10dp"
+                android:background="@android:color/transparent"
+                android:hint="Cari nama fasilitas..."
+                android:textColor="@color/agnesian_text"
+                android:textColorHint="@color/agnesian_muted"
+                android:textSize="13sp"
+                android:inputType="text"
+                android:singleLine="true"
+                android:imeOptions="actionSearch" />
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- JUDUL DAFTAR -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="10dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Daftar Fasilitas"
+            android:textColor="@color/agnesian_text"
+            android:textStyle="bold"
+            android:textSize="15sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Urut A–Z"
+            android:textColor="@color/agnesian_muted"
+            android:textSize="11sp" />
+
+    </LinearLayout>
+
+    <!-- LOADING -->
     <ProgressBar
         android:id="@+id/progress"
         android:layout_width="wrap_content"
@@ -132,31 +274,39 @@
         android:layout_gravity="center"
         android:visibility="gone" />
 
+    <!-- ERROR -->
     <TextView
         android:id="@+id/tvError"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="8dp"
         android:textColor="@color/change_cancel"
+        android:textSize="12sp"
         android:visibility="gone" />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnRetry"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="@string/action_retry"
+        android:text="Coba Lagi"
+        android:textAllCaps="false"
         android:visibility="gone" />
 
+    <!-- EMPTY STATE -->
     <TextView
         android:id="@+id/tvEmpty"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="@string/master_facilities_belum_ada_fasilitas"
-        android:padding="24dp"
+        android:padding="28dp"
+        android:text="Tidak ada fasilitas ditemukan"
+        android:textColor="@color/agnesian_muted"
+        android:textSize="13sp"
         android:visibility="gone" />
 
+    <!-- DAFTAR FASILITAS -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvFasilitas"
         android:layout_width="match_parent"
@@ -165,6 +315,7 @@
         android:clipToPadding="false"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
+        android:paddingTop="4dp"
         android:paddingBottom="20dp" />
 
 </LinearLayout>

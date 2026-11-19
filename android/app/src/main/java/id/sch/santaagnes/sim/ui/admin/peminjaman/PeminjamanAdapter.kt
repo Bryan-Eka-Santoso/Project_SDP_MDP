@@ -9,7 +9,8 @@ import id.sch.santaagnes.sim.databinding.ItemPeminjamanBinding
 
 class PeminjamanAdapter(
     private val onApprove: (PeminjamanDto) -> Unit,
-    private val onReject: (PeminjamanDto) -> Unit
+    private val onReject: (PeminjamanDto) -> Unit,
+    private val onReturn: (PeminjamanDto) -> Unit
 ) : RecyclerView.Adapter<PeminjamanAdapter.ViewHolder>() {
 
     private val daftar = mutableListOf<PeminjamanDto>()
@@ -81,6 +82,29 @@ class PeminjamanAdapter(
             binding.btnReject.setOnClickListener {
                 onReject(item)
             }
+
+
+            // Tombol kembali hanya untuk peminjaman disetujui
+            val canReturn = item.status == "APPROVED"
+
+            binding.btnReturn.visibility =
+                if (canReturn) View.VISIBLE else View.GONE
+
+            binding.btnReturn.setOnClickListener {
+                onReturn(item)
+            }
+
+            // Tanggal kembali hanya muncul jika sudah dikembalikan
+            binding.tvReturnDate.visibility =
+                if (item.status == "RETURNED") {
+                    View.VISIBLE
+                } else {
+                    View.GONE
+                }
+
+            binding.tvReturnDate.text =
+                "Dikembalikan pada: ${item.returnDate ?: "-"}"
+
         }
     }
 }

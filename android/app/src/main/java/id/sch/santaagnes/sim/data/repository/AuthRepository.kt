@@ -100,6 +100,9 @@ class AuthRepository @Inject constructor(
         isHomeroomTeacher = teacher?.isHomeroomTeacher ?: false,
         studentId = student?.id,
         homeroomClassGroups = teacher?.homeroomClassGroups.orEmpty().map { NamedId(it.id, it.name) },
-        children = guardian?.children.orEmpty().map { NamedId(it.id, it.name) }
+        children = guardian?.children.orEmpty().map { NamedId(it.id, it.name) },
+        classNames = student?.classGroups.orEmpty().map { it.name },
+        homeroomTeacherNames = student?.classGroups.orEmpty().mapNotNull { it.homeroomTeacherName }.distinct(),
+        phone = (student?.phone ?: guardian?.phone)?.takeIf { it.isNotBlank() }
     )
 }

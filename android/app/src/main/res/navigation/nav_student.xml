@@ -5,6 +5,11 @@
     app:startDestination="@id/studentScheduleFragment">
 
     <fragment
+        android:id="@+id/studentRiwayatPelanggaranFragment"
+        android:name="id.sch.santaagnes.sim.ui.pelanggaran.RiwayatPelanggaranFragment"
+        android:label="Riwayat Pelanggaran" />
+
+    <fragment
         android:id="@+id/studentHomeFragment"
         android:name="id.sch.santaagnes.sim.ui.home.HomeFragment">
 
@@ -13,6 +18,16 @@
             android:defaultValue="STUDENT"
             app:argType="string" />
     </fragment>
+
+    <!-- ABS-03: destination turunan, bukan tab bottom-navigation Vincent. -->
+    <fragment
+        android:id="@+id/studentAttendanceSummaryFragment"
+        android:name="id.sch.santaagnes.sim.ui.attendance.StudentAttendanceSummaryFragment" />
+
+    <!-- NIL-05: catatan perkembangan khusus siswa. -->
+    <fragment
+        android:id="@+id/studentProgressNotesFragment"
+        android:name="id.sch.santaagnes.sim.ui.progress.StudentProgressNotesFragment" />
 
     <fragment
         android:id="@+id/studentGradeReportFragment"
@@ -63,4 +78,19 @@
     <fragment
         android:id="@+id/studentProfileFragment"
         android:name="id.sch.santaagnes.sim.ui.profile.ProfileFragment" />
+
+    <fragment
+        android:id="@+id/studentAjukanPeminjamanFragment"
+        android:name="id.sch.santaagnes.sim.ui.peminjaman.AjukanPeminjamanFragment"
+        android:label="Ajukan Peminjaman" />
+
+    <fragment
+        android:id="@+id/studentRiwayatPeminjamanFragment"
+        android:name="id.sch.santaagnes.sim.ui.peminjaman.RiwayatPeminjamanFragment"
+        android:label="Riwayat Peminjaman" />
+
+    <fragment
+        android:id="@+id/studentIsiSurveiMinatFragment"
+        android:name="id.sch.santaagnes.sim.ui.student.survei.IsiSurveiMinatFragment"
+        android:label="Isi Survei Minat" />
 </navigation>

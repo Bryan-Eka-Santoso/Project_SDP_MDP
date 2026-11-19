@@ -188,6 +188,57 @@
                             android:textStyle="bold" />
                     </LinearLayout>
 
+                    <!-- Siswa: kelas dan wali kelas (Figma Halaman Profil). -->
+                    <LinearLayout
+                        android:id="@+id/layoutClass"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/profile_label_class"
+                            android:textColor="@color/agnesian_muted"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/tvClassValue"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:textColor="@color/agnesian_text"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/layoutHomeroomTeacher"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/profile_label_homeroom_teacher"
+                            android:textColor="@color/agnesian_muted"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/tvHomeroomTeacherValue"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:textColor="@color/agnesian_text"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
                     <LinearLayout
                         android:id="@+id/layoutEmail"
                         android:layout_width="match_parent"
@@ -212,6 +263,32 @@
                             android:textStyle="bold" />
                     </LinearLayout>
 
+                    <LinearLayout
+                        android:id="@+id/layoutPhone"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/profile_label_phone"
+                            android:textColor="@color/agnesian_muted"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/tvPhoneValue"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:textColor="@color/agnesian_text"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <!-- Keterangan Tambahan (Wali Kelas / Anak) jika ada -->
                     <TextView
                         android:id="@+id/tvDetails"
                         android:layout_width="match_parent"

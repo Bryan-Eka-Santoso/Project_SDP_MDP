@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@color/teacher_screen" android:orientation="vertical">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:background="@drawable/bg_header" android:orientation="vertical"
+        android:paddingStart="22dp" android:paddingEnd="22dp" android:paddingTop="22dp" android:paddingBottom="30dp">
+        <TextView android:id="@+id/btnLeaveBack" android:layout_width="wrap_content"
+            android:layout_height="44dp" android:gravity="center_vertical"
+            android:clickable="true" android:focusable="true"
+            android:text="‹ Kembali ke Halaman Sebelumnya" android:textColor="#FFFFFF" android:textSize="12sp"/>
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="Pengajuan Izin Siswa" android:textColor="#FFFFFF"
+            android:textSize="23sp" android:textStyle="bold"/>
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="6dp" android:text="Daftar izin yang perlu ditinjau wali kelas"
+            android:textColor="#FFFFFF" android:textSize="12sp"/>
+    </LinearLayout>
+    <ProgressBar android:id="@+id/progressPending" style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:indeterminate="true" android:visibility="gone"/>
+    <ScrollView android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1" android:fillViewport="true">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:padding="16dp">
+            <TextView android:id="@+id/tvLeaveStatus" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginTop="8dp"
+                android:layout_marginBottom="10dp" android:textSize="13sp"
+                android:textColor="@color/teacher_muted"/>
+            <LinearLayout android:id="@+id/listPending" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="vertical"/>
+            <Button android:id="@+id/btnLeaveMore" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:text="Muat lebih banyak"
+                android:textAllCaps="false" android:visibility="gone"
+                android:backgroundTint="@color/teacher_blue_light" android:textColor="#FFFFFF"/>
+            <Button android:id="@+id/btnLeaveReload" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:text="Muat ulang"
+                android:textAllCaps="false" android:visibility="gone"
+                android:backgroundTint="@color/teacher_blue_light" android:textColor="#FFFFFF"/>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

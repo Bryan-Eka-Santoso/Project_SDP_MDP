@@ -81,7 +81,7 @@ Format ID: `F-<MODUL>-<nomor>`. Gunakan ID ini di prompt, tiket, commit, dan pen
 | F-JDW-01 | Master jadwal pelajaran semester berjalan | Admin |
 | F-JDW-02 | Impor jadwal satu semester dari Excel | Admin |
 | F-JDW-03 | Cek bentrok otomatis (guru, kelas, ruangan) saat simpan dan impor | Sistem |
-| F-JDW-04 | Catat perubahan jadwal per tanggal (guru pengganti, pindah waktu/ruang, batal) + notifikasi ke pihak terdampak | Admin |
+| F-JDW-04 | Catat perubahan jadwal per tanggal (guru pengganti, pindah tanggal/waktu/ruang, batal) + notifikasi ke pihak terdampak. Guru boleh memindah atau membatalkan pertemuan dari jadwal mengajarnya sendiri | Admin; Guru (pindah dan batal untuk jadwal miliknya) |
 | F-JDW-05 | Lihat jadwal beserta perubahannya, sesuai cakupan role | Siswa, Guru, Wali kelas, Wali murid |
 | F-JDW-06 | Sinkronkan agenda kalender akademik dan peminjaman yang disetujui ke kalender perangkat. Jadwal pelajaran **tidak** disinkron | Semua (kalender akademik); Siswa, Guru (peminjaman miliknya) |
 | F-JDW-07 | To-do list pribadi di halaman jadwal (judul, catatan, tenggat, opsional mapel, tandai selesai). Disimpan di perangkat (Room) | Siswa |

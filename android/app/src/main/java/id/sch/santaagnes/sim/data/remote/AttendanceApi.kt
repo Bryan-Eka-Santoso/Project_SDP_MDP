@@ -43,4 +43,11 @@ interface AttendanceApi {
 
     @POST("schedule-slots/{slotId}/attendance")
     suspend fun save(@Path("slotId") slotId: Int, @Body request: SaveAttendanceRequest): ApiResponse<SavedAttendanceDto>
+
+    // ABS-03: Rekap presensi siswa yang sedang login
+    @GET("me/attendance-summary")
+    suspend fun myAttendanceSummary(
+        @Query("startDate") startDate: String? = null,
+        @Query("endDate") endDate: String? = null
+    ): ApiResponse<AttendanceSummaryDto>
 }

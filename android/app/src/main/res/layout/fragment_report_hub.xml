@@ -56,6 +56,77 @@
 
             <!-- Satu kartu per laporan; laporan baru menambah satu kartu di sini. -->
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardGradesAdmin" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="12dp" android:clickable="true" android:focusable="true"
+                app:cardBackgroundColor="@color/white" app:cardCornerRadius="12dp" app:cardElevation="1dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:text="Laporan Nilai Siswa" android:textColor="@color/agnesian_text"
+                        android:textSize="16sp" android:textStyle="bold"/>
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp" android:text="Nilai akhir, predikat, filter kelas dan export Excel"
+                        android:textColor="@color/agnesian_muted" android:textSize="13sp"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- LAP-02: rekap presensi siswa per kelas. -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardAttendanceAdmin" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="12dp" android:clickable="true" android:focusable="true"
+                app:cardBackgroundColor="@color/white" app:cardCornerRadius="12dp" app:cardElevation="1dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:text="Laporan Kehadiran Siswa" android:textColor="@color/agnesian_text"
+                        android:textSize="16sp" android:textStyle="bold"/>
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp" android:text="Rekap hadir, sakit, izin dan alpa, filter kelas, export Excel"
+                        android:textColor="@color/agnesian_muted" android:textSize="13sp"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- LAP-06: laporan jurnal berfilter serta export, terpisah dari monitoring ABS-04. -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardTeachingJournalReport" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="12dp" android:clickable="true" android:focusable="true"
+                app:cardBackgroundColor="@color/white" app:cardCornerRadius="12dp" app:cardElevation="1dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:text="Laporan Jurnal Mengajar" android:textColor="@color/agnesian_text"
+                        android:textSize="16sp" android:textStyle="bold"/>
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Sesi mengajar, filter kelas/guru/tanggal dan export Excel"
+                        android:textColor="@color/agnesian_muted" android:textSize="13sp"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- ABS-04: monitoring jurnal mengajar Admin, tetap melalui hub Laporan. -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardAdminJournals"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp" android:layout_marginTop="12dp"
+                android:clickable="true" android:focusable="true"
+                app:cardBackgroundColor="@color/white" app:cardCornerRadius="12dp" app:cardElevation="1dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:text="Monitoring Jurnal Mengajar" android:textColor="@color/agnesian_text"
+                        android:textSize="16sp" android:textStyle="bold" />
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Pantau jurnal setiap sesi guru berdasarkan tanggal dan kelas"
+                        android:textColor="@color/agnesian_muted" android:textSize="13sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardScheduleChanges"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -125,6 +196,122 @@
                         android:textColor="@color/agnesian_muted"
                         android:textSize="13sp" />
                 </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+
+            <!-- F-LAP-03: LAPORAN PELANGGARAN -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardViolationReport"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Laporan Pelanggaran Siswa"
+                        android:textColor="@color/agnesian_text"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Lihat data kejadian, poin pelanggaran, filter, dan ekspor Excel"
+                        android:textColor="@color/agnesian_muted"
+                        android:textSize="13sp" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardFacilityBookingReport"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Laporan Peminjaman Fasilitas"
+                        android:textColor="@color/agnesian_text"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Lihat peminjaman ruangan dan barang, status, periode, serta ekspor Excel"
+                        android:textColor="@color/agnesian_muted"
+                        android:textSize="13sp" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardElectiveSurveyReport"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Laporan Survei Mata Pelajaran Pilihan"
+                        android:textColor="@color/agnesian_text"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Lihat jumlah peminat, persentase, dan ekspor hasil survei"
+                        android:textColor="@color/agnesian_muted"
+                        android:textSize="13sp" />
+
+                </LinearLayout>
+
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
     </ScrollView>

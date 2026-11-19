@@ -36,7 +36,17 @@ const studentRow = (overrides = {}) => ({
   status: 'ACTIVE',
   passwordHash: PASSWORD_HASH,
   teacher: null,
-  student: { id: 1, nis: '26001', birthDate: new Date('2010-05-17T00:00:00Z') },
+  student: {
+    id: 1,
+    nis: '26001',
+    birthDate: new Date('2010-05-17T00:00:00Z'),
+    phone: '081234567890',
+    classMemberships: [
+      { classGroup: { id: 3, name: 'X-1', homeroomTeacher: { user: { name: 'Guru Satu' } } } },
+      // Kelas paket yang wali kelasnya belum diatur.
+      { classGroup: { id: 9, name: 'X-Paket A', homeroomTeacher: null } },
+    ],
+  },
   guardian: null,
   ...overrides,
 });
@@ -79,8 +89,22 @@ describe('POST /api/v1/auth/login', () => {
       name: 'Siswa Satu',
       role: 'STUDENT',
       teacher: null,
-      student: { id: 1, nis: '26001', birthDate: '2010-05-17' },
+      // Kelas tahun ajaran aktif beserta wali kelasnya (layar Profil).
+      student: {
+        id: 1,
+        nis: '26001',
+        birthDate: '2010-05-17',
+        phone: '081234567890',
+        classGroups: [
+          { id: 3, name: 'X-1', homeroomTeacherName: 'Guru Satu' },
+          { id: 9, name: 'X-Paket A', homeroomTeacherName: null },
+        ],
+      },
       guardian: null,
+    });
+    // Hanya kelas pada tahun ajaran aktif yang diambil.
+    expect(prisma.user.findUnique.mock.calls[0][0].select.student.select.classMemberships.where).toEqual({
+      classGroup: { academicYear: { isActive: true } },
     });
     expect(JSON.stringify(res.body)).not.toContain(PASSWORD_HASH);
 

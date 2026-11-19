@@ -18,7 +18,8 @@ function viewSelect(from, to) {
       select: { ...assignment, semester: { select: { startDate: true, endDate: true } } },
     },
     changes: {
-      where: { date: { gte: from, lte: to } },
+      // Termasuk pertemuan yang dipindah MASUK ke rentang ini dari tanggal di luar rentang.
+      where: { OR: [{ date: { gte: from, lte: to } }, { newDate: { gte: from, lte: to } }] },
       select: {
         id: true,
         type: true,
@@ -28,6 +29,7 @@ function viewSelect(from, to) {
         newRoom: { select: { id: true, name: true } },
         newStartTime: true,
         newEndTime: true,
+        newDate: true,
       },
     },
   };
@@ -60,18 +62,38 @@ function toEntry(slot, date, change) {
   };
   if (!change) return entry;
 
-  entry.change = { id: change.id, type: change.type, description: change.description };
+  // movedTo: pertemuan tanggal ini dipindah ke tanggal lain; movedFrom: pertemuan ini pindahan.
+  entry.change = {
+    id: change.id,
+    type: change.type,
+    description: change.description,
+    movedTo: null,
+    movedFrom: null,
+  };
   entry.original = original;
   if (change.type === 'SUBSTITUTE') {
     entry.teacher = { id: change.substituteTeacher.id, name: change.substituteTeacher.user.name };
   }
   if (change.type === 'RESCHEDULE') {
+    if (change.newDate) {
+      // Jam dan ruangan baru berlaku di tanggal tujuan, bukan di tanggal asal ini.
+      entry.change.movedTo = formatDateOnly(change.newDate);
+      return entry;
+    }
     if (change.newRoom) entry.room = change.newRoom;
     if (change.newStartTime) {
       entry.startTime = formatTimeOfDay(change.newStartTime);
       entry.endTime = formatTimeOfDay(change.newEndTime);
     }
   }
+  return entry;
+}
+
+// Pertemuan yang dipindah dari tanggal lain: tampil di tanggal tujuan dengan jam/ruangan barunya.
+function toMovedEntry(slot, change) {
+  const entry = toEntry(slot, change.newDate, { ...change, newDate: null });
+  entry.dayOfWeek = dayOfWeekOf(change.newDate);
+  entry.change.movedFrom = formatDateOnly(change.date);
   return entry;
 }
 
@@ -118,6 +140,15 @@ async function viewSchedule(user, query) {
       const change = slot.changes.find((item) => item.date.getTime() === time) ?? null;
       if (scope.teacherUserId && !teacherSees(slot, change, scope.teacherUserId)) continue;
       entries.push(toEntry(slot, date, change));
+    }
+  }
+  // Pertemuan yang dipindah masuk ke rentang ini (tanggal tujuannya bukan hari slot itu).
+  for (const slot of slots) {
+    for (const change of slot.changes) {
+      if (change.type !== 'RESCHEDULE' || !change.newDate) continue;
+      if (change.newDate < from || change.newDate > to) continue;
+      if (scope.teacherUserId && !teacherSees(slot, change, scope.teacherUserId)) continue;
+      entries.push(toMovedEntry(slot, change));
     }
   }
 

@@ -55,4 +55,20 @@ router.get(
   controller.listScores,
 );
 
+// Rincian Tugas 1..n dan Ulangan 1..n
+router.get(
+  '/teaching-assignments/:assignmentId/grade-assessments',
+  authenticate, authorize('TEACHER'),
+  validate({ params: schemas.assignmentParams }), controller.listAssessments,
+);
+router.post(
+  '/teaching-assignments/:assignmentId/grade-assessments',
+  authenticate, authorize('TEACHER'),
+  validate({ params: schemas.assignmentParams, body: schemas.assessmentCreateBody }), controller.createAssessment,
+);
+router.put(
+  '/grade-assessments/:id/scores',
+  authenticate, authorize('TEACHER'),
+  validate({ params: schemas.assessmentParams, body: schemas.assessmentScoreBody }), controller.saveAssessmentScore,
+);
 module.exports = router;

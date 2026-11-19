@@ -12,7 +12,29 @@
             android:name="role"
             android:defaultValue="TEACHER"
             app:argType="string" />
+
+        <action
+            android:id="@+id/action_teacherHome_to_inputPelanggaran"
+            app:destination="@id/inputPelanggaranFragment" />
+
+        <action
+            android:id="@+id/action_teacherHome_to_riwayatPelanggaran"
+            app:destination="@id/teacherRiwayatPelanggaranFragment" />
+
+        <action
+            android:id="@+id/action_teacherHome_to_bukuPenghubung"
+            app:destination="@id/teacherBukuPenghubungFragment" />
+
+        <action
+            android:id="@+id/action_teacherHome_to_profilSiswaBinaan"
+            app:destination="@id/teacherProfilSiswaBinaanFragment" />
     </fragment>
+
+    <!-- IZN-03: route tambahan untuk wali kelas; tab Vincent tidak berubah. -->
+    <fragment
+        android:id="@+id/homeroomPendingFragment"
+        android:name="id.sch.santaagnes.sim.ui.leave.HomeroomPendingFragment"
+        android:label="Pengajuan Izin Siswa" />
 
     <fragment
         android:id="@+id/teacherClassesFragment"
@@ -31,6 +53,12 @@
         <argument
             android:name="assignmentLabel"
             app:argType="string" />
+    </fragment>
+
+    <!-- NIL-05: catatan perkembangan siswa oleh guru mata pelajaran. -->
+    <fragment android:id="@+id/teacherProgressNotesFragment"
+        android:name="id.sch.santaagnes.sim.ui.progress.TeacherProgressNotesFragment">
+        <argument android:name="assignmentId" app:argType="integer" />
     </fragment>
 
     <fragment
@@ -67,6 +95,75 @@
         <action
             android:id="@+id/action_schedule_to_taskList"
             app:destination="@id/teacherTaskListFragment" />
+
+        <action
+            android:id="@+id/action_schedule_to_reschedule"
+            app:destination="@id/rescheduleFormFragment" />
+    </fragment>
+
+    <!-- Guru memindah satu pertemuan miliknya (F-JDW-04). date/startTime/endTime/room = jadwal asli;
+         new* dan description terisi bila pertemuan itu sudah pernah dipindah (changeId != 0). -->
+    <fragment
+        android:id="@+id/rescheduleFormFragment"
+        android:name="id.sch.santaagnes.sim.ui.schedule.RescheduleFormFragment">
+
+        <argument
+            android:name="slotId"
+            app:argType="integer" />
+        <argument
+            android:name="date"
+            app:argType="string" />
+        <argument
+            android:name="changeId"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <!-- true: pertemuan ini sudah dibatalkan (changeId = perubahan CANCEL); form hanya menawarkan pemulihan. -->
+        <argument
+            android:name="cancelled"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <argument
+            android:name="subject"
+            app:argType="string" />
+        <argument
+            android:name="classGroup"
+            app:argType="string" />
+        <argument
+            android:name="startTime"
+            app:argType="string" />
+        <argument
+            android:name="endTime"
+            app:argType="string" />
+        <argument
+            android:name="room"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="newDate"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="newStartTime"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="newEndTime"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="newRoom"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="description"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
     </fragment>
 
     <fragment
@@ -120,4 +217,39 @@
     <fragment
         android:id="@+id/teacherProfileFragment"
         android:name="id.sch.santaagnes.sim.ui.profile.ProfileFragment" />
+
+    <fragment
+        android:id="@+id/inputPelanggaranFragment"
+        android:name="id.sch.santaagnes.sim.ui.teacher.pelanggaran.InputPelanggaranFragment"
+        android:label="Input Pelanggaran" />
+
+    <fragment
+        android:id="@+id/teacherRiwayatPelanggaranFragment"
+        android:name="id.sch.santaagnes.sim.ui.pelanggaran.RiwayatPelanggaranFragment"
+        android:label="Riwayat Pelanggaran" />
+
+    <fragment
+        android:id="@+id/teacherAjukanPeminjamanFragment"
+        android:name="id.sch.santaagnes.sim.ui.peminjaman.AjukanPeminjamanFragment"
+        android:label="Ajukan Peminjaman" />
+
+    <fragment
+        android:id="@+id/teacherRiwayatPeminjamanFragment"
+        android:name="id.sch.santaagnes.sim.ui.peminjaman.RiwayatPeminjamanFragment"
+        android:label="Riwayat Peminjaman" />
+
+    <fragment
+        android:id="@+id/teacherBukuPenghubungFragment"
+        android:name="id.sch.santaagnes.sim.ui.teacher.bukupenghubung.BukuPenghubungFragment"
+        android:label="Buku Penghubung" />
+
+    <fragment
+        android:id="@+id/teacherBacaBukuPenghubungFragment"
+        android:name="id.sch.santaagnes.sim.ui.bukupenghubung.BacaBukuPenghubungFragment"
+        android:label="Riwayat Buku Penghubung" />
+
+    <fragment
+        android:id="@+id/teacherProfilSiswaBinaanFragment"
+        android:name="id.sch.santaagnes.sim.ui.teacher.profilsiswa.ProfilSiswaBinaanFragment"
+        android:label="Profil Siswa Binaan" />
 </navigation>

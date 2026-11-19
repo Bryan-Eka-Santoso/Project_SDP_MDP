@@ -93,8 +93,21 @@ class ProfileFragment : Fragment() {
         } else {
             getString(R.string.profile_role_label)
         }
+          
+        // Peran sudah tampil sebagai chip di bawah nama; untuk siswa barisnya diganti Kelas dan
+        // Wali Kelas (Figma Halaman Profil).
+        val isStudent = profile.role == "STUDENT"
+        binding.layoutRoleField.isVisible = !isStudent
+        binding.tvRoleLabel.setText(R.string.profile_label_role)
         binding.tvRoleValue.text = roleDisplay
+        binding.layoutClass.isVisible = isStudent && profile.classNames.isNotEmpty()
+        binding.tvClassValue.text = profile.classNames.joinToString(", ")
+        binding.layoutHomeroomTeacher.isVisible = isStudent && profile.homeroomTeachers.isNotEmpty()
+        binding.tvHomeroomTeacherValue.text = profile.homeroomTeachers.joinToString(", ")
+        binding.layoutPhone.isVisible = !profile.phone.isNullOrBlank()
+        binding.tvPhoneValue.text = profile.phone
 
+        // Email
         if (!profile.email.isNullOrBlank()) {
             binding.layoutEmail.isVisible = true
             binding.tvEmailValue.text = profile.email

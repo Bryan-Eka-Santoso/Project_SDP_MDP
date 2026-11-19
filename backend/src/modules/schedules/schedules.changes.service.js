@@ -2,7 +2,13 @@
 const prisma = require('../../lib/prisma');
 const AppError = require('../../utils/AppError');
 const { DAYS_OF_WEEK, DAY_LABELS } = require('../../config/constants');
-const { parseDateOnly, formatDateOnly, parseTimeOfDay, formatTimeOfDay } = require('../../utils/date');
+const {
+  parseDateOnly,
+  formatDateOnly,
+  parseTimeOfDay,
+  formatTimeOfDay,
+  todayLocal,
+} = require('../../utils/date');
 const { toPrismaPagination } = require('../../utils/pagination');
 const { findConflictsOnDate } = require('./schedules.conflicts');
 const { slotSelect, toSlotDto, invalidField, ensureRoom, activeSemesterId } = require('./schedules.service');
@@ -18,11 +24,15 @@ const changeSelect = {
   newRoom: { select: { id: true, name: true } },
   newStartTime: true,
   newEndTime: true,
+  newDate: true,
   description: true,
   createdAt: true,
   updatedAt: true,
   scheduleSlot: { select: slotSelect },
 };
+
+const forbidden = (message) => new AppError(403, 'FORBIDDEN', message);
+const invalidState = (message) => new AppError(409, 'INVALID_STATE', message);
 
 function toChangeDto(change) {
   const sub = change.substituteTeacher;
@@ -35,6 +45,8 @@ function toChangeDto(change) {
     newRoom: change.newRoom,
     newStartTime: change.newStartTime ? formatTimeOfDay(change.newStartTime) : null,
     newEndTime: change.newEndTime ? formatTimeOfDay(change.newEndTime) : null,
+    // Tanggal tujuan bila pertemuan dipindah ke hari lain; null = tetap di `date`.
+    newDate: change.newDate ? formatDateOnly(change.newDate) : null,
     description: change.description,
     createdAt: change.createdAt,
     updatedAt: change.updatedAt,
@@ -95,6 +107,39 @@ function ensureDateMatchesSlot(date, slot) {
   }
 }
 
+// Tanggal tujuan pindah lintas hari (BUSINESS_RULES 2.4). Hari jadwal itu sendiri ditolak agar
+// satu slot tidak punya dua pertemuan pada tanggal yang sama.
+function ensureNewDateAllowed(newDate, slot) {
+  const { semester } = slot.teachingAssignment;
+  if (newDate < semester.startDate || newDate > semester.endDate) {
+    throw invalidField('newDate', 'Tanggal baru berada di luar semester jadwal ini.');
+  }
+  const day = dayOfWeekOf(newDate);
+  if (day === null) {
+    throw invalidField('newDate', 'Tanggal baru jatuh pada hari Minggu, bukan hari sekolah.');
+  }
+  if (day === slot.dayOfWeek) {
+    throw invalidField(
+      'newDate',
+      `Tanggal baru juga hari ${DAY_LABELS[day]}, hari jadwal ini sendiri. Pilih hari lain atau ubah jamnya saja.`,
+    );
+  }
+}
+
+/**
+ * Guru hanya boleh memindah (RESCHEDULE) pertemuan dari slot mengajarnya sendiri yang belum
+ * lewat; guru pengganti dan pembatalan tetap wewenang admin (docs/PERMISSIONS.md).
+ */
+function ensureTeacherMayChange(user, slot, type) {
+  if (user.role !== 'TEACHER') return;
+  if (slot.teachingAssignment.teacher.userId !== user.id) {
+    throw forbidden('Anda hanya dapat mengubah jadwal mengajar Anda sendiri.');
+  }
+  if (type === 'SUBSTITUTE') {
+    throw forbidden('Guru hanya dapat memindah jadwal atau membatalkan kelas. Guru pengganti diatur admin.');
+  }
+}
+
 async function loadSubstitute(id, slot) {
   if (id === slot.teachingAssignment.teacherId) {
     throw invalidField('substituteTeacherId', 'Guru pengganti tidak boleh sama dengan guru asli.');
@@ -120,14 +165,21 @@ function changeColumns(input) {
     newRoomId: input.type === 'RESCHEDULE' ? (input.newRoomId ?? null) : null,
     newStartTime: input.type === 'RESCHEDULE' && input.newStartTime ? parseTimeOfDay(input.newStartTime) : null,
     newEndTime: input.type === 'RESCHEDULE' && input.newEndTime ? parseTimeOfDay(input.newEndTime) : null,
+    // Sama dengan tanggal asal = tidak pindah tanggal.
+    newDate:
+      input.type === 'RESCHEDULE' && input.newDate && input.newDate !== input.date
+        ? parseDateOnly(input.newDate)
+        : null,
   };
 }
 
-async function ensureNoConflictOnDate(slot, columns, date) {
+// Bentrok dicek pada tanggal pertemuan itu benar-benar berlangsung (tanggal baru bila dipindah).
+async function ensureNoConflictOnDate(slot, columns, originalDate) {
   if (columns.type === 'CANCEL') return;
+  const date = columns.newDate ?? originalDate;
   const ta = slot.teachingAssignment;
   const candidate = {
-    dayOfWeek: slot.dayOfWeek,
+    dayOfWeek: dayOfWeekOf(date),
     startTime: columns.newStartTime ?? slot.startTime,
     endTime: columns.newEndTime ?? slot.endTime,
     roomId: columns.newRoomId ?? slot.roomId,
@@ -155,7 +207,8 @@ function describeChange(change) {
       const start = formatTimeOfDay(change.newStartTime ?? slot.startTime);
       const end = formatTimeOfDay(change.newEndTime ?? slot.endTime);
       const room = change.newRoom?.name ?? slot.room.name;
-      return `pindah ke ${start}–${end} di ${room}`;
+      const day = change.newDate ? `${longDate.format(change.newDate)} ` : '';
+      return `pindah ke ${day}${start}–${end} di ${room}`;
     }
   }
 }
@@ -187,10 +240,12 @@ function sendChangeNotification({ classGroupId, teacherUserIds, change, detail, 
 /**
  * Simpan perubahan untuk satu slot pada satu tanggal. Jika sudah ada perubahan di tanggal
  * itu, perubahan tersebut diperbarui (maksimal satu per slot per tanggal).
+ * `user` = pelaku (admin, atau guru pemilik slot yang hanya boleh RESCHEDULE dan CANCEL).
  * Mengembalikan `{ change, created }`.
  */
-async function saveChange(input) {
+async function saveChange(user, input) {
   const slot = await loadSlot(input.scheduleSlotId);
+  ensureTeacherMayChange(user, slot, input.type);
   const date = parseDateOnly(input.date);
   ensureDateMatchesSlot(date, slot);
 
@@ -206,17 +261,41 @@ async function saveChange(input) {
       (columns.newStartTime.getTime() === slot.startTime.getTime() &&
         columns.newEndTime.getTime() === slot.endTime.getTime());
     const sameRoom = !columns.newRoomId || columns.newRoomId === slot.roomId;
-    if (sameTime && sameRoom) {
-      throw invalidField('newRoomId', 'Jam dan ruangan baru sama dengan jadwal asli.');
+    if (sameTime && sameRoom && !columns.newDate) {
+      throw invalidField('newRoomId', 'Tanggal, jam, dan ruangan baru sama dengan jadwal asli.');
     }
   }
-  await ensureNoConflictOnDate(slot, columns, date);
+  if (columns.newDate) ensureNewDateAllowed(columns.newDate, slot);
 
   const key = { scheduleSlotId_date: { scheduleSlotId: slot.id, date } };
   const previous = await prisma.scheduleChange.findUnique({
     where: key,
-    select: { substituteTeacher: { select: { userId: true } } },
+    select: { type: true, newDate: true, substituteTeacher: { select: { userId: true } } },
   });
+  if (user.role === 'TEACHER') {
+    // Guru tidak boleh menimpa guru pengganti yang ditetapkan admin. Pemindahan dan pembatalan
+    // boleh ditimpa karena tidak tercatat siapa pembuatnya dan guru berhak atas kelasnya sendiri.
+    if (previous && previous.type === 'SUBSTITUTE') {
+      throw invalidState('Pertemuan ini sudah diganti guru oleh admin. Hubungi admin.');
+    }
+    // Yang dinilai adalah kapan pertemuan itu berlangsung sekarang: tanggal pindahannya bila ada.
+    const today = parseDateOnly(todayLocal());
+    if ((previous?.newDate ?? date) < today) {
+      throw invalidField('date', 'Pertemuan yang sudah lewat tidak dapat dipindah.');
+    }
+    if (columns.newDate && columns.newDate < today) {
+      throw invalidField('newDate', 'Tanggal baru tidak boleh sebelum hari ini.');
+    }
+  }
+  if (columns.newDate) {
+    // Satu slot hanya boleh punya satu pertemuan pada satu tanggal.
+    const sameTarget = await prisma.scheduleChange.findFirst({
+      where: { scheduleSlotId: slot.id, newDate: columns.newDate, date: { not: date } },
+      select: { id: true },
+    });
+    if (sameTarget) throw invalidState('Pertemuan lain dari jadwal ini sudah dipindah ke tanggal tersebut.');
+  }
+  await ensureNoConflictOnDate(slot, columns, date);
 
   const change = await prisma.scheduleChange.upsert({
     where: key,
@@ -275,10 +354,22 @@ async function getChange(id) {
   return toChangeDto(change);
 }
 
-// Menghapus perubahan = jadwal tanggal itu kembali seperti slot asli.
-async function deleteChange(id) {
+// Menghapus perubahan = jadwal tanggal itu kembali seperti slot asli. Guru hanya boleh
+// menghapus pemindahan atau pembatalan pada slot miliknya yang belum berlangsung.
+async function deleteChange(user, id) {
   const change = await prisma.scheduleChange.findUnique({ where: { id }, select: changeSelect });
   if (!change) throw new AppError(404, 'NOT_FOUND', 'Perubahan jadwal tidak ditemukan.');
+  if (user.role === 'TEACHER') {
+    if (change.scheduleSlot.teachingAssignment.teacher.userId !== user.id) {
+      throw forbidden('Anda hanya dapat mengubah jadwal mengajar Anda sendiri.');
+    }
+    if (change.type === 'SUBSTITUTE') {
+      throw forbidden('Guru pengganti ditetapkan admin. Hubungi admin untuk membatalkannya.');
+    }
+    if ((change.newDate ?? change.date) < parseDateOnly(todayLocal())) {
+      throw invalidState('Perubahan jadwal yang sudah berlangsung tidak dapat dibatalkan.');
+    }
+  }
 
   await prisma.scheduleChange.delete({ where: { id } });
 

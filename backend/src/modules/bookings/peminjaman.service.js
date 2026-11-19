@@ -5,6 +5,8 @@ const { notify } = require("../notifications/notifications.service");
 
 const { toPrismaPagination } = require("../../utils/pagination");
 
+const { todayLocal, parseDateOnly } = require("../../utils/date");
+
 const includeDetail = {
   facility: {
     select: {
@@ -43,6 +45,9 @@ function formatData(item) {
     purpose: item.purpose,
     status: item.status,
     verifierName: item.verifier?.name || null,
+    returnDate: item.returnDate
+      ? item.returnDate.toISOString().slice(0, 10)
+      : null,
   };
 }
 
@@ -281,9 +286,93 @@ async function reject(id, adminId) {
   return putuskan(id, adminId, "reject");
 }
 
+async function konfirmasiPengembalian(id) {
+  const tanggalKembali = todayLocal();
+
+  const result = await prisma.$transaction(
+    async (tx) => {
+      const booking = await tx.facilityBooking.findUnique({
+        where: { id },
+        include: {
+          facility: true,
+        },
+      });
+
+      if (!booking) {
+        throw new AppError(
+          404,
+          "NOT_FOUND",
+          "Data peminjaman tidak ditemukan.",
+        );
+      }
+
+      if (booking.status !== "APPROVED") {
+        throw new AppError(
+          409,
+          "INVALID_STATE",
+          "Hanya peminjaman yang disetujui dapat dikembalikan.",
+        );
+      }
+
+      // Tanggal kembali tidak boleh sebelum tanggal pinjam.
+      const tanggalPinjam = booking.bookingDate.toISOString().slice(0, 10);
+
+      if (tanggalKembali < tanggalPinjam) {
+        throw new AppError(
+          400,
+          "INVALID_DATE",
+          "Fasilitas belum memasuki tanggal peminjaman.",
+        );
+      }
+
+      // Mencegah konfirmasi pengembalian berulang.
+      const updated = await tx.facilityBooking.updateMany({
+        where: {
+          id,
+          status: "APPROVED",
+        },
+        data: {
+          status: "RETURNED",
+          returnDate: parseDateOnly(tanggalKembali),
+        },
+      });
+
+      if (updated.count !== 1) {
+        throw new AppError(
+          409,
+          "INVALID_STATE",
+          "Peminjaman telah diproses sebelumnya.",
+        );
+      }
+
+      return tx.facilityBooking.findUnique({
+        where: { id },
+        include: includeDetail,
+      });
+    },
+    {
+      isolationLevel: "Serializable",
+    },
+  );
+
+  // Notifikasi dikirim setelah transaksi berhasil.
+  notify([result.requesterId], {
+    type: "BOOKING",
+    title: "Pengembalian Fasilitas Dikonfirmasi",
+    body:
+      `Pengembalian ${result.facility.name} ` +
+      `telah dikonfirmasi oleh Admin.`,
+    referenceId: result.id,
+  });
+
+  return formatData(result);
+}
+
 module.exports = {
   list,
   getById,
   approve,
   reject,
+  formatData,
+  konfirmasiPengembalian,
 };

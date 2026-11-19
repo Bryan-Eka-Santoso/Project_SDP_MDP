@@ -29,10 +29,19 @@ data class TokenDto(
     val refreshToken: String
 )
 
+/** Kelas siswa pada tahun ajaran aktif; `homeroomTeacherName` null bila wali kelas belum diatur. */
+data class StudentClassDto(
+    val id: Int,
+    val name: String,
+    val homeroomTeacherName: String?
+)
+
 data class StudentDto(
     val id: Int,
     val nis: String?,
-    val birthDate: String?
+    val birthDate: String?,
+    val phone: String? = null,
+    val classGroups: List<StudentClassDto>? = null
 )
 
 data class TeacherDto(

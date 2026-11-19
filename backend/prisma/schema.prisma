@@ -161,6 +161,7 @@ model Student {
   attendances       Attendance[]
   leaveRequests     LeaveRequest[]
   scores            Score[]
+  assessmentScores  GradeAssessmentScore[]
   progressNotes     ProgressNote[]
   violations        Violation[]
   liaisonNotes      LiaisonNote[]
@@ -332,6 +333,7 @@ model TeachingAssignment {
   scores          Score[]
   progressNotes   ProgressNote[]
   gradeComponents GradeComponent[]
+  gradeAssessments GradeAssessment[]
   tasks           Task[]
 
   @@unique([teacherId, subjectId, classGroupId, semesterId])
@@ -350,6 +352,7 @@ model GradeComponent {
 
   teachingAssignment TeachingAssignment @relation(fields: [teachingAssignmentId], references: [id])
   scores             Score[]
+  assessments        GradeAssessment[]
 
   @@unique([teachingAssignmentId, name])
   @@map("komponen_penilaian")
@@ -533,6 +536,8 @@ model ScheduleChange {
   newRoomId           Int?               @map("id_fasilitas_baru")
   newStartTime        DateTime?          @map("jam_mulai_baru") @db.Time(0)
   newEndTime          DateTime?          @map("jam_selesai_baru") @db.Time(0)
+  // RESCHEDULE lintas hari: pertemuan pada `date` dipindah ke tanggal ini. Null = tetap di `date`.
+  newDate             DateTime?          @map("tanggal_baru") @db.Date
   description         String             @map("keterangan") @db.VarChar(255)
   createdAt           DateTime           @default(now()) @map("created_at")
   updatedAt           DateTime           @updatedAt @map("updated_at")
@@ -542,6 +547,8 @@ model ScheduleChange {
   newRoom           Facility?    @relation(fields: [newRoomId], references: [id])
 
   @@unique([scheduleSlotId, date])
+  // Jadwal per tanggal dan cek bentrok mencari pertemuan yang dipindah MASUK ke suatu tanggal.
+  @@index([newDate])
   @@map("perubahan_jadwal")
 }
 
@@ -753,4 +760,37 @@ model Bill {
 
   @@unique([studentId, billCode])
   @@map("pembayaran")
+}
+
+// Detail Tugas dan Ulangan. Score lama tetap dipakai sebagai nilai rata-rata per komponen.
+model GradeAssessment {
+  id                   Int      @id @default(autoincrement()) @map("id_penilaian_detail")
+  teachingAssignmentId Int      @map("id_penugasan")
+  gradeComponentId     Int      @map("id_komponen")
+  title                String   @map("judul") @db.VarChar(80)
+  sequence             Int      @map("urutan")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  teachingAssignment TeachingAssignment @relation(fields: [teachingAssignmentId], references: [id])
+  gradeComponent     GradeComponent     @relation(fields: [gradeComponentId], references: [id])
+  scores             GradeAssessmentScore[]
+
+  @@unique([gradeComponentId, sequence])
+  @@map("penilaian_detail")
+}
+
+model GradeAssessmentScore {
+  id           Int      @id @default(autoincrement()) @map("id_nilai_detail")
+  assessmentId Int      @map("id_penilaian_detail")
+  studentId    Int      @map("id_siswa")
+  value        Decimal  @map("nilai") @db.Decimal(5, 2)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  assessment GradeAssessment @relation(fields: [assessmentId], references: [id])
+  student    Student         @relation(fields: [studentId], references: [id])
+
+  @@unique([assessmentId, studentId])
+  @@map("nilai_detail")
 }

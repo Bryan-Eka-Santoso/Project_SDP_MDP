@@ -32,9 +32,19 @@ async function reject(req, res) {
   return sendSuccess(res, result);
 }
 
+async function konfirmasiPengembalian(req, res) {
+
+  const result = await service.konfirmasiPengembalian(
+    req.validated.params.id
+  );
+
+  return sendSuccess(res, result);
+}
+
 module.exports = {
   list,
   getById,
   approve,
   reject,
+  konfirmasiPengembalian,
 };

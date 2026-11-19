@@ -58,7 +58,9 @@ data class AdminChange(
     val newRoomName: String?,
     val newStartTime: LocalTime?,
     val newEndTime: LocalTime?,
-    val slot: AdminSlot
+    val slot: AdminSlot,
+    // Tanggal tujuan bila pertemuan dipindah ke hari lain.
+    val newDate: LocalDate? = null
 )
 
 /** Isi formulir perubahan; kolom yang tidak dipakai jenisnya dibiarkan null. */
@@ -70,7 +72,8 @@ data class ChangeInput(
     val substituteTeacherId: Int? = null,
     val newRoomId: Int? = null,
     val newStartTime: LocalTime? = null,
-    val newEndTime: LocalTime? = null
+    val newEndTime: LocalTime? = null,
+    val newDate: LocalDate? = null
 )
 
 /** Pilihan penugasan (kelas + mapel + guru) pada formulir slot. */

@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.ui.grades
 
+import id.sch.santaagnes.sim.data.remote.GradeAssessmentDto
 import id.sch.santaagnes.sim.domain.model.GradeAssignment
 import id.sch.santaagnes.sim.domain.model.GradeComponent
 import id.sch.santaagnes.sim.domain.model.GradeScore
@@ -12,6 +13,7 @@ data class GradeManageUiState(
     val students: List<GradeStudent> = emptyList(),
     val components: List<GradeComponent> = emptyList(),
     val scores: List<GradeScore> = emptyList(),
+    val assessments: List<GradeAssessmentDto> = emptyList(),
     val message: String? = null,
     val errorMessage: String? = null,
 ) {

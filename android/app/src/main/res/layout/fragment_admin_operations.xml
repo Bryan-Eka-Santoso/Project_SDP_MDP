@@ -81,6 +81,42 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Timeline MPP-05: fitur akademik paket pilihan, mengikuti style kartu Figma Bryan. -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardElectiveAllocation"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp" android:layout_marginTop="12dp"
+                android:clickable="true" android:focusable="true"
+                app:cardBackgroundColor="@color/white" app:cardCornerRadius="12dp" app:cardElevation="1dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:text="Alokasi Paket Pilihan" android:textStyle="bold" android:textSize="16sp"
+                        android:textColor="@color/agnesian_text" />
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp" android:text="Pratinjau dan pembagian kelas paket mata pelajaran"
+                        android:textSize="13sp" android:textColor="@color/agnesian_muted" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- MPP-06: Tren peminat paket lintas tahun ajaran. -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardElectiveTrends"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp" android:layout_marginTop="12dp"
+                android:clickable="true" android:focusable="true"
+                app:cardBackgroundColor="@color/white" app:cardCornerRadius="12dp" app:cardElevation="1dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:padding="16dp" android:orientation="vertical">
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:text="Tren Paket Pilihan" android:textStyle="bold" android:textSize="16sp"
+                        android:textColor="@color/agnesian_text" />
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp" android:text="Bandingkan jumlah pemilih paket antar tahun ajaran"
+                        android:textSize="13sp" android:textColor="@color/agnesian_muted" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardSubjectPackages"
                 android:layout_width="match_parent"
@@ -223,6 +259,120 @@
                         android:textColor="@color/agnesian_muted"
                         android:textSize="13sp" />
                 </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- RIWAYAT PELANGGARAN -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardRiwayatPelanggaran"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Riwayat Pelanggaran Siswa"
+                        android:textColor="@color/agnesian_text"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Lihat akumulasi poin dan rincian kejadian pelanggaran siswa"
+                        android:textColor="@color/agnesian_muted"
+                        android:textSize="13sp" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardRiwayatPeminjaman"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Riwayat Peminjaman"
+                        android:textColor="@color/agnesian_text"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Lihat status dan riwayat pengajuan peminjaman seluruh pengguna"
+                        android:textColor="@color/agnesian_muted"
+                        android:textSize="13sp" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardSurveiMinat"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Survei Minat Mata Pelajaran"
+                        android:textColor="@color/agnesian_text"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Buat, terbitkan, dan lihat rekap survei minat siswa"
+                        android:textColor="@color/agnesian_muted"
+                        android:textSize="13sp" />
+
+                </LinearLayout>
+
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
     </ScrollView>

@@ -18,4 +18,13 @@ async function listScores(req, res) {
   const result = await service.listScores(req.user.id, query);
   sendPaginated(res, result.data, { page: query.page, limit: query.limit, total: result.total });
 }
-module.exports = { listComponents, createComponent, updateComponent, saveScore, listScores };
+async function listAssessments(req, res) {
+  sendSuccess(res, await service.listAssessments(req.user.id, req.validated.params.assignmentId));
+}
+async function createAssessment(req, res) {
+  sendSuccess(res, await service.createAssessment(req.user.id, req.validated.params.assignmentId, req.validated.body), 201);
+}
+async function saveAssessmentScore(req, res) {
+  sendSuccess(res, await service.saveAssessmentScore(req.user.id, req.validated.params.id, req.validated.body));
+}
+module.exports = { listComponents, createComponent, updateComponent, saveScore, listScores, listAssessments, createAssessment, saveAssessmentScore };

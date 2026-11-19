@@ -141,13 +141,19 @@ async function findSlotConflicts(db, candidate, { semesterId, excludeSlotId } = 
 }
 
 // Slot pada tanggal tertentu setelah ditimpa perubahan di tanggal itu (BUSINESS_RULES 2.4).
-// Mengembalikan null jika slot dibatalkan.
+// Mengembalikan null jika slot dibatalkan atau dipindah ke tanggal lain.
 function applyChange(slot, change) {
   if (!change) return slot;
   if (change.type === 'CANCEL') return null;
   if (change.type === 'SUBSTITUTE') {
     return { ...slot, teacherId: change.substituteTeacherId, teacherName: change.substituteTeacher.user.name };
   }
+  if (change.newDate) return null;
+  return applyMove(slot, change);
+}
+
+// Jam dan ruangan baru sebuah RESCHEDULE; yang tidak diisi tetap memakai milik slot asli.
+function applyMove(slot, change) {
   return {
     ...slot,
     startTime: change.newStartTime ?? slot.startTime,
@@ -157,36 +163,51 @@ function applyChange(slot, change) {
   };
 }
 
+const changeForConflict = {
+  type: true,
+  substituteTeacherId: true,
+  substituteTeacher: { select: { user: { select: { name: true } } } },
+  newRoomId: true,
+  newRoom: { select: { name: true } },
+  newStartTime: true,
+  newEndTime: true,
+  newDate: true,
+};
+
 /**
  * Cek bentrok untuk satu tanggal (F-JDW-04): slot lain di hari itu dibandingkan setelah
  * perubahan mereka pada tanggal yang sama diterapkan. Jam slot lain bisa sudah dipindah,
- * jadi semua slot pada hari itu diambil tanpa filter jam.
+ * jadi semua slot pada hari itu diambil tanpa filter jam. Pertemuan slot lain yang dipindah
+ * MASUK ke tanggal itu (lintas hari) ikut dibandingkan; yang dipindah KELUAR tidak.
+ * `candidate.dayOfWeek` harus hari dari `date`.
  */
 async function findConflictsOnDate(db, candidate, { semesterId, date, excludeSlotId }) {
-  const rows = await db.scheduleSlot.findMany({
-    where: {
-      id: { not: excludeSlotId },
-      dayOfWeek: candidate.dayOfWeek,
-      teachingAssignment: { semesterId },
-    },
-    select: {
-      ...slotForConflict,
-      changes: {
-        where: { date },
-        select: {
-          type: true,
-          substituteTeacherId: true,
-          substituteTeacher: { select: { user: { select: { name: true } } } },
-          newRoomId: true,
-          newRoom: { select: { name: true } },
-          newStartTime: true,
-          newEndTime: true,
-        },
+  const [rows, arrivals] = await Promise.all([
+    db.scheduleSlot.findMany({
+      where: {
+        id: { not: excludeSlotId },
+        dayOfWeek: candidate.dayOfWeek,
+        teachingAssignment: { semesterId },
       },
-    },
-  });
-  const others = rows.map((row) => applyChange(flatten(row), row.changes[0])).filter(Boolean);
-  return conflictsAgainst(db, candidate, others);
+      select: { ...slotForConflict, changes: { where: { date }, select: changeForConflict } },
+    }),
+    db.scheduleChange.findMany({
+      where: {
+        type: 'RESCHEDULE',
+        newDate: date,
+        scheduleSlotId: { not: excludeSlotId },
+        scheduleSlot: { teachingAssignment: { semesterId } },
+      },
+      select: { ...changeForConflict, scheduleSlot: { select: slotForConflict } },
+    }),
+  ]);
+  const staying = rows.map((row) => applyChange(flatten(row), row.changes[0])).filter(Boolean);
+  // Slot asalnya di hari lain; pada tanggal ini ia berlangsung di hari kandidat.
+  const moved = arrivals.map((change) => ({
+    ...applyMove(flatten(change.scheduleSlot), change),
+    dayOfWeek: candidate.dayOfWeek,
+  }));
+  return conflictsAgainst(db, candidate, [...staying, ...moved]);
 }
 
 // Semua slot satu semester, sudah di-flatten untuk detectConflicts (satu query untuk impor).

@@ -27,6 +27,10 @@
                     android:text="Kelas | Mata Pelajaran" android:textColor="@color/teacher_muted" android:textSize="12sp"/>
                 <Spinner android:id="@+id/spReportSelection" android:layout_width="match_parent" android:layout_height="46dp"
                     android:layout_marginTop="8dp" android:background="@drawable/bg_teacher_field"/>
+                <TextView android:id="@+id/tvReportClassStats"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp" android:textSize="11sp"
+                    android:textColor="@color/teacher_muted" android:visibility="gone" />
                 <Button android:id="@+id/btnReloadReport" android:layout_width="match_parent" android:layout_height="45dp"
                     android:layout_marginTop="11dp" android:text="Muat ulang nilai" android:textAllCaps="false"
                     android:textColor="#FFFFFF" android:backgroundTint="@color/teacher_blue_light"/>

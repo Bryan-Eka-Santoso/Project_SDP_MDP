@@ -34,7 +34,9 @@ Tanda `—` berarti tidak punya akses (backend mengembalikan 403).
 | Lihat kalender akademik | ✓ | ✓ | | ✓ | ✓ |
 | Kelola kalender akademik | — | — | — | — | ✓ |
 | Lihat jadwal | `SELF` (kelas reguler + kelas paket) | jadwal mengajarnya | `HOMEROOM` | `CHILD` | `ALL` (lewat master jadwal) |
-| Kelola jadwal, impor, perubahan jadwal | — | — | — | — | ✓ |
+| Kelola jadwal, impor | — | — | — | — | ✓ |
+| Perubahan jadwal (guru pengganti, pindah, batal) | — | hanya **pindah** (`RESCHEDULE`) dan **batalkan kelas** (`CANCEL`) untuk slot mengajarnya sendiri, termasuk memulihkannya (hapus perubahan); guru pengganti tetap admin | | — | ✓ semua jenis |
+| Daftar ruangan untuk form perubahan jadwal (`GET /schedule-rooms`) | — | ✓ | | — | ✓ |
 | Kelola tugas dari guru (termasuk daftar penugasan miliknya, `GET /me/teaching-assignments`) | — | `TAUGHT` (penugasan miliknya) | | — | — |
 | Lihat tugas dari guru | `SELF` (kelasnya) | `TAUGHT` | | `CHILD` (daftar saja, `GET /tasks?studentId=`) | — |
 | To-do pribadi (di perangkat) | milik sendiri | — | | — | — |

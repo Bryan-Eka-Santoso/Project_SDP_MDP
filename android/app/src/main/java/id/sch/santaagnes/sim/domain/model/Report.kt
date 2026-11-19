@@ -28,7 +28,9 @@ data class ScheduleChangeReportRow(
     val originalEnd: LocalTime,
     val newStart: LocalTime?,
     val newEnd: LocalTime?,
-    val description: String
+    val description: String,
+    // Tanggal tujuan bila pertemuan dipindah ke hari lain.
+    val newDate: LocalDate? = null
 )
 
 /** Filter laporan perubahan jadwal; null = tidak difilter. Semester selalu semester aktif. */

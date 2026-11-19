@@ -8,6 +8,15 @@ async function list(req, res) {
   sendPaginated(res, result.data, result.meta);
 }
 async function create(req, res) {
-  sendSuccess(res, await service.create(req.user.id, req.validated.body), 201);
+  sendSuccess(res, await service.create(req.user.id, req.validated.body, req.file), 201);
 }
-module.exports = { children, list, create };
+
+async function downloadAttachment(req, res) {
+  const info = await service.findAttachment(req.user.id, Number(req.validated.params.id));
+  res.type(info.contentType);
+  res.set('Content-Disposition', 'inline');
+  res.sendFile(info.path, (err) => {
+    if (err && !res.headersSent) res.status(err.statusCode || 404).end();
+  });
+}
+module.exports = { children, list, create, downloadAttachment };

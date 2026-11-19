@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="@color/agnesian_background">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:background="@drawable/bg_header" android:orientation="vertical"
+        android:paddingStart="24dp" android:paddingEnd="24dp" android:paddingTop="24dp" android:paddingBottom="30dp">
+        <TextView android:id="@+id/btnNoteBack" android:layout_width="wrap_content"
+            android:layout_height="44dp" android:gravity="center_vertical" android:clickable="true"
+            android:focusable="true" android:text="‹ Kembali ke Halaman Sebelumnya"
+            android:textColor="@color/white" android:textSize="12sp" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="Catatan Perkembangan" android:textColor="@color/white" android:textSize="23sp" android:textStyle="bold" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="6dp" android:text="Riwayat catatan dari guru" android:textColor="@color/white" android:textSize="12sp" />
+    </LinearLayout>
+    <ProgressBar android:id="@+id/progressNotes" android:layout_width="match_parent" android:layout_height="wrap_content"
+        style="?android:attr/progressBarStyleHorizontal" android:indeterminate="true" android:visibility="gone" />
+    <ScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:padding="16dp">
+            <TextView android:id="@+id/tvNotesStatus" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginVertical="12dp" android:textColor="@color/agnesian_muted" android:textSize="13sp" />
+            <LinearLayout android:id="@+id/listNotes" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" />
+            <Button android:id="@+id/btnNotesMore" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Muat lebih banyak" android:textAllCaps="false" android:visibility="gone" />
+            <Button android:id="@+id/btnNotesRetry" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Coba lagi" android:textAllCaps="false" android:visibility="gone" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

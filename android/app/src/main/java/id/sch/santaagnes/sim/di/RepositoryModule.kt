@@ -16,6 +16,8 @@ import id.sch.santaagnes.sim.data.repository.CalendarRepository
 import id.sch.santaagnes.sim.data.repository.CalendarRepositoryImpl
 import id.sch.santaagnes.sim.data.repository.ReportRepository
 import id.sch.santaagnes.sim.data.repository.ReportRepositoryImpl
+import id.sch.santaagnes.sim.data.repository.RescheduleRepository
+import id.sch.santaagnes.sim.data.repository.RescheduleRepositoryImpl
 import id.sch.santaagnes.sim.data.repository.ScheduleRepository
 import id.sch.santaagnes.sim.data.repository.ScheduleRepositoryImpl
 import id.sch.santaagnes.sim.data.repository.AdminOverviewRepository
@@ -34,6 +36,9 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindScheduleRepository(impl: ScheduleRepositoryImpl): ScheduleRepository
+
+    @Binds
+    abstract fun bindRescheduleRepository(impl: RescheduleRepositoryImpl): RescheduleRepository
 
     @Binds
     abstract fun bindAdminScheduleRepository(impl: AdminScheduleRepositoryImpl): AdminScheduleRepository

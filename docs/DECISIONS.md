@@ -36,6 +36,8 @@ Format menambah keputusan baru: nomor berikutnya, judul, status, konteks, keputu
 - **Status:** Diterima
 - **Keputusan:** `ScheduleChange` menimpa `ScheduleSlot` untuk satu tanggal; slot asli tidak diubah.
 - **Alasan:** Riwayat perubahan dan laporan perubahan jadwal tetap tersedia.
+- **Tambahan 16/11/2026:** `RESCHEDULE` boleh lintas hari lewat kolom `newDate` (`tanggal_baru`): perubahan tetap dikunci pada tanggal pertemuan asli (`date`), pertemuannya tampil di `newDate`. Guru boleh membuat `RESCHEDULE` untuk slot mengajarnya sendiri (sebelumnya hanya admin). Rinciannya di `docs/BUSINESS_RULES.md` 2.4.
+- **Tambahan 17/11/2026:** guru juga boleh membatalkan kelasnya sendiri (`CANCEL`) dan memulihkannya. Guru pengganti tetap hanya admin. Tidak ada kolom pembuat perubahan, jadi guru boleh menghapus `CANCEL` apa pun pada slotnya sendiri.
 
 ### ADR-007 Nilai akhir dihitung, tidak disimpan
 - **Status:** Diterima

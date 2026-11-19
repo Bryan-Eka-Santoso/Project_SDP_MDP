@@ -1,17 +1,34 @@
 // Laporan admin (F-LAP-*) dan ekspornya ke Excel (F-LAP-11). Tiap jenis laporan didaftarkan di
 // REPORTS dengan filter, kolom ekspor, dan fungsi `load`; ekspor memakai data dan filter yang
 // sama dengan tampilan sehingga isi berkas = yang sedang ditampilkan.
-const AppError = require('../../utils/AppError');
-const { todayLocal } = require('../../utils/date');
-const { toPrismaPagination, paginationQuery } = require('../../utils/pagination');
-const { writeXlsx } = require('../../lib/excel');
-const scheduleChanges = require('./reports.scheduleChanges');
-const teachingLoad = require('./reports.teachingLoad');
+const AppError = require("../../utils/AppError");
+const { todayLocal } = require("../../utils/date");
+const {
+  toPrismaPagination,
+  paginationQuery,
+} = require("../../utils/pagination");
+const { writeXlsx } = require("../../lib/excel");
+const scheduleChanges = require("./reports.scheduleChanges");
+const teachingLoad = require("./reports.teachingLoad");
+const grades = require("./reports.grades");
+const attendance = require("./reports.attendance");
+const journals = require("./reports.journals");
+const violations = require("./reports.violations");
+const facilityBookings = require("./reports.facilityBookings");
+const electiveSurveys = require("./reports.electiveSurveys");
 
 // Kunci = segmen path `/reports/:type`.
 const REPORTS = Object.freeze({
-  'schedule-changes': scheduleChanges,
-  'teaching-load': teachingLoad,
+  "schedule-changes": scheduleChanges,
+  "teaching-load": teachingLoad,
+
+  // LAP-01, LAP-02, LAP-06
+  grades: grades,
+  attendance: attendance,
+  "teaching-journals": journals,
+  violations: violations,
+  "facility-bookings": facilityBookings,
+  "elective-surveys": electiveSurveys,
 });
 
 // Ekspor lebih besar dari ini ditolak agar server tidak kehabisan memori; persempit filter.
@@ -19,7 +36,7 @@ const MAX_EXPORT_ROWS = 20000;
 
 function findReport(type) {
   if (!Object.hasOwn(REPORTS, type)) {
-    throw new AppError(404, 'NOT_FOUND', 'Jenis laporan tidak ditemukan.');
+    throw new AppError(404, "NOT_FOUND", "Jenis laporan tidak ditemukan.");
   }
   return REPORTS[type];
 }
@@ -27,7 +44,7 @@ function findReport(type) {
 // Schema query untuk middleware `validate`: tampilan berpaginasi, ekspor tanpa paginasi.
 function querySchema(type, mode) {
   const report = findReport(type);
-  return report.makeQuery(mode === 'export' ? {} : paginationQuery.shape);
+  return report.makeQuery(mode === "export" ? {} : paginationQuery.shape);
 }
 
 async function getReport(type, query) {
@@ -38,11 +55,14 @@ async function getReport(type, query) {
 
 async function exportReport(type, query) {
   const report = findReport(type);
-  const { items } = await report.load(query, { skip: 0, take: MAX_EXPORT_ROWS + 1 });
+  const { items } = await report.load(query, {
+    skip: 0,
+    take: MAX_EXPORT_ROWS + 1,
+  });
   if (items.length > MAX_EXPORT_ROWS) {
     throw new AppError(
       422,
-      'EXPORT_TOO_LARGE',
+      "EXPORT_TOO_LARGE",
       `Data melebihi ${MAX_EXPORT_ROWS} baris. Persempit filter lalu coba lagi.`,
     );
   }
