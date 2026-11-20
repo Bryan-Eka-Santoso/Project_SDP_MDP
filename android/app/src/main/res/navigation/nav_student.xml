@@ -83,4 +83,9 @@
         android:id="@+id/studentIsiSurveiMinatFragment"
         android:name="id.sch.santaagnes.sim.ui.student.survei.IsiSurveiMinatFragment"
         android:label="Isi Survei Minat" />
+
+    <fragment
+        android:id="@+id/studentPilihPaketFragment"
+        android:name="id.sch.santaagnes.sim.ui.student.paket.PilihPaketFragment"
+        android:label="Pilih Paket Mata Pelajaran" />
 </navigation>

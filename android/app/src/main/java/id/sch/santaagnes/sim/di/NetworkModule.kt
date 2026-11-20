@@ -39,6 +39,7 @@ import id.sch.santaagnes.sim.data.remote.BacaBukuPenghubungApi
 import id.sch.santaagnes.sim.data.remote.ProfilSiswaBinaanApi
 import id.sch.santaagnes.sim.data.remote.SurveiMinatApi
 import id.sch.santaagnes.sim.data.remote.IsiSurveiMinatApi
+import id.sch.santaagnes.sim.data.remote.PilihPaketApi
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -327,5 +328,13 @@ object NetworkModule {
         return retrofit.create(
             IsiSurveiMinatApi::class.java
         )
+    }
+
+    @Provides
+    @Singleton
+    fun providePilihPaketApi(
+        retrofit: Retrofit
+    ): PilihPaketApi {
+        return retrofit.create(PilihPaketApi::class.java)
     }
 }

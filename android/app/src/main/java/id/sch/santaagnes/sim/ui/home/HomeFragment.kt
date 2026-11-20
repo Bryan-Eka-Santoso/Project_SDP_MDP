@@ -172,7 +172,12 @@ class HomeFragment : Fragment() {
                 HomeShortcut(R.string.home_shortcut_booking_history, R.drawable.ic_facility, go(R.id.studentRiwayatPeminjamanFragment)),
                 HomeShortcut(R.string.home_shortcut_notes, R.drawable.ic_person, go(R.id.studentProgressNotesFragment)),
                 HomeShortcut(R.string.shortcut_announcements, R.drawable.ic_bell, go(R.id.action_global_announcements)),
-                HomeShortcut(R.string.shortcut_calendar, R.drawable.ic_calendar, go(R.id.action_global_calendar))
+                HomeShortcut(R.string.shortcut_calendar, R.drawable.ic_calendar, go(R.id.action_global_calendar)),
+                HomeShortcut(
+                    R.string.home_shortcut_subject_package,
+                    R.drawable.ic_package,
+                    go(R.id.studentPilihPaketFragment)
+                ),
             )
             "GUARDIAN" -> listOf(
                 HomeShortcut(R.string.home_shortcut_violations, R.drawable.ic_warning, go(R.id.guardianRiwayatPelanggaranFragment)),

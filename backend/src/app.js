@@ -46,10 +46,16 @@ api.use("/users", require("./modules/users/users.routes"));
 api.use(require("./modules/master/master.routes"));
 api.use("/subject-packages", require("./modules/elective/elective.routes"));
 api.use("/academic-events", require("./modules/calendar/calendar.routes"));
-api.use("/announcements", require("./modules/announcements/announcements.routes"));
+api.use(
+  "/announcements",
+  require("./modules/announcements/announcements.routes"),
+);
 
 // File lampiran lokal sementara (fallback jika env Cloudinary belum diisi).
-app.use("/uploads", express.static(path.resolve(__dirname, "../uploads"), { dotfiles: "ignore" }));
+app.use(
+  "/uploads",
+  express.static(path.resolve(__dirname, "../uploads"), { dotfiles: "ignore" }),
+);
 api.use("/violations", require("./modules/violations/pelanggaran.routes"));
 api.use(
   "/violation-history",
@@ -77,6 +83,10 @@ api.use("/elective-surveys", require("./modules/elective/survei.routes"));
 api.use(
   "/student-elective-surveys",
   require("./modules/elective/isi_survei.routes"),
+);
+api.use(
+  "/student-subject-packages",
+  require("./modules/elective/pilih_paket.routes"),
 );
 
 app.use("/api/v1", api);

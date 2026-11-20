@@ -647,4 +647,5 @@
     <string name="shortcut_liaison_write">Tulis Buku</string>
     <string name="shortcut_liaison_read">Baca Buku</string>
     <string name="shortcut_homeroom_profile">Profil Binaan</string>
+    <string name="home_shortcut_subject_package">Pilih Paket</string>
 </resources>
