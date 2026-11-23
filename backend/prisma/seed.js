@@ -166,6 +166,37 @@ const GUARDIANS = [
   { name: 'Paulus Tanoto', phone: '081234567805', children: [['2025002', 'Wali']] },
 ];
 
+// Siswa tingkat X tambahan khusus untuk demo alokasi paket pilihan (F-MPP-05). Sengaja belum masuk kelas
+// reguler dan tidak ikut data nilai/presensi/tagihan demo; setelah alokasi disimpan mereka menjadi anggota
+// kelas paket (MPP-...).
+const ELECTIVE_EXTRA_STUDENTS = [
+  { nis: '2026004', name: 'Gabriel Setiawan', birthDate: '2010-02-08' },
+  { nis: '2026005', name: 'Helena Susanto', birthDate: '2010-05-19' },
+  { nis: '2026006', name: 'Ignatius Budiman', birthDate: '2010-07-27' },
+  { nis: '2026007', name: 'Josephine Tan', birthDate: '2010-10-03' },
+  { nis: '2026008', name: 'Kevin Aditya', birthDate: '2010-12-11' },
+  { nis: '2026009', name: 'Laura Handoko', birthDate: '2010-01-25' },
+  { nis: '2026010', name: 'Matius Kusuma', birthDate: '2010-04-06' },
+  { nis: '2026011', name: 'Natalia Permata', birthDate: '2010-08-14' },
+  { nis: '2026012', name: 'Oscar Winata', birthDate: '2010-09-30' },
+  { nis: '2026013', name: 'Patricia Salim', birthDate: '2010-11-22' },
+  { nis: '2026014', name: 'Quirinus Darmawan', birthDate: '2010-03-01' },
+  { nis: '2026015', name: 'Rosalia Mulyadi', birthDate: '2010-06-17' },
+  { nis: '2026016', name: 'Sebastianus Lie', birthDate: '2010-02-28' },
+  { nis: '2026017', name: 'Tabitha Gozali', birthDate: '2010-12-05' },
+];
+
+// Satu siswa hanya memilih satu paket. Paket "Sains Terapan" berkapasitas kecil (5) supaya pratinjau
+// alokasi menghasilkan beberapa kelas: 11 siswa -> k = 3 -> 4, 4, 3 (BUSINESS_RULES.md bagian 8).
+const ELECTIVE_SELECTIONS = {
+  'Paket Saintek (Biologi dan Fisika)': ['2026001', '2026003', '2026004'],
+  'Paket Seni (Biologi dan Seni Budaya)': ['2026002', '2026005', '2026006'],
+  'Paket Sains Terapan (Matematika dan Fisika)': [
+    '2026007', '2026008', '2026009', '2026010', '2026011', '2026012',
+    '2026013', '2026014', '2026015', '2026016', '2026017',
+  ],
+};
+
 const DAYS = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'];
 const PERIODS = [
   ['07:00', '08:30'],
@@ -671,13 +702,16 @@ async function seedActivity(ctx) {
   const packages = [
     { name: 'Paket Saintek (Biologi dan Fisika)', capacity: 30, codes: ['BIO', 'FIS'] },
     { name: 'Paket Seni (Biologi dan Seni Budaya)', capacity: 20, codes: ['BIO', 'SBD'] },
+    { name: 'Paket Sains Terapan (Matematika dan Fisika)', capacity: 5, codes: ['MAT', 'FIS'] },
   ];
+  const packageByName = {};
   for (const p of packages) {
     const saved = await findOrCreate(
       prisma.subjectPackage,
       { academicYearId: academicYear.id, name: p.name },
       { capacity: p.capacity },
     );
+    packageByName[p.name] = saved;
     for (const code of p.codes) {
       await prisma.subjectPackageItem.upsert({
         where: { packageId_subjectId: { packageId: saved.id, subjectId: subjectByCode[code].id } },
@@ -703,6 +737,36 @@ async function seedActivity(ctx) {
     });
   }
 
+  // Pilihan paket (bahan alokasi F-MPP-05): siswa tingkat X, termasuk siswa tambahan tanpa kelas.
+  const passwordHash = await bcrypt.hash(
+    requirePassword('SEED_DEMO_PASSWORD', env.seed.demoPassword),
+    BCRYPT_ROUNDS,
+  );
+  const electiveNo = Object.keys(studentsByNis).length;
+  const electiveStudents = { ...studentsByNis };
+  for (const [i, student] of ELECTIVE_EXTRA_STUDENTS.entries()) {
+    const user = await upsertUser(
+      `siswa${electiveNo + 1 + i}@${DEMO_EMAIL_DOMAIN}`,
+      'STUDENT',
+      student.name,
+      passwordHash,
+    );
+    electiveStudents[student.nis] = await prisma.student.upsert({
+      where: { nis: student.nis },
+      update: {},
+      create: { nis: student.nis, birthDate: date(student.birthDate), userId: user.id },
+    });
+  }
+  for (const [packageName, nisList] of Object.entries(ELECTIVE_SELECTIONS)) {
+    for (const nis of nisList) {
+      const key = { studentId: electiveStudents[nis].id, packageId: packageByName[packageName].id };
+      await prisma.packageSelection.upsert({
+        where: { studentId_packageId: key },
+        update: {},
+        create: { ...key, selectedDate: date('2026-11-14') },
+      });
+    }
+  }
 }
 
 async function main() {
