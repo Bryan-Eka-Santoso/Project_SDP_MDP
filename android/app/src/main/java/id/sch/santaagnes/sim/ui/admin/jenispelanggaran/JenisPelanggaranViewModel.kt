@@ -132,7 +132,7 @@ class JenisPelanggaranViewModel @Inject constructor(
                     val pesan = if (response.code() == 409) {
                         "Jenis pelanggaran sudah digunakan dalam riwayat siswa"
                     } else {
-                        "Gagal menghapus (HTTP ${response.code()})"
+                        "Gagal menghapus jenis pelanggaran. Silakan coba lagi."
                     }
 
                     throw Exception(pesan)

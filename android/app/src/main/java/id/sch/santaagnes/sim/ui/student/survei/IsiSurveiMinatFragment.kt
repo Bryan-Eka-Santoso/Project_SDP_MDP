@@ -127,7 +127,7 @@ class IsiSurveiMinatFragment : Fragment() {
                         MaterialAlertDialogBuilder(requireContext())
                             .setTitle("Berhasil")
                             .setMessage(message)
-                            .setPositiveButton("OK", null)
+                            .setPositiveButton("Tutup", null)
                             .show()
                     }
                 }
@@ -244,7 +244,7 @@ class IsiSurveiMinatFragment : Fragment() {
 
         binding.tvInfo.text =
             if (survey.canFill) {
-                "Pilih mata pelajaran yang kamu minati. " +
+                "Pilih mata pelajaran yang Anda minati. " +
                         "Jawaban dapat diperbarui selama survei masih terbuka."
             } else {
                 "Periode pengisian survei sudah berakhir. " +

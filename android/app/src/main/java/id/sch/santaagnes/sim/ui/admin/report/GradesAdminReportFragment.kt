@@ -9,6 +9,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -84,7 +85,57 @@ class GradesAdminReportFragment : Fragment() {
         }
 
         binding.reportRows.removeAllViews()
+        if (state.items.isNotEmpty()) {
+            binding.reportRows.addView(buildGradesChart(state.items))
+        }
         state.items.forEach { addRow(it) }
+    }
+
+    private fun buildGradesChart(items: List<GradesAdminReportDto>): View {
+        val ctx = requireContext()
+        val scored = items.mapNotNull { it.finalScore }
+        val avg = if (scored.isNotEmpty()) decimal.format(scored.average()) else "-"
+        val completeCount = items.count { it.complete }
+        val cGreen = ContextCompat.getColor(ctx, R.color.bill_paid)
+        val cBlue = ContextCompat.getColor(ctx, R.color.agnesian_blue)
+        val cAmber = ContextCompat.getColor(ctx, R.color.change_substitute)
+        val cRed = ContextCompat.getColor(ctx, R.color.change_cancel)
+        val cMuted = ContextCompat.getColor(ctx, R.color.agnesian_muted)
+
+        val grouped = items.groupBy { it.predicate?.trim()?.uppercase()?.ifEmpty { null } ?: "Belum Lengkap" }
+        val orderedKeys = listOf("A", "B", "C", "D", "E", "Belum Lengkap")
+            .filter { grouped.containsKey(it) } + grouped.keys.filter { it !in setOf("A", "B", "C", "D", "E", "Belum Lengkap") }
+        val segments = orderedKeys.map { key ->
+            val count = grouped[key]?.size ?: 0
+            val color = when (key) {
+                "A" -> cGreen
+                "B" -> cBlue
+                "C" -> cAmber
+                "Belum Lengkap" -> cMuted
+                else -> cRed
+            }
+            ChartSegment(
+                label = if (key == "Belum Lengkap") key else "Predikat $key",
+                value = count.toFloat(),
+                displayValue = "$count",
+                color = color
+            )
+        }
+        return ReportChartRenderer.buildCard(
+            ctx,
+            ReportChartSpec(
+                title = "Distribusi Predikat Nilai",
+                subtitle = "Berdasarkan ${items.size} baris nilai yang ditampilkan",
+                kind = ReportChartKind.DONUT,
+                centerLabel = avg,
+                centerSubLabel = "Rata-rata",
+                kpis = listOf(
+                    ChartKpi("Nilai Lengkap", "$completeCount / ${items.size}", cGreen),
+                    ChartKpi("Rata-rata Nilai", avg, cBlue)
+                ),
+                segments = segments
+            )
+        )
     }
 
     private fun addRow(row: GradesAdminReportDto) {
@@ -93,21 +144,52 @@ class GradesAdminReportFragment : Fragment() {
             radius = dp(14).toFloat()
             cardElevation = 0f
             strokeWidth = dp(1)
-            strokeColor = resources.getColor(R.color.agnesian_muted, context.theme)
-            setCardBackgroundColor(resources.getColor(R.color.white, context.theme))
+            strokeColor = ContextCompat.getColor(context, R.color.agnesian_border)
+            setCardBackgroundColor(ContextCompat.getColor(context, R.color.white))
             layoutParams = LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(10) }
         }
         val content = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(14), dp(13), dp(14), dp(13))
         }
-        content.addView(line(row.studentName, 15f, true, R.color.agnesian_text))
-        content.addView(line("NIS ${row.nis} • ${row.className}", 12f, false, R.color.agnesian_muted))
+        val header = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = android.view.Gravity.CENTER_VERTICAL
+        }
+        val titleCol = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
+        }
+        titleCol.addView(line(row.studentName, 15f, true, R.color.agnesian_text))
+        titleCol.addView(line("NIS ${row.nis} • ${row.className}", 12f, false, R.color.agnesian_muted))
+        header.addView(titleCol)
+        val badgeText = row.predicate?.let { "Predikat $it" } ?: "Belum Lengkap"
+        val badgeColor = when (row.predicate?.uppercase()) {
+            "A" -> R.color.bill_paid
+            "B" -> R.color.agnesian_blue
+            "C" -> R.color.change_substitute
+            null -> R.color.agnesian_muted
+            else -> R.color.change_cancel
+        }
+        header.addView(ReportChartRenderer.buildBadge(context, badgeText, badgeColor))
+        content.addView(header)
+
         content.addView(line(row.subjectName, 13f, true, R.color.agnesian_blue))
         val score = row.finalScore?.let { decimal.format(it) } ?: "Belum lengkap"
-        val pred = row.predicate?.let { " • Predikat $it" }.orEmpty()
-        content.addView(line("Nilai akhir: $score$pred", 13f, false, R.color.agnesian_text))
-        content.addView(line(if (row.complete) "Komponen nilai lengkap" else "Komponen nilai belum lengkap", 12f, false, R.color.agnesian_muted))
+        val scoreColor = when {
+            row.finalScore == null -> R.color.change_substitute
+            row.finalScore >= 75.0 -> R.color.bill_paid
+            else -> R.color.change_cancel
+        }
+        content.addView(line("Nilai Akhir: $score", 14f, true, scoreColor))
+        content.addView(
+            line(
+                if (row.complete) "Komponen nilai lengkap" else "Komponen nilai belum lengkap",
+                12f,
+                true,
+                if (row.complete) R.color.bill_paid else R.color.change_substitute
+            )
+        )
         card.addView(content)
         binding.reportRows.addView(card)
     }

@@ -82,7 +82,7 @@
                             android:text="Muat ulang"/>
                         <com.google.android.material.button.MaterialButton android:id="@+id/btnExport"
                             android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp" android:text="Export Excel"/>
+                            android:layout_marginStart="8dp" android:text="Ekspor Excel"/>
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

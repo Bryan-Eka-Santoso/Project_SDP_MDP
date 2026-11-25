@@ -11,6 +11,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -56,6 +57,11 @@ abstract class ReportFragment<R : Any, F : Any> : Fragment() {
 
     protected open fun releaseFilters() = Unit
 
+    /** Grafik ringkasan opsional yang tampil di atas daftar pratinjau laporan. */
+    protected open fun buildChartSpec(state: ReportUiState<R, F>): ReportChartSpec? = null
+
+    private val chartHeaderAdapter = ReportChartHeaderAdapter()
+
     private val exportLauncher = registerForActivityResult(
         ActivityResultContracts.CreateDocument(XLSX_MIME)
     ) { uri ->
@@ -74,12 +80,19 @@ abstract class ReportFragment<R : Any, F : Any> : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.tvTitle.setText(titleRes)
 
-        val layoutManager = GridLayoutManager(requireContext(), resources.getInteger(R.integer.report_columns))
+        val spanCount = resources.getInteger(R.integer.report_columns)
+        val layoutManager = GridLayoutManager(requireContext(), spanCount).apply {
+            spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+                override fun getSpanSize(position: Int): Int =
+                    if (chartHeaderAdapter.itemCount > 0 && position == 0) spanCount else 1
+            }
+        }
         binding.rvReport.layoutManager = layoutManager
-        binding.rvReport.adapter = adapter
+        binding.rvReport.adapter = ConcatAdapter(chartHeaderAdapter, adapter)
         binding.rvReport.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                if (dy > 0 && layoutManager.findLastVisibleItemPosition() >= adapter.itemCount - LOAD_MORE_THRESHOLD) {
+                val totalItems = chartHeaderAdapter.itemCount + adapter.itemCount
+                if (dy > 0 && layoutManager.findLastVisibleItemPosition() >= totalItems - LOAD_MORE_THRESHOLD) {
                     viewModel.loadMore()
                 }
             }
@@ -114,6 +127,7 @@ abstract class ReportFragment<R : Any, F : Any> : Fragment() {
         binding.tvEmpty.isVisible = state.isEmpty
         binding.tvTotal.isVisible = state.rows.isNotEmpty()
         binding.tvTotal.text = getString(totalRes, state.total)
+        chartHeaderAdapter.submit(if (state.rows.isNotEmpty()) buildChartSpec(state) else null)
         adapter.submitList(state.rows)
         renderFilters(state)
     }

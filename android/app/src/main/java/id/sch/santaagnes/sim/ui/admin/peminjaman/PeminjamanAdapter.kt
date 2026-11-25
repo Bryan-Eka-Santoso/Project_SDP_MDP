@@ -1,5 +1,7 @@
 package id.sch.santaagnes.sim.ui.admin.peminjaman
 
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -62,13 +64,20 @@ class PeminjamanAdapter(
             binding.tvPurpose.text =
                 "Keperluan: ${item.purpose}"
 
-            binding.tvStatus.text = when (item.status) {
-                "PENDING" -> "Menunggu Persetujuan"
-                "APPROVED" -> "Disetujui"
-                "REJECTED" -> "Ditolak"
-                "RETURNED" -> "Dikembalikan"
-                else -> item.status
+            val (statusLabel, textHex, bgHex) = when (item.status) {
+                "PENDING" -> Triple("Menunggu", "#986500", "#FFF4DC")
+                "APPROVED" -> Triple("Disetujui", "#207A45", "#E4F5EA")
+                "REJECTED" -> Triple("Ditolak", "#B73636", "#FDE7E7")
+                "RETURNED" -> Triple("Dikembalikan", "#2052CE", "#E8F0FE")
+                else -> Triple(item.status, "#555555", "#EEEEEE")
             }
+            binding.tvStatus.text = statusLabel
+            binding.tvStatus.setTextColor(Color.parseColor(textHex))
+            binding.tvStatus.backgroundTintList = ColorStateList.valueOf(Color.parseColor(bgHex))
+
+            val showRejection = item.status == "REJECTED" && !item.rejectionReason.isNullOrBlank()
+            binding.layoutRejectionReason.visibility = if (showRejection) View.VISIBLE else View.GONE
+            binding.tvRejectionReason.text = item.rejectionReason.orEmpty()
 
             val canProcess = item.status == "PENDING"
 

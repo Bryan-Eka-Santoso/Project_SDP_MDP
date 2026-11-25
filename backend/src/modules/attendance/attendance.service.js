@@ -45,9 +45,24 @@ async function listSlots(userId) {
       teachingAssignment: { teacherId: teacher.id, semester: { isActive: true } },
     },
     select: slotSelect,
-    orderBy: [{ dayOfWeek: 'asc' }, { id: 'asc' }],
+    orderBy: [{ dayOfWeek: 'asc' }, { startTime: 'asc' }, { id: 'asc' }],
   });
-  return slots.map((slot) => ({
+
+  // Urutkan mulai dari hari terdekat dengan hari ini (WIB) lalu jam paling awal.
+  const todayIdx = DAYS.indexOf(dayOfDate(todayJakarta()));
+  const distance = (dayOfWeek) => {
+    const idx = DAYS.indexOf(dayOfWeek);
+    if (idx < 0 || todayIdx < 0) return 99;
+    return (idx - todayIdx + 7) % 7;
+  };
+  const sorted = [...slots].sort((a, b) => {
+    const dayDiff = distance(a.dayOfWeek) - distance(b.dayOfWeek);
+    if (dayDiff !== 0) return dayDiff;
+    const timeDiff = a.startTime.getTime() - b.startTime.getTime();
+    return timeDiff !== 0 ? timeDiff : a.id - b.id;
+  });
+
+  return sorted.map((slot) => ({
     id: slot.id,
     dayOfWeek: slot.dayOfWeek,
     startTime: slot.startTime,

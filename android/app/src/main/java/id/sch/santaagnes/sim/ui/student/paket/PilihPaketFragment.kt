@@ -118,7 +118,7 @@ class PilihPaketFragment : Fragment() {
                         )
                             .setTitle("Berhasil")
                             .setMessage(message)
-                            .setPositiveButton("OK", null)
+                            .setPositiveButton("Tutup", null)
                             .show()
                     }
                 }
@@ -138,13 +138,14 @@ class PilihPaketFragment : Fragment() {
             val card = MaterialCardView(requireContext()).apply {
                 radius = dp(12).toFloat()
                 cardElevation = dp(1).toFloat()
-
-                setCardBackgroundColor(
-                    ContextCompat.getColor(
-                        requireContext(),
-                        R.color.white
-                    )
-                )
+                if (paket.isSelected) {
+                    setCardBackgroundColor(0xFFF2F6FF.toInt())
+                    strokeColor = ContextCompat.getColor(requireContext(), R.color.agnesian_blue)
+                    strokeWidth = dp(2)
+                } else {
+                    setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.white))
+                    strokeWidth = 0
+                }
 
                 layoutParams = LinearLayout.LayoutParams(
                     -1,
@@ -167,13 +168,17 @@ class PilihPaketFragment : Fragment() {
 
             content.addView(
                 makeText(
-                    "Terisi: ${paket.selectionCount}/${paket.capacity}"
+                    "Terisi: ${paket.selectionCount}/${paket.capacity}",
+                    13f,
+                    true
                 )
             )
 
             content.addView(
                 makeText(
-                    "Sisa kapasitas: ${paket.remainingCapacity}"
+                    "Sisa kapasitas: ${paket.remainingCapacity}",
+                    13f,
+                    true
                 )
             )
 
@@ -191,20 +196,24 @@ class PilihPaketFragment : Fragment() {
 
             val button = MaterialButton(requireContext()).apply {
                 text = when {
-                    paket.isSelected -> "Paket Dipilih"
+                    paket.isSelected -> "✓ Paket Dipilih"
                     paket.remainingCapacity <= 0 -> "Paket Penuh"
                     else -> "Pilih Paket"
                 }
 
                 isAllCaps = false
-
-                isEnabled =
-                    !busy &&
-                            !paket.isSelected &&
-                            paket.remainingCapacity > 0
-
-                setOnClickListener {
-                    konfirmasiPaket(paket)
+                if (paket.isSelected) {
+                    backgroundTintList = android.content.res.ColorStateList.valueOf(
+                        ContextCompat.getColor(requireContext(), R.color.bill_paid)
+                    )
+                    setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
+                    isEnabled = true
+                    isClickable = false
+                } else {
+                    isEnabled = !busy && paket.remainingCapacity > 0
+                    setOnClickListener {
+                        konfirmasiPaket(paket)
+                    }
                 }
             }
 

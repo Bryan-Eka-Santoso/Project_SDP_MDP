@@ -199,7 +199,7 @@ class JenisPelanggaranFragment : Fragment() {
                 if (item == null) {
                     "Tambah Jenis Pelanggaran"
                 } else {
-                    "Edit Jenis Pelanggaran"
+                    "Ubah Jenis Pelanggaran"
                 }
             )
             .setView(form.root)
@@ -251,7 +251,7 @@ class JenisPelanggaranFragment : Fragment() {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Hapus Jenis Pelanggaran")
             .setMessage(
-                "Apakah kamu ingin menghapus ${item.name}?"
+                "Apakah Anda yakin ingin menghapus ${item.name}?"
             )
             .setNegativeButton("Batal", null)
             .setPositiveButton("Hapus") { _, _ ->

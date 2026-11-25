@@ -94,9 +94,21 @@ class ChangeFormFragment : Fragment() {
         binding.inputNewDate.setOnClickListener {
             pickDate(newDate ?: date, R.string.change_new_date_hint) { newDate = it }
         }
+        binding.layoutNewDate.setEndIconOnClickListener {
+            newDate = null
+            showDate()
+        }
         binding.inputStart.setOnClickListener { pickTime(start) { start = it; showTimes() } }
+        binding.layoutStart.setEndIconOnClickListener {
+            start = null
+            showTimes()
+        }
         binding.inputEnd.setOnClickListener { pickTime(end) { end = it; showTimes() } }
-        binding.btnSave.setOnClickListener { save() }
+        binding.layoutEnd.setEndIconOnClickListener {
+            end = null
+            showTimes()
+        }
+        binding.btnSave.setOnClickListener { confirmOrSave() }
         viewModel.load()
 
         viewLifecycleOwner.lifecycleScope.launch {
@@ -130,8 +142,9 @@ class ChangeFormFragment : Fragment() {
             binding.inputTeacher.setAdapter(
                 ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, lookups.teachers.map { it.name })
             )
+            val roomLabels = listOf(KEEP_ROOM_LABEL) + lookups.rooms.map { it.name }
             binding.inputRoom.setAdapter(
-                ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, lookups.rooms.map { it.name })
+                ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, roomLabels)
             )
             if (needsPrefill) prefill(state)
         }
@@ -175,6 +188,21 @@ class ChangeFormFragment : Fragment() {
         binding.groupReschedule.isVisible = type == ChangeType.RESCHEDULE
     }
 
+    private fun confirmOrSave() {
+        val type = currentType()
+        val description = binding.inputDescription.text.toString().trim()
+        if (type == ChangeType.CANCEL && description.isNotEmpty()) {
+            com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Batalkan Pertemuan?")
+                .setMessage("Pertemuan ini akan ditandai dibatalkan dan notifikasi akan dikirimkan kepada guru, siswa, dan wali murid terkait. Lanjutkan?")
+                .setNegativeButton("Batal", null)
+                .setPositiveButton("Ya, Batalkan") { _, _ -> save() }
+                .show()
+            return
+        }
+        save()
+    }
+
     private fun save() {
         val state = viewModel.uiState.value
         val lookups = state.lookups
@@ -182,13 +210,14 @@ class ChangeFormFragment : Fragment() {
         val slotText = binding.inputSlot.text.toString()
         val teacherText = binding.inputTeacher.text.toString()
         val roomText = binding.inputRoom.text.toString()
+        val chosenRoom = if (roomText == KEEP_ROOM_LABEL) null else lookups?.rooms?.firstOrNull { it.name == roomText }
         viewModel.save(
             slot = state.slots.firstOrNull { slotLabel(it) == slotText },
             date = date,
             type = currentType(),
             description = binding.inputDescription.text.toString(),
             teacher = lookups?.teachers?.firstOrNull { it.name == teacherText },
-            room = lookups?.rooms?.firstOrNull { it.name == roomText },
+            room = chosenRoom,
             start = start,
             end = end,
             newDate = newDate
@@ -220,11 +249,14 @@ class ChangeFormFragment : Fragment() {
     private fun showDate() {
         binding.inputDate.setText(date?.let(DateTimeWib::formatDate).orEmpty())
         binding.inputNewDate.setText(newDate?.let(DateTimeWib::formatDate).orEmpty())
+        binding.layoutNewDate.isEndIconVisible = newDate != null
     }
 
     private fun showTimes() {
         binding.inputStart.setText(start?.let(DateTimeWib::formatTime).orEmpty())
         binding.inputEnd.setText(end?.let(DateTimeWib::formatTime).orEmpty())
+        binding.layoutStart.isEndIconVisible = start != null
+        binding.layoutEnd.isEndIconVisible = end != null
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -242,6 +274,7 @@ class ChangeFormFragment : Fragment() {
     }
 
     private companion object {
+        const val KEEP_ROOM_LABEL = "Tetap (tidak pindah ruangan)"
         const val STATE_DATE = "date"
         const val STATE_NEW_DATE = "newDate"
         const val STATE_START = "start"

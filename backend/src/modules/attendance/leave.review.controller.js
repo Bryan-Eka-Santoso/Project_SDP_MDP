@@ -6,8 +6,12 @@ async function pending(req, res) {
   return sendPaginated(res, data, meta);
 }
 async function decide(req, res) {
-  return sendSuccess(res, await service.decide(req.user.id,
-    req.validated.params.requestId, req.validated.body.decision));
+  return sendSuccess(res, await service.decide(
+    req.user.id,
+    req.validated.params.requestId,
+    req.validated.body.decision,
+    req.validated.body.rejectionReason,
+  ));
 }
 async function downloadAttachment(req, res) {
   const { path, mime } = await service.findAttachmentForHomeroom(

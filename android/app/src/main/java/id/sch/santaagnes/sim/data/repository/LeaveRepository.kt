@@ -26,14 +26,14 @@ class LeaveRepository @Inject constructor(private val api: LeaveApi) {
     }
     companion object {
         fun message(error: Throwable): String = when (error) {
-            is IOException -> "Tidak bisa terhubung ke backend."
+            is IOException -> "Tidak dapat terhubung ke server. Periksa koneksi internet Anda."
             is HttpException -> when (error.code()) {
                 400 -> "Data izin tidak valid. Periksa tanggal, alasan, dan lampiran."
                 413 -> "Ukuran lampiran maksimal 5 MB."
                 415 -> "Lampiran harus berupa JPG, PNG, atau PDF."
-                401 -> "Sesi login sudah habis. Silakan login kembali."
+                401 -> "Sesi login Anda telah berakhir. Silakan masuk kembali."
                 403, 404 -> "Anak tidak terhubung ke akun wali murid ini."
-                else -> "Gagal mengakses server (HTTP ${error.code()})."
+                else -> "Terjadi kesalahan pada server. Silakan coba lagi."
             }
             else -> error.message ?: "Terjadi kesalahan."
         }

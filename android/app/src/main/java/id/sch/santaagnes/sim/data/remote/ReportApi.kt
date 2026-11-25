@@ -128,7 +128,8 @@ data class FacilityBookingReportDto(
     val purpose: String,
     val status: String,
     val verifierName: String?,
-    val returnDate: String?
+    val returnDate: String?,
+    val rejectionReason: String? = null
 )
 
 data class ElectiveSurveyReportDto(

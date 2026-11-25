@@ -110,11 +110,19 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnChanges"
-        style="@style/Widget.Material3.Button.TextButton"
-        android:layout_width="wrap_content"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:text="@string/admin_schedule_changes" />
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/admin_schedule_changes"
+        android:textColor="@color/agnesian_blue"
+        android:textStyle="bold"
+        app:backgroundTint="@color/agnesian_tile"
+        app:icon="@drawable/ic_calendar"
+        app:iconGravity="textStart"
+        app:iconTint="@color/agnesian_blue"
+        app:strokeColor="@color/agnesian_blue" />
 
     <!-- Jumlah seluruh data yang cocok dengan filter (dari meta.total). -->
     <TextView
@@ -122,7 +130,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="8dp"
         android:layout_marginBottom="4dp"
         android:textColor="@color/agnesian_blue"
         android:textSize="13sp"
@@ -156,22 +164,28 @@
             android:text="@string/action_retry" />
     </LinearLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvSlots"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:clipToPadding="false"
-        android:paddingBottom="8dp" />
+        android:layout_weight="1">
 
-    <TextView
-        android:id="@+id/tvEmpty"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="24dp"
-        android:text="@string/admin_schedule_empty"
-        android:textColor="@color/agnesian_muted"
-        android:visibility="gone" />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvSlots"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="8dp" />
+
+        <TextView
+            android:id="@+id/tvEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:padding="24dp"
+            android:text="@string/admin_schedule_empty"
+            android:textColor="@color/agnesian_muted"
+            android:visibility="gone" />
+    </FrameLayout>
 
 </LinearLayout>

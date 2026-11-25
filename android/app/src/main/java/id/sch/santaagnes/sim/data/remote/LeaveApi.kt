@@ -19,7 +19,8 @@ data class LeaveChildDto(
 data class LeaveRequestDto(
     val id: Int, val studentId: Int, val studentName: String,
     val startDate: String, val endDate: String, val reason: String,
-    val status: String, val attachmentUrl: String?
+    val status: String, val attachmentUrl: String?,
+    val rejectionReason: String? = null
 )
 data class CreateLeaveDto(
     val studentId: Int, val startDate: String, val endDate: String, val reason: String

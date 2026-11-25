@@ -150,7 +150,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSemua"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="38dp"
                 android:text="Semua"
@@ -164,7 +164,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnRuangan"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="38dp"
                 android:layout_marginStart="8dp"
@@ -179,7 +179,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnBarang"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="38dp"
                 android:layout_marginStart="8dp"

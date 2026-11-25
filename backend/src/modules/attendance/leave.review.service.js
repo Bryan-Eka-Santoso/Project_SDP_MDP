@@ -1,6 +1,7 @@
 const prisma = require('../../lib/prisma');
 const AppError = require('../../utils/AppError');
 const { absoluteFile } = require('./leave.attachment');
+const { notify } = require('../notifications/notifications.service');
 
 function dateText(value) { return value.toISOString().slice(0, 10); }
 
@@ -28,10 +29,11 @@ async function pending(userId, query) {
       where,
       select: {
         id: true, studentId: true, startDate: true, endDate: true,
-        reason: true, attachmentUrl: true, status: true, createdAt: true,
+        reason: true, rejectionReason: true, attachmentUrl: true, status: true, createdAt: true,
         student: { select: { nis: true, user: { select: { name: true } } } },
       },
-      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+      // Urutkan dari tanggal mulai izin paling dekat (tenggat paling mepet).
+      orderBy: [{ startDate: 'asc' }, { createdAt: 'asc' }, { id: 'asc' }],
       skip: (query.page - 1) * query.limit, take: query.limit,
     }),
   ]);
@@ -40,23 +42,37 @@ async function pending(userId, query) {
       id: r.id, studentId: r.studentId, studentName: r.student.user.name,
       nis: r.student.nis, startDate: dateText(r.startDate),
       endDate: dateText(r.endDate), reason: r.reason,
+      rejectionReason: r.rejectionReason ?? null,
       attachmentUrl: r.attachmentUrl, status: r.status, createdAt: r.createdAt,
     })),
     meta: { total, page: query.page, limit: query.limit },
   };
 }
 
-async function decide(userId, requestId, decision) {
+async function decide(userId, requestId, decision, rejectionReason = null) {
   const teacherId = await homeroomTeacherId(userId);
-  return prisma.$transaction(async (tx) => {
+  const cleanedReason = decision === 'REJECTED' ? (rejectionReason?.trim() || null) : null;
+  if (decision === 'REJECTED' && !cleanedReason) {
+    throw new AppError(400, 'VALIDATION_ERROR', 'Alasan penolakan wajib diisi saat menolak pengajuan izin.', [
+      { field: 'body.rejectionReason', message: 'Alasan penolakan wajib diisi.' },
+    ]);
+  }
+
+  const outcome = await prisma.$transaction(async (tx) => {
     const request = await tx.leaveRequest.findUnique({
       where: { id: requestId },
       select: {
         id: true, status: true, studentId: true, startDate: true, endDate: true,
-        student: { select: { classMemberships: {
-          where: { classGroup: { homeroomTeacherId: teacherId, academicYear: { isActive: true } } },
-          select: { classGroupId: true },
-        } } },
+        guardian: { select: { userId: true } },
+        student: {
+          select: {
+            user: { select: { name: true } },
+            classMemberships: {
+              where: { classGroup: { homeroomTeacherId: teacherId, academicYear: { isActive: true } } },
+              select: { classGroupId: true },
+            },
+          },
+        },
       },
     });
     if (!request || request.student.classMemberships.length === 0) {
@@ -68,7 +84,7 @@ async function decide(userId, requestId, decision) {
     // Conditional update prevents two reviewers from deciding a PENDING request twice.
     const updated = await tx.leaveRequest.updateMany({
       where: { id: requestId, status: 'PENDING' },
-      data: { status: decision, verifierId: teacherId },
+      data: { status: decision, verifierId: teacherId, rejectionReason: cleanedReason },
     });
     if (updated.count !== 1) {
       throw new AppError(409, 'CONFLICT', 'Pengajuan izin sudah diproses.');
@@ -90,8 +106,38 @@ async function decide(userId, requestId, decision) {
       });
       attendanceUpdated = attendance.count;
     }
-    return { id: requestId, status: decision, verifierId: teacherId, attendanceUpdated };
+    return {
+      result: {
+        id: requestId,
+        status: decision,
+        verifierId: teacherId,
+        rejectionReason: cleanedReason,
+        attendanceUpdated,
+      },
+      guardianUserId: request.guardian?.userId ?? null,
+      studentName: request.student?.user?.name ?? 'Anak Anda',
+      startDate: dateText(request.startDate),
+      endDate: dateText(request.endDate),
+    };
   });
+
+  if (outcome.guardianUserId) {
+    const dateRange =
+      outcome.startDate === outcome.endDate
+        ? outcome.startDate
+        : `${outcome.startDate} s.d. ${outcome.endDate}`;
+    notify([outcome.guardianUserId], {
+      type: 'LEAVE_REQUEST',
+      title: decision === 'APPROVED' ? 'Pengajuan Izin Disetujui' : 'Pengajuan Izin Ditolak',
+      body:
+        decision === 'APPROVED'
+          ? `Pengajuan izin ${outcome.studentName} (${dateRange}) telah disetujui wali kelas.`
+          : `Pengajuan izin ${outcome.studentName} (${dateRange}) ditolak. Alasan: ${cleanedReason}`,
+      referenceId: requestId,
+    });
+  }
+
+  return outcome.result;
 }
 
 // Unduh hanya jika permohonan milik siswa dari kelas aktif yang diampu wali kelas ini.

@@ -120,10 +120,11 @@ Saat sesi dibuat, status awal setiap siswa:
 2. selain itu `PRESENT`, lalu guru mengubah yang tidak hadir.
 
 ### 4.3 Pengajuan izin
-- Diajukan wali murid untuk anaknya (`CHILD`) dengan `startDate`, `endDate` (`startDate ≤ endDate`), alasan, dan lampiran opsional.
-- Diverifikasi oleh wali kelas dari kelas anak tersebut pada tahun ajaran aktif.
+- Diajukan wali murid untuk anaknya (`CHILD`) dengan `startDate`, `endDate` (`startDate ≤ endDate`), alasan, dan lampiran opsional (JPG/PNG/PDF maks. 5 MB). Pengajuan baru menotifikasi wali kelas dari kelas anak tersebut pada tahun ajaran aktif.
+- Diverifikasi oleh wali kelas dari kelas anak tersebut pada tahun ajaran aktif. Antrean izin menunggu diurutkan dari `startDate` terdekat.
 - Saat disetujui: semua `Attendance` siswa itu pada sesi yang **sudah ada** dalam rentang tanggal diubah menjadi `EXCUSED` (dalam transaksi yang sama). Sesi yang dibuat setelahnya mengikuti aturan 4.2.
-- Izin yang sudah `APPROVED`/`REJECTED` tidak bisa diubah lagi. Wali murid dinotifikasi hasilnya.
+- Saat ditolak: wali kelas wajib mengisi alasan penolakan (`rejectionReason`), yang disimpan pada `LeaveRequest` dan ditampilkan kepada wali murid.
+- Izin yang sudah `APPROVED`/`REJECTED` tidak bisa diubah lagi. Wali murid dinotifikasi hasilnya (termasuk alasan penolakan bila ditolak).
 
 ### 4.4 Rekap kehadiran
 Rekap per periode = jumlah sesi per status. Persentase kehadiran = `PRESENT / total sesi × 100`.
@@ -166,11 +167,11 @@ Contoh: 40 sesi, 36 hadir, 2 sakit, 1 izin, 1 alpa → 36/40 × 100 = **90%**.
 ## 9. Peminjaman fasilitas
 
 - Diajukan siswa atau guru: `facilityId`, `bookingDate`, `startTime`, `endTime`, `purpose` (satu hari). Syarat: `startTime < endTime` dan waktu mulai di masa depan. Pada rumus di bawah, `startAt`/`endAt` = `bookingDate` + jam.
-- Alur status: `PENDING` → `APPROVED` / `REJECTED`; `APPROVED` → `RETURNED` (oleh admin).
-- Saat admin menyetujui, cek tumpang tindih dengan peminjaman `APPROVED` lain untuk fasilitas yang sama: bentrok jika `startAt < other.endAt` **dan** `other.startAt < endAt`. Untuk ruangan, cek juga slot jadwal (memperhitungkan perubahan jadwal) pada waktu tersebut. Jika bentrok → `409 BOOKING_CONFLICT`.
+- Alur status: `PENDING` → `APPROVED` / `REJECTED`; `APPROVED` → `RETURNED` (oleh admin). Pengajuan baru menotifikasi admin. Saat menolak (`REJECTED`), admin wajib menyertakan alasan penolakan (`rejectionReason`) yang disimpan dan ditampilkan ke pemohon.
+- Saat admin menyetujui, cek tumpang tindih dengan peminjaman `APPROVED` lain untuk fasilitas yang sama: bentrok jika `startAt < other.endAt` **dan** `other.startAt < endAt`. Untuk ruangan, cek juga slot jadwal (memperhitungkan perubahan jadwal termasuk `newDate`) pada waktu tersebut. Jika bentrok → `409 BOOKING_CONFLICT`.
 - Pengajuan `PENDING` boleh saling tumpang tindih; yang disetujui lebih dulu yang berlaku.
 - Contoh: A disetujui 08.00–10.00. B 10.00–11.00 → `08.00 < 11.00` dan `10.00 < 10.00` salah → **tidak bentrok**. C 09.30–10.30 → **bentrok**.
-- Pemohon dinotifikasi setiap perubahan status.
+- Pemohon dinotifikasi setiap perubahan status (termasuk alasan penolakan bila ditolak).
 
 ## 10. Pembayaran
 

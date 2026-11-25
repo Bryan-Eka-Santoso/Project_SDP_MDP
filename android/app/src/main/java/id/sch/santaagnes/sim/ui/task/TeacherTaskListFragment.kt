@@ -95,7 +95,7 @@ class TeacherTaskListFragment : Fragment() {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.task_delete_title)
             .setMessage(getString(R.string.task_delete_message, task.title))
-            .setNegativeButton(android.R.string.cancel, null)
+            .setNegativeButton("Batal", null)
             .setPositiveButton(R.string.task_delete) { _, _ -> viewModel.delete(task.id) }
             .show()
     }

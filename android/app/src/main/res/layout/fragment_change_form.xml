@@ -137,7 +137,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:hint="@string/change_new_date_hint">
+                    android:hint="@string/change_new_date_hint"
+                    app:endIconDrawable="@android:drawable/ic_menu_close_clear_cancel"
+                    app:endIconMode="custom">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/inputNewDate"
@@ -172,7 +174,9 @@
                         android:id="@+id/layoutStart"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/change_start_hint">
+                        android:hint="@string/change_start_hint"
+                        app:endIconDrawable="@android:drawable/ic_menu_close_clear_cancel"
+                        app:endIconMode="custom">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/inputStart"
@@ -187,7 +191,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:hint="@string/change_end_hint">
+                        android:hint="@string/change_end_hint"
+                        app:endIconDrawable="@android:drawable/ic_menu_close_clear_cancel"
+                        app:endIconMode="custom">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/inputEnd"

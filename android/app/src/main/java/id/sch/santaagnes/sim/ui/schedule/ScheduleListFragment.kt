@@ -23,6 +23,7 @@ import id.sch.santaagnes.sim.domain.model.ChangeType
 import id.sch.santaagnes.sim.domain.model.ScheduleEntry
 import id.sch.santaagnes.sim.domain.model.ScheduleScope
 import id.sch.santaagnes.sim.domain.model.ScopeOption
+import id.sch.santaagnes.sim.ui.common.applyAgnesianFilterStyle
 import kotlinx.coroutines.launch
 import java.time.temporal.ChronoUnit
 
@@ -153,7 +154,7 @@ class ScheduleListFragment : Fragment() {
                 val chip = Chip(requireContext()).apply {
                     id = View.generateViewId()
                     text = optionLabel(option)
-                    isCheckable = true
+                    applyAgnesianFilterStyle(onDarkHeader = true)
                     tag = index
                     setOnClickListener { viewModel.selectOption(index) }
                 }

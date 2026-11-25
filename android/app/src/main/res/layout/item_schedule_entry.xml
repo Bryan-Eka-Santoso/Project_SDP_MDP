@@ -106,14 +106,19 @@
             tools:text="Guru semula: Guru Dua"
             tools:visibility="visible" />
 
-        <!-- Hanya di jadwal mengajar guru: petunjuk bahwa pelajaran ini bisa dipindah. -->
+        <!-- Hanya di jadwal mengajar guru: tombol jelas agar guru mudah memindah atau memulihkan jadwal. -->
         <TextView
             android:id="@+id/tvAction"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_badge"
+            android:backgroundTint="@color/agnesian_tile"
+            android:foreground="?attr/selectableItemBackground"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp"
             android:textColor="@color/agnesian_blue"
-            android:textSize="13sp"
+            android:textSize="12sp"
             android:textStyle="bold"
             android:visibility="gone"
             tools:text="Pindah jadwal"

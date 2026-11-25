@@ -127,7 +127,7 @@ class MataPelajaranViewModel @Inject constructor(
                     val pesan = if (response.code() == 409) {
                         "Mata pelajaran masih digunakan dalam data akademik"
                     } else {
-                        "Gagal menghapus (HTTP ${response.code()})"
+                        "Gagal menghapus mata pelajaran. Silakan coba lagi."
                     }
                     throw Exception(pesan)
                 }

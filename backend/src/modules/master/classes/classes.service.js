@@ -71,6 +71,36 @@ async function getClassById(id) {
   return item;
 }
 
+async function ensureValidHomeroomTeacher(academicYearId, homeroomTeacherId, excludeClassId = null) {
+  const teacher = await prisma.teacher.findUnique({
+    where: { id: homeroomTeacherId },
+    select: { id: true, user: { select: { name: true, status: true } } },
+  });
+  if (!teacher) {
+    throw new AppError(404, 'NOT_FOUND', 'Guru wali kelas tidak ditemukan.');
+  }
+  if (teacher.user && teacher.user.status !== 'ACTIVE') {
+    throw new AppError(409, 'INVALID_STATE', 'Akun guru sedang diblokir dan tidak dapat ditugaskan sebagai wali kelas.');
+  }
+
+  const existingHomeroom = await prisma.classGroup.findFirst({
+    where: {
+      academicYearId,
+      homeroomTeacherId,
+      ...(excludeClassId ? { id: { not: excludeClassId } } : {}),
+    },
+    select: { id: true, name: true },
+  });
+  if (existingHomeroom) {
+    throw new AppError(
+      409,
+      'SCHEDULE_CONFLICT',
+      `Guru tersebut sudah menjadi wali kelas ${existingHomeroom.name} pada tahun ajaran ini.`,
+      [{ field: 'body.homeroomTeacherId', message: `Sudah menjadi wali kelas ${existingHomeroom.name}.` }],
+    );
+  }
+}
+
 /**
  * F-MST-07: Menambah rombongan belajar / kelas baru per tahun ajaran.
  */
@@ -101,13 +131,7 @@ async function createClass({
   }
 
   if (homeroomTeacherId) {
-    const teacher = await prisma.teacher.findUnique({
-      where: { id: homeroomTeacherId },
-      select: { id: true },
-    });
-    if (!teacher) {
-      throw new AppError(404, 'NOT_FOUND', 'Guru wali kelas tidak ditemukan.');
-    }
+    await ensureValidHomeroomTeacher(academicYearId, homeroomTeacherId);
   }
 
   return prisma.$transaction(async (tx) => {
@@ -187,13 +211,7 @@ async function setHomeroomTeacher(classGroupId, homeroomTeacherId) {
   }
 
   if (homeroomTeacherId !== null) {
-    const teacher = await prisma.teacher.findUnique({
-      where: { id: homeroomTeacherId },
-      select: { id: true },
-    });
-    if (!teacher) {
-      throw new AppError(404, 'NOT_FOUND', 'Guru tidak ditemukan.');
-    }
+    await ensureValidHomeroomTeacher(classGroup.academicYear.id, homeroomTeacherId, classGroupId);
   }
 
   return prisma.$transaction(async (tx) => {

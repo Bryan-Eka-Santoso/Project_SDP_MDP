@@ -1,5 +1,7 @@
 package id.sch.santaagnes.sim.domain.model
 
+import java.time.Instant
+
 /** Jenis notifikasi; nilainya sama dengan `NOTIFICATION_TYPES` di backend. */
 enum class NotificationType {
     SCHEDULE_CHANGE,
@@ -35,7 +37,8 @@ data class PushPayload(
     val type: NotificationType,
     val title: String,
     val body: String,
-    val referenceId: String?
+    val referenceId: String?,
+    val sentAtMillis: Long? = null
 ) {
     companion object {
         /** Null bila pesan bukan notifikasi aplikasi (tanpa judul atau isi). */
@@ -43,12 +46,16 @@ data class PushPayload(
             val title = data["title"]?.trim().orEmpty()
             val body = data["body"]?.trim().orEmpty()
             if (title.isEmpty() || body.isEmpty()) return null
+            val sentAtMillis = data["sentAt"]?.takeIf { it.isNotBlank() }?.let { raw ->
+                runCatching { Instant.parse(raw).toEpochMilli() }.getOrNull()
+            }
             return PushPayload(
                 type = NotificationType.fromWire(data["type"]),
                 title = title,
                 body = body,
                 // server mengirim string kosong bila tidak ada referensi
-                referenceId = data["referenceId"]?.takeIf { it.isNotBlank() }
+                referenceId = data["referenceId"]?.takeIf { it.isNotBlank() },
+                sentAtMillis = sentAtMillis
             )
         }
     }

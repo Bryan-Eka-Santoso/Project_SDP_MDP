@@ -1,6 +1,7 @@
 package id.sch.santaagnes.sim.ui.bill
 
 import android.content.res.ColorStateList
+import android.graphics.Typeface
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
@@ -70,6 +71,20 @@ class BillAdapter(
             }
             binding.tvBadge.setText(label)
             binding.tvBadge.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context, color))
+
+            val dueColor = when (bill.status) {
+                BillStatus.OVERDUE -> R.color.change_cancel
+                BillStatus.PAID -> R.color.bill_paid
+                BillStatus.UNPAID -> R.color.agnesian_text
+            }
+            binding.tvDue.setTextColor(ContextCompat.getColor(context, dueColor))
+            binding.tvDue.setTypeface(null, Typeface.BOLD)
+            binding.tvAmount.setTextColor(
+                ContextCompat.getColor(
+                    context,
+                    if (bill.status == BillStatus.OVERDUE) R.color.change_cancel else R.color.agnesian_text
+                )
+            )
         }
     }
 

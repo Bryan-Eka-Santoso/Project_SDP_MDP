@@ -239,101 +239,103 @@ class ElectiveSurveyReportFragment : Fragment() {
         items: List<ElectiveSurveyReportDto>
     ) {
         binding.listContainer.removeAllViews()
+        if (items.isNotEmpty()) {
+            val ctx = requireContext()
+            val cBlue = ContextCompat.getColor(ctx, R.color.agnesian_blue)
+            val top = items.sortedByDescending { it.studentCount }.take(6)
+            binding.listContainer.addView(
+                ReportChartRenderer.buildCard(
+                    ctx,
+                    ReportChartSpec(
+                        title = "Peringkat Minat Mata Pelajaran Pilihan",
+                        subtitle = "Berdasarkan ${items.size} data survei yang ditampilkan",
+                        kind = ReportChartKind.HORIZONTAL_BAR,
+                        segments = top.map { item ->
+                            ChartSegment(
+                                label = "${item.subjectName} (${item.gradeLevel})",
+                                value = item.studentCount.toFloat(),
+                                displayValue = "${item.studentCount} siswa (${formatReportDecimal(item.percentage)}%)",
+                                color = cBlue
+                            )
+                        }
+                    )
+                )
+            )
+        }
 
         items.forEach { item ->
             val card = MaterialCardView(requireContext()).apply {
                 radius = dp(12).toFloat()
                 cardElevation = dp(1).toFloat()
-
-                setCardBackgroundColor(
-                    ContextCompat.getColor(
-                        requireContext(),
-                        R.color.white
-                    )
-                )
-
-                layoutParams = LinearLayout.LayoutParams(
-                    -1,
-                    -2
-                ).apply {
-                    bottomMargin = dp(12)
-                }
+                setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.white))
+                layoutParams = LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(12) }
             }
 
             val content = LinearLayout(requireContext()).apply {
                 orientation = LinearLayout.VERTICAL
-                setPadding(
-                    dp(16), dp(16),
-                    dp(16), dp(16)
-                )
+                setPadding(dp(16), dp(16), dp(16), dp(16))
             }
 
             fun addText(
                 value: String,
                 size: Float = 13f,
-                bold: Boolean = false
+                bold: Boolean = false,
+                colorRes: Int = R.color.agnesian_text
             ) {
-                val tv = TextView(requireContext()).apply {
-                    text = value
-                    textSize = size
-                    setPadding(0, 0, 0, dp(7))
-
-                    setTextColor(
-                        ContextCompat.getColor(
-                            requireContext(),
-                            R.color.agnesian_text
-                        )
-                    )
-
-                    if (bold) {
-                        setTypeface(
-                            null,
-                            android.graphics.Typeface.BOLD
-                        )
+                content.addView(
+                    TextView(requireContext()).apply {
+                        text = value
+                        textSize = size
+                        setPadding(0, 0, 0, dp(6))
+                        setTextColor(ContextCompat.getColor(requireContext(), colorRes))
+                        if (bold) setTypeface(null, android.graphics.Typeface.BOLD)
                     }
-                }
-
-                content.addView(tv)
+                )
             }
 
-            addText(item.subjectName, 16f, true)
-            addText("Kode: ${item.subjectCode}")
+            val isClosed = item.status == "CLOSED"
+            val header = LinearLayout(requireContext()).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = android.view.Gravity.CENTER_VERTICAL
+            }
+            val titleCol = LinearLayout(requireContext()).apply {
+                orientation = LinearLayout.VERTICAL
+                layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
+            }
+            titleCol.addView(
+                TextView(requireContext()).apply {
+                    text = item.subjectName
+                    textSize = 16f
+                    setTypeface(null, android.graphics.Typeface.BOLD)
+                    setTextColor(ContextCompat.getColor(requireContext(), R.color.agnesian_text))
+                }
+            )
+            titleCol.addView(
+                TextView(requireContext()).apply {
+                    text = "Kode: ${item.subjectCode} • Tingkat ${item.gradeLevel}"
+                    textSize = 12f
+                    setTextColor(ContextCompat.getColor(requireContext(), R.color.agnesian_muted))
+                    setPadding(0, dp(2), 0, dp(6))
+                }
+            )
+            header.addView(titleCol)
+            header.addView(
+                ReportChartRenderer.buildBadge(
+                    requireContext(),
+                    if (isClosed) "Ditutup" else "Diterbitkan",
+                    if (isClosed) R.color.agnesian_muted else R.color.bill_paid
+                )
+            )
+            content.addView(header)
 
             addText(
-                "Jumlah Peminat: ${item.studentCount} siswa",
+                "Peminat: ${item.studentCount} / ${item.respondentCount} responden (${formatReportDecimal(item.percentage)}%)",
                 14f,
-                true
+                true,
+                R.color.agnesian_blue
             )
-
-            addText(
-                "Persentase: ${item.percentage}%"
-            )
-
-            addText(
-                "Total Responden Survei: ${item.respondentCount}"
-            )
-
-            addText("Survei: ${item.surveyTitle}")
-
-            addText(
-                "Tahun Ajaran: ${item.academicYearName}"
-            )
-
-            addText("Tingkat: ${item.gradeLevel}")
-
-            addText(
-                "Periode: ${item.openDate} - ${item.closeDate}"
-            )
-
-            addText(
-                "Status: ${
-                    if (item.status == "CLOSED") {
-                        "Ditutup"
-                    } else {
-                        "Diterbitkan"
-                    }
-                }"
-            )
+            addText("Survei: ${item.surveyTitle} (${item.academicYearName})", 12f, false, R.color.agnesian_muted)
+            addText("Periode: ${item.openDate} s.d. ${item.closeDate}", 12f, true, R.color.agnesian_text)
 
             card.addView(content)
             binding.listContainer.addView(card)

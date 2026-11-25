@@ -132,7 +132,7 @@ class FasilitasViewModel @Inject constructor(
                         if (response.code() == 409) {
                             "Fasilitas masih digunakan"
                         } else {
-                            "Gagal menghapus (HTTP ${response.code()})"
+                            "Gagal menghapus fasilitas. Silakan coba lagi."
                         }
                     )
                 }

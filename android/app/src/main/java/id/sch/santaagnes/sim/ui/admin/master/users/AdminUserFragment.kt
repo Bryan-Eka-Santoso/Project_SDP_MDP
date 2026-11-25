@@ -128,8 +128,34 @@ class AdminUserFragment : Fragment() {
 
                         val isFilterActive = state.currentFilter.status == "ACTIVE"
                         val isFilterBlocked = state.currentFilter.status == "BLOCKED"
-                        binding.chipActive.alpha = if (isFilterBlocked) 0.4f else 1.0f
-                        binding.chipInactive.alpha = if (isFilterActive) 0.4f else 1.0f
+                        val padH = (resources.displayMetrics.density * 10).toInt()
+                        val padV = (resources.displayMetrics.density * 4).toInt()
+                        binding.chipActive.apply {
+                            alpha = 1.0f
+                            setPadding(padH, padV, padH, padV)
+                            if (isFilterActive) {
+                                setBackgroundResource(R.drawable.bg_badge)
+                                backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.bill_paid)
+                                setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
+                            } else {
+                                backgroundTintList = null
+                                setBackgroundResource(R.drawable.bg_option_unselected)
+                                setTextColor(ContextCompat.getColor(requireContext(), R.color.bill_paid))
+                            }
+                        }
+                        binding.chipInactive.apply {
+                            alpha = 1.0f
+                            setPadding(padH, padV, padH, padV)
+                            if (isFilterBlocked) {
+                                setBackgroundResource(R.drawable.bg_badge)
+                                backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.change_cancel)
+                                setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
+                            } else {
+                                backgroundTintList = null
+                                setBackgroundResource(R.drawable.bg_option_unselected)
+                                setTextColor(ContextCompat.getColor(requireContext(), R.color.change_cancel))
+                            }
+                        }
 
                         state.errorMessage?.let { error ->
                             Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
