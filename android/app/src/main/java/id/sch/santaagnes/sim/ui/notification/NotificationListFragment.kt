@@ -29,9 +29,48 @@ class NotificationListFragment : Fragment() {
 
     private val adapter = NotificationAdapter { item ->
         if (!item.isRead) viewModel.markRead(item.id)
-        if (item.type == NotificationType.ANNOUNCEMENT) {
-            findNavController().navigate(R.id.action_global_announcements)
-        }
+        navigateForNotification(item.type)
+    }
+
+    private fun navigateForNotification(type: NotificationType) {
+        val nav = findNavController()
+        val graphId = nav.currentDestination?.parent?.id
+        val destinationId = when (type) {
+            NotificationType.ANNOUNCEMENT -> R.id.action_global_announcements
+            NotificationType.BILL_OVERDUE -> R.id.action_global_bills
+            NotificationType.SCHEDULE_CHANGE -> when (graphId) {
+                R.id.student_graph -> R.id.studentScheduleFragment
+                R.id.guardian_graph -> R.id.guardianScheduleFragment
+                R.id.teacher_graph -> R.id.teacherScheduleFragment
+                R.id.admin_graph -> R.id.changeListFragment
+                else -> null
+            }
+            NotificationType.TASK -> when (graphId) {
+                R.id.student_graph -> R.id.studentTasksFragment
+                R.id.teacher_graph -> R.id.teacherTaskListFragment
+                else -> null
+            }
+            NotificationType.VIOLATION -> when (graphId) {
+                R.id.student_graph -> R.id.studentRiwayatPelanggaranFragment
+                R.id.guardian_graph -> R.id.guardianRiwayatPelanggaranFragment
+                R.id.teacher_graph -> R.id.teacherRiwayatPelanggaranFragment
+                R.id.admin_graph -> R.id.adminRiwayatPelanggaranFragment
+                else -> null
+            }
+            NotificationType.LEAVE_REQUEST -> when (graphId) {
+                R.id.guardian_graph -> R.id.guardianLeaveFragment
+                R.id.teacher_graph -> R.id.homeroomPendingFragment
+                else -> null
+            }
+            NotificationType.BOOKING -> when (graphId) {
+                R.id.student_graph -> R.id.studentRiwayatPeminjamanFragment
+                R.id.teacher_graph -> R.id.teacherRiwayatPeminjamanFragment
+                R.id.admin_graph -> R.id.adminPeminjamanFragment
+                else -> null
+            }
+            NotificationType.OTHER -> null
+        } ?: return
+        runCatching { nav.navigate(destinationId) }
     }
 
     override fun onCreateView(

@@ -64,14 +64,18 @@ class LeaveFragment : Fragment() {
             }
             if (allowed == null || (mime != null && mime != "application/octet-stream" && mime != allowed)) {
                 clearAttachment()
-                binding.tvFeedback.text = "Pilih JPG, PNG, atau PDF."
+                binding.tvFeedback.setTextColor(0xFFB3261E.toInt())
+                binding.tvFeedback.text = "Lampiran tidak valid. Pilih berkas JPG, PNG, atau PDF."
             } else if (size != null && size!! > MAX_FILE_BYTES) {
                 clearAttachment()
-                binding.tvFeedback.text = "Lampiran maksimal 5 MB."
+                binding.tvFeedback.setTextColor(0xFFB3261E.toInt())
+                binding.tvFeedback.text = "Ukuran lampiran melebihi batas maksimal 5 MB."
             } else {
                 selectedFileName = actualName
                 selectedMime = allowed
-                binding.tvAttachment.text = "Terpilih: $actualName"
+                val sizeLabel = size?.let { String.format(Locale.US, " (%.1f MB)", it / (1024.0 * 1024.0)) }.orEmpty()
+                binding.tvAttachment.setTextColor(0xFF176A42.toInt())
+                binding.tvAttachment.text = "✓ Lampiran valid: $actualName$sizeLabel"
                 binding.btnRemoveAttachment.visibility = View.VISIBLE
                 binding.tvFeedback.text = ""
             }
@@ -154,6 +158,9 @@ class LeaveFragment : Fragment() {
                     binding.progressBar.visibility = if (state.loading) View.VISIBLE else View.GONE
                     binding.btnSubmit.isEnabled = !state.loading && selectedChildId != null
                     binding.btnSubmit.setLoading(state.saving)
+                    binding.tvFeedback.setTextColor(
+                        if (state.error != null) 0xFFB3261E.toInt() else 0xFF176A42.toInt()
+                    )
                     binding.tvFeedback.text = state.error ?: state.message ?: if (!state.loading && state.children.isEmpty()) "Belum ada anak yang terhubung." else ""
                     if (!state.saving && state.message != null) {
                         binding.etReason.text?.clear()
@@ -185,6 +192,15 @@ class LeaveFragment : Fragment() {
                         status.setTextColor(style.third)
                         item.findViewById<TextView>(R.id.tvHasAttachment).visibility =
                             if (request.attachmentUrl.isNullOrBlank()) View.GONE else View.VISIBLE
+                        val rejectionBox = item.findViewById<View>(R.id.layoutRejectionReason)
+                        val rejectionText = item.findViewById<TextView>(R.id.tvRejectionReason)
+                        if (request.status == "REJECTED") {
+                            rejectionBox.visibility = View.VISIBLE
+                            rejectionText.text = request.rejectionReason?.takeIf { it.isNotBlank() }
+                                ?: "Ditolak oleh wali kelas tanpa catatan tambahan."
+                        } else {
+                            rejectionBox.visibility = View.GONE
+                        }
                         binding.listRequests.addView(item)
                     }
                     binding.tvEmpty.visibility = if (!state.loading && state.requests.isEmpty()) View.VISIBLE else View.GONE
@@ -203,7 +219,8 @@ class LeaveFragment : Fragment() {
         selectedFileName = null
         selectedMime = null
         _binding?.let {
-            it.tvAttachment.text = "Format JPG, PNG, PDF · Maksimal 5 MB"
+            it.tvAttachment.setTextColor(0xFF556278.toInt())
+            it.tvAttachment.text = "Belum ada lampiran dipilih (JPG, PNG, PDF · Maks. 5 MB)"
             it.btnRemoveAttachment.visibility = View.GONE
         }
     }

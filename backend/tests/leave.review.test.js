@@ -3,7 +3,9 @@ jest.mock('../src/lib/prisma', () => ({
   leaveRequest: { count: jest.fn(), findMany: jest.fn() },
   $transaction: jest.fn(),
 }));
+jest.mock('../src/modules/notifications/notifications.service', () => ({ notify: jest.fn() }));
 const prisma = require('../src/lib/prisma');
+const { notify } = require('../src/modules/notifications/notifications.service');
 const service = require('../src/modules/attendance/leave.review.service');
 const { decisionBody, idParams, pendingQuery } = require('../src/modules/attendance/leave.review.validation');
 const teacher = () => prisma.teacher.findUnique.mockResolvedValue({ id: 7 });
@@ -11,13 +13,17 @@ const date = (s) => new Date(`${s}T00:00:00.000Z`);
 const request = (overrides = {}) => ({
   id: 42, status: 'PENDING', studentId: 10,
   startDate: date('2026-11-12'), endDate: date('2026-11-13'),
-  student: { classMemberships: [{ classGroupId: 5 }] }, ...overrides,
+  guardian: { userId: 88 },
+  student: { user: { name: 'Ani' }, classMemberships: [{ classGroupId: 5 }] }, ...overrides,
 });
 
 beforeEach(() => jest.clearAllMocks());
 
-test('validasi menerima hanya APPROVED dan REJECTED', () => {
+test('validasi menerima APPROVED dan REJECTED (wajib alasan penolakan)', () => {
   expect(decisionBody.parse({ decision: 'APPROVED' }).decision).toBe('APPROVED');
+  expect(decisionBody.parse({ decision: 'REJECTED', rejectionReason: 'Surat kurang jelas' }).rejectionReason).toBe('Surat kurang jelas');
+  expect(decisionBody.safeParse({ decision: 'REJECTED' }).success).toBe(false);
+  expect(decisionBody.safeParse({ decision: 'REJECTED', rejectionReason: '   ' }).success).toBe(false);
   expect(decisionBody.safeParse({ decision: 'INVALID' }).success).toBe(false);
   expect(idParams.parse({ requestId: '42' }).requestId).toBe(42);
   expect(pendingQuery.parse({})).toEqual({ page: 1, limit: 20 });
@@ -80,7 +86,7 @@ test('approve otomatis mengubah presensi yang sudah tersimpan menjadi EXCUSED', 
   }));
 });
 
-test('reject tidak mengubah presensi', async () => {
+test('reject wajib menyertakan alasan penolakan, tidak mengubah presensi, dan mengirim notifikasi', async () => {
   teacher();
   const updateMany = jest.fn().mockResolvedValue({ count: 1 });
   const updateAttendance = jest.fn();
@@ -88,9 +94,18 @@ test('reject tidak mengubah presensi', async () => {
     leaveRequest: { findUnique: jest.fn().mockResolvedValue(request()), updateMany },
     attendance: { updateMany: updateAttendance },
   }));
-  const result = await service.decide(9, 42, 'REJECTED');
+  const result = await service.decide(9, 42, 'REJECTED', 'Foto surat dokter buram');
   expect(result.attendanceUpdated).toBe(0);
+  expect(result.rejectionReason).toBe('Foto surat dokter buram');
   expect(updateAttendance).not.toHaveBeenCalled();
+  expect(notify).toHaveBeenCalledWith(
+    [88],
+    expect.objectContaining({
+      type: 'LEAVE_REQUEST',
+      title: 'Pengajuan Izin Ditolak',
+      body: expect.stringContaining('Foto surat dokter buram'),
+    }),
+  );
 });
 
 test('update bersyarat yang gagal dianggap conflict', async () => {

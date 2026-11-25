@@ -115,6 +115,15 @@ class RiwayatPeminjamanAdapter :
                 ColorStateList.valueOf(
                     Color.parseColor(bgColor)
                 )
+
+            val isRejected = item.status == "REJECTED"
+            binding.layoutRejectionReason.visibility =
+                if (isRejected) android.view.View.VISIBLE else android.view.View.GONE
+            if (isRejected) {
+                binding.tvRejectionReason.text =
+                    item.rejectionReason?.takeIf { it.isNotBlank() }
+                        ?: "Ditolak oleh Admin tanpa catatan tambahan."
+            }
         }
 
         private fun formatTanggal(value: String): String {

@@ -45,14 +45,14 @@ class AttendanceRepository @Inject constructor(private val api: AttendanceApi) {
 
     companion object {
         fun errorMessage(e: Throwable): String = when (e) {
-            is IOException -> "Tidak dapat menghubungi server."
+            is IOException -> "Tidak dapat terhubung ke server. Periksa koneksi internet Anda."
             is HttpException -> when (e.code()) {
                 400 -> "Tanggal, daftar siswa, atau jurnal tidak valid. Pastikan tanggal sesuai hari jadwal."
-                401 -> "Sesi login habis. Silakan login ulang."
-                403 -> "Kamu tidak boleh mengisi sesi ini (mungkin jadwal dibatalkan atau diganti)."
-                404 -> "Jadwal tidak ditemukan atau bukan jadwalmu."
-                409 -> "Data mengalami konflik. Muat ulang terlebih dahulu."
-                else -> "Server bermasalah (HTTP ${e.code()})."
+                401 -> "Sesi login Anda telah berakhir. Silakan masuk kembali."
+                403 -> "Anda tidak dapat mengisi sesi ini (jadwal mungkin dibatalkan atau diganti)."
+                404 -> "Jadwal tidak ditemukan atau bukan jadwal Anda."
+                409 -> "Data mengalami konflik. Silakan muat ulang terlebih dahulu."
+                else -> "Terjadi kesalahan pada server. Silakan coba lagi."
             }
             else -> e.message ?: "Terjadi kesalahan."
         }

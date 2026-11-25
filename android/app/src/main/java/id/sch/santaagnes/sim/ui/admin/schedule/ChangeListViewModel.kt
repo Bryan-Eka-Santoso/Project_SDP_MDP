@@ -97,7 +97,11 @@ class ChangeListViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = repository.deleteChange(changeId)) {
                 is Resource.Success -> _uiState.update { state ->
-                    state.copy(changes = state.changes.filterNot { it.id == changeId }, errorMessage = null)
+                    state.copy(
+                        changes = state.changes.filterNot { it.id == changeId },
+                        total = state.total?.let { (it - 1).coerceAtLeast(0) },
+                        errorMessage = null
+                    )
                 }
                 is Resource.Error -> _uiState.update { it.copy(errorMessage = result.message) }
             }

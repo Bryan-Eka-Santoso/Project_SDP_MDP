@@ -4,7 +4,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    app:cardCornerRadius="12dp">
+    android:layout_marginBottom="12dp"
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="1dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -12,59 +15,129 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <TextView
-            android:id="@+id/tvFacility"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Laboratorium Komputer" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tvFacility"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Laboratorium Komputer"
+                android:textColor="@color/agnesian_text"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_status_peminjaman"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="5dp"
+                android:text="Menunggu"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/tvRequester"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Pemohon" />
+            android:layout_marginTop="6dp"
+            android:text="Pemohon"
+            android:textColor="@color/agnesian_text"
+            android:textSize="13sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tvDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Tanggal" />
+            android:layout_marginTop="8dp"
+            android:text="Tanggal"
+            android:textColor="@color/agnesian_blue"
+            android:textSize="13sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tvTime"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Waktu" />
+            android:layout_marginTop="4dp"
+            android:text="Waktu"
+            android:textColor="@color/agnesian_blue"
+            android:textSize="13sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tvPurpose"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Keperluan" />
+            android:layout_marginTop="6dp"
+            android:text="Keperluan"
+            android:textColor="@color/agnesian_text"
+            android:textSize="13sp" />
 
-        <TextView
-            android:id="@+id/tvStatus"
+        <LinearLayout
+            android:id="@+id/layoutRejectionReason"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Status" />
+            android:layout_marginTop="10dp"
+            android:background="#FDE7E7"
+            android:orientation="vertical"
+            android:padding="10dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Alasan Penolakan"
+                android:textColor="@color/change_cancel"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvRejectionReason"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textColor="#8C1D18"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/layoutActions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
             android:orientation="horizontal">
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnReject"
-                android:layout_width="wrap_content"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Tolak" />
+                android:layout_marginEnd="6dp"
+                android:layout_weight="1"
+                android:text="Tolak"
+                android:textColor="@color/change_cancel"
+                app:strokeColor="@color/change_cancel" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnApprove"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Setujui" />
+                android:layout_marginStart="6dp"
+                android:layout_weight="1"
+                android:text="Setujui"
+                android:textColor="@color/white"
+                app:backgroundTint="@color/agnesian_blue" />
 
         </LinearLayout>
 

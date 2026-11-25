@@ -10,8 +10,12 @@ data class HomeroomLeaveDto(
     val reason: String,
     val attachmentUrl: String?,
     val status: String,
-    val createdAt: String?
+    val createdAt: String?,
+    val rejectionReason: String? = null
 )
 
-/** Nilai decision harus APPROVED atau REJECTED sesuai validasi backend. */
-data class HomeroomDecisionRequest(val decision: String)
+/** Nilai decision harus APPROVED atau REJECTED sesuai validasi backend; rejectionReason wajib saat REJECTED. */
+data class HomeroomDecisionRequest(
+    val decision: String,
+    val rejectionReason: String? = null
+)

@@ -75,8 +75,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Tanggal: 20 November 2026"
-            android:textColor="@color/agnesian_text"
-            android:textSize="12sp" />
+            android:textColor="@color/agnesian_blue"
+            android:textSize="13sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tvTime"
@@ -84,17 +85,46 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:text="Waktu: 09:00 - 11:00"
-            android:textColor="@color/agnesian_text"
-            android:textSize="12sp" />
+            android:textColor="@color/agnesian_blue"
+            android:textSize="13sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tvPurpose"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
+            android:layout_marginTop="6dp"
             android:text="Keperluan: Presentasi"
             android:textColor="@color/agnesian_text"
-            android:textSize="12sp" />
+            android:textSize="13sp" />
+
+        <LinearLayout
+            android:id="@+id/layoutRejectionReason"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="#FDE7E7"
+            android:orientation="vertical"
+            android:padding="10dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Alasan Penolakan"
+                android:textColor="@color/change_cancel"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvRejectionReason"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textColor="#8C1D18"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/tvRequester"

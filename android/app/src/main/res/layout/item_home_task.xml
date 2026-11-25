@@ -30,5 +30,6 @@
         android:layout_marginTop="2dp"
         android:textColor="@color/agnesian_blue"
         android:textSize="12sp"
+        android:textStyle="bold"
         tools:text="Tenggat: Jumat, 20 November 2026 pukul 14:30 · Waktu sisa 5 hari" />
 </LinearLayout>

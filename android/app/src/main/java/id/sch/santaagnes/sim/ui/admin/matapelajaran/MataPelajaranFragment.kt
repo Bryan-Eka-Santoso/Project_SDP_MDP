@@ -152,7 +152,7 @@ class MataPelajaranFragment : Fragment() {
                 if (item == null) {
                     "Tambah Mata Pelajaran"
                 } else {
-                    "Edit Mata Pelajaran"
+                    "Ubah Mata Pelajaran"
                 }
             )
             .setView(form.root)
@@ -210,7 +210,7 @@ class MataPelajaranFragment : Fragment() {
     private fun konfirmasiHapus(item: MataPelajaranDto) {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Hapus Mata Pelajaran")
-            .setMessage("Apakah kamu ingin menghapus ${item.name}?")
+            .setMessage("Apakah Anda yakin ingin menghapus ${item.name}?")
             .setNegativeButton("Batal", null)
             .setPositiveButton("Hapus") { _, _ ->
                 viewModel.hapus(item.id)

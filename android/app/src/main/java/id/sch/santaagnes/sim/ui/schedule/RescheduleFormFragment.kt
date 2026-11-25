@@ -95,8 +95,11 @@ class RescheduleFormFragment : Fragment() {
         showValues()
 
         binding.inputNewDate.setOnClickListener { pickDate() }
+        binding.layoutNewDate.setEndIconOnClickListener { newDate = null; showValues() }
         binding.inputNewStart.setOnClickListener { pickTime(isStart = true) }
+        binding.layoutNewStart.setEndIconOnClickListener { newStart = null; showValues() }
         binding.inputNewEnd.setOnClickListener { pickTime(isStart = false) }
+        binding.layoutNewEnd.setEndIconOnClickListener { newEnd = null; showValues() }
         binding.btnSave.setOnClickListener { save() }
         binding.btnCancelMove.isVisible = hasMove
         binding.btnCancelMove.setOnClickListener { confirmCancel() }
@@ -118,7 +121,7 @@ class RescheduleFormFragment : Fragment() {
     }
 
     private fun render(state: RescheduleFormUiState) {
-        binding.progress.isVisible = state.isLoadingRooms
+        binding.progress.isVisible = state.isLoadingRooms || state.isSaving
         binding.btnSave.setLoading(state.isSaving)
         binding.btnCancelMove.isEnabled = !state.isSaving
         binding.btnCancelClass.isEnabled = !state.isSaving
@@ -130,8 +133,9 @@ class RescheduleFormFragment : Fragment() {
 
         if (state.rooms != rooms) {
             rooms = state.rooms
+            val labels = listOf(KEEP_ROOM_LABEL) + rooms.map { it.name }
             binding.inputRoom.setAdapter(
-                ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, rooms.map { it.name })
+                ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, labels)
             )
         }
     }
@@ -139,26 +143,34 @@ class RescheduleFormFragment : Fragment() {
     private fun save() {
         // Ruangan dikenali dari teks yang tampil, sehingga tetap benar setelah layar diputar.
         val chosenRoom = binding.inputRoom.text.toString()
+        val room = if (chosenRoom == KEEP_ROOM_LABEL) null else rooms.firstOrNull { it.name == chosenRoom }
         viewModel.save(
             target = target,
             newDate = newDate,
             newStartTime = newStart,
             newEndTime = newEnd,
-            room = rooms.firstOrNull { it.name == chosenRoom },
+            room = room,
             description = binding.inputDescription.text.toString()
         )
     }
 
     private fun confirmCancel() {
         if (args.cancelled) {
-            // Kelas yang dibatalkan: menghapus perubahan berarti jadwal kembali normal.
-            viewModel.cancelMove(args.changeId, R.string.reschedule_restored)
+            // Kelas yang dibatalkan: konfirmasi dulu sebelum memulihkan agar tidak tertekan tidak sengaja.
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Pulihkan jadwal?")
+                .setMessage("Pertemuan ini akan kembali berlangsung sesuai jadwal semula dan notifikasi akan dikirimkan kepada siswa serta wali murid.")
+                .setNegativeButton("Batal", null)
+                .setPositiveButton(R.string.reschedule_restore) { _, _ ->
+                    viewModel.cancelMove(args.changeId, R.string.reschedule_restored)
+                }
+                .show()
             return
         }
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.reschedule_cancel_title)
             .setMessage(R.string.reschedule_cancel_message)
-            .setNegativeButton(android.R.string.cancel, null)
+            .setNegativeButton("Batal", null)
             .setPositiveButton(R.string.reschedule_cancel_move) { _, _ -> viewModel.cancelMove(args.changeId) }
             .show()
     }
@@ -170,15 +182,16 @@ class RescheduleFormFragment : Fragment() {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.reschedule_cancel_class_title)
             .setMessage(R.string.reschedule_cancel_class_message)
-            .setNegativeButton(android.R.string.cancel, null)
+            .setNegativeButton("Batal", null)
             .setPositiveButton(R.string.reschedule_cancel_class_confirm) { _, _ ->
                 viewModel.cancelClass(target, binding.inputDescription.text.toString())
             }
             .show()
     }
 
-    // Pertemuan sudah dibatalkan: sembunyikan form dan tawarkan pemulihan saja.
+    // Pertemuan sudah dibatalkan: sembunyikan form dan tawarkan pemulihan dengan tombol biru utama.
     private fun showCancelledMode() {
+        binding.tvHeading.setText(R.string.reschedule_restore)
         listOf(
             binding.tvInfo, binding.layoutNewDate, binding.layoutNewStart, binding.layoutNewEnd,
             binding.layoutRoom, binding.layoutDescription, binding.btnSave, binding.btnCancelClass
@@ -186,6 +199,10 @@ class RescheduleFormFragment : Fragment() {
         binding.tvCancelledInfo.isVisible = true
         binding.btnCancelMove.isVisible = true
         binding.btnCancelMove.setText(R.string.reschedule_restore)
+        binding.btnCancelMove.backgroundTintList =
+            android.content.res.ColorStateList.valueOf(requireContext().getColor(R.color.agnesian_blue))
+        binding.btnCancelMove.setTextColor(requireContext().getColor(R.color.white))
+        binding.btnCancelMove.strokeWidth = 0
     }
 
     private fun pickDate() {
@@ -230,6 +247,9 @@ class RescheduleFormFragment : Fragment() {
         binding.inputNewDate.setText(newDate?.let(DateTimeWib::formatDate).orEmpty())
         binding.inputNewStart.setText(newStart?.let(DateTimeWib::formatTime).orEmpty())
         binding.inputNewEnd.setText(newEnd?.let(DateTimeWib::formatTime).orEmpty())
+        binding.layoutNewDate.isEndIconVisible = newDate != null
+        binding.layoutNewStart.isEndIconVisible = newStart != null
+        binding.layoutNewEnd.isEndIconVisible = newEnd != null
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -245,6 +265,7 @@ class RescheduleFormFragment : Fragment() {
     }
 
     private companion object {
+        const val KEEP_ROOM_LABEL = "Tetap (tidak pindah ruangan)"
         const val STATE_DATE = "newDate"
         const val STATE_START = "newStart"
         const val STATE_END = "newEnd"

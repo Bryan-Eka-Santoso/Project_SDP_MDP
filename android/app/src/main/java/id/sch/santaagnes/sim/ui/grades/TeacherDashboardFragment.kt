@@ -155,7 +155,7 @@ class TeacherDashboardFragment : Fragment() {
                 if (_binding == null) return@launch
 
                 binding.tvTeacherName.text =
-                    user?.name ?: "Guru SMA Santa Agnes"
+                    user?.name ?: "Guru SMAK Santa Agnes"
 
                 // Mengambil daftar kelas yang diajar
                 val assignments = gradesRepository.assignments()

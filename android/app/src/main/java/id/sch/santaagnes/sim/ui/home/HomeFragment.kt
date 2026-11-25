@@ -24,6 +24,7 @@ import id.sch.santaagnes.sim.domain.model.NamedId
 import id.sch.santaagnes.sim.domain.model.Task
 import id.sch.santaagnes.sim.ui.calendar.AcademicCalendarViewModel
 import id.sch.santaagnes.sim.ui.calendar.bindDashboardCalendar
+import id.sch.santaagnes.sim.ui.common.applyAgnesianFilterStyle
 import id.sch.santaagnes.sim.ui.task.countdownText
 import id.sch.santaagnes.sim.ui.task.dueColor
 import id.sch.santaagnes.sim.ui.task.dueDateText
@@ -118,7 +119,7 @@ class HomeFragment : Fragment() {
                 val chip = Chip(requireContext()).apply {
                     id = View.generateViewId()
                     text = child.name
-                    isCheckable = true
+                    applyAgnesianFilterStyle(onDarkHeader = true)
                     setOnClickListener { viewModel.selectChild(child.id) }
                 }
                 binding.chipChildren.addView(chip)
@@ -172,7 +173,12 @@ class HomeFragment : Fragment() {
                 HomeShortcut(R.string.home_shortcut_booking_history, R.drawable.ic_facility, go(R.id.studentRiwayatPeminjamanFragment)),
                 HomeShortcut(R.string.home_shortcut_notes, R.drawable.ic_person, go(R.id.studentProgressNotesFragment)),
                 HomeShortcut(R.string.shortcut_announcements, R.drawable.ic_bell, go(R.id.action_global_announcements)),
-                HomeShortcut(R.string.shortcut_calendar, R.drawable.ic_calendar, go(R.id.action_global_calendar))
+                HomeShortcut(R.string.shortcut_calendar, R.drawable.ic_calendar, go(R.id.action_global_calendar)),
+                HomeShortcut(
+                    R.string.home_shortcut_subject_package,
+                    R.drawable.ic_package,
+                    go(R.id.studentPilihPaketFragment)
+                ),
             )
             "GUARDIAN" -> listOf(
                 HomeShortcut(R.string.home_shortcut_violations, R.drawable.ic_warning, go(R.id.guardianRiwayatPelanggaranFragment)),

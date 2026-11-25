@@ -27,7 +27,11 @@ async function approve(req, res) {
 }
 
 async function reject(req, res) {
-  const result = await service.reject(req.validated.params.id, req.user.id);
+  const result = await service.reject(
+    req.validated.params.id,
+    req.user.id,
+    req.validated.body.rejectionReason,
+  );
 
   return sendSuccess(res, result);
 }

@@ -8,8 +8,21 @@ import javax.inject.Inject
 data class AdminJournalPage(val rows: List<AdminJournalDto>, val page: Int, val totalPages: Int, val total: Int)
 
 class AdminJournalRepository @Inject constructor(private val api: ReportApi) {
-    suspend fun getPage(page: Int, startDate: String?, endDate: String?): AdminJournalPage {
-        val response = api.getAdminJournals(page = page, limit = 10, startDate = startDate, endDate = endDate)
+    suspend fun getPage(
+        page: Int,
+        startDate: String?,
+        endDate: String?,
+        teacherId: Int? = null,
+        classGroupId: Int? = null
+    ): AdminJournalPage {
+        val response = api.getAdminJournals(
+            page = page,
+            limit = 10,
+            startDate = startDate,
+            endDate = endDate,
+            teacherId = teacherId,
+            classGroupId = classGroupId
+        )
         if (!response.success) error(response.error?.message ?: "Gagal mengambil jurnal mengajar.")
         val meta = response.meta ?: error("Informasi halaman jurnal tidak tersedia.")
         return AdminJournalPage(response.data.orEmpty(), meta.page, meta.totalPages, meta.total)

@@ -62,14 +62,14 @@ class GradesRepository @Inject constructor(private val api: GradesApi) {
 
     companion object {
         fun friendlyError(error: Throwable): String = when (error) {
-            is IOException -> "Tidak bisa terhubung ke server."
+            is IOException -> "Tidak dapat terhubung ke server. Periksa koneksi internet Anda."
             is HttpException -> when (error.code()) {
                 400 -> "Data yang diisi tidak valid."
-                401 -> "Sesi login habis. Silakan login ulang."
-                403 -> "Kamu tidak punya akses ke data ini."
-                404 -> "Data tidak ditemukan atau bukan kelas yang kamu ajar."
+                401 -> "Sesi login Anda telah berakhir. Silakan masuk kembali."
+                403 -> "Anda tidak memiliki akses ke data ini."
+                404 -> "Data tidak ditemukan atau bukan kelas yang Anda ajar."
                 409 -> "Bobot komponen harus berjumlah 100% sebelum input nilai."
-                else -> "Server bermasalah (HTTP ${error.code()})."
+                else -> "Terjadi kesalahan pada server. Silakan coba lagi."
             }
             else -> error.message ?: "Terjadi kesalahan."
         }

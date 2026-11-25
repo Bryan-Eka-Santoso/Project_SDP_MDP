@@ -126,18 +126,73 @@ class HomeroomPendingFragment : Fragment() {
     }
 
     private fun confirmDecision(item: HomeroomLeaveDto, approved: Boolean) {
-        val verb = if (approved) "Setujui" else "Tolak"
-        val detail = if (approved) {
-            "Izin akan disetujui dan dapat memperbarui data presensi sesuai aturan backend."
-        } else {
-            "Izin akan ditolak. Keputusan ini akan tersimpan di sistem."
+        if (approved) {
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Setujui izin ${item.studentName}?")
+                .setMessage(
+                    "${formatDate(item.startDate)} – ${formatDate(item.endDate)}\n\n" +
+                        "Izin akan disetujui dan presensi siswa pada tanggal tersebut akan diperbarui otomatis."
+                )
+                .setNegativeButton("Batal", null)
+                .setPositiveButton("Setujui") { _, _ -> viewModel.decide(item, approved = true) }
+                .show()
+            return
         }
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("$verb izin ${item.studentName}?")
-            .setMessage("${formatDate(item.startDate)} – ${formatDate(item.endDate)}\n\n$detail")
+
+        val density = resources.displayMetrics.density
+        val pad = (density * 20).toInt()
+        val container = android.widget.LinearLayout(requireContext()).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            setPadding(pad, (density * 8).toInt(), pad, 0)
+        }
+        val subtitle = TextView(requireContext()).apply {
+            text = "${formatDate(item.startDate)} – ${formatDate(item.endDate)}\nTuliskan alasan penolakan agar wali murid mengetahuinya."
+            textSize = 13f
+            setTextColor(requireContext().getColor(R.color.agnesian_text))
+        }
+        val inputLayout = com.google.android.material.textfield.TextInputLayout(
+            requireContext(),
+            null,
+            com.google.android.material.R.attr.textInputOutlinedStyle
+        ).apply {
+            hint = "Alasan penolakan (wajib diisi)"
+            isCounterEnabled = true
+            counterMaxLength = 255
+            layoutParams = android.widget.LinearLayout.LayoutParams(-1, -2).apply {
+                topMargin = (density * 12).toInt()
+            }
+        }
+        val editText = com.google.android.material.textfield.TextInputEditText(inputLayout.context).apply {
+            minLines = 2
+            maxLines = 4
+            inputType = android.text.InputType.TYPE_CLASS_TEXT or
+                android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE or
+                android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+            filters = arrayOf(android.text.InputFilter.LengthFilter(255))
+        }
+        inputLayout.addView(editText)
+        container.addView(subtitle)
+        container.addView(inputLayout)
+
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Tolak izin ${item.studentName}?")
+            .setView(container)
             .setNegativeButton("Batal", null)
-            .setPositiveButton(verb) { _, _ -> viewModel.decide(item, approved) }
-            .show()
+            .setPositiveButton("Tolak", null)
+            .create()
+        dialog.setOnShowListener {
+            dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                val reason = editText.text?.toString()?.trim().orEmpty()
+                if (reason.isBlank()) {
+                    inputLayout.error = "Alasan penolakan wajib diisi."
+                    return@setOnClickListener
+                }
+                inputLayout.error = null
+                dialog.dismiss()
+                viewModel.decide(item, approved = false, rejectionReason = reason)
+            }
+        }
+        dialog.show()
     }
 
     private fun formatDate(raw: String): String = try {

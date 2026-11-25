@@ -107,7 +107,11 @@ class AdminScheduleViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = repository.deleteSlot(slotId)) {
                 is Resource.Success -> _uiState.update { state ->
-                    state.copy(slots = state.slots.filterNot { it.id == slotId }, errorMessage = null)
+                    state.copy(
+                        slots = state.slots.filterNot { it.id == slotId },
+                        total = state.total?.let { (it - 1).coerceAtLeast(0) },
+                        errorMessage = null
+                    )
                 }
                 is Resource.Error -> _uiState.update { it.copy(errorMessage = result.message) }
             }

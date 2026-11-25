@@ -1,6 +1,7 @@
 const prisma = require('../../lib/prisma');
 const AppError = require('../../utils/AppError');
 const attachment = require('./leave.attachment');
+const { notify } = require('../notifications/notifications.service');
 
 async function guardianOf(userId) {
   const guardian = await prisma.guardian.findUnique({
@@ -45,7 +46,7 @@ async function list(userId, query) {
       where,
       select: {
         id: true, studentId: true, startDate: true, endDate: true,
-        reason: true, attachmentUrl: true, status: true, createdAt: true,
+        reason: true, rejectionReason: true, attachmentUrl: true, status: true, createdAt: true,
         student: { select: { nis: true, user: { select: { name: true } } } },
       },
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
@@ -61,6 +62,7 @@ async function list(userId, query) {
       startDate: item.startDate.toISOString().slice(0, 10),
       endDate: item.endDate.toISOString().slice(0, 10),
       reason: item.reason,
+      rejectionReason: item.rejectionReason ?? null,
       attachmentUrl: item.attachmentUrl,
       status: item.status,
       createdAt: item.createdAt,
@@ -87,17 +89,53 @@ async function create(userId, data, file = null) {
       },
       select: {
         id: true, studentId: true, startDate: true, endDate: true,
-        reason: true, status: true, createdAt: true, attachmentUrl: true,
+        reason: true, rejectionReason: true, status: true, createdAt: true, attachmentUrl: true,
+        student: {
+          select: {
+            user: { select: { name: true } },
+            classMemberships: {
+              where: { classGroup: { academicYear: { isActive: true }, homeroomTeacherId: { not: null } } },
+              select: { classGroup: { select: { homeroomTeacher: { select: { userId: true } } } } },
+            },
+          },
+        },
       },
     });
   } catch (error) {
     await attachment.deleteAttachment(stored?.filename);
     throw error;
   }
+
+  const homeroomUserIds = [
+    ...new Set(
+      (record.student?.classMemberships ?? [])
+        .map((m) => m.classGroup?.homeroomTeacher?.userId)
+        .filter(Boolean),
+    ),
+  ];
+  const startDate = record.startDate.toISOString().slice(0, 10);
+  const endDate = record.endDate.toISOString().slice(0, 10);
+  if (homeroomUserIds.length > 0) {
+    const studentName = record.student?.user?.name ?? 'Siswa';
+    const dateRange = startDate === endDate ? startDate : `${startDate} s.d. ${endDate}`;
+    notify(homeroomUserIds, {
+      type: 'LEAVE_REQUEST',
+      title: 'Pengajuan Izin Baru',
+      body: `${studentName} mengajukan izin (${dateRange}): ${record.reason}`,
+      referenceId: record.id,
+    });
+  }
+
   return {
-    ...record,
-    startDate: record.startDate.toISOString().slice(0, 10),
-    endDate: record.endDate.toISOString().slice(0, 10),
+    id: record.id,
+    studentId: record.studentId,
+    startDate,
+    endDate,
+    reason: record.reason,
+    rejectionReason: record.rejectionReason ?? null,
+    status: record.status,
+    createdAt: record.createdAt,
+    attachmentUrl: record.attachmentUrl,
   };
 }
 

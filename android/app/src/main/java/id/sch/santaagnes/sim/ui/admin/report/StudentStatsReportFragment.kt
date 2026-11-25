@@ -1,6 +1,7 @@
 package id.sch.santaagnes.sim.ui.admin.report
 
 import android.view.View
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import com.google.android.material.chip.Chip
@@ -73,6 +74,39 @@ class StudentStatsReportFragment : ReportFragment<StudentStatsRow, StudentStatsF
         if (selectedIdx >= 0) {
             (binding.chipTypes.getChildAt(selectedIdx) as? Chip)?.isChecked = true
         }
+    }
+
+    override fun buildChartSpec(state: ReportUiState<StudentStatsRow, StudentStatsFilter>): ReportChartSpec {
+        val ctx = requireContext()
+        val cGood = ContextCompat.getColor(ctx, R.color.bill_paid)
+        val cWarn = ContextCompat.getColor(ctx, R.color.change_substitute)
+        val cBad = ContextCompat.getColor(ctx, R.color.change_cancel)
+        val cBlue = ContextCompat.getColor(ctx, R.color.agnesian_blue)
+        val totalStudents = state.rows.sumOf { it.studentCount }
+        val totalViolations = state.rows.sumOf { it.violationPoints }
+        return ReportChartSpec(
+            title = "Tingkat Kehadiran per Kelas (%)",
+            subtitle = "Semester aktif · ${state.rows.size} kelas ditampilkan",
+            kind = ReportChartKind.HORIZONTAL_BAR,
+            kpis = listOf(
+                ChartKpi("Total Siswa", "$totalStudents siswa", cBlue),
+                ChartKpi("Total Poin Pelanggaran", "$totalViolations poin", if (totalViolations > 0) cBad else cGood)
+            ),
+            segments = state.rows.take(6).map { row ->
+                val color = when {
+                    row.attendanceTotal == 0 -> ContextCompat.getColor(ctx, R.color.agnesian_muted)
+                    row.attendanceRate >= 90.0 -> cGood
+                    row.attendanceRate >= 75.0 -> cWarn
+                    else -> cBad
+                }
+                ChartSegment(
+                    label = "${row.className} (${row.studentCount} siswa)",
+                    value = row.attendanceRate.toFloat(),
+                    displayValue = if (row.attendanceTotal == 0) "0%" else "${formatReportDecimal(row.attendanceRate)}%",
+                    color = color
+                )
+            }
+        )
     }
 
     override fun releaseFilters() {

@@ -10,6 +10,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -113,7 +114,36 @@ class TeachingJournalReportFragment : Fragment() {
         }
 
         binding.reportRows.removeAllViews()
+        if (state.items.isNotEmpty()) {
+            binding.reportRows.addView(buildJournalChart(state.items))
+        }
         state.items.forEach { addRow(it) }
+    }
+
+    private fun buildJournalChart(items: List<TeachingJournalReportDto>): View {
+        val ctx = requireContext()
+        val filled = items.count { !it.journal.isNullOrBlank() }
+        val empty = items.size - filled
+        val cBlue = ContextCompat.getColor(ctx, R.color.agnesian_blue)
+        val cGreen = ContextCompat.getColor(ctx, R.color.bill_paid)
+        val cAmber = ContextCompat.getColor(ctx, R.color.change_substitute)
+        val byClass = items.groupingBy { it.className }.eachCount()
+            .entries.sortedByDescending { it.value }.take(6)
+        return ReportChartRenderer.buildCard(
+            ctx,
+            ReportChartSpec(
+                title = "Jumlah Sesi Jurnal per Kelas",
+                subtitle = "Berdasarkan ${items.size} sesi yang ditampilkan",
+                kind = ReportChartKind.HORIZONTAL_BAR,
+                kpis = listOf(
+                    ChartKpi("Jurnal Terisi", "$filled sesi", cGreen),
+                    ChartKpi("Belum Diisi", "$empty sesi", if (empty > 0) cAmber else cGreen)
+                ),
+                segments = byClass.map { (cls, count) ->
+                    ChartSegment(cls, count.toFloat(), "$count sesi", cBlue)
+                }
+            )
+        )
     }
 
     private fun pickDate(selected: LocalDate?, onPicked: (LocalDate) -> Unit) {
@@ -129,8 +159,8 @@ class TeachingJournalReportFragment : Fragment() {
             radius = dp(14).toFloat()
             cardElevation = 0f
             strokeWidth = dp(1)
-            strokeColor = resources.getColor(R.color.agnesian_muted, context.theme)
-            setCardBackgroundColor(resources.getColor(R.color.white, context.theme))
+            strokeColor = ContextCompat.getColor(context, R.color.agnesian_border)
+            setCardBackgroundColor(ContextCompat.getColor(context, R.color.white))
             layoutParams = LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(10) }
         }
         val content = LinearLayout(context).apply {
@@ -139,11 +169,35 @@ class TeachingJournalReportFragment : Fragment() {
         }
         val dateText = runCatching { DateTimeWib.formatDate(LocalDate.parse(row.date)) }
             .getOrDefault(row.date)
-        content.addView(line(row.subjectName, 15f, true, R.color.agnesian_text))
-        content.addView(line("${row.className} • ${row.teacherName}", 12f, false, R.color.agnesian_muted))
-        content.addView(line(dateText, 12f, false, R.color.agnesian_blue))
-        content.addView(line("Jurnal mengajar", 12f, true, R.color.agnesian_text))
-        content.addView(line(row.journal?.takeIf { it.isNotBlank() } ?: "Belum ada catatan jurnal", 13f, false, R.color.agnesian_text))
+        val hasJournal = !row.journal.isNullOrBlank()
+        val header = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = android.view.Gravity.CENTER_VERTICAL
+        }
+        val titleCol = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
+        }
+        titleCol.addView(line(row.subjectName, 15f, true, R.color.agnesian_text))
+        titleCol.addView(line("${row.className} • ${row.teacherName}", 12f, true, R.color.agnesian_muted))
+        header.addView(titleCol)
+        header.addView(
+            ReportChartRenderer.buildBadge(
+                context,
+                if (hasJournal) "Terisi" else "Kosong",
+                if (hasJournal) R.color.bill_paid else R.color.change_substitute
+            )
+        )
+        content.addView(header)
+        content.addView(line(dateText, 13f, true, R.color.agnesian_blue))
+        content.addView(
+            line(
+                row.journal?.takeIf { it.isNotBlank() } ?: "Belum ada catatan jurnal.",
+                13f,
+                !hasJournal,
+                if (hasJournal) R.color.agnesian_text else R.color.change_substitute
+            )
+        )
         card.addView(content)
         binding.reportRows.addView(card)
     }

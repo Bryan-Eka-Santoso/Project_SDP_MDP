@@ -1,7 +1,9 @@
 package id.sch.santaagnes.sim.ui.admin.report
 
+import android.graphics.Typeface
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -37,12 +39,16 @@ class TeachingLoadReportAdapter :
 
             if (row.sessionsPerWeek == 0) {
                 binding.tvSummary.setText(R.string.report_load_no_schedule)
+                binding.tvSummary.setTextColor(ContextCompat.getColor(context, R.color.agnesian_muted))
+                binding.tvSummary.setTypeface(null, Typeface.NORMAL)
             } else {
                 binding.tvSummary.text = context.getString(
                     R.string.report_load_summary,
                     row.sessionsPerWeek,
                     row.classCount
                 )
+                binding.tvSummary.setTextColor(ContextCompat.getColor(context, R.color.agnesian_text))
+                binding.tvSummary.setTypeface(null, Typeface.BOLD)
             }
             binding.tvSubjects.isVisible = row.subjectNames.isNotEmpty()
             binding.tvSubjects.text = row.subjectNames.joinToString(", ")
@@ -58,6 +64,13 @@ class TeachingLoadReportAdapter :
                 val bar = ItemReportDayBarBinding.inflate(inflater, binding.daysRow, false)
                 bar.tvDayName.text = DateTimeWib.dayName(day).take(DAY_LABEL_LENGTH)
                 bar.tvDayHours.text = formatReportDecimal(hours)
+                bar.tvDayHours.setTypeface(null, if (hours > 0) Typeface.BOLD else Typeface.NORMAL)
+                bar.tvDayHours.setTextColor(
+                    ContextCompat.getColor(
+                        binding.root.context,
+                        if (hours > 0) R.color.agnesian_blue else R.color.agnesian_muted
+                    )
+                )
                 // Skala tetap (bukan relatif per guru) supaya batang antar guru bisa dibandingkan.
                 val fraction = (hours / MAX_DAY_HOURS).coerceIn(0.0, 1.0)
                 bar.viewBar.layoutParams = bar.viewBar.layoutParams.also {

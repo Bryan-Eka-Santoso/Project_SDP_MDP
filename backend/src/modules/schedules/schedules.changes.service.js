@@ -371,6 +371,32 @@ async function deleteChange(user, id) {
     }
   }
 
+  // Saat memulihkan jadwal yang dibatalkan/dipindah, pastikan slot asli tidak bentrok dengan jadwal lain di tanggal asal.
+  if (change.type === 'CANCEL' || change.type === 'RESCHEDULE') {
+    const slot = change.scheduleSlot;
+    const ta = slot.teachingAssignment;
+    const details = await findConflictsOnDate(
+      prisma,
+      {
+        dayOfWeek: dayOfWeekOf(change.date),
+        startTime: slot.startTime,
+        endTime: slot.endTime,
+        roomId: slot.room.id,
+        teacherId: ta.teacher.id,
+        classGroupId: ta.classGroup.id,
+      },
+      { semesterId: ta.semesterId, date: change.date, excludeSlotId: slot.id },
+    );
+    if (details.length > 0) {
+      throw new AppError(
+        409,
+        'SCHEDULE_CONFLICT',
+        'Jadwal asli tidak dapat dipulihkan karena bentrok dengan jadwal lain pada tanggal tersebut.',
+        details,
+      );
+    }
+  }
+
   await prisma.scheduleChange.delete({ where: { id } });
 
   const ta = change.scheduleSlot.teachingAssignment;

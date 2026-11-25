@@ -126,13 +126,13 @@ class ElectiveAllocationViewModel @Inject constructor(
     fun clearMessage() { mutable.value = mutable.value.copy(message = null) }
 
     private fun friendly(e: Exception): String = when (e) {
-        is IOException -> "Tidak dapat terhubung ke server. Periksa backend dan koneksi emulator."
+        is IOException -> "Tidak dapat terhubung ke server. Periksa koneksi internet Anda."
         is HttpException -> when (e.code()) {
-            401 -> "Sesi login berakhir. Silakan login ulang."
+            401 -> "Sesi login Anda telah berakhir. Silakan masuk kembali."
             403 -> "Fitur alokasi hanya dapat digunakan oleh Admin."
             404 -> "Paket mata pelajaran tidak ditemukan."
-            409 -> "Alokasi tidak dapat dilanjutkan: ${e.message()}. Paket mungkin sudah dialokasikan atau data berubah."
-            else -> "Permintaan gagal (HTTP ${e.code()})."
+            409 -> "Alokasi tidak dapat dilanjutkan. Paket mungkin sudah dialokasikan atau data telah berubah."
+            else -> "Terjadi kesalahan pada server. Silakan coba lagi."
         }
         else -> e.message ?: "Terjadi kesalahan."
     }

@@ -40,6 +40,16 @@
         <item name="materialCalendarTheme">@style/ThemeOverlay.Agnesian.DatePicker</item>
         <item name="bottomSheetDialogTheme">@style/ThemeOverlay.Agnesian.BottomSheetDialog</item>
         <item name="textInputOutlinedStyle">@style/Widget.Agnesian.TextInputLayout</item>
+        <item name="chipStyle">@style/Widget.Agnesian.Chip.Filter</item>
+    </style>
+
+    <style name="Widget.Agnesian.Chip.Filter" parent="Widget.Material3.Chip.Filter">
+        <item name="chipBackgroundColor">@color/chip_filter_bg</item>
+        <item name="android:textColor">@color/chip_filter_text</item>
+        <item name="chipStrokeColor">@color/chip_filter_stroke</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="checkedIconTint">@color/white</item>
+        <item name="android:textStyle">bold</item>
     </style>
 
     <style name="ThemeOverlay.Agnesian.AlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">

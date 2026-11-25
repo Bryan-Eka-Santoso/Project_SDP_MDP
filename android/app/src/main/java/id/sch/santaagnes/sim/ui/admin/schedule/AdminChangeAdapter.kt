@@ -46,25 +46,36 @@ class AdminChangeAdapter(
 
             val lines = detailLines(change)
             binding.tvDetail.isVisible = lines.isNotEmpty()
-            binding.tvDetail.text = lines.joinToString("\n")
+            val highlight = ContextCompat.getColor(context, color)
+            val sb = android.text.SpannableStringBuilder()
+            lines.forEachIndexed { idx, (text, important) ->
+                if (idx > 0) sb.append("\n")
+                val start = sb.length
+                sb.append(text)
+                if (important) {
+                    sb.setSpan(android.text.style.StyleSpan(android.graphics.Typeface.BOLD), start, sb.length, 0)
+                    sb.setSpan(android.text.style.ForegroundColorSpan(highlight), start, sb.length, 0)
+                }
+            }
+            binding.tvDetail.text = sb
             binding.tvDescription.text = change.description
             binding.btnEdit.setOnClickListener { onEdit(change) }
             binding.btnDelete.setOnClickListener { onDelete(change) }
         }
 
-        // Nilai semula selalu tampil sebagai pembanding; nilai baru hanya bila jenisnya mengubah itu.
-        private fun detailLines(change: AdminChange): List<String> {
+        // Nilai semula selalu tampil sebagai pembanding; nilai baru di-bold dan diwarnai agar menonjol.
+        private fun detailLines(change: AdminChange): List<Pair<String, Boolean>> {
             val context = binding.root.context
             val slot = change.slot
-            val lines = mutableListOf<String>()
+            val lines = mutableListOf<Pair<String, Boolean>>()
             when (change.type) {
                 ChangeType.SUBSTITUTE -> {
-                    lines += context.getString(R.string.schedule_original_teacher, slot.teacherName)
-                    change.substituteTeacherName?.let { lines += context.getString(R.string.change_substitute_line, it) }
+                    lines += context.getString(R.string.schedule_original_teacher, slot.teacherName) to false
+                    change.substituteTeacherName?.let { lines += context.getString(R.string.change_substitute_line, it) to true }
                 }
                 ChangeType.RESCHEDULE -> {
                     change.newDate?.let {
-                        lines += context.getString(R.string.change_new_date, DateTimeWib.formatDate(it))
+                        lines += context.getString(R.string.change_new_date, DateTimeWib.formatDate(it)) to true
                     }
                     val start = change.newStartTime
                     val end = change.newEndTime
@@ -73,9 +84,9 @@ class AdminChangeAdapter(
                             R.string.change_new_time,
                             DateTimeWib.formatTime(start),
                             DateTimeWib.formatTime(end)
-                        )
+                        ) to true
                     }
-                    change.newRoomName?.let { lines += context.getString(R.string.change_new_room, it) }
+                    change.newRoomName?.let { lines += context.getString(R.string.change_new_room, it) to true }
                 }
                 ChangeType.CANCEL -> Unit
             }

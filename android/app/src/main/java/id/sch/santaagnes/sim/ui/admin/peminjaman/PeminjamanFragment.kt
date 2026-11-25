@@ -148,30 +148,75 @@ class PeminjamanFragment : Fragment() {
         item: PeminjamanDto,
         setujui: Boolean
     ) {
-        val judul = if (setujui) {
-            "Setujui Peminjaman"
-        } else {
-            "Tolak Peminjaman"
+        if (setujui) {
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Setujui Peminjaman")
+                .setMessage(
+                    "Setujui peminjaman ${item.facilityName} oleh ${item.requesterName}?\n" +
+                        "Tanggal: ${item.bookingDate} (${item.startTime} – ${item.endTime})"
+                )
+                .setNegativeButton("Batal", null)
+                .setPositiveButton("Setujui") { _, _ ->
+                    viewModel.putuskan(item.id, true)
+                }
+                .show()
+            return
         }
 
-        val pesan = if (setujui) {
-            "Setujui peminjaman ${item.facilityName} " +
-                    "oleh ${item.requesterName}?"
-        } else {
-            "Tolak peminjaman ${item.facilityName} " +
-                    "oleh ${item.requesterName}?"
+        val density = resources.displayMetrics.density
+        val pad = (density * 20).toInt()
+        val container = android.widget.LinearLayout(requireContext()).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            setPadding(pad, (density * 8).toInt(), pad, 0)
         }
-
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(judul)
-            .setMessage(pesan)
-            .setNegativeButton("Batal", null)
-            .setPositiveButton(
-                if (setujui) "Setujui" else "Tolak"
-            ) { _, _ ->
-                viewModel.putuskan(item.id, setujui)
+        val subtitle = android.widget.TextView(requireContext()).apply {
+            text = "Tolak peminjaman ${item.facilityName} oleh ${item.requesterName}.\nTuliskan alasan penolakan agar pemohon mengetahuinya."
+            textSize = 13f
+            setTextColor(ContextCompat.getColor(requireContext(), R.color.agnesian_text))
+        }
+        val inputLayout = com.google.android.material.textfield.TextInputLayout(
+            requireContext(),
+            null,
+            com.google.android.material.R.attr.textInputOutlinedStyle
+        ).apply {
+            hint = "Alasan penolakan (wajib diisi)"
+            isCounterEnabled = true
+            counterMaxLength = 255
+            layoutParams = android.widget.LinearLayout.LayoutParams(-1, -2).apply {
+                topMargin = (density * 12).toInt()
             }
-            .show()
+        }
+        val editText = com.google.android.material.textfield.TextInputEditText(inputLayout.context).apply {
+            minLines = 2
+            maxLines = 4
+            inputType = android.text.InputType.TYPE_CLASS_TEXT or
+                android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE or
+                android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+            filters = arrayOf(android.text.InputFilter.LengthFilter(255))
+        }
+        inputLayout.addView(editText)
+        container.addView(subtitle)
+        container.addView(inputLayout)
+
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Tolak Peminjaman")
+            .setView(container)
+            .setNegativeButton("Batal", null)
+            .setPositiveButton("Tolak", null)
+            .create()
+        dialog.setOnShowListener {
+            dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                val reason = editText.text?.toString()?.trim().orEmpty()
+                if (reason.isBlank()) {
+                    inputLayout.error = "Alasan penolakan wajib diisi."
+                    return@setOnClickListener
+                }
+                inputLayout.error = null
+                dialog.dismiss()
+                viewModel.putuskan(item.id, false, reason)
+            }
+        }
+        dialog.show()
     }
 
     private fun konfirmasiKembali(item: PeminjamanDto) {

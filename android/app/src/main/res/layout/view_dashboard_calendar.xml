@@ -83,6 +83,7 @@
                 android:background="@drawable/bg_option_selected"
                 android:clickable="true"
                 android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
                 android:paddingHorizontal="9dp"
                 android:paddingVertical="4dp"
                 android:text="Hari Ini"

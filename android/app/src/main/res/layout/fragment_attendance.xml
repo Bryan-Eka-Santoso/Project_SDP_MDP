@@ -40,7 +40,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:text="Absensi Siswa"
+                android:text="Presensi Siswa"
                 android:textColor="#FFFFFF"
                 android:textSize="25sp"
                 android:textStyle="bold" />
@@ -81,9 +81,10 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Pilih Sesi Mengajar"
+                    android:text="Pilih Sesi Mengajar (diurutkan dari jadwal terdekat)"
                     android:textSize="12sp"
-                    android:textColor="@color/teacher_muted" />
+                    android:textStyle="bold"
+                    android:textColor="@color/teacher_ink" />
 
                 <Spinner
                     android:id="@+id/spinnerSlots"
@@ -175,8 +176,9 @@
                     android:layout_height="wrap_content"
                     android:text="Pilih status Hadir, Sakit, Izin, atau Alpa untuk setiap siswa"
                     android:layout_marginTop="5dp"
-                    android:textSize="11sp"
-                    android:textColor="@color/teacher_muted" />
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/teacher_ink" />
 
                 <!-- Tombol Baru: Tandai Semua Hadir -->
                 <Button
@@ -210,13 +212,13 @@
 
             </LinearLayout>
 
-            <!-- Tombol Simpan Absensi -->
+            <!-- Tombol Simpan Presensi -->
             <Button
                 android:id="@+id/btnSave"
                 android:layout_width="match_parent"
                 android:layout_height="47dp"
                 android:layout_marginTop="16dp"
-                android:text="Simpan Absensi dan Jurnal"
+                android:text="Simpan Presensi dan Jurnal"
                 android:textAllCaps="false"
                 android:textColor="#FFFFFF"
                 android:backgroundTint="@color/teacher_blue_light" />

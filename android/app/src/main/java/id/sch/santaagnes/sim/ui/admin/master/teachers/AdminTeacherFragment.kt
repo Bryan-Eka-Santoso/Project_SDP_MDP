@@ -203,8 +203,39 @@ class AdminTeacherFragment : Fragment() {
                             binding.chipHomeroom.text = getString(R.string.chip_homeroom_count, state.homeroomCount)
                             binding.chipRegular.text = getString(R.string.chip_regular_count, state.regularCount)
 
-                            binding.chipHomeroom.alpha = if (state.homeroomFilter == false) 0.4f else 1.0f
-                            binding.chipRegular.alpha = if (state.homeroomFilter == true) 0.4f else 1.0f
+                            binding.btnFilterTeacherType.text = when (state.homeroomFilter) {
+                                true -> getString(R.string.filter_homeroom_teachers)
+                                false -> getString(R.string.filter_regular_teachers)
+                                null -> getString(R.string.filter_all_teachers)
+                            }
+                            val padH = (resources.displayMetrics.density * 10).toInt()
+                            val padV = (resources.displayMetrics.density * 4).toInt()
+                            binding.chipHomeroom.apply {
+                                alpha = 1.0f
+                                setPadding(padH, padV, padH, padV)
+                                if (state.homeroomFilter == true) {
+                                    setBackgroundResource(R.drawable.bg_badge)
+                                    backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.agnesian_blue)
+                                    setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
+                                } else {
+                                    backgroundTintList = null
+                                    setBackgroundResource(R.drawable.bg_option_unselected)
+                                    setTextColor(ContextCompat.getColor(requireContext(), R.color.agnesian_button))
+                                }
+                            }
+                            binding.chipRegular.apply {
+                                alpha = 1.0f
+                                setPadding(padH, padV, padH, padV)
+                                if (state.homeroomFilter == false) {
+                                    setBackgroundResource(R.drawable.bg_badge)
+                                    backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.agnesian_blue)
+                                    setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
+                                } else {
+                                    backgroundTintList = null
+                                    setBackgroundResource(R.drawable.bg_option_unselected)
+                                    setTextColor(ContextCompat.getColor(requireContext(), R.color.agnesian_text))
+                                }
+                            }
                         } else {
                             if (binding.rvTeachers.adapter !== assignmentAdapter) {
                                 binding.rvTeachers.adapter = assignmentAdapter

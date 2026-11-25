@@ -160,7 +160,7 @@ class AdminScheduleFragment : Fragment() {
                     DateTimeWib.formatTime(slot.startTime)
                 )
             )
-            .setNegativeButton(android.R.string.cancel, null)
+            .setNegativeButton("Batal", null)
             .setPositiveButton(R.string.task_delete) { _, _ -> viewModel.delete(slot.id) }
             .show()
     }

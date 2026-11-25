@@ -44,26 +44,37 @@ class ScheduleChangeReportAdapter :
 
             val lines = detailLines(row)
             binding.tvDetail.isVisible = lines.isNotEmpty()
-            binding.tvDetail.text = lines.joinToString("\n")
+            val highlightColor = ContextCompat.getColor(context, color)
+            val sb = android.text.SpannableStringBuilder()
+            lines.forEachIndexed { idx, (text, important) ->
+                if (idx > 0) sb.append("\n")
+                val start = sb.length
+                sb.append(text)
+                if (important) {
+                    sb.setSpan(android.text.style.StyleSpan(android.graphics.Typeface.BOLD), start, sb.length, 0)
+                    sb.setSpan(android.text.style.ForegroundColorSpan(highlightColor), start, sb.length, 0)
+                }
+            }
+            binding.tvDetail.text = sb
             binding.tvDescription.isVisible = row.description.isNotBlank()
             binding.tvDescription.text = row.description
         }
 
-        // Nilai semula selalu tampil sebagai pembanding; nilai baru hanya bila jenisnya mengubah itu.
-        private fun detailLines(row: ScheduleChangeReportRow): List<String> {
+        // Nilai semula selalu tampil sebagai pembanding; nilai baru di-bold dan diwarnai agar menonjol.
+        private fun detailLines(row: ScheduleChangeReportRow): List<Pair<String, Boolean>> {
             val context = binding.root.context
-            val lines = mutableListOf(context.getString(R.string.schedule_original_teacher, row.originalTeacherName))
+            val lines = mutableListOf(context.getString(R.string.schedule_original_teacher, row.originalTeacherName) to false)
             when (row.type) {
                 ChangeType.SUBSTITUTE ->
-                    row.substituteTeacherName?.let { lines += context.getString(R.string.change_substitute_line, it) }
+                    row.substituteTeacherName?.let { lines += context.getString(R.string.change_substitute_line, it) to true }
                 ChangeType.RESCHEDULE -> {
                     lines += context.getString(
                         R.string.report_original_time,
                         DateTimeWib.formatTime(row.originalStart),
                         DateTimeWib.formatTime(row.originalEnd)
-                    )
+                    ) to false
                     row.newDate?.let {
-                        lines += context.getString(R.string.change_new_date, DateTimeWib.formatDate(it))
+                        lines += context.getString(R.string.change_new_date, DateTimeWib.formatDate(it)) to true
                     }
                     val start = row.newStart
                     val end = row.newEnd
@@ -72,10 +83,10 @@ class ScheduleChangeReportAdapter :
                             R.string.change_new_time,
                             DateTimeWib.formatTime(start),
                             DateTimeWib.formatTime(end)
-                        )
+                        ) to true
                     }
-                    row.originalRoomName?.let { lines += context.getString(R.string.report_original_room, it) }
-                    row.newRoomName?.let { lines += context.getString(R.string.change_new_room, it) }
+                    row.originalRoomName?.let { lines += context.getString(R.string.report_original_room, it) to false }
+                    row.newRoomName?.let { lines += context.getString(R.string.change_new_room, it) to true }
                 }
                 ChangeType.CANCEL -> Unit
             }

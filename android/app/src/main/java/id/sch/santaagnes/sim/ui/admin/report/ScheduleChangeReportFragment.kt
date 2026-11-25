@@ -1,6 +1,7 @@
 package id.sch.santaagnes.sim.ui.admin.report
 
 import android.view.View
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import com.google.android.material.chip.Chip
@@ -80,6 +81,27 @@ class ScheduleChangeReportFragment : ReportFragment<ScheduleChangeReportRow, Sch
         )
 
         renderDateRange(filter.dateFrom, filter.dateTo)
+    }
+
+    override fun buildChartSpec(
+        state: ReportUiState<ScheduleChangeReportRow, ScheduleChangeReportFilter>
+    ): ReportChartSpec {
+        val ctx = requireContext()
+        val subCount = state.rows.count { it.type == ChangeType.SUBSTITUTE }
+        val resCount = state.rows.count { it.type == ChangeType.RESCHEDULE }
+        val canCount = state.rows.count { it.type == ChangeType.CANCEL }
+        return ReportChartSpec(
+            title = "Sebaran Jenis Perubahan Jadwal",
+            subtitle = "Berdasarkan ${state.rows.size} perubahan yang ditampilkan",
+            kind = ReportChartKind.DONUT,
+            centerLabel = "${state.rows.size}",
+            centerSubLabel = "Perubahan",
+            segments = listOf(
+                ChartSegment("Ganti Guru", subCount.toFloat(), "$subCount", ContextCompat.getColor(ctx, R.color.change_substitute)),
+                ChartSegment("Pindah Jadwal", resCount.toFloat(), "$resCount", ContextCompat.getColor(ctx, R.color.change_reschedule)),
+                ChartSegment("Dibatalkan", canCount.toFloat(), "$canCount", ContextCompat.getColor(ctx, R.color.change_cancel))
+            )
+        )
     }
 
     override fun releaseFilters() {

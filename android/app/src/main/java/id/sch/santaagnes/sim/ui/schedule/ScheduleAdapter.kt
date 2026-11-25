@@ -90,6 +90,7 @@ class ScheduleAdapter : ListAdapter<ScheduleEntry, ScheduleAdapter.LessonViewHol
         }
 
         fun bindAction(entry: ScheduleEntry, enabled: Boolean, onReschedule: ((ScheduleEntry) -> Unit)?) {
+            val context = binding.root.context
             binding.tvAction.isVisible = enabled
             binding.tvAction.setText(
                 when (entry.change?.type) {
@@ -98,8 +99,19 @@ class ScheduleAdapter : ListAdapter<ScheduleEntry, ScheduleAdapter.LessonViewHol
                     else -> R.string.schedule_action_edit_reschedule
                 }
             )
+            val isRestore = entry.change?.type == ChangeType.CANCEL
+            binding.tvAction.setTextColor(
+                ContextCompat.getColor(context, if (isRestore) R.color.bill_paid else R.color.agnesian_blue)
+            )
+            binding.tvAction.backgroundTintList = ColorStateList.valueOf(
+                if (isRestore) 0xFFE4F5EA.toInt() else ContextCompat.getColor(context, R.color.agnesian_tile)
+            )
+            val clickListener = if (enabled) android.view.View.OnClickListener { onReschedule?.invoke(entry) } else null
+            binding.cardLesson.setOnClickListener(clickListener)
+            binding.tvAction.setOnClickListener(clickListener)
+            // setOnClickListener(null) tetap membiarkan isClickable = true; atur ulang setelah listener dipasang.
             binding.cardLesson.isClickable = enabled
-            binding.cardLesson.setOnClickListener(if (enabled) { _ -> onReschedule?.invoke(entry) } else null)
+            binding.cardLesson.isFocusable = enabled
         }
 
         private fun bindChange(context: Context, entry: ScheduleEntry) {
