@@ -1,7 +1,7 @@
 <resources>
-    <string name="app_name">SIM SMA Santa Agnes</string>
+    <string name="app_name">SIM SMAK Santa Agnes</string>
     <string name="login_title">Masuk</string>
-    <string name="login_subtitle">Silahkan masuk dengan akun sekolah Anda.</string>
+    <string name="login_subtitle">Silakan masuk dengan akun sekolah Anda.</string>
     <string name="login_email">Email</string>
     <string name="login_password">Password</string>
     <string name="login_button">Masuk</string>
@@ -10,7 +10,7 @@
     <string name="login_brand">Agnesian</string>
     <string name="login_brand_subtitle">Sistem Informasi Akademik Siswa</string>
     <string name="login_help">Butuh bantuan? Hubungi admin sekolah</string>
-    <string name="login_footer">© 2024 Agnesian — SMA St. Agnes</string>
+    <string name="login_footer">© 2024 Agnesian — SMAK Santa Agnes</string>
     <string name="login_error_required">Email dan password wajib diisi.</string>
 
     <string name="action_logout">Keluar</string>
@@ -86,7 +86,7 @@
     <string name="due_remaining">Waktu sisa %1$d hari</string>
     <string name="cd_mark_done">Tandai selesai</string>
     <string name="todo_add">Tambahkan Pengingat Tugas</string>
-    <string name="todo_empty">Belum ada pengingat. Tambahkan pengingat untuk tugas atau ulanganmu.</string>
+    <string name="todo_empty">Belum ada pengingat. Tambahkan pengingat untuk tugas atau ulangan Anda.</string>
     <string name="todo_done">Selesai</string>
     <string name="todo_delete_title">Hapus pengingat?</string>
     <string name="todo_delete_message">Pengingat \"%1$s\" akan dihapus dari perangkat ini.</string>
@@ -96,7 +96,7 @@
     <string name="todo_subject_none">Tanpa mata pelajaran</string>
     <string name="todo_error_title_required">Judul wajib diisi.</string>
 
-    <string name="tab_home">Home</string>
+    <string name="tab_home">Beranda</string>
     <string name="tab_schedule">Jadwal</string>
     <string name="tab_grades">Nilai</string>
     <string name="tab_classes">Kelas</string>
@@ -179,7 +179,7 @@
     <string name="slot_day_hint">Hari</string>
     <string name="slot_start_hint">Jam mulai</string>
     <string name="slot_end_hint">Jam selesai</string>
-    <string name="slot_no_rooms">Belum ada ruangan yang dikenal. Ruangan diambil dari jadwal yang sudah ada atau dari impor Excel.</string>
+    <string name="slot_no_rooms">Belum ada ruangan yang tersedia. Tambahkan ruangan di Master Fasilitas terlebih dahulu.</string>
     <string name="slot_error_assignment">Pilih kelas, mapel, dan guru.</string>
     <string name="slot_error_room">Pilih ruangan.</string>
     <string name="slot_error_day">Pilih hari.</string>
@@ -288,7 +288,18 @@
 
     <!-- Laporan admin (F-LAP-05, F-LAP-07, F-LAP-09, F-LAP-10, F-LAP-11) -->
     <string name="report_hub_title">Laporan</string>
-    <string name="report_hub_hint">Pilih laporan. Data memakai semester aktif.</string>
+    <string name="report_hub_hint">Pilih laporan untuk melihat pratinjau, grafik, dan ekspor Excel.</string>
+    <string name="report_tile_grades">Nilai Siswa</string>
+    <string name="report_tile_attendance">Kehadiran</string>
+    <string name="report_tile_violations">Pelanggaran</string>
+    <string name="report_tile_bookings">Peminjaman</string>
+    <string name="report_tile_payments">Pembayaran</string>
+    <string name="report_tile_journals">Jurnal</string>
+    <string name="report_tile_schedule_changes">Ubah Jadwal</string>
+    <string name="report_tile_surveys">Survei Mapel</string>
+    <string name="report_tile_teaching_load">Beban Guru</string>
+    <string name="report_tile_student_stats">Kesiswaan</string>
+    <string name="report_tile_journal_monitor">Pantau Jurnal</string>
     <string name="report_schedule_changes_title">Perubahan Jadwal</string>
     <string name="report_schedule_changes_desc">Penggantian guru, pemindahan jadwal, dan pembatalan, lengkap dengan jam dan ruangan semula.</string>
     <string name="report_teaching_load_title">Beban Mengajar Guru</string>
@@ -328,7 +339,7 @@
     <string name="report_stats_violations">Pelanggaran: %1$d kasus · %2$d poin</string>
     <string name="profile_change_password">Ubah password</string>
     <string name="password_title">Ubah Password</string>
-    <string name="password_info">Setelah password diubah, akunmu otomatis keluar dari perangkat lain.</string>
+    <string name="password_info">Setelah password diubah, akun Anda otomatis keluar dari perangkat lain.</string>
     <string name="password_current_hint">Password lama</string>
     <string name="password_new_hint">Password baru</string>
     <string name="password_confirm_hint">Ulangi password baru</string>
@@ -347,7 +358,7 @@
     <string name="bill_filter_overdue">Menunggak</string>
     <string name="bill_filter_paid">Lunas</string>
     <string name="bill_empty">Belum ada tagihan.</string>
-    <string name="bill_summary_students">%1$d murid</string>
+    <string name="bill_summary_students">%1$d siswa</string>
     <string name="bill_summary_class">%1$s · %2$s</string>
     <string name="bill_summary_total">Total: %1$d tagihan</string>
     <string name="bill_no_access">Tidak ada tagihan yang bisa dilihat untuk akun ini.</string>
@@ -376,9 +387,9 @@
     <string name="grade_name">Nama Komponen</string>
     <string name="grade_weight">Bobot (%)</string>
     <string name="grade_add">Simpan Komponen</string>
-    <string name="grade_cancel">Batal Edit</string>
+    <string name="grade_cancel">Batal Ubah</string>
     <string name="grade_delete">Hapus</string>
-    <string name="grade_edit">Edit</string>
+    <string name="grade_edit">Ubah</string>
     <string name="grade_total">Total Bobot: 0%</string>
     <string name="grade_valid">Bobot sudah valid (100%)</string>
     <string name="grade_invalid">Total bobot harus 100%</string>
@@ -386,7 +397,7 @@
 
     <!-- Master Data (F-MST, milik Yosua) -->
     <string name="status_active">Aktif</string>
-    <string name="status_inactive">Non-aktif</string>
+    <string name="status_inactive">Nonaktif</string>
     <string name="title_management_user">Manajemen User</string>
     <string name="title_management_student">Manajemen Siswa</string>
     <string name="tab_master_user">User</string>
@@ -401,7 +412,7 @@
     <string name="filter_all_roles">Semua Role</string>
     <string name="filter_all_classes">Semua Kelas</string>
     <string name="chip_active_count">(%1$d) Aktif</string>
-    <string name="chip_inactive_count">(%1$d) Non-aktif</string>
+    <string name="chip_inactive_count">(%1$d) Nonaktif</string>
     <string name="chip_student_count">(%1$d) Siswa</string>
     <string name="dialog_add_user_title">Tambah Pengguna</string>
     <string name="dialog_edit_user_title">Ubah Pengguna</string>
@@ -450,7 +461,7 @@
     <string name="home_shortcut_tasks">Tugas</string>
     <string name="home_shortcut_grades">Nilai</string>
     <string name="home_shortcut_leave">Izin</string>
-    <string name="home_shortcut_attendance">Absensi</string>
+    <string name="home_shortcut_attendance">Presensi</string>
     <string name="home_shortcut_violations">Pelanggaran</string>
     <string name="home_shortcut_booking">Peminjaman</string>
     <string name="home_shortcut_booking_history">Riwayat Pinjam</string>
@@ -500,7 +511,7 @@
     <string name="master_add">Tambah</string>
 
     <!-- Tambahan UI Admin & Master Data (F-MST-01..10, Figma konsisten) -->
-    <string name="action_import">Import</string>
+    <string name="action_import">Impor</string>
     <string name="master_period_loading">Periode Aktif</string>
     <string name="master_period_badge">%1$s | %2$s ▾</string>
     <string name="master_total_count">Total: %1$d data</string>

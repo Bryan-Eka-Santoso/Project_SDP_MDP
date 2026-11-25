@@ -167,8 +167,9 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="8dp"
-        android:textColor="@color/agnesian_muted"
+        android:textColor="@color/agnesian_blue"
         android:textSize="13sp"
+        android:textStyle="bold"
         android:visibility="gone" />
 
     <LinearLayout

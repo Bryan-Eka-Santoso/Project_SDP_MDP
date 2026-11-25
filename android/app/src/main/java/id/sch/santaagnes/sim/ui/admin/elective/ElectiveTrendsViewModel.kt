@@ -38,11 +38,11 @@ class ElectiveTrendsViewModel @Inject constructor(
                 throw e
             } catch (e: Exception) {
                 val message = when (e) {
-                    is IOException -> "Tidak dapat terhubung ke server. Periksa backend dan koneksi emulator."
+                    is IOException -> "Tidak dapat terhubung ke server. Periksa koneksi internet Anda."
                     is HttpException -> when (e.code()) {
-                        401 -> "Sesi login sudah berakhir. Silakan login ulang."
+                        401 -> "Sesi login Anda telah berakhir. Silakan masuk kembali."
                         403 -> "Hanya Admin yang dapat melihat tren paket."
-                        else -> "Gagal memuat tren (HTTP ${e.code()})."
+                        else -> "Gagal memuat tren paket. Silakan coba lagi."
                     }
                     else -> e.message ?: "Tidak dapat mengambil data tren paket."
                 }

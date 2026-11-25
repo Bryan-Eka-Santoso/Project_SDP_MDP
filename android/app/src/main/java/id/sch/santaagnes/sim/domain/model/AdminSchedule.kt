@@ -96,13 +96,14 @@ data class TeacherOption(
     val name: String
 )
 
-/** Data pilihan untuk formulir admin. Guru dan ruangan diturunkan dari penugasan dan slot yang ada. */
+/** Data pilihan untuk formulir admin. Guru dan ruangan diambil dari master ditambah penugasan yang ada. */
 data class ScheduleLookups(
     val assignments: List<AssignmentOption>,
-    val rooms: List<RoomOption>
+    val rooms: List<RoomOption>,
+    val allTeachers: List<TeacherOption> = emptyList()
 ) {
     val teachers: List<TeacherOption>
-        get() = assignments.map { TeacherOption(it.teacherId, it.teacherName) }
+        get() = (allTeachers + assignments.map { TeacherOption(it.teacherId, it.teacherName) })
             .distinctBy { it.id }
             .sortedBy { it.name }
 

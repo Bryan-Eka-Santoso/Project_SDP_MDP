@@ -32,7 +32,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="Absensi"
+            android:text="Presensi"
             android:textSize="24sp"
             android:textStyle="bold"
             android:textColor="@color/white" />
@@ -173,9 +173,10 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:text="● Masuk     ● Sakit/Izin     ● Bolos"
+                        android:text="● Hadir     ● Sakit/Izin     ● Alpa"
                         android:textSize="12sp"
-                        android:textColor="@color/agnesian_muted" />
+                        android:textStyle="bold"
+                        android:textColor="@color/agnesian_text" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

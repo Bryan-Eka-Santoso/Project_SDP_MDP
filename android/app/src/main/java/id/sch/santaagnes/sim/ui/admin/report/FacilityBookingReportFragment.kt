@@ -21,6 +21,7 @@ import com.google.android.material.card.MaterialCardView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import id.sch.santaagnes.sim.R
+import id.sch.santaagnes.sim.core.DateTimeWib
 import id.sch.santaagnes.sim.data.remote.FacilityBookingReportDto
 import id.sch.santaagnes.sim.databinding.FragmentFacilityBookingReportBinding
 import kotlinx.coroutines.launch
@@ -279,25 +280,38 @@ class FacilityBookingReportFragment : Fragment() {
         items: List<FacilityBookingReportDto>
     ) {
         binding.listContainer.removeAllViews()
+        if (items.isNotEmpty()) {
+            val ctx = requireContext()
+            val pending = items.count { it.status == "PENDING" }
+            val approved = items.count { it.status == "APPROVED" }
+            val returned = items.count { it.status == "RETURNED" }
+            val rejected = items.count { it.status == "REJECTED" }
+            binding.listContainer.addView(
+                ReportChartRenderer.buildCard(
+                    ctx,
+                    ReportChartSpec(
+                        title = "Sebaran Status Peminjaman",
+                        subtitle = "Berdasarkan ${items.size} peminjaman yang ditampilkan",
+                        kind = ReportChartKind.DONUT,
+                        centerLabel = "${items.size}",
+                        centerSubLabel = "Pengajuan",
+                        segments = listOf(
+                            ChartSegment("Disetujui", approved.toFloat(), "$approved", ContextCompat.getColor(ctx, R.color.agnesian_blue)),
+                            ChartSegment("Dikembalikan", returned.toFloat(), "$returned", ContextCompat.getColor(ctx, R.color.bill_paid)),
+                            ChartSegment("Menunggu", pending.toFloat(), "$pending", ContextCompat.getColor(ctx, R.color.change_substitute)),
+                            ChartSegment("Ditolak", rejected.toFloat(), "$rejected", ContextCompat.getColor(ctx, R.color.change_cancel))
+                        )
+                    )
+                )
+            )
+        }
 
         items.forEach { item ->
             val card = MaterialCardView(requireContext()).apply {
                 radius = dp(12).toFloat()
                 cardElevation = dp(1).toFloat()
-
-                setCardBackgroundColor(
-                    ContextCompat.getColor(
-                        requireContext(),
-                        R.color.white
-                    )
-                )
-
-                layoutParams = LinearLayout.LayoutParams(
-                    -1,
-                    -2
-                ).apply {
-                    bottomMargin = dp(12)
-                }
+                setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.white))
+                layoutParams = LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(12) }
             }
 
             val content = LinearLayout(requireContext()).apply {
@@ -305,57 +319,46 @@ class FacilityBookingReportFragment : Fragment() {
                 setPadding(dp(16), dp(16), dp(16), dp(16))
             }
 
-            fun addText(
-                value: String,
-                size: Float = 13f,
-                bold: Boolean = false
-            ) {
-                content.addView(
-                    buatText(value, size, bold)
-                )
+            val statusColor = when (item.status) {
+                "APPROVED" -> R.color.agnesian_blue
+                "RETURNED" -> R.color.bill_paid
+                "REJECTED" -> R.color.change_cancel
+                else -> R.color.change_substitute
             }
 
-            addText(item.facilityName, 16f, true)
+            val header = LinearLayout(requireContext()).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = android.view.Gravity.CENTER_VERTICAL
+            }
+            val titleCol = LinearLayout(requireContext()).apply {
+                orientation = LinearLayout.VERTICAL
+                layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
+            }
+            val typeLabel = when (item.facilityType) {
+                "ROOM" -> "Ruangan"
+                "ITEM" -> "Barang"
+                else -> item.facilityType
+            }
+            titleCol.addView(buatText(item.facilityName, 16f, true, R.color.agnesian_text))
+            titleCol.addView(buatText("$typeLabel • ${item.requesterName}", 12f, false, R.color.agnesian_muted))
+            header.addView(titleCol)
+            header.addView(ReportChartRenderer.buildBadge(requireContext(), labelStatus(item.status), statusColor))
+            content.addView(header)
 
-            addText(
-                "Jenis: ${
-                    when (item.facilityType) {
-                        "ROOM" -> "Ruangan"
-                        "ITEM" -> "Barang"
-                        else -> item.facilityType
-                    }
-                }"
-            )
+            val formattedDate = runCatching {
+                DateTimeWib.formatDate(java.time.LocalDate.parse(item.bookingDate))
+            }.getOrDefault(item.bookingDate)
+            content.addView(buatText("$formattedDate  •  ${item.startTime}–${item.endTime} WIB", 13f, true, R.color.agnesian_blue))
+            content.addView(buatText("Keperluan: ${item.purpose}", 13f, false, R.color.agnesian_text))
 
-            addText("Peminjam: ${item.requesterName}")
-            addText("Email: ${item.requesterEmail}")
-
-            addText(
-                "Tanggal: ${item.bookingDate}"
-            )
-
-            addText(
-                "Jam: ${item.startTime} - ${item.endTime}"
-            )
-
-            addText("Keperluan: ${item.purpose}")
-
-            addText(
-                "Status: ${labelStatus(item.status)}",
-                14f,
-                true
-            )
-
+            if (!item.rejectionReason.isNullOrBlank()) {
+                content.addView(buatText("Alasan Penolakan: ${item.rejectionReason}", 13f, true, R.color.change_cancel))
+            }
             if (item.verifierName != null) {
-                addText(
-                    "Diverifikasi oleh: ${item.verifierName}"
-                )
+                content.addView(buatText("Diverifikasi oleh: ${item.verifierName}", 12f, false, R.color.agnesian_muted))
             }
-
             if (item.returnDate != null) {
-                addText(
-                    "Tanggal kembali: ${item.returnDate}"
-                )
+                content.addView(buatText("Tanggal kembali: ${item.returnDate}", 12f, true, R.color.bill_paid))
             }
 
             card.addView(content)
@@ -376,27 +379,15 @@ class FacilityBookingReportFragment : Fragment() {
     private fun buatText(
         value: String,
         size: Float,
-        bold: Boolean
+        bold: Boolean,
+        colorRes: Int = R.color.agnesian_text
     ): TextView {
         return TextView(requireContext()).apply {
             text = value
             textSize = size
-
-            setTextColor(
-                ContextCompat.getColor(
-                    requireContext(),
-                    R.color.agnesian_text
-                )
-            )
-
-            if (bold) {
-                setTypeface(
-                    null,
-                    android.graphics.Typeface.BOLD
-                )
-            }
-
-            setPadding(0, 0, 0, dp(7))
+            setTextColor(ContextCompat.getColor(requireContext(), colorRes))
+            if (bold) setTypeface(null, android.graphics.Typeface.BOLD)
+            setPadding(0, 0, 0, dp(6))
         }
     }
 

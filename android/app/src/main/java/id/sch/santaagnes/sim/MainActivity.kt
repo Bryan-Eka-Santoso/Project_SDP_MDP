@@ -146,6 +146,8 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
         lifecycleScope.launch {
             if (sessionManager.hasSession()) {
+                // Coba daftarkan ulang token FCM bila sebelumnya gagal saat login.
+                pushTokenRegistrar.register()
                 notificationRepository.syncAnnouncements()
                 syncDeviceCalendar()
             }
@@ -209,8 +211,15 @@ class MainActivity : AppCompatActivity() {
                 notificationPermissionAsked = true
                 requestNotificationPermission()
             }
+            // Sub-tab Master Data (Siswa/Guru/Kelas) tetap terhitung tab Akademik agar BottomNav & highlight terjaga.
+            val mappedTabId = when (destination.id) {
+                R.id.adminStudentFragment,
+                R.id.adminTeacherFragment,
+                R.id.adminClassFragment -> R.id.adminUserFragment
+                else -> destination.id
+            }
             // Layar turunan (mis. form tugas) bukan tab: bottom nav disembunyikan.
-            val tab = binding.bottomNav.menu.findItem(destination.id)
+            val tab = binding.bottomNav.menu.findItem(mappedTabId)
             binding.bottomNav.isVisible = tab != null
             tab?.isChecked = true
         }

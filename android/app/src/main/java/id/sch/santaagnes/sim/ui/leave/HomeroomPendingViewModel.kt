@@ -52,14 +52,18 @@ class HomeroomPendingViewModel @Inject constructor(
         }
     }
 
-    fun decide(item: HomeroomLeaveDto, approved: Boolean) {
+    fun decide(item: HomeroomLeaveDto, approved: Boolean, rejectionReason: String? = null) {
         val before = mutable.value
         if (before.loading || before.loadingMore || before.decisionBusyId != null) return
         if (before.items.none { it.id == item.id }) return
         viewModelScope.launch {
             mutable.value = before.copy(decisionBusyId = item.id, error = null, notice = null)
             try {
-                repository.decide(item.id, if (approved) "APPROVED" else "REJECTED")
+                repository.decide(
+                    item.id,
+                    if (approved) "APPROVED" else "REJECTED",
+                    rejectionReason = if (approved) null else rejectionReason
+                )
                 // Ambil ulang daftar dari server supaya total, pagination, dan status akurat.
                 val latest = repository.pending(1)
                 mutable.value = HomeroomPendingState(

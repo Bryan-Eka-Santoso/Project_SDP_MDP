@@ -26,6 +26,7 @@
             android:src="@drawable/ic_arrow_back" />
 
         <TextView
+            android:id="@+id/tvHeading"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -103,7 +104,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:hint="@string/reschedule_new_date">
+                android:hint="@string/reschedule_new_date"
+                app:endIconDrawable="@android:drawable/ic_menu_close_clear_cancel"
+                app:endIconMode="custom">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/inputNewDate"
@@ -118,7 +121,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:hint="@string/reschedule_new_start">
+                android:hint="@string/reschedule_new_start"
+                app:endIconDrawable="@android:drawable/ic_menu_close_clear_cancel"
+                app:endIconMode="custom">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/inputNewStart"
@@ -133,7 +138,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:hint="@string/reschedule_new_end">
+                android:hint="@string/reschedule_new_end"
+                app:endIconDrawable="@android:drawable/ic_menu_close_clear_cancel"
+                app:endIconMode="custom">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/inputNewEnd"
@@ -199,31 +206,38 @@
                 style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="10dp"
                 android:text="@string/reschedule_cancel_class"
-                android:textColor="@color/change_cancel" />
+                android:textColor="@color/change_cancel"
+                android:textStyle="bold"
+                app:strokeColor="@color/change_cancel" />
 
             <!-- Hanya saat kelas ini sudah dibatalkan: form disembunyikan, tinggal pulihkan. -->
             <TextView
                 android:id="@+id/tvCancelledInfo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="14dp"
+                android:background="#FDE7E7"
+                android:padding="12dp"
                 android:text="@string/reschedule_cancelled_info"
                 android:textColor="@color/change_cancel"
-                android:textSize="14sp"
+                android:textSize="13sp"
+                android:textStyle="bold"
                 android:visibility="gone" />
 
-            <!-- Hanya saat mengubah pemindahan atau pembatalan yang sudah tersimpan. -->
+            <!-- Hanya saat mengubah pemindahan (outlined biru) atau memulihkan pembatalan (filled biru). -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnCancelMove"
                 style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="10dp"
                 android:text="@string/reschedule_cancel_move"
-                android:textColor="@color/change_cancel"
-                android:visibility="gone" />
+                android:textColor="@color/agnesian_blue"
+                android:textStyle="bold"
+                android:visibility="gone"
+                app:strokeColor="@color/agnesian_blue" />
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

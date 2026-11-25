@@ -68,15 +68,20 @@ class StudentAttendanceSummaryFragment : Fragment() {
             state.loading -> "Memuat rekap..."
             data == null -> "Belum dapat menampilkan rekap."
             data.total == 0 -> "Belum ada presensi yang dicatat pada bulan ini."
-            else -> "Masuk: ${data.counts.PRESENT}    Sakit: ${data.counts.SICK}\n" +
-                "Izin: ${data.counts.EXCUSED}    Bolos: ${data.counts.ABSENT}\n" +
-                "Total sesi: ${data.total}    Kehadiran: ${data.attendancePercentage?.let { "$it%" } ?: "—"}"
+            else -> buildStatsSpannable(
+                present = data.counts.PRESENT,
+                sick = data.counts.SICK,
+                excused = data.counts.EXCUSED,
+                absent = data.counts.ABSENT,
+                total = data.total,
+                percentage = data.attendancePercentage
+            )
         }
         // Satu tanggal bisa memiliki beberapa sesi; semua detail tetap ditampilkan.
         val entries = data?.entries.orEmpty()
         renderCalendar(state.month, entries)
         renderSelectedDay(entries)
-        val spannable = android.text.SpannableString("● Masuk     ● Sakit/Izin     ● Bolos")
+        val spannable = android.text.SpannableString("● Hadir     ● Sakit/Izin     ● Alpa")
         val dotPositions = spannable.indices.filter { spannable[it] == '●' }
         listOf(BLUE, ORANGE, RED).forEachIndexed { index, color ->
             dotPositions.getOrNull(index)?.let { pos ->
@@ -84,6 +89,45 @@ class StudentAttendanceSummaryFragment : Fragment() {
             }
         }
         binding.tvAttendanceLegend.text = spannable
+    }
+
+    private fun buildStatsSpannable(
+        present: Int,
+        sick: Int,
+        excused: Int,
+        absent: Int,
+        total: Int,
+        percentage: Double?
+    ): CharSequence {
+        val sb = android.text.SpannableStringBuilder()
+        fun appendStat(label: String, value: String, color: Int) {
+            sb.append(label)
+            val start = sb.length
+            sb.append(value)
+            sb.setSpan(android.text.style.StyleSpan(Typeface.BOLD), start, sb.length, 0)
+            sb.setSpan(android.text.style.ForegroundColorSpan(color), start, sb.length, 0)
+        }
+        appendStat("Hadir: ", present.toString(), BLUE)
+        sb.append("    ")
+        appendStat("Sakit: ", sick.toString(), ORANGE)
+        sb.append("\n")
+        appendStat("Izin: ", excused.toString(), ORANGE)
+        sb.append("    ")
+        appendStat("Alpa: ", absent.toString(), RED)
+        sb.append("\n")
+        appendStat("Total sesi: ", total.toString(), requireContext().getColor(R.color.agnesian_text))
+        sb.append("    ")
+        val pctColor = when {
+            percentage == null -> MUTED
+            percentage >= 85.0 -> GREEN
+            percentage >= 70.0 -> ORANGE
+            else -> RED
+        }
+        val pctLabel = percentage?.let {
+            if (it % 1.0 == 0.0) "${it.toInt()}%" else String.format(Locale("id", "ID"), "%.1f%%", it)
+        } ?: "—"
+        appendStat("Kehadiran: ", pctLabel, pctColor)
+        return sb
     }
 
     private fun renderCalendar(month: YearMonth, entries: List<AttendanceSummaryEntryDto>) {
@@ -117,13 +161,13 @@ class StudentAttendanceSummaryFragment : Fragment() {
         val cell = TextView(requireContext()).apply {
             text = label
             gravity = Gravity.CENTER
-            textSize = if (bold) 10f else 13f
-            setTextColor(textColor)
-            if (bold || onClick != null) setTypeface(typeface, Typeface.BOLD)
+            textSize = if (onClick == null && bold) 10f else 13f
             val selected = onClick != null && selectedDate?.dayOfMonth?.toString() == label
+            setTextColor(if (selected) Color.WHITE else textColor)
+            if (bold || onClick != null) setTypeface(typeface, Typeface.BOLD)
             if (selected) {
                 setBackgroundResource(R.drawable.bg_badge)
-                backgroundTintList = ColorStateList.valueOf(0xFFEAF0FF.toInt())
+                backgroundTintList = ColorStateList.valueOf(BLUE)
             }
             if (onClick != null) {
                 isClickable = true
@@ -146,15 +190,37 @@ class StudentAttendanceSummaryFragment : Fragment() {
         binding.tvAttendanceDayDetails.text = when {
             date == null -> "Pilih tanggal pada kalender untuk melihat detail presensi."
             details.isEmpty() -> "Belum ada catatan presensi untuk tanggal ini."
-            else -> details.joinToString("\n\n") { "${it.subjectName} · ${label(it.status)}" }
+            else -> {
+                val sb = android.text.SpannableStringBuilder()
+                val textDark = requireContext().getColor(R.color.agnesian_text)
+                details.forEachIndexed { index, entry ->
+                    if (index > 0) sb.append("\n\n")
+                    val subjStart = sb.length
+                    sb.append(entry.subjectName)
+                    sb.setSpan(android.text.style.StyleSpan(Typeface.BOLD), subjStart, sb.length, 0)
+                    sb.setSpan(android.text.style.ForegroundColorSpan(textDark), subjStart, sb.length, 0)
+                    sb.append("  ·  ")
+                    val statusStart = sb.length
+                    sb.append(label(entry.status))
+                    sb.setSpan(android.text.style.StyleSpan(Typeface.BOLD), statusStart, sb.length, 0)
+                    val statusColor = when (entry.status) {
+                        "PRESENT" -> GREEN
+                        "SICK", "EXCUSED" -> ORANGE
+                        "ABSENT" -> RED
+                        else -> MUTED
+                    }
+                    sb.setSpan(android.text.style.ForegroundColorSpan(statusColor), statusStart, sb.length, 0)
+                }
+                sb
+            }
         }
     }
 
     private fun label(status: String): String = when (status) {
-        "PRESENT" -> "Masuk"
+        "PRESENT" -> "Hadir"
         "SICK" -> "Sakit"
         "EXCUSED" -> "Izin"
-        "ABSENT" -> "Bolos"
+        "ABSENT" -> "Alpa"
         else -> status
     }
 
@@ -164,7 +230,8 @@ class StudentAttendanceSummaryFragment : Fragment() {
     }
 
     private companion object {
-        val BLUE = Color.rgb(46, 100, 214)
+        val BLUE = Color.rgb(30, 80, 202)
+        val GREEN = Color.rgb(46, 125, 50)
         val ORANGE = Color.rgb(219, 152, 26)
         val RED = Color.rgb(214, 51, 61)
         val MUTED = Color.rgb(148, 154, 165)

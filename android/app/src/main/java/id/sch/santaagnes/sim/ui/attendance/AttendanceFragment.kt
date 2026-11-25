@@ -94,7 +94,7 @@ class AttendanceFragment : Fragment() {
                         lastSlotsSignature = signature
                         slots = state.slots
                         binding.spinnerSlots.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item,
-                            slots.map { "${dayIndo(it.dayOfWeek)} • ${it.subjectName} • ${it.className} (slot ${it.id})" })
+                            slots.map { "${dayIndo(it.dayOfWeek)} • ${it.subjectName} • ${it.className}" })
                         if (slots.isNotEmpty()) {
                             selectedSlotId = slots.first().id
                             date = recentDay(slots.first().dayOfWeek)
@@ -160,7 +160,14 @@ class AttendanceFragment : Fragment() {
             binding.studentsContainer.addView(row)
             statuses[student.id] = picker
         }
-        binding.tvCount.text = "${session.students.size} siswa • ${if (session.saved) "Sudah dicatat" else "Belum dicatat"}"
+        val statusText = if (session.saved) "Sudah dicatat" else "Belum dicatat"
+        val statusColor = requireContext().getColor(if (session.saved) R.color.bill_paid else R.color.change_substitute)
+        val sb = android.text.SpannableStringBuilder("${session.students.size} siswa • ")
+        val start = sb.length
+        sb.append(statusText)
+        sb.setSpan(android.text.style.StyleSpan(android.graphics.Typeface.BOLD), start, sb.length, 0)
+        sb.setSpan(android.text.style.ForegroundColorSpan(statusColor), start, sb.length, 0)
+        binding.tvCount.text = sb
     }
 
     private fun recentDay(day: String): String {

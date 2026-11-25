@@ -65,6 +65,7 @@ const columns = [
   { header: "Jam Selesai", width: 14 },
   { header: "Keperluan", width: 40 },
   { header: "Status", width: 18 },
+  { header: "Alasan Penolakan", width: 32 },
   { header: "Verifikator", width: 28 },
   { header: "Tanggal Kembali", width: 18 },
 ];
@@ -83,6 +84,7 @@ function toRow(item) {
     endTime: formatTimeOfDay(item.endTime),
     purpose: item.purpose,
     status: item.status,
+    rejectionReason: item.rejectionReason || null,
     verifierName: item.verifier?.name || null,
     returnDate: item.returnDate ? formatDateOnly(item.returnDate) : null,
   };
@@ -100,6 +102,7 @@ function toCells(row) {
     row.endTime,
     row.purpose,
     STATUS_LABELS[row.status] || row.status,
+    row.rejectionReason || "-",
     row.verifierName || "-",
     row.returnDate || "-",
   ];

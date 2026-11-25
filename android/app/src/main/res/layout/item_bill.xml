@@ -74,8 +74,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:textColor="@color/agnesian_muted"
+            android:textColor="@color/agnesian_text"
             android:textSize="13sp"
+            android:textStyle="bold"
             tools:text="Jatuh tempo: Minggu, 15 November 2026" />
 
         <TextView

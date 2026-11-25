@@ -107,7 +107,9 @@ class AdminDashboardFragment : Fragment() {
             StatCardSpec(R.string.admin_stat_slots, overview.scheduleSlots, R.drawable.ic_calendar) {
                 nav.navigate(R.id.action_adminDashboard_to_adminSchedule)
             },
-            StatCardSpec(R.string.admin_stat_changes, overview.scheduleChanges, R.drawable.ic_warning, null),
+            StatCardSpec(R.string.admin_stat_changes, overview.scheduleChanges, R.drawable.ic_warning) {
+                nav.navigate(R.id.changeListFragment)
+            },
             StatCardSpec(R.string.admin_stat_facilities, overview.facilities, R.drawable.ic_facility) {
                 nav.navigate(R.id.action_adminDashboard_to_operations)
             }

@@ -44,6 +44,7 @@ function formatData(item) {
     endTime: item.endTime.toISOString().slice(11, 16),
     purpose: item.purpose,
     status: item.status,
+    rejectionReason: item.rejectionReason || null,
     verifierName: item.verifier?.name || null,
     returnDate: item.returnDate
       ? item.returnDate.toISOString().slice(0, 10)
@@ -129,10 +130,10 @@ async function cekBentrokJadwal(tx, booking) {
     },
   });
 
-  // Perubahan jadwal pada tanggal tersebut juga diperiksa.
+  // Perubahan jadwal pada tanggal tersebut maupun yang pindah masuk ke tanggal ini juga diperiksa.
   const changes = await tx.scheduleChange.findMany({
     where: {
-      date: booking.bookingDate,
+      OR: [{ date: booking.bookingDate }, { newDate: booking.bookingDate }],
     },
     include: {
       scheduleSlot: true,
@@ -150,20 +151,25 @@ async function cekBentrokJadwal(tx, booking) {
     });
   }
 
+  const bookingDateStr = booking.bookingDate.toISOString().slice(0, 10);
   for (const change of changes) {
     const slot = change.scheduleSlot;
+    const isOriginalDate = change.date.toISOString().slice(0, 10) === bookingDateStr;
+    const isMovedIn = change.newDate && change.newDate.toISOString().slice(0, 10) === bookingDateStr;
 
-    if (change.type === "CANCEL") {
+    if (isOriginalDate && (change.type === "CANCEL" || change.newDate)) {
       jadwal.delete(slot.id);
-      continue;
+      if (!isMovedIn) continue;
     }
 
-    jadwal.set(slot.id, {
-      roomId: change.newRoomId ?? slot.roomId,
-      startTime: change.newStartTime ?? slot.startTime,
-      endTime: change.newEndTime ?? slot.endTime,
-      active: true,
-    });
+    if (isMovedIn || (isOriginalDate && !change.newDate && change.type !== "CANCEL")) {
+      jadwal.set(slot.id, {
+        roomId: change.newRoomId ?? slot.roomId,
+        startTime: change.newStartTime ?? slot.startTime,
+        endTime: change.newEndTime ?? slot.endTime,
+        active: true,
+      });
+    }
   }
 
   for (const slot of jadwal.values()) {
@@ -208,8 +214,14 @@ async function cekBentrokPeminjaman(tx, booking) {
 
 // Setujui atau tolak pengajuan.
 // Perubahan status harus berasal dari PENDING.
-async function putuskan(id, adminId, keputusan) {
+async function putuskan(id, adminId, keputusan, rejectionReason = null) {
   const status = keputusan === "approve" ? "APPROVED" : "REJECTED";
+  const cleanedReason = status === "REJECTED" ? (rejectionReason?.trim() || null) : null;
+  if (status === "REJECTED" && !cleanedReason) {
+    throw new AppError(400, "VALIDATION_ERROR", "Alasan penolakan wajib diisi.", [
+      { field: "body.rejectionReason", message: "Alasan penolakan wajib diisi." },
+    ]);
+  }
 
   const result = await prisma.$transaction(
     async (tx) => {
@@ -246,6 +258,7 @@ async function putuskan(id, adminId, keputusan) {
         data: {
           status,
           verifierId: adminId,
+          rejectionReason: cleanedReason,
         },
       });
 
@@ -270,8 +283,8 @@ async function putuskan(id, adminId, keputusan) {
       status === "APPROVED" ? "Peminjaman Disetujui" : "Peminjaman Ditolak",
     body:
       status === "APPROVED"
-        ? `Pengajuan ${result.facility.name} telah disetujui.`
-        : `Pengajuan ${result.facility.name} telah ditolak.`,
+        ? `Pengajuan peminjaman ${result.facility.name} telah disetujui.`
+        : `Pengajuan peminjaman ${result.facility.name} ditolak. Alasan: ${cleanedReason}`,
     referenceId: result.id,
   });
 
@@ -282,8 +295,8 @@ async function approve(id, adminId) {
   return putuskan(id, adminId, "approve");
 }
 
-async function reject(id, adminId) {
-  return putuskan(id, adminId, "reject");
+async function reject(id, adminId, rejectionReason) {
+  return putuskan(id, adminId, "reject", rejectionReason);
 }
 
 async function konfirmasiPengembalian(id) {

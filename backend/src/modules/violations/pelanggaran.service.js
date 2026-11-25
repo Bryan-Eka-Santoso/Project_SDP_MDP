@@ -159,8 +159,12 @@ async function simpan(userId, body) {
     },
   });
 
+  let guardianCount = 0;
+
   try {
+    // Penerima adalah akun wali murid, bukan akun siswa.
     const waliIds = await guardianUserIdsOfStudents([siswa.id]);
+    guardianCount = waliIds.length;
 
     if (waliIds.length > 0) {
       notify(waliIds, {
@@ -177,18 +181,6 @@ async function simpan(userId, body) {
     console.error("[pelanggaran] gagal memproses notifikasi:", err);
   }
 
-  // Penerima adalah akun wali murid, bukan akun siswa.
-  const waliIds = await guardianUserIdsOfStudents([siswa.id]);
-
-  notify(waliIds, {
-    type: "VIOLATION",
-    title: "Pemberitahuan Pelanggaran Siswa",
-    body:
-      `${siswa.user.name} tercatat melakukan pelanggaran ` +
-      `"${jenis.name}" dengan bobot ${jenis.points} poin.`,
-    referenceId: result.id,
-  });
-
   return {
     id: result.id,
     studentId: siswa.id,
@@ -198,7 +190,7 @@ async function simpan(userId, body) {
     points: result.points,
     date: formatDateOnly(result.date),
     description: result.description,
-    guardianCount: waliIds.length,
+    guardianCount,
   };
 }
 

@@ -1,5 +1,7 @@
 const prisma = require("../../lib/prisma");
 const AppError = require("../../utils/AppError");
+const { notify } = require("../notifications/notifications.service");
+const { activeUserIdsByRoles } = require("../notifications/notifications.recipients");
 
 const {
   parseDateOnly,
@@ -100,7 +102,21 @@ async function ajukan(userId, body) {
       purpose: body.purpose,
       status: "PENDING",
     },
+    include: {
+      requester: { select: { name: true } },
+    },
   });
+
+  const adminIds = (await activeUserIdsByRoles(["ADMIN"])).filter((id) => id !== userId);
+  if (adminIds.length > 0) {
+    const requesterName = result.requester?.name || "Pengguna";
+    notify(adminIds, {
+      type: "BOOKING",
+      title: "Pengajuan Peminjaman Baru",
+      body: `${requesterName} mengajukan peminjaman ${fasilitas.name} (${body.bookingDate}, ${body.startTime}–${body.endTime}).`,
+      referenceId: result.id,
+    });
+  }
 
   return {
     id: result.id,
@@ -112,6 +128,7 @@ async function ajukan(userId, body) {
     endTime: body.endTime,
     purpose: result.purpose,
     status: result.status,
+    rejectionReason: null,
   };
 }
 

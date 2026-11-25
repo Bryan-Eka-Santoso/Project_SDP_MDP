@@ -6,8 +6,12 @@
         <TextView android:id="@+id/tvStudent" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textStyle="bold" android:textColor="#182943" android:textSize="14sp" />
         <TextView android:id="@+id/tvStatus" android:layout_width="wrap_content" android:layout_height="wrap_content" android:paddingHorizontal="12dp" android:paddingVertical="6dp" android:textSize="11sp" android:textStyle="bold" />
     </LinearLayout>
-    <TextView android:id="@+id/tvDates" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:textColor="#2354C5" android:textSize="12sp" />
+    <TextView android:id="@+id/tvDates" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:textColor="#1E50CA" android:textStyle="bold" android:textSize="13sp" />
     <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Alasan" android:textColor="#8993A2" android:textSize="11sp" />
-    <TextView android:id="@+id/tvReason" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:textColor="#35435A" android:textSize="13sp" />
-    <TextView android:id="@+id/tvHasAttachment" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="📎 Bukti izin telah dilampirkan" android:textSize="12sp" android:textColor="#245BCB" android:visibility="gone" />
+    <TextView android:id="@+id/tvReason" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:textColor="#182943" android:textStyle="bold" android:textSize="13sp" />
+    <TextView android:id="@+id/tvHasAttachment" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="📎 Bukti izin valid telah dilampirkan" android:textSize="12sp" android:textStyle="bold" android:textColor="#176A42" android:visibility="gone" />
+    <LinearLayout android:id="@+id/layoutRejectionReason" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:orientation="vertical" android:background="#FDE7E7" android:padding="10dp" android:visibility="gone">
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Alasan Penolakan" android:textColor="#B3261E" android:textStyle="bold" android:textSize="11sp" />
+        <TextView android:id="@+id/tvRejectionReason" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:textColor="#8C1D18" android:textStyle="bold" android:textSize="12sp" />
+    </LinearLayout>
 </LinearLayout>

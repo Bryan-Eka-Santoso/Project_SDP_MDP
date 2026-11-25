@@ -45,10 +45,10 @@ class ElectiveAllocationFragment : Fragment() {
         binding.btnElectiveApply.setOnClickListener {
             val plan = viewModel.state.value.preview ?: return@setOnClickListener
             MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Konfirmasi alokasi paket")
-                .setMessage("Buat ${plan.totalClasses} kelas untuk ${plan.totalStudents} siswa paket ${plan.packageName} (${plan.gradeLevel})? Tindakan ini menyimpan kelas dan anggota ke database.")
+                .setTitle("Konfirmasi Alokasi Paket")
+                .setMessage("Buat ${plan.totalClasses} kelas untuk ${plan.totalStudents} siswa paket ${plan.packageName} (${plan.gradeLevel})? Tindakan ini akan menyimpan kelas dan daftar anggotanya.")
                 .setNegativeButton("Batal", null)
-                .setPositiveButton("Jalankan alokasi") { _, _ -> viewModel.applyPreview() }
+                .setPositiveButton("Jalankan Alokasi") { _, _ -> viewModel.applyPreview() }
                 .show()
         }
         binding.spinnerElectivePackage.setOnItemClickListener { _, _, index, _ ->

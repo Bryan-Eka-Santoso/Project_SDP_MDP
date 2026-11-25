@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.data.remote
 
+import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -18,7 +19,12 @@ data class PeminjamanDto(
     val purpose: String,
     val status: String,
     val verifierName: String?,
-    val returnDate: String? = null
+    val returnDate: String? = null,
+    val rejectionReason: String? = null
+)
+
+data class RejectPeminjamanRequest(
+    val rejectionReason: String
 )
 
 interface PeminjamanApi {
@@ -42,7 +48,8 @@ interface PeminjamanApi {
 
     @POST("facility-bookings/{id}/reject")
     suspend fun tolak(
-        @Path("id") id: Int
+        @Path("id") id: Int,
+        @Body body: RejectPeminjamanRequest
     ): ApiResponse<PeminjamanDto>
 
     @POST("facility-bookings/{id}/return")

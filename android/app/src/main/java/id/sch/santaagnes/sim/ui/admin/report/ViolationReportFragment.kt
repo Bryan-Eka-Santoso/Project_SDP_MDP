@@ -21,6 +21,7 @@ import com.google.android.material.card.MaterialCardView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import id.sch.santaagnes.sim.R
+import id.sch.santaagnes.sim.core.DateTimeWib
 import id.sch.santaagnes.sim.data.remote.ViolationReportDto
 import id.sch.santaagnes.sim.databinding.FragmentViolationReportBinding
 import kotlinx.coroutines.launch
@@ -262,24 +263,37 @@ class ViolationReportFragment : Fragment() {
         items: List<ViolationReportDto>
     ) {
         binding.listContainer.removeAllViews()
+        if (items.isNotEmpty()) {
+            val ctx = requireContext()
+            val cRed = ContextCompat.getColor(ctx, R.color.change_cancel)
+            val cAmber = ContextCompat.getColor(ctx, R.color.change_substitute)
+            val byType = items.groupBy { it.violationTypeName }
+                .map { (name, list) ->
+                    Triple(name, list.sumOf { it.points }, list.size)
+                }
+                .sortedByDescending { it.second }
+                .take(6)
+            binding.listContainer.addView(
+                ReportChartRenderer.buildCard(
+                    ctx,
+                    ReportChartSpec(
+                        title = "Jenis Pelanggaran Terbanyak (Poin)",
+                        subtitle = "Berdasarkan ${items.size} kejadian yang ditampilkan",
+                        kind = ReportChartKind.HORIZONTAL_BAR,
+                        segments = byType.map { (name, pts, cnt) ->
+                            ChartSegment(name, pts.toFloat(), "$pts poin ($cnt×)", if (pts >= 20) cRed else cAmber)
+                        }
+                    )
+                )
+            )
+        }
 
         items.forEach { item ->
             val card = MaterialCardView(requireContext()).apply {
                 radius = dp(12).toFloat()
                 cardElevation = dp(1).toFloat()
-
-                setCardBackgroundColor(
-                    ContextCompat.getColor(
-                        requireContext(),
-                        R.color.white
-                    )
-                )
-
-                layoutParams = LinearLayout.LayoutParams(
-                    -1, -2
-                ).apply {
-                    bottomMargin = dp(12)
-                }
+                setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.white))
+                layoutParams = LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(12) }
             }
 
             val content = LinearLayout(requireContext()).apply {
@@ -287,46 +301,29 @@ class ViolationReportFragment : Fragment() {
                 setPadding(dp(16), dp(16), dp(16), dp(16))
             }
 
-            content.addView(
-                buatText(item.studentName, 16f, true)
-            )
+            val header = LinearLayout(requireContext()).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = android.view.Gravity.CENTER_VERTICAL
+            }
+            val titleCol = LinearLayout(requireContext()).apply {
+                orientation = LinearLayout.VERTICAL
+                layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
+            }
+            titleCol.addView(buatText(item.studentName, 16f, true, R.color.agnesian_text))
+            titleCol.addView(buatText("NIS ${item.nis} • ${item.className}", 12f, false, R.color.agnesian_muted))
+            header.addView(titleCol)
+            header.addView(ReportChartRenderer.buildBadge(requireContext(), "+${item.points} Poin", R.color.change_cancel))
+            content.addView(header)
 
-            content.addView(
-                buatText(
-                    "NIS ${item.nis} • ${item.className}"
-                )
-            )
-
-            content.addView(
-                buatText(
-                    "Tanggal: ${item.date}"
-                )
-            )
-
-            content.addView(
-                buatText(
-                    "Pelanggaran: ${item.violationTypeName}"
-                )
-            )
-
-            content.addView(
-                buatText(
-                    "Poin: ${item.points}",
-                    14f,
-                    true
-                )
-            )
-
-            content.addView(
-                buatText(
-                    "Guru Pelapor: ${item.reporterName}"
-                )
-            )
+            val formattedDate = runCatching {
+                DateTimeWib.formatDate(java.time.LocalDate.parse(item.date))
+            }.getOrDefault(item.date)
+            content.addView(buatText("Tanggal: $formattedDate", 13f, true, R.color.agnesian_blue))
+            content.addView(buatText("Pelanggaran: ${item.violationTypeName}", 13f, true, R.color.agnesian_text))
+            content.addView(buatText("Guru Pelapor: ${item.reporterName}", 12f, false, R.color.agnesian_muted))
 
             if (!item.description.isNullOrBlank()) {
-                content.addView(
-                    buatText("Keterangan: ${item.description}")
-                )
+                content.addView(buatText("Keterangan: ${item.description}", 12f, false, R.color.agnesian_text))
             }
 
             card.addView(content)
@@ -337,27 +334,15 @@ class ViolationReportFragment : Fragment() {
     private fun buatText(
         value: String,
         size: Float = 12f,
-        bold: Boolean = false
+        bold: Boolean = false,
+        colorRes: Int = R.color.agnesian_text
     ): TextView {
         return TextView(requireContext()).apply {
             text = value
             textSize = size
-
-            setTextColor(
-                ContextCompat.getColor(
-                    requireContext(),
-                    R.color.agnesian_text
-                )
-            )
-
-            if (bold) {
-                setTypeface(
-                    null,
-                    android.graphics.Typeface.BOLD
-                )
-            }
-
-            setPadding(0, 0, 0, dp(7))
+            setTextColor(ContextCompat.getColor(requireContext(), colorRes))
+            if (bold) setTypeface(null, android.graphics.Typeface.BOLD)
+            setPadding(0, 0, 0, dp(6))
         }
     }
 

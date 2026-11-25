@@ -1,6 +1,7 @@
 const prisma = require('../../../lib/prisma');
 const AppError = require('../../../utils/AppError');
 const { toPrismaPagination } = require('../../../utils/pagination');
+const { findSlotConflicts } = require('../../schedules/schedules.conflicts');
 
 const ASSIGNMENT_SELECT = {
   id: true,
@@ -205,10 +206,13 @@ async function updateTeachingAssignment(id, { teacherId }) {
 
   const teacher = await prisma.teacher.findUnique({
     where: { id: teacherId },
-    select: { id: true },
+    select: { id: true, user: { select: { status: true } } },
   });
   if (!teacher) {
     throw new AppError(404, 'NOT_FOUND', 'Guru baru tidak ditemukan.');
+  }
+  if (teacher.user && teacher.user.status !== 'ACTIVE') {
+    throw new AppError(409, 'INVALID_STATE', 'Akun guru baru sedang diblokir.');
   }
 
   if (teacherId !== current.teacherId) {
@@ -228,6 +232,38 @@ async function updateTeachingAssignment(id, { teacherId }) {
         'DUPLICATE',
         'Guru tersebut sudah ditugaskan mengajar mata pelajaran ini pada kelas dan semester yang sama.',
       );
+    }
+
+    // Pastikan jam mengajar guru baru tidak bentrok dengan slot jadwal yang sudah ada pada penugasan ini.
+    const existingSlots = await prisma.scheduleSlot.findMany({
+      where: { teachingAssignmentId: id },
+      select: { id: true, dayOfWeek: true, startTime: true, endTime: true, roomId: true },
+    });
+    if (existingSlots.length > 0) {
+      const conflicts = [];
+      for (const slot of existingSlots) {
+        const slotConflicts = await findSlotConflicts(
+          prisma,
+          {
+            dayOfWeek: slot.dayOfWeek,
+            startTime: slot.startTime,
+            endTime: slot.endTime,
+            roomId: slot.roomId,
+            teacherId,
+            classGroupId: current.classGroupId,
+          },
+          { semesterId: current.semesterId, excludeSlotId: slot.id },
+        );
+        conflicts.push(...slotConflicts.filter((c) => c.reason === 'TEACHER'));
+      }
+      if (conflicts.length > 0) {
+        throw new AppError(
+          409,
+          'SCHEDULE_CONFLICT',
+          'Jam mengajar guru baru bentrok dengan jadwal pelajaran yang sudah terdaftar.',
+          conflicts,
+        );
+      }
     }
   }
 

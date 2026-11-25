@@ -66,11 +66,15 @@ jest.mock('../src/lib/prisma', () => {
     },
     classGroup: {
       findUnique: jest.fn(),
+      findFirst: jest.fn(),
       findMany: jest.fn(),
       count: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
+    },
+    scheduleSlot: {
+      findMany: jest.fn(),
     },
     classMember: {
       findUnique: jest.fn(),
@@ -364,7 +368,8 @@ describe('F-MST-07 & F-MST-08: Master Kelas & Atur Wali Kelas', () => {
       id: 1,
       academicYear: { id: 1, isActive: true },
     });
-    prisma.teacher.findUnique.mockResolvedValue({ id: 8 });
+    prisma.classGroup.findFirst.mockResolvedValue(null);
+    prisma.teacher.findUnique.mockResolvedValue({ id: 8, user: { name: 'Guru Wali', status: 'ACTIVE' } });
     prisma.classGroup.update.mockResolvedValue({
       id: 1,
       name: 'X-1',
@@ -383,6 +388,23 @@ describe('F-MST-07 & F-MST-08: Master Kelas & Atur Wali Kelas', () => {
       where: { id: { in: [8] } },
       data: { isHomeroomTeacher: true },
     });
+  });
+
+  it('menolak wali kelas yang sudah menjadi wali kelas lain pada tahun ajaran yang sama (409 SCHEDULE_CONFLICT)', async () => {
+    prisma.classGroup.findUnique.mockResolvedValue({
+      id: 2,
+      academicYear: { id: 1, isActive: true },
+    });
+    prisma.teacher.findUnique.mockResolvedValue({ id: 8, user: { name: 'Guru Wali', status: 'ACTIVE' } });
+    prisma.classGroup.findFirst.mockResolvedValue({ id: 1, name: 'X-1' });
+
+    const res = await request(app)
+      .patch('/api/v1/classes/2/homeroom-teacher')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ homeroomTeacherId: 8 });
+
+    expect(res.status).toBe(409);
+    expect(res.body.error.code).toBe('SCHEDULE_CONFLICT');
   });
 });
 
@@ -473,5 +495,50 @@ describe('F-MST-10: Penugasan Guru Mengajar', () => {
 
     expect(res.status).toBe(400);
     expect(res.body.error.code).toBe('VALIDATION_ERROR');
+  });
+
+  it('menolak ubah guru penugasan jika jam mengajar guru baru bentrok dengan jadwal kelas (409 SCHEDULE_CONFLICT)', async () => {
+    prisma.teachingAssignment.findUnique
+      .mockResolvedValueOnce({ id: 100, teacherId: 2, subjectId: 3, classGroupId: 4, semesterId: 5 })
+      .mockResolvedValueOnce(null);
+    prisma.teacher.findUnique.mockResolvedValue({ id: 9, user: { status: 'ACTIVE' } });
+    prisma.scheduleSlot.findMany
+      .mockResolvedValueOnce([
+        {
+          id: 50,
+          dayOfWeek: 'MONDAY',
+          startTime: new Date('1970-01-01T07:00:00.000Z'),
+          endTime: new Date('1970-01-01T08:30:00.000Z'),
+          roomId: 10,
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          id: 51,
+          teachingAssignmentId: 101,
+          dayOfWeek: 'MONDAY',
+          startTime: new Date('1970-01-01T08:00:00.000Z'),
+          endTime: new Date('1970-01-01T09:30:00.000Z'),
+          roomId: 11,
+          room: { name: 'Ruang XI-1' },
+          teachingAssignment: {
+            teacherId: 9,
+            classGroupId: 6,
+            teacher: { user: { name: 'Guru Sembilan' } },
+            subject: { name: 'Fisika' },
+            classGroup: { name: 'XI-1' },
+          },
+        },
+      ]);
+    prisma.classMember.findMany.mockResolvedValue([]);
+
+    const res = await request(app)
+      .patch('/api/v1/teaching-assignments/100')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ teacherId: 9 });
+
+    expect(res.status).toBe(409);
+    expect(res.body.error.code).toBe('SCHEDULE_CONFLICT');
+    expect(prisma.teachingAssignment.update).not.toHaveBeenCalled();
   });
 });

@@ -325,16 +325,16 @@ model TeachingAssignment {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  teacher         Teacher          @relation(fields: [teacherId], references: [id])
-  subject         Subject          @relation(fields: [subjectId], references: [id])
-  classGroup      ClassGroup       @relation(fields: [classGroupId], references: [id])
-  semester        Semester         @relation(fields: [semesterId], references: [id])
-  scheduleSlots   ScheduleSlot[]
-  scores          Score[]
-  progressNotes   ProgressNote[]
-  gradeComponents GradeComponent[]
+  teacher          Teacher           @relation(fields: [teacherId], references: [id])
+  subject          Subject           @relation(fields: [subjectId], references: [id])
+  classGroup       ClassGroup        @relation(fields: [classGroupId], references: [id])
+  semester         Semester          @relation(fields: [semesterId], references: [id])
+  scheduleSlots    ScheduleSlot[]
+  scores           Score[]
+  progressNotes    ProgressNote[]
+  gradeComponents  GradeComponent[]
   gradeAssessments GradeAssessment[]
-  tasks           Task[]
+  tasks            Task[]
 
   @@unique([teacherId, subjectId, classGroupId, semesterId])
   @@map("penugasan_guru")
@@ -594,6 +594,7 @@ model LeaveRequest {
   attachmentUrl      String?            @map("lampiran_url") @db.VarChar(255)
   attachmentPublicId String?            @map("lampiran_public_id") @db.VarChar(255)
   status             LeaveRequestStatus @default(PENDING)
+  rejectionReason    String?            @map("alasan_penolakan") @db.VarChar(255)
   createdAt          DateTime           @default(now()) @map("created_at")
   updatedAt          DateTime           @updatedAt @map("updated_at")
 
@@ -721,18 +722,19 @@ model AcademicEvent {
 // =====================================================================
 
 model FacilityBooking {
-  id          Int           @id @default(autoincrement()) @map("id_peminjaman")
-  facilityId  Int           @map("id_fasilitas")
-  requesterId Int           @map("id_akun_pemohon")
-  verifierId  Int?          @map("id_akun_verifikator")
-  bookingDate DateTime      @map("tanggal_pinjam") @db.Date
-  startTime   DateTime      @map("jam_mulai") @db.Time(0)
-  endTime     DateTime      @map("jam_selesai") @db.Time(0)
-  purpose     String        @map("keperluan") @db.VarChar(255)
-  status      BookingStatus @default(PENDING)
-  returnDate  DateTime?     @map("tanggal_kembali") @db.Date
-  createdAt   DateTime      @default(now()) @map("created_at")
-  updatedAt   DateTime      @updatedAt @map("updated_at")
+  id              Int           @id @default(autoincrement()) @map("id_peminjaman")
+  facilityId      Int           @map("id_fasilitas")
+  requesterId     Int           @map("id_akun_pemohon")
+  verifierId      Int?          @map("id_akun_verifikator")
+  bookingDate     DateTime      @map("tanggal_pinjam") @db.Date
+  startTime       DateTime      @map("jam_mulai") @db.Time(0)
+  endTime         DateTime      @map("jam_selesai") @db.Time(0)
+  purpose         String        @map("keperluan") @db.VarChar(255)
+  status          BookingStatus @default(PENDING)
+  rejectionReason String?       @map("alasan_penolakan") @db.VarChar(255)
+  returnDate      DateTime?     @map("tanggal_kembali") @db.Date
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
 
   facility  Facility @relation(fields: [facilityId], references: [id])
   requester User     @relation("BookingRequester", fields: [requesterId], references: [id])
@@ -772,8 +774,8 @@ model GradeAssessment {
   createdAt            DateTime @default(now()) @map("created_at")
   updatedAt            DateTime @updatedAt @map("updated_at")
 
-  teachingAssignment TeachingAssignment @relation(fields: [teachingAssignmentId], references: [id])
-  gradeComponent     GradeComponent     @relation(fields: [gradeComponentId], references: [id])
+  teachingAssignment TeachingAssignment     @relation(fields: [teachingAssignmentId], references: [id])
+  gradeComponent     GradeComponent         @relation(fields: [gradeComponentId], references: [id])
   scores             GradeAssessmentScore[]
 
   @@unique([gradeComponentId, sequence])

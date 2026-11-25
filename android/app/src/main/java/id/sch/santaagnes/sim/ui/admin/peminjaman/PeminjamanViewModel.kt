@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import id.sch.santaagnes.sim.data.remote.PeminjamanApi
 import id.sch.santaagnes.sim.data.remote.PeminjamanDto
+import id.sch.santaagnes.sim.data.remote.RejectPeminjamanRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -93,7 +94,7 @@ class PeminjamanViewModel @Inject constructor(
         }
     }
 
-    fun putuskan(id: Int, setujui: Boolean) {
+    fun putuskan(id: Int, setujui: Boolean, rejectionReason: String? = null) {
         if (_uiState.value.processing) return
 
         viewModelScope.launch {
@@ -106,7 +107,7 @@ class PeminjamanViewModel @Inject constructor(
                 val response = if (setujui) {
                     api.setujui(id)
                 } else {
-                    api.tolak(id)
+                    api.tolak(id, RejectPeminjamanRequest(rejectionReason.orEmpty().trim()))
                 }
 
                 if (!response.success) {
@@ -129,10 +130,11 @@ class PeminjamanViewModel @Inject constructor(
 
             } catch (e: HttpException) {
                 val message = when (e.code()) {
+                    400 -> "Alasan penolakan wajib diisi."
                     409 -> "Pengajuan sudah diproses atau terjadi bentrok jadwal."
                     403 -> "Hanya Admin yang dapat memproses pengajuan."
                     404 -> "Pengajuan tidak ditemukan."
-                    else -> "Gagal memproses (HTTP ${e.code()})"
+                    else -> "Gagal memproses pengajuan. Silakan coba lagi."
                 }
 
                 _uiState.value = _uiState.value.copy(
@@ -143,7 +145,7 @@ class PeminjamanViewModel @Inject constructor(
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     processing = false,
-                    error = e.message ?: "Gagal memproses"
+                    error = e.message ?: "Gagal memproses pengajuan."
                 )
             }
         }
@@ -186,7 +188,7 @@ class PeminjamanViewModel @Inject constructor(
                     403 -> "Hanya Admin yang dapat mengonfirmasi."
                     404 -> "Data peminjaman tidak ditemukan."
                     409 -> "Peminjaman sudah diproses atau belum disetujui."
-                    else -> "Gagal memproses (HTTP ${e.code()})"
+                    else -> "Gagal mengonfirmasi pengembalian. Silakan coba lagi."
                 }
 
                 _uiState.value = _uiState.value.copy(

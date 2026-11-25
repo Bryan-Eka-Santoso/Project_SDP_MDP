@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.ui.admin.report
 
+import android.graphics.Typeface
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
@@ -37,12 +38,18 @@ class StudentStatsReportAdapter :
                 binding.tvAttendanceRate.setText(R.string.report_stats_no_attendance_rate)
                 binding.tvAttendanceRate.setTextColor(ContextCompat.getColor(context, R.color.agnesian_muted))
                 binding.tvAttendanceSummary.setText(R.string.report_stats_no_attendance)
+                binding.tvAttendanceSummary.setTypeface(null, Typeface.NORMAL)
             } else {
+                val rateColor = when {
+                    row.attendanceRate >= 90.0 -> R.color.bill_paid
+                    row.attendanceRate >= 75.0 -> R.color.change_substitute
+                    else -> R.color.change_cancel
+                }
                 binding.tvAttendanceRate.text = context.getString(
                     R.string.report_stats_attendance_rate,
                     formatReportDecimal(row.attendanceRate)
                 )
-                binding.tvAttendanceRate.setTextColor(ContextCompat.getColor(context, R.color.agnesian_blue))
+                binding.tvAttendanceRate.setTextColor(ContextCompat.getColor(context, rateColor))
                 binding.tvAttendanceSummary.text = context.getString(
                     R.string.report_stats_attendance,
                     row.presentCount,
@@ -50,13 +57,22 @@ class StudentStatsReportAdapter :
                     row.excusedCount,
                     row.absentCount
                 )
+                binding.tvAttendanceSummary.setTypeface(null, Typeface.BOLD)
             }
 
             binding.tvStudentCount.text = context.getString(R.string.report_stats_students, row.studentCount, row.capacity)
+            binding.tvStudentCount.setTypeface(null, Typeface.BOLD)
             binding.tvViolations.text = context.getString(
                 R.string.report_stats_violations,
                 row.violationCount,
                 row.violationPoints
+            )
+            binding.tvViolations.setTypeface(null, if (row.violationCount > 0) Typeface.BOLD else Typeface.NORMAL)
+            binding.tvViolations.setTextColor(
+                ContextCompat.getColor(
+                    context,
+                    if (row.violationCount > 0) R.color.change_cancel else R.color.agnesian_muted
+                )
             )
         }
     }

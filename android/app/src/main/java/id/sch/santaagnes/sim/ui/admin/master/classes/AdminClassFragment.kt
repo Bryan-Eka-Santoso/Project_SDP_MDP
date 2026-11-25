@@ -192,16 +192,30 @@ class AdminClassFragment : Fragment() {
             )
 
             val teachers = state.teachers
-            val teacherOptions = buildList {
-                add(AgnesianOption("", "Belum diatur", "Wali kelas bisa ditetapkan nanti"))
-                addAll(teachers.map { AgnesianOption(it.id.toString(), it.name, "NIP: ${it.employeeNumber}") })
+            fun buildTeacherOptions(): List<AgnesianOption> {
+                val chosenYearId = years.getOrNull(selectedYearIdx)?.id
+                val assignedByTeacher = state.classes
+                    .filter { it.academicYearId == chosenYearId && it.homeroomTeacherId != null }
+                    .associate { it.homeroomTeacherId!! to it.name }
+                return buildList {
+                    add(AgnesianOption("", "Belum diatur", "Wali kelas bisa ditetapkan nanti"))
+                    addAll(teachers.map { teacher ->
+                        val occupiedClass = assignedByTeacher[teacher.id]
+                        val sub = if (occupiedClass != null) {
+                            "NIP: ${teacher.employeeNumber} · Sudah wali kelas $occupiedClass"
+                        } else {
+                            "NIP: ${teacher.employeeNumber}"
+                        }
+                        AgnesianOption(teacher.id.toString(), teacher.name, sub)
+                    })
+                }
             }
-            d.etHomeroomSelector.setText(teacherOptions[0].title)
+            d.etHomeroomSelector.setText("Belum diatur")
             bindSelectorField(
                 layout = d.layoutHomeroom,
                 input = d.etHomeroomSelector,
                 sheetTitle = "Pilih Wali Kelas (Opsional)",
-                options = { teacherOptions },
+                options = ::buildTeacherOptions,
                 selectedIndex = { selectedTeacherIdx },
                 onSelected = { idx, _ -> selectedTeacherIdx = idx }
             )
@@ -258,11 +272,23 @@ class AdminClassFragment : Fragment() {
     }
 
     private fun showHomeroomDialog(item: MasterClassGroup) {
-        val teachers = viewModel.uiState.value.teachers
+        val state = viewModel.uiState.value
+        val teachers = state.teachers
+        val occupiedByTeacher = state.classes
+            .filter { it.academicYearId == item.academicYearId && it.id != item.id && it.homeroomTeacherId != null }
+            .associate { it.homeroomTeacherId!! to it.name }
         val d = DialogHomeroomTeacherBinding.inflate(layoutInflater)
         val teacherOptions = buildList {
             add(AgnesianOption("", "Lepas Wali Kelas", "Kosongkan penugasan wali untuk kelas ini"))
-            addAll(teachers.map { AgnesianOption(it.id.toString(), it.name, "NIP: ${it.employeeNumber}") })
+            addAll(teachers.map { teacher ->
+                val occupiedClass = occupiedByTeacher[teacher.id]
+                val sub = if (occupiedClass != null) {
+                    "NIP: ${teacher.employeeNumber} · Sudah wali kelas $occupiedClass"
+                } else {
+                    "NIP: ${teacher.employeeNumber}"
+                }
+                AgnesianOption(teacher.id.toString(), teacher.name, sub)
+            })
         }
 
         var selectedIdx = if (item.homeroomTeacherId == null) 0 else {
@@ -384,7 +410,16 @@ class AdminClassFragment : Fragment() {
                                 ViewGroup.LayoutParams.WRAP_CONTENT,
                                 ViewGroup.LayoutParams.WRAP_CONTENT
                             ).apply { marginStart = 12 }
-                            setOnClickListener { viewModel.removeClassMember(item.id, member.studentId) }
+                            setOnClickListener {
+                                MaterialAlertDialogBuilder(requireContext())
+                                    .setTitle("Keluarkan Siswa?")
+                                    .setMessage("Keluarkan ${member.name} dari kelas ${item.name}?")
+                                    .setNegativeButton("Batal", null)
+                                    .setPositiveButton("Keluarkan") { _, _ ->
+                                        viewModel.removeClassMember(item.id, member.studentId)
+                                    }
+                                    .show()
+                            }
                         }
                         row.addView(info)
                         row.addView(btnMove)

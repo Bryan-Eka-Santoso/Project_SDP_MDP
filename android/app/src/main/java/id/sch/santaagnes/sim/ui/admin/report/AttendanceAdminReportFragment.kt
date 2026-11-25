@@ -10,6 +10,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -102,7 +103,36 @@ class AttendanceAdminReportFragment : Fragment() {
         }
 
         binding.reportRows.removeAllViews()
+        if (state.items.isNotEmpty()) {
+            binding.reportRows.addView(buildAttendanceChart(state.items))
+        }
         state.items.forEach { addRow(it) }
+    }
+
+    private fun buildAttendanceChart(items: List<AttendanceAdminReportDto>): View {
+        val ctx = requireContext()
+        val sumPresent = items.sumOf { it.present }
+        val sumSick = items.sumOf { it.sick }
+        val sumExcused = items.sumOf { it.excused }
+        val sumAbsent = items.sumOf { it.absent }
+        val sumTotal = sumPresent + sumSick + sumExcused + sumAbsent
+        val rate = if (sumTotal > 0) "${decimal.format(sumPresent * 100.0 / sumTotal)}%" else "0%"
+        return ReportChartRenderer.buildCard(
+            ctx,
+            ReportChartSpec(
+                title = "Komposisi Kehadiran Siswa",
+                subtitle = "Berdasarkan ${items.size} siswa yang ditampilkan ($sumTotal catatan)",
+                kind = ReportChartKind.DONUT,
+                centerLabel = rate,
+                centerSubLabel = "Hadir",
+                segments = listOf(
+                    ChartSegment("Hadir", sumPresent.toFloat(), "$sumPresent", ContextCompat.getColor(ctx, R.color.bill_paid)),
+                    ChartSegment("Sakit", sumSick.toFloat(), "$sumSick", ContextCompat.getColor(ctx, R.color.agnesian_blue)),
+                    ChartSegment("Izin", sumExcused.toFloat(), "$sumExcused", ContextCompat.getColor(ctx, R.color.change_substitute)),
+                    ChartSegment("Alpa", sumAbsent.toFloat(), "$sumAbsent", ContextCompat.getColor(ctx, R.color.change_cancel))
+                )
+            )
+        )
     }
 
     private fun pickDate(selected: LocalDate?, onPicked: (LocalDate) -> Unit) {
@@ -118,19 +148,44 @@ class AttendanceAdminReportFragment : Fragment() {
             radius = dp(14).toFloat()
             cardElevation = 0f
             strokeWidth = dp(1)
-            strokeColor = resources.getColor(R.color.agnesian_muted, context.theme)
-            setCardBackgroundColor(resources.getColor(R.color.white, context.theme))
+            strokeColor = ContextCompat.getColor(context, R.color.agnesian_border)
+            setCardBackgroundColor(ContextCompat.getColor(context, R.color.white))
             layoutParams = LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(10) }
         }
         val content = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(14), dp(13), dp(14), dp(13))
         }
-        content.addView(line(row.studentName, 15f, true, R.color.agnesian_text))
-        content.addView(line("NIS ${row.nis} • ${row.className}", 12f, false, R.color.agnesian_muted))
-        content.addView(line("Hadir: ${row.present}   Sakit: ${row.sick}   Izin: ${row.excused}   Alpa: ${row.absent}", 13f, false, R.color.agnesian_text))
-        val rate = row.attendanceRate?.let { "${decimal.format(it)}%" } ?: "Belum ada presensi"
-        content.addView(line("Total sesi: ${row.total} • Kehadiran: $rate", 13f, true, R.color.agnesian_blue))
+        val rate = row.attendanceRate?.let { "${decimal.format(it)}%" } ?: "Belum ada"
+        val rateColor = when {
+            row.attendanceRate == null -> R.color.agnesian_muted
+            row.attendanceRate >= 90.0 -> R.color.bill_paid
+            row.attendanceRate >= 75.0 -> R.color.change_substitute
+            else -> R.color.change_cancel
+        }
+        val header = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = android.view.Gravity.CENTER_VERTICAL
+        }
+        val titleCol = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
+        }
+        titleCol.addView(line(row.studentName, 15f, true, R.color.agnesian_text))
+        titleCol.addView(line("NIS ${row.nis} • ${row.className}", 12f, false, R.color.agnesian_muted))
+        header.addView(titleCol)
+        header.addView(ReportChartRenderer.buildBadge(context, rate, rateColor))
+        content.addView(header)
+
+        content.addView(
+            line(
+                "Hadir: ${row.present}  •  Sakit: ${row.sick}  •  Izin: ${row.excused}  •  Alpa: ${row.absent}",
+                13f,
+                true,
+                if (row.absent > 0) R.color.change_cancel else R.color.agnesian_text
+            )
+        )
+        content.addView(line("Total sesi tercatat: ${row.total}", 12f, true, R.color.agnesian_blue))
         card.addView(content)
         binding.reportRows.addView(card)
     }

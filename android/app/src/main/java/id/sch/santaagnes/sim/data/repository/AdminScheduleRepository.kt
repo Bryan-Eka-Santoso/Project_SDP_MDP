@@ -7,6 +7,7 @@ import id.sch.santaagnes.sim.core.UploadFiles
 import id.sch.santaagnes.sim.data.remote.AdminScheduleApi
 import id.sch.santaagnes.sim.data.remote.MasterLookupApi
 import id.sch.santaagnes.sim.data.remote.SaveChangeRequest
+import id.sch.santaagnes.sim.data.remote.ScheduleApi
 import id.sch.santaagnes.sim.data.remote.SlotRequest
 import id.sch.santaagnes.sim.domain.model.AdminChange
 import id.sch.santaagnes.sim.domain.model.AdminSlot
@@ -19,6 +20,7 @@ import id.sch.santaagnes.sim.domain.model.RoomOption
 import id.sch.santaagnes.sim.domain.model.ScheduleLookups
 import id.sch.santaagnes.sim.domain.model.SlotFilter
 import id.sch.santaagnes.sim.domain.model.SlotInput
+import id.sch.santaagnes.sim.domain.model.TeacherOption
 import retrofit2.HttpException
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -59,6 +61,7 @@ interface AdminScheduleRepository {
 class AdminScheduleRepositoryImpl @Inject constructor(
     private val api: AdminScheduleApi,
     private val master: MasterLookupApi,
+    private val scheduleApi: ScheduleApi,
     private val errors: ApiErrorMapper,
     private val uploads: UploadFiles,
     private val templates: TemplateFiles
@@ -148,14 +151,34 @@ class AdminScheduleRepositoryImpl @Inject constructor(
             if (page >= (response.meta?.totalPages ?: page)) break
             page += 1
         }
-        // Ruangan belum punya endpoint (master fasilitas milik Bryan): diambil dari slot yang sudah ada.
-        val rooms = loadAllSlots()
-            .mapNotNull { slot -> slot.roomId?.let { RoomOption(it, slot.roomName.orEmpty()) } }
-            .distinctBy { it.id }
-            .sortedBy { it.name }
+        // Ambil semua guru aktif agar guru pengganti tidak terbatas pada yang sudah punya penugasan.
+        val allTeachers = runCatching {
+            val list = mutableListOf<TeacherOption>()
+            var tPage = 1
+            while (tPage <= MAX_PAGES) {
+                val res = master.getTeachers(tPage, LOOKUP_PAGE_SIZE)
+                list += res.data.orEmpty().map { TeacherOption(it.id, it.user.name) }
+                if (tPage >= (res.meta?.totalPages ?: tPage)) break
+                tPage += 1
+            }
+            list
+        }.getOrDefault(emptyList())
+        // Ambil daftar ruangan dari endpoint resmi; fallback ke ruangan dari slot yang ada bila kosong.
+        val apiRooms = runCatching {
+            scheduleApi.getRooms().data.orEmpty().map { RoomOption(it.id, it.name) }
+        }.getOrDefault(emptyList())
+        val rooms = if (apiRooms.isNotEmpty()) {
+            apiRooms.distinctBy { it.id }.sortedBy { it.name }
+        } else {
+            loadAllSlots()
+                .mapNotNull { slot -> slot.roomId?.let { RoomOption(it, slot.roomName.orEmpty()) } }
+                .distinctBy { it.id }
+                .sortedBy { it.name }
+        }
         ScheduleLookups(
             assignments = assignments.sortedWith(compareBy({ it.classGroupName }, { it.subjectName })),
-            rooms = rooms
+            rooms = rooms,
+            allTeachers = allTeachers
         )
     }
 

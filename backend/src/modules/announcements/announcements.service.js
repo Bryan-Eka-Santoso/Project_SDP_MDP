@@ -25,7 +25,13 @@ const ANNOUNCEMENT_SELECT = {
   createdAt: true,
   updatedAt: true,
   author: { select: { id: true, name: true, role: true } },
-  classGroup: { select: { id: true, name: true } },
+  classGroup: {
+    select: {
+      id: true,
+      name: true,
+      homeroomTeacher: { select: { userId: true } },
+    },
+  },
 };
 
 function mapAnnouncement(item) {
@@ -35,7 +41,7 @@ function mapAnnouncement(item) {
     content: item.content,
     scope: item.scope,
     classGroupId: item.classGroupId,
-    classGroup: item.classGroup,
+    classGroup: item.classGroup ? { id: item.classGroup.id, name: item.classGroup.name } : null,
     author: item.author,
     date: formatDateOnly(item.date),
     attachmentUrl: item.attachmentUrl,
@@ -68,7 +74,10 @@ async function dispatchAnnouncementNotification(created, senderUserId) {
       studentUserIdsOfClasses([created.classGroupId]),
       guardianUserIdsOfClasses([created.classGroupId]),
     ]);
-    userIds = [...new Set([...studentIds, ...guardianIds])].filter((id) => id !== senderUserId);
+    const homeroomUserId = created.classGroup?.homeroomTeacher?.userId;
+    userIds = [...new Set([...studentIds, ...guardianIds, ...(homeroomUserId ? [homeroomUserId] : [])])].filter(
+      (id) => id !== senderUserId,
+    );
     const className = created.classGroup?.name ?? 'Kelas';
     title = `Pengumuman ${className}: ${created.title}`;
   }
