@@ -5,8 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -164,62 +162,32 @@ class TeacherDashboardFragment : Fragment() {
 
                 binding.classesPreviewContainer.removeAllViews()
 
-                // Menampilkan maksimal 3 kelas pada dashboard
+                // Menampilkan maksimal 3 kelas secara ringkas pada dashboard (detail jadwal dibuka saat diklik)
                 assignments.take(3).forEach { assignment ->
-
-                    val card = layoutInflater.inflate(
-                        R.layout.item_grade_class,
-                        binding.classesPreviewContainer,
-                        false
-                    )
-
-                    // Nama mata pelajaran dan kelas
-                    card.findViewById<TextView>(
-                        R.id.tvAssignment
-                    ).text =
-                        "${assignment.subjectName} · ${assignment.className}"
-
-                    // Informasi semester dan jadwal
-                    card.findViewById<TextView>(
-                        R.id.tvClassSchedule
-                    ).text =
-                        if (assignment.schedules.isEmpty()) {
-                            "Semester ${assignment.semesterName} · Jadwal belum tersedia"
-                        } else {
-                            "Semester ${assignment.semesterName}\n" +
-                                    assignment.schedules.joinToString("\n") { slot ->
-                                        "${slot.day}  ${slot.startTime}–${slot.endTime}"
-                                    }
+                    val card = inflateTeacherClassCard(
+                        inflater = layoutInflater,
+                        parent = binding.classesPreviewContainer,
+                        assignment = assignment,
+                        showNotes = false,
+                        onAttendanceClick = {
+                            findNavController().navigate(
+                                R.id.attendanceFragment,
+                                bundleOf(
+                                    "assignmentId" to assignment.id,
+                                    "assignmentLabel" to assignment.label
+                                )
+                            )
+                        },
+                        onGradesClick = {
+                            findNavController().navigate(
+                                R.id.gradeManageFragment,
+                                bundleOf(
+                                    "assignmentId" to assignment.id,
+                                    "assignmentLabel" to assignment.label
+                                )
+                            )
                         }
-
-                    // Tombol Nilai
-                    card.findViewById<Button>(
-                        R.id.btnGrades
-                    ).setOnClickListener {
-
-                        findNavController().navigate(
-                            R.id.gradeManageFragment,
-                            bundleOf(
-                                "assignmentId" to assignment.id,
-                                "assignmentLabel" to assignment.label
-                            )
-                        )
-                    }
-
-                    // Tombol Absensi
-                    card.findViewById<Button>(
-                        R.id.btnAttendance
-                    ).setOnClickListener {
-
-                        findNavController().navigate(
-                            R.id.attendanceFragment,
-                            bundleOf(
-                                "assignmentId" to assignment.id,
-                                "assignmentLabel" to assignment.label
-                            )
-                        )
-                    }
-
+                    )
                     binding.classesPreviewContainer.addView(card)
                 }
 

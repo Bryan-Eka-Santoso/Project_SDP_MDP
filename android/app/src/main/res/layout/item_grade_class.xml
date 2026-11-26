@@ -1,32 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical"
-    android:background="@drawable/bg_teacher_card" android:padding="16dp" android:layout_marginTop="12dp">
-    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
-        <TextView android:id="@+id/tvAssignment" android:layout_width="0dp" android:layout_height="wrap_content"
-            android:layout_weight="1" android:textStyle="bold" android:textSize="15sp" android:textColor="@color/teacher_ink"/>
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="◷" android:textColor="@color/teacher_blue" android:textSize="17sp"/>
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="10dp"
+    android:background="@drawable/bg_teacher_card"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    android:orientation="vertical"
+    android:padding="14dp">
+
+    <!-- Baris ringkas: Nama mapel/kelas + ringkasan jadwal 1 baris + tombol toggle detail -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvAssignment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="@color/teacher_ink"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvScheduleSummary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="@color/teacher_muted"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/btnToggleSchedule"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:background="@drawable/bg_option_unselected"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="10dp"
+            android:paddingEnd="6dp">
+
+            <TextView
+                android:id="@+id/tvToggleSchedule"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Jadwal"
+                android:textColor="@color/agnesian_blue"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/ivScheduleChevron"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginStart="2dp"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_chevron_down"
+                app:tint="@color/agnesian_blue" />
+        </LinearLayout>
     </LinearLayout>
-    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:layout_marginTop="6dp" android:text="Semester aktif · Kelola pembelajaran"
-        android:textSize="11sp" android:textColor="@color/teacher_muted"/>
-    <TextView android:id="@+id/tvClassSchedule"
-        android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:layout_marginTop="8dp" android:textSize="13sp"
-        android:lineSpacingExtra="3dp" android:textColor="@color/teacher_ink"/>
-    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:orientation="horizontal" android:layout_marginTop="13dp">
-        <Button android:id="@+id/btnAttendance" android:layout_width="wrap_content" android:layout_height="36dp"
-            android:minWidth="92dp" android:minHeight="0dp" android:paddingStart="12dp" android:paddingEnd="12dp"
-            android:text="Absensi" android:textAllCaps="false" android:textSize="12sp" android:textColor="#FFFFFF"
-            android:backgroundTint="@color/teacher_blue_light"/>
-        <Button android:id="@+id/btnGrades" android:layout_width="wrap_content" android:layout_height="36dp"
-            android:minWidth="80dp" android:minHeight="0dp" android:layout_marginStart="8dp"
-            android:text="Nilai" android:textAllCaps="false" android:textSize="12sp" android:textColor="#FFFFFF"
-            android:backgroundTint="@color/teacher_blue_light"/>
-        <!-- Hanya ditampilkan di tab Kelas (TeacherClassesFragment); di Home tetap tersembunyi. -->
-        <Button android:id="@+id/btnNotes" android:layout_width="wrap_content" android:layout_height="36dp"
-            android:minWidth="80dp" android:minHeight="0dp" android:layout_marginStart="8dp"
-            android:text="Catatan" android:textAllCaps="false" android:textSize="12sp" android:textColor="#FFFFFF"
-            android:backgroundTint="@color/teacher_blue_light" android:visibility="gone"/>
+
+    <!-- Detail jadwal: tersembunyi secara default, muncul saat kartu/tombol diklik -->
+    <LinearLayout
+        android:id="@+id/layoutScheduleDetail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg_teacher_field"
+        android:orientation="vertical"
+        android:padding="10dp"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Detail Jadwal Mengajar"
+            android:textColor="@color/teacher_blue"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvClassSchedule"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:lineSpacingExtra="4dp"
+            android:textColor="@color/teacher_ink"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+    <!-- Aksi cepat kelas -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnAttendance"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:backgroundTint="@color/teacher_blue_light"
+            android:minWidth="88dp"
+            android:minHeight="0dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:text="Presensi"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/btnGrades"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:layout_marginStart="8dp"
+            android:backgroundTint="@color/teacher_blue_light"
+            android:minWidth="76dp"
+            android:minHeight="0dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:text="Nilai"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp" />
+
+        <!-- Hanya ditampilkan di halaman Semua Kelas (TeacherClassesFragment); di Beranda tetap tersembunyi. -->
+        <Button
+            android:id="@+id/btnNotes"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:layout_marginStart="8dp"
+            android:backgroundTint="@color/teacher_blue_light"
+            android:minWidth="80dp"
+            android:minHeight="0dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:text="Catatan"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:visibility="gone" />
     </LinearLayout>
 </LinearLayout>
