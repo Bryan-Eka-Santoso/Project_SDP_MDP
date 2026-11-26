@@ -109,6 +109,35 @@ class StudentStatsReportFragment : ReportFragment<StudentStatsRow, StudentStatsF
         )
     }
 
+    override fun buildExportPreview(
+        state: ReportUiState<StudentStatsRow, StudentStatsFilter>,
+        fileName: String
+    ): ReportExportPreviewSpec {
+        val filters = buildList {
+            state.filter.classGroupId?.let { id ->
+                state.options.classGroups.firstOrNull { it.id == id }?.name?.let { add("Kelas: $it") }
+            }
+            state.filter.gradeLevel?.let { add("Tingkat $it") }
+        }
+        return ReportExportPreviewSpec(
+            reportTitle = getString(titleRes),
+            fileName = fileName,
+            totalCount = state.total,
+            filters = filters,
+            columns = listOf("Kelas", "Tingkat", "Wali Kelas", "Siswa", "Kehadiran", "Pelanggaran"),
+            rows = state.rows.map { row ->
+                listOf(
+                    row.className,
+                    row.gradeLevel,
+                    row.homeroomTeacherName.orEmpty().ifBlank { "—" },
+                    "${row.studentCount}/${row.capacity}",
+                    if (row.attendanceTotal == 0) "—" else "${formatReportDecimal(row.attendanceRate)}%",
+                    "${row.violationCount} kasus (${row.violationPoints} poin)"
+                )
+            }
+        )
+    }
+
     override fun releaseFilters() {
         classDropdown = null
         renderedLevels = emptyList()

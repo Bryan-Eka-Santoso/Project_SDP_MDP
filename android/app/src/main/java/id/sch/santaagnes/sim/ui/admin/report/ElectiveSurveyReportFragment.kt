@@ -111,14 +111,40 @@ class ElectiveSurveyReportFragment : Fragment() {
         }
 
         binding.btnExport.setOnClickListener {
+            val state = viewModel.state.value
             val date = SimpleDateFormat(
                 "yyyy-MM-dd",
                 Locale.US
             ).format(Calendar.getInstance().time)
-
-            exportLauncher.launch(
-                "laporan-survei-mapel-$date.xlsx"
-            )
+            val fileName = "laporan-survei-mapel-$date.xlsx"
+            val filters = buildList {
+                val grade = binding.etGrade.text?.toString()?.trim().orEmpty()
+                if (grade.isNotEmpty()) add("Tingkat: $grade")
+                selectedStatus?.let {
+                    add("Status: " + if (it == "CLOSED") "Ditutup" else "Diterbitkan")
+                }
+            }
+            showReportExportPreview(
+                ReportExportPreviewSpec(
+                    reportTitle = "Laporan Survei Mata Pelajaran Pilihan",
+                    fileName = fileName,
+                    totalCount = state.total,
+                    filters = filters,
+                    columns = listOf("Mapel", "Tingkat", "Survei", "Peminat", "Persen", "Status"),
+                    rows = state.items.map { item ->
+                        listOf(
+                            item.subjectName,
+                            item.gradeLevel,
+                            item.surveyTitle,
+                            "${item.studentCount}/${item.respondentCount}",
+                            "${formatReportDecimal(item.percentage)}%",
+                            if (item.status == "CLOSED") "Ditutup" else "Diterbitkan"
+                        )
+                    }
+                )
+            ) {
+                exportLauncher.launch(fileName)
+            }
         }
 
         viewLifecycleOwner.lifecycleScope.launch {

@@ -20,6 +20,7 @@ import androidx.navigation.fragment.findNavController
 import com.google.android.material.card.MaterialCardView
 import dagger.hilt.android.AndroidEntryPoint
 import id.sch.santaagnes.sim.R
+import id.sch.santaagnes.sim.core.DateTimeWib
 import id.sch.santaagnes.sim.data.remote.GradesAdminReportDto
 import id.sch.santaagnes.sim.databinding.FragmentGradesAdminReportBinding
 import kotlinx.coroutines.launch
@@ -51,7 +52,34 @@ class GradesAdminReportFragment : Fragment() {
         binding.btnBack.setOnClickListener { findNavController().popBackStack() }
         binding.btnRefresh.setOnClickListener { vm.refresh() }
         binding.btnLoadMore.setOnClickListener { vm.loadMore() }
-        binding.btnExport.setOnClickListener { exportLauncher.launch("laporan-nilai.xlsx") }
+        binding.btnExport.setOnClickListener {
+            val state = vm.state.value
+            val fileName = "laporan-nilai-${DateTimeWib.today()}.xlsx"
+            val className = state.classGroupId?.let { id ->
+                state.classOptions.firstOrNull { it.id == id }?.name
+            }
+            showReportExportPreview(
+                ReportExportPreviewSpec(
+                    reportTitle = "Laporan Nilai Siswa",
+                    fileName = fileName,
+                    totalCount = state.total,
+                    filters = listOfNotNull(className?.let { "Kelas: $it" }),
+                    columns = listOf("Siswa", "NIS", "Kelas", "Mapel", "Nilai Akhir", "Predikat"),
+                    rows = state.items.map { row ->
+                        listOf(
+                            row.studentName,
+                            row.nis,
+                            row.className,
+                            row.subjectName,
+                            row.finalScore?.let { decimal.format(it) } ?: "Belum lengkap",
+                            row.predicate ?: "—"
+                        )
+                    }
+                )
+            ) {
+                exportLauncher.launch(fileName)
+            }
+        }
         binding.spinnerClasses.setOnItemClickListener { _, _, index, _ ->
             vm.selectClass(optionIds.getOrNull(index))
         }

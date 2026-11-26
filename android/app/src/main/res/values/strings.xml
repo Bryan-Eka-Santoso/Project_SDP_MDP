@@ -4,6 +4,7 @@
     <string name="login_subtitle">Silakan masuk dengan akun sekolah Anda.</string>
     <string name="login_email">Email</string>
     <string name="login_password">Password</string>
+    <string name="login_toggle_password">Tampilkan atau sembunyikan password</string>
     <string name="login_button">Masuk</string>
     <string name="login_remember">Ingat saya</string>
     <string name="login_forgot">Lupa Password?</string>

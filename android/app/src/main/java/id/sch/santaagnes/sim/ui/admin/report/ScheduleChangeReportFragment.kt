@@ -7,6 +7,7 @@ import androidx.fragment.app.viewModels
 import com.google.android.material.chip.Chip
 import dagger.hilt.android.AndroidEntryPoint
 import id.sch.santaagnes.sim.R
+import id.sch.santaagnes.sim.core.DateTimeWib
 import id.sch.santaagnes.sim.domain.model.ChangeType
 import id.sch.santaagnes.sim.domain.model.ScheduleChangeReportFilter
 import id.sch.santaagnes.sim.domain.model.ScheduleChangeReportRow
@@ -101,6 +102,68 @@ class ScheduleChangeReportFragment : ReportFragment<ScheduleChangeReportRow, Sch
                 ChartSegment("Pindah Jadwal", resCount.toFloat(), "$resCount", ContextCompat.getColor(ctx, R.color.change_reschedule)),
                 ChartSegment("Dibatalkan", canCount.toFloat(), "$canCount", ContextCompat.getColor(ctx, R.color.change_cancel))
             )
+        )
+    }
+
+    override fun buildExportPreview(
+        state: ReportUiState<ScheduleChangeReportRow, ScheduleChangeReportFilter>,
+        fileName: String
+    ): ReportExportPreviewSpec {
+        val filters = buildList {
+            state.filter.classGroupId?.let { id ->
+                state.options.classGroups.firstOrNull { it.id == id }?.name?.let { add("Kelas: $it") }
+            }
+            state.filter.teacherId?.let { id ->
+                state.options.teachers.firstOrNull { it.id == id }?.name?.let { add("Guru: $it") }
+            }
+            state.filter.type?.let {
+                add(
+                    "Jenis: " + when (it) {
+                        ChangeType.SUBSTITUTE -> "Ganti Guru"
+                        ChangeType.RESCHEDULE -> "Pindah Jadwal"
+                        ChangeType.CANCEL -> "Dibatalkan"
+                    }
+                )
+            }
+            if (state.filter.dateFrom != null || state.filter.dateTo != null) {
+                add(
+                    "Tanggal: ${state.filter.dateFrom?.let(DateTimeWib::formatDate) ?: "..."} – " +
+                        (state.filter.dateTo?.let(DateTimeWib::formatDate) ?: "...")
+                )
+            }
+        }
+        return ReportExportPreviewSpec(
+            reportTitle = getString(titleRes),
+            fileName = fileName,
+            totalCount = state.total,
+            filters = filters,
+            columns = listOf("Tanggal", "Kelas", "Mapel", "Jenis", "Guru Asli", "Keterangan"),
+            rows = state.rows.map { row ->
+                val typeLabel = when (row.type) {
+                    ChangeType.SUBSTITUTE -> "Ganti Guru"
+                    ChangeType.RESCHEDULE -> "Pindah Jadwal"
+                    ChangeType.CANCEL -> "Dibatalkan"
+                }
+                val detail = when (row.type) {
+                    ChangeType.SUBSTITUTE -> row.substituteTeacherName?.let { "Pengganti: $it" } ?: row.description
+                    ChangeType.RESCHEDULE -> {
+                        val moved = listOfNotNull(
+                            row.newDate?.let(DateTimeWib::formatDate),
+                            if (row.newStart != null && row.newEnd != null) "${row.newStart}–${row.newEnd}" else null
+                        ).joinToString(" ")
+                        moved.ifBlank { row.description }
+                    }
+                    ChangeType.CANCEL -> row.description
+                }
+                listOf(
+                    DateTimeWib.formatDate(row.date),
+                    row.classGroupName,
+                    row.subjectName,
+                    typeLabel,
+                    row.originalTeacherName,
+                    detail
+                )
+            }
         )
     }
 

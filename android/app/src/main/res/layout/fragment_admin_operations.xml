@@ -43,336 +43,727 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="16dp">
+            android:paddingTop="4dp"
+            android:paddingBottom="20dp">
 
+            <!-- 1. Mata Pelajaran -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardSubjects"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="10dp"
                 android:clickable="true"
                 android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
                 app:cardBackgroundColor="@color/white"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="1dp">
+                app:cardCornerRadius="10dp"
+                app:cardElevation="1dp"
+                app:strokeColor="@color/agnesian_divider"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="14dp">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/ops_subjects_title"
-                        android:textColor="@color/agnesian_text"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
+                    <FrameLayout
+                        android:layout_width="42dp"
+                        android:layout_height="42dp"
+                        android:background="@drawable/bg_badge"
+                        android:backgroundTint="@color/agnesian_tile">
 
-                    <TextView
-                        android:layout_width="match_parent"
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_gravity="center"
+                            android:importantForAccessibility="no"
+                            android:src="@drawable/ic_book"
+                            app:tint="@color/agnesian_blue" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="@string/ops_subjects_desc"
-                        android:textColor="@color/agnesian_muted"
-                        android:textSize="13sp" />
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/ops_subjects_title"
+                            android:textColor="@color/agnesian_text"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/ops_subjects_desc"
+                            android:textColor="@color/agnesian_muted"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="@color/agnesian_muted" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Timeline MPP-05: fitur akademik paket pilihan, mengikuti style kartu Figma Bryan. -->
+            <!-- 2. Alokasi Paket Pilihan (MPP-05) -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardElectiveAllocation"
-                android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp" android:layout_marginTop="12dp"
-                android:clickable="true" android:focusable="true"
-                app:cardBackgroundColor="@color/white" app:cardCornerRadius="12dp" app:cardElevation="1dp">
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:orientation="vertical" android:padding="16dp">
-                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-                        android:text="Alokasi Paket Pilihan" android:textStyle="bold" android:textSize="16sp"
-                        android:textColor="@color/agnesian_text" />
-                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp" android:text="Pratinjau dan pembagian kelas paket mata pelajaran"
-                        android:textSize="13sp" android:textColor="@color/agnesian_muted" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="10dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="1dp"
+                app:strokeColor="@color/agnesian_divider"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="14dp">
+
+                    <FrameLayout
+                        android:layout_width="42dp"
+                        android:layout_height="42dp"
+                        android:background="@drawable/bg_badge"
+                        android:backgroundTint="@color/agnesian_tile">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_gravity="center"
+                            android:importantForAccessibility="no"
+                            android:src="@drawable/ic_group"
+                            app:tint="@color/agnesian_blue" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Alokasi Paket Pilihan"
+                            android:textColor="@color/agnesian_text"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Pratinjau dan pembagian kelas paket mata pelajaran"
+                            android:textColor="@color/agnesian_muted"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="@color/agnesian_muted" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- MPP-06: Tren peminat paket lintas tahun ajaran. -->
+            <!-- 3. Tren Paket Pilihan (MPP-06) -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardElectiveTrends"
-                android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp" android:layout_marginTop="12dp"
-                android:clickable="true" android:focusable="true"
-                app:cardBackgroundColor="@color/white" app:cardCornerRadius="12dp" app:cardElevation="1dp">
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:padding="16dp" android:orientation="vertical">
-                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-                        android:text="Tren Paket Pilihan" android:textStyle="bold" android:textSize="16sp"
-                        android:textColor="@color/agnesian_text" />
-                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp" android:text="Bandingkan jumlah pemilih paket antar tahun ajaran"
-                        android:textSize="13sp" android:textColor="@color/agnesian_muted" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="10dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="1dp"
+                app:strokeColor="@color/agnesian_divider"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="14dp">
+
+                    <FrameLayout
+                        android:layout_width="42dp"
+                        android:layout_height="42dp"
+                        android:background="@drawable/bg_badge"
+                        android:backgroundTint="@color/agnesian_tile">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_gravity="center"
+                            android:importantForAccessibility="no"
+                            android:src="@drawable/ic_bar_chart"
+                            app:tint="@color/agnesian_blue_dark" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Tren Paket Pilihan"
+                            android:textColor="@color/agnesian_text"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Bandingkan jumlah pemilih paket antar tahun ajaran"
+                            android:textColor="@color/agnesian_muted"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="@color/agnesian_muted" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- 4. Paket Mata Pelajaran -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardSubjectPackages"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="10dp"
                 android:clickable="true"
                 android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
                 app:cardBackgroundColor="@color/white"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="1dp">
+                app:cardCornerRadius="10dp"
+                app:cardElevation="1dp"
+                app:strokeColor="@color/agnesian_divider"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="14dp">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/ops_subject_packages_title"
-                        android:textColor="@color/agnesian_text"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
+                    <FrameLayout
+                        android:layout_width="42dp"
+                        android:layout_height="42dp"
+                        android:background="@drawable/bg_badge"
+                        android:backgroundTint="@color/agnesian_tile">
 
-                    <TextView
-                        android:layout_width="match_parent"
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_gravity="center"
+                            android:importantForAccessibility="no"
+                            android:src="@drawable/ic_package"
+                            app:tint="@color/agnesian_blue" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="@string/ops_subject_packages_desc"
-                        android:textColor="@color/agnesian_muted"
-                        android:textSize="13sp" />
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/ops_subject_packages_title"
+                            android:textColor="@color/agnesian_text"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/ops_subject_packages_desc"
+                            android:textColor="@color/agnesian_muted"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="@color/agnesian_muted" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- 5. Fasilitas Sekolah -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardFacilities"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="10dp"
                 android:clickable="true"
                 android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
                 app:cardBackgroundColor="@color/white"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="1dp">
+                app:cardCornerRadius="10dp"
+                app:cardElevation="1dp"
+                app:strokeColor="@color/agnesian_divider"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="14dp">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/ops_facilities_title"
-                        android:textColor="@color/agnesian_text"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
+                    <FrameLayout
+                        android:layout_width="42dp"
+                        android:layout_height="42dp"
+                        android:background="@drawable/bg_badge"
+                        android:backgroundTint="@color/agnesian_tile">
 
-                    <TextView
-                        android:layout_width="match_parent"
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_gravity="center"
+                            android:importantForAccessibility="no"
+                            android:src="@drawable/ic_building"
+                            app:tint="@color/agnesian_blue" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="@string/ops_facilities_desc"
-                        android:textColor="@color/agnesian_muted"
-                        android:textSize="13sp" />
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/ops_facilities_title"
+                            android:textColor="@color/agnesian_text"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/ops_facilities_desc"
+                            android:textColor="@color/agnesian_muted"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="@color/agnesian_muted" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- 6. Jenis Pelanggaran -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardViolationTypes"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="10dp"
                 android:clickable="true"
                 android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
                 app:cardBackgroundColor="@color/white"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="1dp">
+                app:cardCornerRadius="10dp"
+                app:cardElevation="1dp"
+                app:strokeColor="@color/agnesian_divider"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="14dp">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/ops_violation_types_title"
-                        android:textColor="@color/agnesian_text"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
+                    <FrameLayout
+                        android:layout_width="42dp"
+                        android:layout_height="42dp"
+                        android:background="@drawable/bg_badge"
+                        android:backgroundTint="#FEECEB">
 
-                    <TextView
-                        android:layout_width="match_parent"
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_gravity="center"
+                            android:importantForAccessibility="no"
+                            android:src="@drawable/ic_warning"
+                            app:tint="@color/change_cancel" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="@string/ops_violation_types_desc"
-                        android:textColor="@color/agnesian_muted"
-                        android:textSize="13sp" />
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/ops_violation_types_title"
+                            android:textColor="@color/agnesian_text"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/ops_violation_types_desc"
+                            android:textColor="@color/agnesian_muted"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="@color/agnesian_muted" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- 7. Verifikasi Peminjaman Fasilitas -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardBookings"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="10dp"
                 android:clickable="true"
                 android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
                 app:cardBackgroundColor="@color/white"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="1dp">
+                app:cardCornerRadius="10dp"
+                app:cardElevation="1dp"
+                app:strokeColor="@color/agnesian_divider"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="14dp">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/ops_bookings_title"
-                        android:textColor="@color/agnesian_text"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
+                    <FrameLayout
+                        android:layout_width="42dp"
+                        android:layout_height="42dp"
+                        android:background="@drawable/bg_badge"
+                        android:backgroundTint="#FFF4E5">
 
-                    <TextView
-                        android:layout_width="match_parent"
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_gravity="center"
+                            android:importantForAccessibility="no"
+                            android:src="@drawable/ic_facility"
+                            app:tint="@color/change_substitute" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="@string/ops_bookings_desc"
-                        android:textColor="@color/agnesian_muted"
-                        android:textSize="13sp" />
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/ops_bookings_title"
+                            android:textColor="@color/agnesian_text"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/ops_bookings_desc"
+                            android:textColor="@color/agnesian_muted"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="@color/agnesian_muted" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- RIWAYAT PELANGGARAN -->
+            <!-- 8. Riwayat Pelanggaran Siswa -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardRiwayatPelanggaran"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="10dp"
                 android:clickable="true"
                 android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
                 app:cardBackgroundColor="@color/white"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="1dp">
+                app:cardCornerRadius="10dp"
+                app:cardElevation="1dp"
+                app:strokeColor="@color/agnesian_divider"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="14dp">
 
-                    <TextView
-                        android:layout_width="match_parent"
+                    <FrameLayout
+                        android:layout_width="42dp"
+                        android:layout_height="42dp"
+                        android:background="@drawable/bg_badge"
+                        android:backgroundTint="#FEECEB">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_gravity="center"
+                            android:importantForAccessibility="no"
+                            android:src="@drawable/ic_shield_person"
+                            app:tint="@color/change_cancel" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="Riwayat Pelanggaran Siswa"
-                        android:textColor="@color/agnesian_text"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="Lihat akumulasi poin dan rincian kejadian pelanggaran siswa"
-                        android:textColor="@color/agnesian_muted"
-                        android:textSize="13sp" />
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Riwayat Pelanggaran Siswa"
+                            android:textColor="@color/agnesian_text"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
 
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Lihat akumulasi poin dan rincian kejadian pelanggaran siswa"
+                            android:textColor="@color/agnesian_muted"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="@color/agnesian_muted" />
                 </LinearLayout>
-
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- 9. Riwayat Peminjaman -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardRiwayatPeminjaman"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="10dp"
                 android:clickable="true"
                 android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
                 app:cardBackgroundColor="@color/white"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="1dp">
+                app:cardCornerRadius="10dp"
+                app:cardElevation="1dp"
+                app:strokeColor="@color/agnesian_divider"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="14dp">
 
-                    <TextView
-                        android:layout_width="match_parent"
+                    <FrameLayout
+                        android:layout_width="42dp"
+                        android:layout_height="42dp"
+                        android:background="@drawable/bg_badge"
+                        android:backgroundTint="#E8F5E9">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_gravity="center"
+                            android:importantForAccessibility="no"
+                            android:src="@drawable/ic_calendar"
+                            app:tint="@color/bill_paid" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="Riwayat Peminjaman"
-                        android:textColor="@color/agnesian_text"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="Lihat status dan riwayat pengajuan peminjaman seluruh pengguna"
-                        android:textColor="@color/agnesian_muted"
-                        android:textSize="13sp" />
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Riwayat Peminjaman"
+                            android:textColor="@color/agnesian_text"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
 
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Lihat status dan riwayat pengajuan peminjaman seluruh pengguna"
+                            android:textColor="@color/agnesian_muted"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="@color/agnesian_muted" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- 10. Survei Minat Mata Pelajaran -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardSurveiMinat"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="10dp"
                 android:clickable="true"
                 android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
                 app:cardBackgroundColor="@color/white"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="1dp">
+                app:cardCornerRadius="10dp"
+                app:cardElevation="1dp"
+                app:strokeColor="@color/agnesian_divider"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="16dp"
-                    android:orientation="vertical">
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="14dp">
 
-                    <TextView
-                        android:layout_width="match_parent"
+                    <FrameLayout
+                        android:layout_width="42dp"
+                        android:layout_height="42dp"
+                        android:background="@drawable/bg_badge"
+                        android:backgroundTint="@color/agnesian_tile">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_gravity="center"
+                            android:importantForAccessibility="no"
+                            android:src="@drawable/ic_edit"
+                            app:tint="@color/agnesian_blue" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="Survei Minat Mata Pelajaran"
-                        android:textColor="@color/agnesian_text"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="Buat, terbitkan, dan lihat rekap survei minat siswa"
-                        android:textColor="@color/agnesian_muted"
-                        android:textSize="13sp" />
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Survei Minat Mata Pelajaran"
+                            android:textColor="@color/agnesian_text"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
 
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Buat, terbitkan, dan lihat rekap survei minat siswa"
+                            android:textColor="@color/agnesian_muted"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="@color/agnesian_muted" />
                 </LinearLayout>
-
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
     </ScrollView>

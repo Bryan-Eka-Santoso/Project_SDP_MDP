@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/agnesian_background"
@@ -33,24 +34,75 @@
             android:textStyle="bold" />
     </LinearLayout>
 
-    <TextView
+    <!-- Ringkasan singkat di atas grid agar layar terisi proporsional -->
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="14dp"
+        android:layout_marginTop="12dp"
         android:layout_marginBottom="4dp"
-        android:text="@string/report_hub_hint"
-        android:textColor="@color/agnesian_muted"
-        android:textSize="13sp" />
+        app:cardBackgroundColor="@color/white"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="1dp"
+        app:strokeColor="@color/agnesian_divider"
+        app:strokeWidth="1dp">
 
-    <!-- Grid 4 kolom: ikon + judul singkat untuk seluruh laporan admin & pemantauan jurnal. -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="12dp">
+
+            <FrameLayout
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:background="@drawable/bg_badge"
+                android:backgroundTint="@color/agnesian_tile">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_bar_chart"
+                    app:tint="@color/agnesian_blue" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="11 Modul Laporan &amp; Pemantauan"
+                    android:textColor="@color/agnesian_text"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/report_hub_hint"
+                    android:textColor="@color/agnesian_muted"
+                    android:textSize="12sp" />
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Grid 3 kolom: ikon + judul yang lebih lega dan proporsional untuk seluruh laporan admin. -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvReportHub"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:clipToPadding="false"
-        android:paddingHorizontal="11dp"
+        android:paddingHorizontal="10dp"
         android:paddingTop="6dp"
-        android:paddingBottom="16dp" />
+        android:paddingBottom="18dp" />
 </LinearLayout>

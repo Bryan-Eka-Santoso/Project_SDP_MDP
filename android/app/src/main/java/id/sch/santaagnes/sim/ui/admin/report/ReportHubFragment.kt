@@ -19,7 +19,7 @@ import id.sch.santaagnes.sim.R
 import id.sch.santaagnes.sim.databinding.FragmentReportHubBinding
 import id.sch.santaagnes.sim.databinding.ItemReportHubTileBinding
 
-/** Daftar laporan admin (F-LAP-01..10 & F-ABS-04) dalam grid 4 kolom (ikon + judul ringkas). */
+/** Daftar laporan admin (F-LAP-01..10 & F-ABS-04) dalam grid 3 kolom (ikon + judul ringkas). */
 @AndroidEntryPoint
 class ReportHubFragment : Fragment() {
 
@@ -94,6 +94,6 @@ class ReportHubFragment : Fragment() {
     }
 
     private companion object {
-        const val HUB_COLUMNS = 4
+        const val HUB_COLUMNS = 3
     }
 }
