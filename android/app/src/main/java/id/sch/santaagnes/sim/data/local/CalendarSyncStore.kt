@@ -21,9 +21,18 @@ interface CalendarSyncStore {
     suspend fun isEnabled(userId: Int): Boolean
     suspend fun setEnabled(userId: Int, enabled: Boolean)
     suspend fun calendarId(userId: Int): Long?
+    suspend fun selectedCalendarId(userId: Int): Long?
+    suspend fun setSelectedCalendarId(userId: Int, calendarId: Long?)
+    suspend fun calendarLabel(userId: Int): String?
     suspend fun refs(userId: Int): Map<String, SyncedRef>
     suspend fun lastSyncMillis(userId: Int): Long?
-    suspend fun saveSync(userId: Int, calendarId: Long, refs: Map<String, SyncedRef>, syncedAtMillis: Long)
+    suspend fun saveSync(
+        userId: Int,
+        calendarId: Long,
+        refs: Map<String, SyncedRef>,
+        syncedAtMillis: Long,
+        calendarLabel: String? = null
+    )
     suspend fun clearRefs(userId: Int)
 }
 
@@ -37,6 +46,8 @@ class DataStoreCalendarSyncStore @Inject constructor(
 
     private fun enabledKey(userId: Int) = booleanPreferencesKey("enabled_$userId")
     private fun calendarKey(userId: Int) = longPreferencesKey("calendar_$userId")
+    private fun selectedCalendarKey(userId: Int) = longPreferencesKey("selected_calendar_$userId")
+    private fun calendarLabelKey(userId: Int) = stringPreferencesKey("calendar_label_$userId")
     private fun refsKey(userId: Int) = stringPreferencesKey("refs_$userId")
     private fun lastSyncKey(userId: Int) = longPreferencesKey("last_sync_$userId")
 
@@ -50,6 +61,17 @@ class DataStoreCalendarSyncStore @Inject constructor(
 
     override suspend fun calendarId(userId: Int): Long? = snapshot()[calendarKey(userId)]
 
+    override suspend fun selectedCalendarId(userId: Int): Long? = snapshot()[selectedCalendarKey(userId)]
+
+    override suspend fun setSelectedCalendarId(userId: Int, calendarId: Long?) {
+        context.calendarSyncDataStore.edit {
+            if (calendarId == null) it.remove(selectedCalendarKey(userId))
+            else it[selectedCalendarKey(userId)] = calendarId
+        }
+    }
+
+    override suspend fun calendarLabel(userId: Int): String? = snapshot()[calendarLabelKey(userId)]
+
     override suspend fun refs(userId: Int): Map<String, SyncedRef> {
         val json = snapshot()[refsKey(userId)] ?: return emptyMap()
         return runCatching { gson.fromJson<Map<String, SyncedRef>>(json, refsType) }.getOrNull() ?: emptyMap()
@@ -61,18 +83,23 @@ class DataStoreCalendarSyncStore @Inject constructor(
         userId: Int,
         calendarId: Long,
         refs: Map<String, SyncedRef>,
-        syncedAtMillis: Long
+        syncedAtMillis: Long,
+        calendarLabel: String?
     ) {
         context.calendarSyncDataStore.edit {
             it[calendarKey(userId)] = calendarId
             it[refsKey(userId)] = gson.toJson(refs)
             it[lastSyncKey(userId)] = syncedAtMillis
+            if (calendarLabel != null) {
+                it[calendarLabelKey(userId)] = calendarLabel
+            }
         }
     }
 
     override suspend fun clearRefs(userId: Int) {
         context.calendarSyncDataStore.edit {
             it.remove(calendarKey(userId))
+            it.remove(calendarLabelKey(userId))
             it.remove(refsKey(userId))
             it.remove(lastSyncKey(userId))
         }

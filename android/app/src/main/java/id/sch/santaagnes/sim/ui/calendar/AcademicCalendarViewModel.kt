@@ -111,6 +111,9 @@ class AcademicCalendarViewModel @Inject constructor(
     private val _message = MutableSharedFlow<String>(extraBufferCapacity = 1)
     val message: SharedFlow<String> = _message.asSharedFlow()
 
+    private val _eventsMutated = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val eventsMutated: SharedFlow<Unit> = _eventsMutated.asSharedFlow()
+
     init {
         viewModelScope.launch {
             _uiState.update { it.copy(role = repository.currentRole()) }
@@ -232,6 +235,7 @@ class AcademicCalendarViewModel @Inject constructor(
                             "Agenda kalender berhasil diperbarui"
                         }
                     )
+                    _eventsMutated.emit(Unit)
                     load()
                 }
                 is Resource.Error -> {
@@ -249,6 +253,7 @@ class AcademicCalendarViewModel @Inject constructor(
                 is Resource.Success -> {
                     _uiState.update { it.copy(isSubmitting = false) }
                     _message.emit("Agenda kalender berhasil dihapus")
+                    _eventsMutated.emit(Unit)
                     load()
                 }
                 is Resource.Error -> {

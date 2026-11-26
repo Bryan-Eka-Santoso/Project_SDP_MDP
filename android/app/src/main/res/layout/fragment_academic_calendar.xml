@@ -189,6 +189,15 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Panel Sinkronisasi Google Calendar (F-JDW-06 / ADR-009) -->
+            <include
+                android:id="@+id/googleCalendarSyncCard"
+                layout="@layout/view_google_calendar_sync_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="10dp" />
+
             <!-- Tampilan Kalender Bulanan -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"

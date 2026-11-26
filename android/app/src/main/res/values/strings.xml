@@ -277,12 +277,19 @@
     <string name="profile_label_homeroom_teacher">Wali Kelas</string>
     <string name="profile_label_phone">No. Telepon</string>
     <string name="profile_label_role">Peran</string>
-    <string name="calendar_sync_title">Sinkronkan ke kalender perangkat</string>
-    <string name="calendar_sync_desc_with_bookings">Agenda kalender akademik dan peminjaman fasilitas yang disetujui ikut masuk ke aplikasi Kalender di HP. Jadwal pelajaran tidak ikut.</string>
-    <string name="calendar_sync_desc_academic">Agenda kalender akademik ikut masuk ke aplikasi Kalender di HP.</string>
-    <string name="calendar_sync_busy">Menyinkronkan…</string>
-    <string name="calendar_sync_status">Terakhir sinkron %1$s · %2$d agenda di kalender (%3$d baru, %4$d diperbarui, %5$d dihapus)</string>
+    <string name="calendar_sync_title">Sinkronisasi Google Calendar</string>
+    <string name="calendar_sync_desc_with_bookings">Agenda kalender akademik dan peminjaman fasilitas yang disetujui tersinkron otomatis ke Google Calendar di perangkat Anda. Jadwal pelajaran tidak ikut.</string>
+    <string name="calendar_sync_desc_academic">Agenda kalender akademik tersinkron otomatis ke Google Calendar di perangkat Anda.</string>
+    <string name="calendar_sync_busy">Menyinkronkan ke Google Calendar…</string>
+    <string name="calendar_sync_status">Terakhir sinkron %1$s · %2$d agenda di Google Calendar (%3$d baru, %4$d diperbarui, %5$d dihapus)</string>
     <string name="calendar_sync_status_time_only">Terakhir sinkron %1$s</string>
+    <string name="calendar_sync_now">Sinkronkan Sekarang</string>
+    <string name="calendar_open_google">Buka Google Calendar</string>
+    <string name="calendar_account_active">Akun Google: %1$s</string>
+    <string name="calendar_account_pick">Pilih akun Google Calendar</string>
+    <string name="calendar_pick_account_title">Pilih Akun Google Calendar</string>
+    <string name="calendar_pick_account_subtitle">Agenda akademik akan disinkronkan ke kalender yang dipilih</string>
+    <string name="calendar_no_google_account">Tidak ditemukan akun Google Calendar di perangkat. Pastikan Anda sudah masuk ke aplikasi Google Calendar.</string>
     <string name="profile_bills">Tagihan</string>
     <string name="profile_reports">Laporan</string>
 
@@ -644,7 +651,7 @@
     <string name="calendar_subtitle">Jadwal ujian, libur, dan kegiatan sekolah</string>
     <string name="calendar_search_hint">Cari agenda akademik</string>
     <string name="calendar_empty">Belum ada agenda pada kalender akademik.</string>
-    <string name="calendar_save_to_device">Simpan ke Kalender HP</string>
+    <string name="calendar_save_to_device">Simpan ke Google Calendar</string>
     <string name="calendar_add_title">Tambah Agenda Kalender</string>
     <string name="calendar_edit_title">Ubah Agenda Kalender</string>
     <string name="shortcut_announcements">Pengumuman</string>

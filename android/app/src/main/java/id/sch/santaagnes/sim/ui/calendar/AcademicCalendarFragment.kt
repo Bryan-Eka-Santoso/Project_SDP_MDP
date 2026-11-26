@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
@@ -28,6 +29,7 @@ import id.sch.santaagnes.sim.domain.model.AcademicEvent
 import id.sch.santaagnes.sim.domain.model.AcademicEventType
 import id.sch.santaagnes.sim.ui.admin.master.bindDateField
 import id.sch.santaagnes.sim.ui.admin.master.showAgnesianFormSheet
+import id.sch.santaagnes.sim.ui.profile.CalendarSyncViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -41,6 +43,20 @@ class AcademicCalendarFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: AcademicCalendarViewModel by viewModels()
+    private val calendarSyncViewModel: CalendarSyncViewModel by viewModels()
+    private var pendingCalendarAction: (() -> Unit)? = null
+
+    private val calendarPermission =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { grants ->
+            val action = pendingCalendarAction
+            pendingCalendarAction = null
+            if (grants.values.all { it }) {
+                calendarSyncViewModel.refreshState()
+                action?.invoke() ?: calendarSyncViewModel.enable()
+            } else {
+                calendarSyncViewModel.permissionDenied()
+            }
+        }
 
     private val adapter by lazy {
         AcademicEventAdapter(
@@ -90,7 +106,18 @@ class AcademicCalendarFragment : Fragment() {
         }
 
         setupFilterAndSearch()
+        bindGoogleCalendarSyncCard(
+            binding = binding.googleCalendarSyncCard,
+            viewModel = calendarSyncViewModel,
+            permissionLauncher = calendarPermission,
+            onPendingPermissionAction = { pendingCalendarAction = it }
+        )
         observeViewModel()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        calendarSyncViewModel.refreshState()
     }
 
     private fun setupFilterAndSearch() {
@@ -150,6 +177,15 @@ class AcademicCalendarFragment : Fragment() {
                 launch {
                     viewModel.message.collect { msg ->
                         Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                launch {
+                    viewModel.eventsMutated.collect {
+                        // Jika sinkron Google Calendar sedang aktif, langsung perbarui event setelah Admin menambah/mengubah/menghapus agenda.
+                        if (calendarSyncViewModel.uiState.value.enabled) {
+                            calendarSyncViewModel.syncNow()
+                        }
                     }
                 }
             }
@@ -260,7 +296,7 @@ class AcademicCalendarFragment : Fragment() {
         }
     }
 
-    /** Membuka aplikasi Kalender Android via Intent CalendarContract (acara sepanjang hari). */
+    /** Membuka aplikasi Google Calendar (atau kalender perangkat) via Intent CalendarContract (acara sepanjang hari). */
     private fun exportToDeviceCalendar(event: AcademicEvent) {
         val intent = runCatching {
             val startMillis = LocalDate.parse(event.startDate)
@@ -280,6 +316,7 @@ class AcademicCalendarFragment : Fragment() {
                 .putExtra(CalendarContract.EXTRA_EVENT_ALL_DAY, true)
                 .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, startMillis)
                 .putExtra(CalendarContract.EXTRA_EVENT_END_TIME, endMillis)
+                .preferGoogleCalendar(requireContext())
         }.getOrNull() ?: return
 
         runCatching {
@@ -287,7 +324,7 @@ class AcademicCalendarFragment : Fragment() {
         }.onFailure {
             Toast.makeText(
                 requireContext(),
-                "Tidak ada aplikasi kalender pada perangkat",
+                "Tidak ditemukan aplikasi Google Calendar pada perangkat ini.",
                 Toast.LENGTH_SHORT
             ).show()
         }
