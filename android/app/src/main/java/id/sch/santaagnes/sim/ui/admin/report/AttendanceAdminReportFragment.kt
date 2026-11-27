@@ -57,7 +57,44 @@ class AttendanceAdminReportFragment : Fragment() {
         binding.inputDateTo.setOnClickListener { pickDate(vm.state.value.dateTo) { vm.selectDateTo(it) } }
         binding.btnClearDates.setOnClickListener { vm.clearDates() }
         binding.btnLoadMore.setOnClickListener { vm.loadMore() }
-        binding.btnExport.setOnClickListener { exportLauncher.launch("laporan-kehadiran.xlsx") }
+        binding.btnExport.setOnClickListener {
+            val state = vm.state.value
+            val fileName = "laporan-kehadiran-${DateTimeWib.today()}.xlsx"
+            val filters = buildList {
+                state.classGroupId?.let { id ->
+                    state.classOptions.firstOrNull { it.id == id }?.name?.let { add("Kelas: $it") }
+                }
+                if (state.dateFrom != null || state.dateTo != null) {
+                    add(
+                        "Periode: ${state.dateFrom?.let(DateTimeWib::formatDate) ?: "..."} – " +
+                            (state.dateTo?.let(DateTimeWib::formatDate) ?: "...")
+                    )
+                }
+            }
+            showReportExportPreview(
+                ReportExportPreviewSpec(
+                    reportTitle = "Laporan Kehadiran Siswa",
+                    fileName = fileName,
+                    totalCount = state.total,
+                    filters = filters,
+                    columns = listOf("Siswa", "NIS", "Kelas", "Hadir", "Sakit", "Izin", "Alpa", "Persen"),
+                    rows = state.items.map { row ->
+                        listOf(
+                            row.studentName,
+                            row.nis,
+                            row.className,
+                            "${row.present}",
+                            "${row.sick}",
+                            "${row.excused}",
+                            "${row.absent}",
+                            row.attendanceRate?.let { "${decimal.format(it)}%" } ?: "—"
+                        )
+                    }
+                )
+            ) {
+                exportLauncher.launch(fileName)
+            }
+        }
         binding.spinnerClasses.setOnItemClickListener { _, _, index, _ ->
             vm.selectClass(optionIds.getOrNull(index))
         }

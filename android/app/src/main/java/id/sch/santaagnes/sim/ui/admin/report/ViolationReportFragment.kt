@@ -111,12 +111,46 @@ class ViolationReportFragment : Fragment() {
         }
 
         binding.btnExport.setOnClickListener {
+            val state = viewModel.state.value
             val filename = "laporan-pelanggaran-${
                 SimpleDateFormat("yyyy-MM-dd", Locale.US)
                     .format(Calendar.getInstance().time)
             }.xlsx"
-
-            exportLauncher.launch(filename)
+            val filters = buildList {
+                selectedTypeId?.let { id ->
+                    state.types.firstOrNull { it.id == id }?.name?.let { add("Jenis: $it") }
+                }
+                val cls = binding.etClassId.text?.toString()?.trim().orEmpty()
+                if (cls.isNotEmpty()) add("ID Kelas: $cls")
+                if (dateFrom != null || dateTo != null) {
+                    add("Tanggal: ${dateFrom ?: "..."} – ${dateTo ?: "..."}")
+                }
+            }
+            showReportExportPreview(
+                ReportExportPreviewSpec(
+                    reportTitle = "Laporan Pelanggaran Siswa",
+                    fileName = filename,
+                    totalCount = state.total,
+                    filters = filters,
+                    columns = listOf("Siswa", "NIS", "Kelas", "Tanggal", "Pelanggaran", "Poin", "Pelapor"),
+                    rows = state.items.map { item ->
+                        val dateLabel = runCatching {
+                            DateTimeWib.formatDate(java.time.LocalDate.parse(item.date))
+                        }.getOrDefault(item.date)
+                        listOf(
+                            item.studentName,
+                            item.nis,
+                            item.className,
+                            dateLabel,
+                            item.violationTypeName,
+                            "+${item.points}",
+                            item.reporterName
+                        )
+                    }
+                )
+            ) {
+                exportLauncher.launch(filename)
+            }
         }
 
         viewLifecycleOwner.lifecycleScope.launch {

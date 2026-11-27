@@ -4,8 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -34,7 +32,7 @@ class TeacherClassesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.header.tvTitle.text = "Kelas yang Diajar"
-        binding.header.tvSubheading.text = "Pilih kelas untuk mengelola nilai dan absensi"
+        binding.header.tvSubheading.text = "Ketuk kelas untuk melihat detail jadwal, atau kelola nilai dan presensi"
         binding.header.btnBack.setOnClickListener { findNavController().navigateUp() }
         binding.btnReload.setOnClickListener { viewModel.load() }
 
@@ -47,47 +45,36 @@ class TeacherClassesFragment : Fragment() {
                             "Belum ada kelas yang diajar di semester aktif." else ""
                     binding.classesContainer.removeAllViews()
                     state.assignments.forEach { assignment ->
-                        val card = layoutInflater.inflate(
-                            R.layout.item_grade_class, binding.classesContainer, false
-                        )
-                        card.findViewById<TextView>(R.id.tvAssignment).text =
-                            "${assignment.subjectName} · ${assignment.className}"
-                        card.findViewById<TextView>(R.id.tvClassSchedule).text =
-                            if (assignment.schedules.isEmpty()) {
-                                "Semester ${assignment.semesterName} · Jadwal belum tersedia"
-                            } else {
-                                "Semester ${assignment.semesterName}\n" +
-                                    assignment.schedules.joinToString("\n") { slot ->
-                                        "${slot.day}  ${slot.startTime}–${slot.endTime}"
-                                    }
-                            }
-                        card.findViewById<Button>(R.id.btnGrades).setOnClickListener {
-                            findNavController().navigate(
-                                R.id.gradeManageFragment,
-                                bundleOf(
-                                    "assignmentId" to assignment.id,
-                                    "assignmentLabel" to assignment.label
+                        val card = inflateTeacherClassCard(
+                            inflater = layoutInflater,
+                            parent = binding.classesContainer,
+                            assignment = assignment,
+                            showNotes = true,
+                            onAttendanceClick = {
+                                findNavController().navigate(
+                                    R.id.attendanceFragment,
+                                    bundleOf(
+                                        "assignmentId" to assignment.id,
+                                        "assignmentLabel" to assignment.label
+                                    )
                                 )
-                            )
-                        }
-                        card.findViewById<Button>(R.id.btnAttendance).setOnClickListener {
-                            findNavController().navigate(
-                                R.id.attendanceFragment,
-                                bundleOf(
-                                    "assignmentId" to assignment.id,
-                                    "assignmentLabel" to assignment.label
+                            },
+                            onGradesClick = {
+                                findNavController().navigate(
+                                    R.id.gradeManageFragment,
+                                    bundleOf(
+                                        "assignmentId" to assignment.id,
+                                        "assignmentLabel" to assignment.label
+                                    )
                                 )
-                            )
-                        }
-                        card.findViewById<Button>(R.id.btnNotes).apply {
-                            visibility = android.view.View.VISIBLE
-                            setOnClickListener {
+                            },
+                            onNotesClick = {
                                 findNavController().navigate(
                                     R.id.teacherProgressNotesFragment,
                                     bundleOf("assignmentId" to assignment.id)
                                 )
                             }
-                        }
+                        )
                         binding.classesContainer.addView(card)
                     }
                 }

@@ -54,7 +54,46 @@ class TeachingJournalReportFragment : Fragment() {
         binding.inputDateTo.setOnClickListener { pickDate(vm.state.value.dateTo) { vm.selectDateTo(it) } }
         binding.btnClearDates.setOnClickListener { vm.clearDates() }
         binding.btnLoadMore.setOnClickListener { vm.loadMore() }
-        binding.btnExport.setOnClickListener { exportLauncher.launch("laporan-jurnal-mengajar.xlsx") }
+        binding.btnExport.setOnClickListener {
+            val state = vm.state.value
+            val fileName = "laporan-jurnal-mengajar-${DateTimeWib.today()}.xlsx"
+            val filters = buildList {
+                state.classGroupId?.let { id ->
+                    state.classOptions.firstOrNull { it.id == id }?.name?.let { add("Kelas: $it") }
+                }
+                state.teacherId?.let { id ->
+                    state.teacherOptions.firstOrNull { it.id == id }?.name?.let { add("Guru: $it") }
+                }
+                if (state.dateFrom != null || state.dateTo != null) {
+                    add(
+                        "Periode: ${state.dateFrom?.let(DateTimeWib::formatDate) ?: "..."} – " +
+                            (state.dateTo?.let(DateTimeWib::formatDate) ?: "...")
+                    )
+                }
+            }
+            showReportExportPreview(
+                ReportExportPreviewSpec(
+                    reportTitle = "Laporan Jurnal Mengajar",
+                    fileName = fileName,
+                    totalCount = state.total,
+                    filters = filters,
+                    columns = listOf("Tanggal", "Kelas", "Mapel", "Guru", "Catatan Jurnal"),
+                    rows = state.items.map { row ->
+                        val dateText = runCatching { DateTimeWib.formatDate(LocalDate.parse(row.date)) }
+                            .getOrDefault(row.date)
+                        listOf(
+                            dateText,
+                            row.className,
+                            row.subjectName,
+                            row.teacherName,
+                            row.journal?.takeIf { it.isNotBlank() } ?: "Belum diisi"
+                        )
+                    }
+                )
+            ) {
+                exportLauncher.launch(fileName)
+            }
+        }
         binding.spinnerClasses.setOnItemClickListener { _, _, index, _ ->
             vm.selectClass(optionIds.getOrNull(index))
         }

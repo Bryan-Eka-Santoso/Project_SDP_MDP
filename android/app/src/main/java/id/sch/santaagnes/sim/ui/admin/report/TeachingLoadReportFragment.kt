@@ -61,6 +61,34 @@ class TeachingLoadReportFragment : ReportFragment<TeachingLoadRow, TeachingLoadF
         )
     }
 
+    override fun buildExportPreview(
+        state: ReportUiState<TeachingLoadRow, TeachingLoadFilter>,
+        fileName: String
+    ): ReportExportPreviewSpec {
+        val filters = buildList {
+            state.filter.teacherId?.let { id ->
+                state.options.teachers.firstOrNull { it.id == id }?.name?.let { add("Guru: $it") }
+            }
+        }
+        return ReportExportPreviewSpec(
+            reportTitle = getString(titleRes),
+            fileName = fileName,
+            totalCount = state.total,
+            filters = filters,
+            columns = listOf("Guru", "NIP", "Pertemuan/Mgg", "Jam/Mgg", "Kelas", "Mata Pelajaran"),
+            rows = state.rows.map { row ->
+                listOf(
+                    row.teacherName,
+                    row.employeeNumber.orEmpty().ifBlank { "—" },
+                    "${row.sessionsPerWeek}",
+                    "${formatReportDecimal(row.totalHours)} jam",
+                    "${row.classCount}",
+                    row.subjectNames.joinToString(", ").ifBlank { "—" }
+                )
+            }
+        )
+    }
+
     override fun releaseFilters() {
         teacherDropdown = null
     }

@@ -60,6 +60,12 @@ abstract class ReportFragment<R : Any, F : Any> : Fragment() {
     /** Grafik ringkasan opsional yang tampil di atas daftar pratinjau laporan. */
     protected open fun buildChartSpec(state: ReportUiState<R, F>): ReportChartSpec? = null
 
+    /** Menyusun tabel & metadata pratinjau ekspor sebelum file Excel diunduh. */
+    protected abstract fun buildExportPreview(
+        state: ReportUiState<R, F>,
+        fileName: String
+    ): ReportExportPreviewSpec
+
     private val chartHeaderAdapter = ReportChartHeaderAdapter()
 
     private val exportLauncher = registerForActivityResult(
@@ -101,7 +107,11 @@ abstract class ReportFragment<R : Any, F : Any> : Fragment() {
         binding.btnBack.setOnClickListener { findNavController().popBackStack() }
         binding.btnRetry.setOnClickListener { viewModel.refresh() }
         binding.btnExport.setOnClickListener {
-            exportLauncher.launch("laporan-$reportType-${DateTimeWib.today()}.xlsx")
+            val fileName = "laporan-$reportType-${DateTimeWib.today()}.xlsx"
+            val preview = buildExportPreview(viewModel.uiState.value, fileName)
+            showReportExportPreview(preview) {
+                exportLauncher.launch(fileName)
+            }
         }
         setupFilters()
 

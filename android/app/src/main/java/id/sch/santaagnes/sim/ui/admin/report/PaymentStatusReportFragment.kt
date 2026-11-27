@@ -7,6 +7,7 @@ import androidx.fragment.app.viewModels
 import com.google.android.material.chip.Chip
 import dagger.hilt.android.AndroidEntryPoint
 import id.sch.santaagnes.sim.R
+import id.sch.santaagnes.sim.core.DateTimeWib
 import id.sch.santaagnes.sim.core.Rupiah
 import id.sch.santaagnes.sim.domain.model.Bill
 import id.sch.santaagnes.sim.domain.model.BillStatus
@@ -104,6 +105,53 @@ class PaymentStatusReportFragment : ReportFragment<Bill, PaymentStatusReportFilt
                 ChartSegment("Belum dibayar", unpaid.size.toFloat(), "${unpaid.size} tagihan", cUnpaid),
                 ChartSegment("Menunggak", overdue.size.toFloat(), "${overdue.size} tagihan", cOverdue)
             )
+        )
+    }
+
+    override fun buildExportPreview(
+        state: ReportUiState<Bill, PaymentStatusReportFilter>,
+        fileName: String
+    ): ReportExportPreviewSpec {
+        val filters = buildList {
+            state.filter.classGroupId?.let { id ->
+                state.options.classGroups.firstOrNull { it.id == id }?.name?.let { add("Kelas: $it") }
+            }
+            state.filter.status?.let {
+                add(
+                    "Status: " + when (it) {
+                        BillStatus.PAID -> "Lunas"
+                        BillStatus.UNPAID -> "Belum dibayar"
+                        BillStatus.OVERDUE -> "Menunggak"
+                    }
+                )
+            }
+            if (state.filter.dueFrom != null || state.filter.dueTo != null) {
+                add(
+                    "Jatuh tempo: ${state.filter.dueFrom?.let(DateTimeWib::formatDate) ?: "..."} – " +
+                        (state.filter.dueTo?.let(DateTimeWib::formatDate) ?: "...")
+                )
+            }
+        }
+        return ReportExportPreviewSpec(
+            reportTitle = getString(titleRes),
+            fileName = fileName,
+            totalCount = state.total,
+            filters = filters,
+            columns = listOf("Siswa", "Kode", "Jenis", "Nominal", "Jatuh Tempo", "Status"),
+            rows = state.rows.map { bill ->
+                listOf(
+                    bill.student?.name.orEmpty().ifBlank { "—" },
+                    bill.code,
+                    bill.paymentType,
+                    Rupiah.format(bill.amount),
+                    DateTimeWib.formatDate(bill.dueDate),
+                    when (bill.status) {
+                        BillStatus.PAID -> "Lunas"
+                        BillStatus.UNPAID -> "Belum dibayar"
+                        BillStatus.OVERDUE -> "Menunggak"
+                    }
+                )
+            }
         )
     }
 

@@ -103,7 +103,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="Pilih kelas untuk mengelola Nilai dan Presensi"
+                    android:text="Ketuk kelas untuk melihat detail jadwal, atau langsung kelola Nilai dan Presensi"
                     android:textSize="12sp"
                     android:textColor="@color/teacher_muted" />
 
