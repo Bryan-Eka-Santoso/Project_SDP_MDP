@@ -68,6 +68,8 @@ class CalendarSyncViewModel @Inject constructor(
                 selectedCalendarId = selectedId,
                 calendarLabel = label,
                 lastSyncMillis = repository.lastSyncMillis(userId),
+                // Termasuk hasil sinkron otomatis, agar jumlah yang diperbarui ikut tampil.
+                result = repository.lastResult(userId),
                 includesBookings = role == "STUDENT" || role == "TEACHER"
             )
         }

@@ -69,8 +69,10 @@ class GradeReportViewModel @Inject constructor(
                         if (options.isNotEmpty()) load(options.first().id)
                     }
                     "TEACHER" -> {
-                        val options = gradesRepository.assignments().map {
-                            ReportOption(it.id, it.label)
+                        // Wali kelas juga melihat mapel guru lain di kelas binaannya (hanya baca).
+                        val options = gradesRepository.assignments(includeHomeroom = true).map {
+                            val owner = it.teacherName?.takeIf { _ -> !it.isOwn }
+                            ReportOption(it.id, if (owner == null) it.label else "${it.label} — $owner")
                         }
                         _state.value = _state.value.copy(loading = false, options = options)
                         if (options.isNotEmpty()) load(options.first().id)

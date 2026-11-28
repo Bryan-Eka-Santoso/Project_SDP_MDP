@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.ui.admin.report
 
+import id.sch.santaagnes.sim.core.setLoading
 import android.os.Bundle
 import android.app.DatePickerDialog
 import android.view.LayoutInflater
@@ -59,7 +60,7 @@ class AttendanceAdminReportFragment : Fragment() {
         binding.btnLoadMore.setOnClickListener { vm.loadMore() }
         binding.btnExport.setOnClickListener {
             val state = vm.state.value
-            val fileName = "laporan-kehadiran-${DateTimeWib.today()}.xlsx"
+            val fileName = "laporan-attendance-${DateTimeWib.today()}.xlsx"
             val filters = buildList {
                 state.classGroupId?.let { id ->
                     state.classOptions.firstOrNull { it.id == id }?.name?.let { add("Kelas: $it") }
@@ -107,8 +108,8 @@ class AttendanceAdminReportFragment : Fragment() {
     }
 
     private fun render(state: AttendanceAdminReportState) {
-        binding.progress.isVisible = state.loading || state.exporting
-        binding.btnExport.isEnabled = !state.exporting
+        binding.progress.isVisible = state.loading
+        binding.btnExport.setLoading(state.exporting)
         binding.btnRefresh.isEnabled = !state.loading
         val from = state.dateFrom
         val to = state.dateTo

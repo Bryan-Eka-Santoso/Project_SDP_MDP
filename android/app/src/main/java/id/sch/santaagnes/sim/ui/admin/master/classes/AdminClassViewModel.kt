@@ -199,8 +199,9 @@ class AdminClassViewModel @Inject constructor(
     }
 
     fun addClassMember(classId: Int, studentId: Int) {
+        if (_uiState.value.isMembersLoading) return
+        _uiState.value = _uiState.value.copy(isMembersLoading = true)
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isMembersLoading = true)
             when (val res = repository.addClassMembers(classId, listOf(studentId))) {
                 is Resource.Success -> {
                     _uiState.value = _uiState.value.copy(

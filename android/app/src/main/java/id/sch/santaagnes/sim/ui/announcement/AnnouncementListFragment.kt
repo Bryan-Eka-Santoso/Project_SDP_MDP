@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.ui.announcement
 
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -289,7 +290,7 @@ class AnnouncementListFragment : Fragment() {
         }
 
         d.btnPickAttachment.setOnClickListener {
-            pickAttachment.launch(arrayOf("image/jpeg", "image/png", "application/pdf"))
+            pickAttachment.launch(arrayOf("*/*"))
         }
         d.btnClearAttachment.setOnClickListener {
             pickedLocalUri = null
@@ -298,6 +299,7 @@ class AnnouncementListFragment : Fragment() {
             renderAttachmentRow(null)
         }
 
+        var formSheet: BottomSheetDialog? = null
         val sheet = showAgnesianFormSheet(
             context = requireContext(),
             title = getString(
@@ -334,11 +336,16 @@ class AnnouncementListFragment : Fragment() {
                 pickedLocalUri = pickedLocalUri,
                 existingUrl = existing?.attachmentUrl,
                 existingPublicId = existingPublicId,
-                clearAttachment = clearAttachment
+                clearAttachment = clearAttachment,
+                onSaved = { formSheet?.dismiss() }
             )
-            true
+            false
         }
-        sheet.setOnDismissListener { pendingAttachmentCallback = null }
+        formSheet = sheet
+        sheet.setOnDismissListener {
+            formSheet = null
+            pendingAttachmentCallback = null
+        }
     }
 
     private fun openAttachmentUrl(item: Announcement) {

@@ -33,7 +33,7 @@ class IsiSurveiMinatFragment : Fragment() {
     private val viewModel: IsiSurveiMinatViewModel by viewModels()
 
     private var renderedSurveys: List<SurveiSiswaDto>? = null
-    private var renderedDetailId: Int? = null
+    private var renderedDetail: DetailSurveiSiswaDto? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -102,10 +102,8 @@ class IsiSurveiMinatFragment : Fragment() {
                         tampilkanDaftar(state.surveys)
                     }
 
-                    val detailId = state.detail?.survey?.id
-
-                    if (renderedDetailId != detailId) {
-                        renderedDetailId = detailId
+                    if (renderedDetail != state.detail) {
+                        renderedDetail = state.detail
 
                         state.detail?.let {
                             tampilkanDetail(it)
@@ -170,6 +168,7 @@ class IsiSurveiMinatFragment : Fragment() {
             )
 
             val status = when {
+                item.status == "CLOSED" -> getString(R.string.survey_status_closed)
                 item.hasSubmitted -> "Sudah Diisi"
                 item.canFill -> "Belum Diisi"
                 else -> "Tidak Aktif"
@@ -209,6 +208,7 @@ class IsiSurveiMinatFragment : Fragment() {
             "Periode: ${survey.openDate} - ${survey.closeDate}"
 
         binding.tvStatus.text = when {
+            survey.status == "CLOSED" -> getString(R.string.survey_closed)
             survey.hasSubmitted -> "Sudah Diisi"
             survey.canFill -> "Belum Diisi"
             else -> "Survei Ditutup"
@@ -326,7 +326,7 @@ class IsiSurveiMinatFragment : Fragment() {
 
     override fun onDestroyView() {
         renderedSurveys = null
-        renderedDetailId = null
+        renderedDetail = null
         _binding = null
         super.onDestroyView()
     }

@@ -3,6 +3,9 @@ const { paginationQuery } = require('../../utils/pagination');
 
 const id = z.coerce.number().int().positive();
 const assignmentParams = z.object({ assignmentId: id });
+const lookupQuery = z.object({
+  includeHomeroom: z.enum(['true', 'false']).default('false').transform((value) => value === 'true'),
+});
 const componentParams = z.object({ id });
 const componentBody = z.object({
   name: z.string().trim().min(1).max(50),
@@ -28,4 +31,4 @@ const assessmentScoreBody = z.object({
   studentId: z.number().int().positive(),
   value: z.number().min(0).max(100).refine((v) => Math.round(v * 100) === v * 100, { message: 'Maksimal dua desimal.' }),
 });
-module.exports = { assignmentParams, componentParams, componentBody, componentUpdateBody, scoreBody, scoresQuery, assessmentParams, assessmentCreateBody, assessmentScoreBody };
+module.exports = { lookupQuery, assignmentParams, componentParams, componentBody, componentUpdateBody, scoreBody, scoresQuery, assessmentParams, assessmentCreateBody, assessmentScoreBody };

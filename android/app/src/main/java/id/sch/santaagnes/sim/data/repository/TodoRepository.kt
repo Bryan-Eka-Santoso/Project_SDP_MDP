@@ -24,6 +24,8 @@ interface TodoRepository {
 
     suspend fun setCompleted(todoId: Long, completed: Boolean)
 
+    suspend fun rename(todoId: Long, title: String)
+
     suspend fun delete(todoId: Long)
 
     fun observeDoneTaskIds(): Flow<Set<Int>>
@@ -66,6 +68,11 @@ class TodoRepositoryImpl @Inject constructor(
     override suspend fun setCompleted(todoId: Long, completed: Boolean) {
         val accountId = session.getUserId() ?: return
         dao.updateTodo(todoId, accountId, completed)
+    }
+
+    override suspend fun rename(todoId: Long, title: String) {
+        val accountId = session.getUserId() ?: return
+        dao.renameTodo(todoId, accountId, title)
     }
 
     override suspend fun delete(todoId: Long) {

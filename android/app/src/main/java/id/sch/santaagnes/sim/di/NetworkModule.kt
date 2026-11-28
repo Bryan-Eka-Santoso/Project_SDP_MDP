@@ -61,7 +61,7 @@ object NetworkModule {
     ): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(
-                AuthInterceptor(sessionManager)
+                AuthInterceptor(sessionManager, sessionEvents)
             )
             .authenticator(
                 TokenAuthenticator(

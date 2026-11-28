@@ -20,7 +20,9 @@ data class PeminjamanDto(
     val status: String,
     val verifierName: String?,
     val returnDate: String? = null,
-    val rejectionReason: String? = null
+    val rejectionReason: String? = null,
+    val createdAt: String? = null,
+    val updatedAt: String? = null
 )
 
 data class RejectPeminjamanRequest(

@@ -169,6 +169,7 @@ class AjukanPeminjamanFragment : Fragment() {
                     )
 
                     binding.etTanggal.setText(tanggal)
+                    binding.layoutTanggal.error = null
                 },
                 cal.get(Calendar.YEAR),
                 cal.get(Calendar.MONTH),
@@ -204,9 +205,11 @@ class AjukanPeminjamanFragment : Fragment() {
                 if (isMulai) {
                     jamMulai = value
                     binding.etJamMulai.setText(value)
+                    binding.layoutJamMulai.error = null
                 } else {
                     jamSelesai = value
                     binding.etJamSelesai.setText(value)
+                    binding.layoutJamSelesai.error = null
                 }
             },
             cal.get(Calendar.HOUR_OF_DAY),
@@ -222,36 +225,23 @@ class AjukanPeminjamanFragment : Fragment() {
             ?.trim()
             .orEmpty()
 
-        if (fasilitas == null) {
-            binding.layoutFasilitas.error =
-                "Pilih fasilitas terlebih dahulu"
-            return
-        }
-        binding.layoutFasilitas.error = null
-
-        if (tanggal.isBlank()) {
-            binding.etTanggal.error = "Pilih tanggal"
-            return
-        }
-
-        if (jamMulai.isBlank() || jamSelesai.isBlank()) {
-            binding.etJamMulai.error = "Lengkapi waktu peminjaman"
-            return
-        }
-
-        if (jamMulai >= jamSelesai) {
-            binding.etJamSelesai.error =
-                "Jam selesai harus setelah jam mulai"
-            return
-        }
-
-        if (keperluan.length !in 5..255) {
-            binding.layoutKeperluan.error =
-                "Keperluan harus 5 sampai 255 karakter"
-            return
-        }
-
-        binding.layoutKeperluan.error = null
+        val sekarang = Calendar.getInstance()
+        val errors = validateBookingForm(
+            hasFacility = fasilitas != null,
+            date = tanggal,
+            startTime = jamMulai,
+            endTime = jamSelesai,
+            purpose = keperluan,
+            today = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(sekarang.time),
+            now = SimpleDateFormat("HH:mm", Locale.US).format(sekarang.time)
+        )
+        // Pesan dipasang pada TextInputLayout: setError pada kolom tanpa fokus hanya memunculkan ikon.
+        binding.layoutFasilitas.error = errors.facility?.let(::getString)
+        binding.layoutTanggal.error = errors.date?.let(::getString)
+        binding.layoutJamMulai.error = errors.startTime?.let(::getString)
+        binding.layoutJamSelesai.error = errors.endTime?.let(::getString)
+        binding.layoutKeperluan.error = errors.purpose?.let(::getString)
+        if (!errors.isValid || fasilitas == null) return
 
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Konfirmasi Peminjaman")

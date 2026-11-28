@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.ui.progress
 
+import id.sch.santaagnes.sim.domain.model.GradeAssignment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,7 +19,10 @@ data class ProgressNotesState(
     val loading: Boolean = false, val saving: Boolean = false,
     val items: List<ProgressNoteDto> = emptyList(), val error: String? = null,
     val page: Int = 0, val total: Int = 0, val students: List<GradeStudent> = emptyList(),
-    val message: String? = null
+    val message: String? = null,
+    /** Wali kelas membaca semua mapel kelas binaan; hanya penugasan sendiri yang bisa ditulis. */
+    val homeroomOptions: List<GradeAssignment> = emptyList(),
+    val readOnly: Boolean = false
 ) {
     val more: Boolean get() = !loading && !saving && items.size < total
 }
@@ -52,6 +56,26 @@ class TeacherProgressNotesViewModel @Inject constructor(
     val state = _state.asStateFlow()
     private var assignmentId = 0
     private var job: Job? = null
+    /** Mode wali kelas: pengguna memilih mapel di antara penugasan kelas binaannya. */
+    fun startHomeroom() {
+        if (_state.value.homeroomOptions.isNotEmpty()) return
+        viewModelScope.launch {
+            _state.value = _state.value.copy(loading = true, error = null, readOnly = true)
+            try {
+                val options = grades.assignments(includeHomeroom = true).filter { it.isHomeroomClass }
+                _state.value = _state.value.copy(loading = false, homeroomOptions = options)
+                options.firstOrNull()?.let { selectHomeroom(it.id) }
+            } catch (e: CancellationException) { throw e }
+            catch (e: Exception) { _state.value = _state.value.copy(loading = false, error = ProgressNoteRepository.message(e)) }
+        }
+    }
+    fun selectHomeroom(id: Int) {
+        val option = _state.value.homeroomOptions.firstOrNull { it.id == id } ?: return
+        if (id == assignmentId && _state.value.page > 0) return
+        assignmentId = id
+        _state.value = _state.value.copy(readOnly = !option.isOwn, students = emptyList())
+        refresh()
+    }
     fun start(id: Int) {
         if (id == assignmentId && _state.value.page > 0) return
         assignmentId = id
@@ -60,7 +84,11 @@ class TeacherProgressNotesViewModel @Inject constructor(
     fun refresh() {
         if (assignmentId <= 0) return
         job?.cancel()
-        _state.value = ProgressNotesState(students = _state.value.students)
+        _state.value = ProgressNotesState(
+            students = _state.value.students,
+            homeroomOptions = _state.value.homeroomOptions,
+            readOnly = _state.value.readOnly
+        )
         job = viewModelScope.launch {
             _state.value = _state.value.copy(loading = true, error = null)
             try {

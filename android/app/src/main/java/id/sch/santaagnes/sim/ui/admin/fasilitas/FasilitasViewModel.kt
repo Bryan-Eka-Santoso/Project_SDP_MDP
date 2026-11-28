@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.ui.admin.fasilitas
 
+import id.sch.santaagnes.sim.core.userMessage
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -69,17 +70,23 @@ class FasilitasViewModel @Inject constructor(
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     loading = false,
-                    error = e.message ?: "Terjadi kesalahan"
+                    error = e.userMessage("Terjadi kesalahan")
                 )
             }
         }
     }
 
+    // Ketukan ganda pada tombol Simpan tidak boleh mengirim dua permintaan.
+    private var menyimpan = false
+
     fun simpan(
         id: Int?,
         body: SimpanFasilitasRequest,
-        onSuccess: () -> Unit
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
     ) {
+        if (menyimpan) return
+        menyimpan = true
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
                 loading = true,
@@ -109,10 +116,10 @@ class FasilitasViewModel @Inject constructor(
                 getFasilitas()
 
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    loading = false,
-                    error = e.message ?: "Gagal menyimpan"
-                )
+                _uiState.value = _uiState.value.copy(loading = false)
+                onError(e.userMessage("Gagal menyimpan"))
+            } finally {
+                menyimpan = false
             }
         }
     }
@@ -147,7 +154,7 @@ class FasilitasViewModel @Inject constructor(
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     loading = false,
-                    error = e.message ?: "Gagal menghapus"
+                    error = e.userMessage("Gagal menghapus")
                 )
             }
         }

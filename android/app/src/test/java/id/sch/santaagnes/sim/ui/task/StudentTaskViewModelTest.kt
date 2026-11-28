@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.ui.task
 
+import kotlinx.coroutines.test.advanceUntilIdle
 import id.sch.santaagnes.sim.domain.model.Todo
 import id.sch.santaagnes.sim.ui.task.FakeTaskRepository.Companion.task
 import kotlinx.coroutines.Dispatchers
@@ -128,5 +129,18 @@ class StudentTaskViewModelTest {
         viewModel.selectTab(StudentTaskTab.REMINDERS)
 
         assertEquals(StudentTaskTab.REMINDERS, viewModel.uiState.value.tab)
+    }
+
+    @Test
+    fun renamingAReminderSavesTheTrimmedTitleAndRejectsABlankOne() = runTest(dispatcher) {
+        val local = FakeTodoRepository()
+        local.todos.value = listOf(Todo(1, "Lama", null, LocalDate.of(2026, 12, 1), null, false))
+        val viewModel = StudentTaskViewModel(FakeTaskRepository(), local)
+
+        assertEquals(false, viewModel.renameTodo(1, "   "))
+        assertEquals(true, viewModel.renameTodo(1, "  Belajar bab 4  "))
+        advanceUntilIdle()
+
+        assertEquals("Belajar bab 4", local.todos.value.single().title)
     }
 }

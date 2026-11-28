@@ -40,13 +40,33 @@ const slotSelect = {
 
 async function listSlots(userId) {
   const teacher = await findTeacher(userId);
-  const slots = await prisma.scheduleSlot.findMany({
-    where: {
-      teachingAssignment: { teacherId: teacher.id, semester: { isActive: true } },
-    },
-    select: slotSelect,
-    orderBy: [{ dayOfWeek: 'asc' }, { startTime: 'asc' }, { id: 'asc' }],
-  });
+  const [ownSlots, substitutions] = await Promise.all([
+    prisma.scheduleSlot.findMany({
+      where: {
+        teachingAssignment: { teacherId: teacher.id, semester: { isActive: true } },
+      },
+      select: slotSelect,
+      orderBy: [{ dayOfWeek: 'asc' }, { startTime: 'asc' }, { id: 'asc' }],
+    }),
+    // Guru pengganti mengisi presensi sesi yang ia gantikan (docs/PERMISSIONS.md).
+    prisma.scheduleChange.findMany({
+      where: {
+        type: 'SUBSTITUTE',
+        substituteTeacherId: teacher.id,
+        scheduleSlot: { teachingAssignment: { semester: { isActive: true } } },
+      },
+      select: { date: true, scheduleSlot: { select: slotSelect } },
+      orderBy: { date: 'asc' },
+    }),
+  ]);
+  const substituted = new Map();
+  for (const { date, scheduleSlot } of substitutions) {
+    const entry = substituted.get(scheduleSlot.id)
+      ?? { ...scheduleSlot, isSubstitute: true, substituteDates: [] };
+    entry.substituteDates.push(date.toISOString().slice(0, 10));
+    substituted.set(scheduleSlot.id, entry);
+  }
+  const slots = [...ownSlots, ...substituted.values()];
 
   // Urutkan mulai dari hari terdekat dengan hari ini (WIB) lalu jam paling awal.
   const todayIdx = DAYS.indexOf(dayOfDate(todayJakarta()));
@@ -70,6 +90,8 @@ async function listSlots(userId) {
     assignmentId: slot.teachingAssignment.id,
     subjectName: slot.teachingAssignment.subject.name,
     className: slot.teachingAssignment.classGroup.name,
+    isSubstitute: slot.isSubstitute ?? false,
+    substituteDates: slot.substituteDates ?? [],
   }));
 }
 

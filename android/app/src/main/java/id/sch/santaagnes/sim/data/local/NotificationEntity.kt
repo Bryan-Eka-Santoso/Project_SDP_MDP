@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.data.local
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -15,5 +16,8 @@ data class NotificationEntity(
     // id data asal (mis. id perubahan jadwal), dikirim server sebagai teks; null bila tidak ada
     val referenceId: String? = null,
     val receivedAt: Long = System.currentTimeMillis(),
-    val isRead: Boolean = false
+    val isRead: Boolean = false,
+    /** true: dibuat aplikasi saat sinkron; push untuk kejadian yang sama menggantikannya. */
+    @ColumnInfo(defaultValue = "0")
+    val isSynced: Boolean = false
 )

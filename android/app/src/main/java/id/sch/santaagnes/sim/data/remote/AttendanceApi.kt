@@ -11,7 +11,9 @@ data class AttendanceSlotDto(
     val dayOfWeek: String,
     val assignmentId: Int,
     val subjectName: String,
-    val className: String
+    val className: String,
+    val isSubstitute: Boolean = false,
+    val substituteDates: List<String>? = null
 )
 
 data class AttendanceStudentDto(val id: Int, val name: String, val nis: String?)
@@ -31,7 +33,25 @@ data class SaveAttendanceRequest(
 )
 data class SavedAttendanceDto(val id: Int, val slotId: Int, val count: Int, val saved: Boolean)
 
+data class ClassAttendanceStudentDto(
+    val studentId: Int,
+    val nis: String?,
+    val name: String,
+    val counts: AttendanceCountsDto
+)
+data class ClassAttendanceSummaryDto(
+    val teachingAssignmentId: Int,
+    val students: List<ClassAttendanceStudentDto>
+)
+
 interface AttendanceApi {
+    @GET("teaching-assignments/{assignmentId}/attendance-summary")
+    suspend fun classAttendanceSummary(
+        @Path("assignmentId") assignmentId: Int,
+        @Query("startDate") startDate: String? = null,
+        @Query("endDate") endDate: String? = null
+    ): ApiResponse<ClassAttendanceSummaryDto>
+
     @GET("me/attendance-schedule-slots")
     suspend fun slots(): ApiResponse<List<AttendanceSlotDto>>
 

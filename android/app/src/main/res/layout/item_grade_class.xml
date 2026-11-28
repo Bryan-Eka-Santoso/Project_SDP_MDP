@@ -108,57 +108,94 @@
             android:textSize="13sp" />
     </LinearLayout>
 
-    <!-- Aksi cepat kelas -->
+    <!-- Aksi cepat kelas; lebar dibagi empat agar muat di layar sempit. -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:weightSum="4">
 
         <Button
             android:id="@+id/btnAttendance"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="34dp"
+            android:layout_weight="1"
             android:backgroundTint="@color/teacher_blue_light"
-            android:minWidth="88dp"
+            android:minWidth="0dp"
             android:minHeight="0dp"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
+            android:paddingStart="2dp"
+            android:paddingEnd="2dp"
+            android:maxLines="1"
             android:text="Presensi"
             android:textAllCaps="false"
             android:textColor="#FFFFFF"
-            android:textSize="12sp" />
+            android:textSize="12sp"
+            app:autoSizeMaxTextSize="12sp"
+            app:autoSizeMinTextSize="9sp"
+            app:autoSizeTextType="uniform" />
 
         <Button
             android:id="@+id/btnGrades"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="34dp"
-            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
             android:backgroundTint="@color/teacher_blue_light"
-            android:minWidth="76dp"
+            android:minWidth="0dp"
             android:minHeight="0dp"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
+            android:paddingStart="2dp"
+            android:paddingEnd="2dp"
+            android:maxLines="1"
             android:text="Nilai"
             android:textAllCaps="false"
             android:textColor="#FFFFFF"
-            android:textSize="12sp" />
+            android:textSize="12sp"
+            app:autoSizeMaxTextSize="12sp"
+            app:autoSizeMinTextSize="9sp"
+            app:autoSizeTextType="uniform" />
 
-        <!-- Hanya ditampilkan di halaman Semua Kelas (TeacherClassesFragment); di Beranda tetap tersembunyi. -->
+        <!-- Rekap dan Catatan hanya di halaman Semua Kelas; di Beranda tetap tersembunyi. -->
+        <Button
+            android:id="@+id/btnRecap"
+            android:layout_width="0dp"
+            android:layout_height="34dp"
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
+            android:backgroundTint="@color/teacher_blue_light"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:paddingStart="2dp"
+            android:paddingEnd="2dp"
+            android:maxLines="1"
+            android:text="@string/attendance_recap_button"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            app:autoSizeMaxTextSize="12sp"
+            app:autoSizeMinTextSize="9sp"
+            app:autoSizeTextType="uniform"
+            android:visibility="gone" />
+
         <Button
             android:id="@+id/btnNotes"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="34dp"
-            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
             android:backgroundTint="@color/teacher_blue_light"
-            android:minWidth="80dp"
+            android:minWidth="0dp"
             android:minHeight="0dp"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
+            android:paddingStart="2dp"
+            android:paddingEnd="2dp"
+            android:maxLines="1"
             android:text="Catatan"
             android:textAllCaps="false"
             android:textColor="#FFFFFF"
             android:textSize="12sp"
+            app:autoSizeMaxTextSize="12sp"
+            app:autoSizeMinTextSize="9sp"
+            app:autoSizeTextType="uniform"
             android:visibility="gone" />
     </LinearLayout>
 </LinearLayout>

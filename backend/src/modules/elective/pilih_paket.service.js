@@ -115,7 +115,8 @@ async function daftarPaket(userId) {
       name: pkg.name,
       capacity: pkg.capacity,
       selectionCount: pkg._count.selections,
-      remainingCapacity: Math.max(0, pkg.capacity - pkg._count.selections),
+      // Kapasitas berlaku per kelas, bukan batas peminat paket (BUSINESS_RULES 8.4).
+      classCount: Math.ceil(pkg._count.selections / pkg.capacity),
       isSelected: pkg.id === selected?.packageId,
       subjects: pkg.items.map((item) => item.subject),
     })),
@@ -181,14 +182,6 @@ async function pilihPaket(userId, packageId) {
               alreadySelected: true,
               message: "Paket sudah menjadi pilihan Anda.",
             };
-          }
-
-          const total = await tx.packageSelection.count({
-            where: { packageId },
-          });
-
-          if (total >= pkg.capacity) {
-            fail(409, "PACKAGE_FULL", "Kapasitas paket sudah penuh.");
           }
 
           await tx.packageSelection.deleteMany({

@@ -1,5 +1,9 @@
 package id.sch.santaagnes.sim.ui.task
 
+import com.google.android.material.textfield.TextInputLayout
+import com.google.android.material.textfield.TextInputEditText
+import androidx.appcompat.app.AlertDialog
+import android.text.InputType
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -31,6 +35,7 @@ class StudentTaskFragment : Fragment() {
     private val adapter = StudentTaskAdapter(
         onTaskDone = { id, done -> viewModel.setTaskDone(id, done) },
         onTodoCompleted = { id, completed -> viewModel.setTodoCompleted(id, completed) },
+        onTodoEdit = ::showRenameDialog,
         onTodoDelete = ::confirmDelete
     )
 
@@ -92,6 +97,33 @@ class StudentTaskFragment : Fragment() {
 
         binding.tvEmpty.setText(if (tasksTab) R.string.task_empty_student else R.string.todo_empty)
         binding.tvEmpty.isVisible = if (tasksTab) state.isTasksEmpty else state.todos.isEmpty()
+    }
+
+    private fun showRenameDialog(todo: Todo) {
+        val input = TextInputEditText(requireContext()).apply {
+            setText(todo.title)
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+        }
+        val layout = TextInputLayout(requireContext()).apply {
+            hint = getString(R.string.todo_title_hint)
+            val side = (24 * resources.displayMetrics.density).toInt()
+            setPadding(side, side / 3, side, 0)
+            addView(input)
+        }
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.todo_edit_title)
+            .setView(layout)
+            .setNegativeButton("Batal", null)
+            .setPositiveButton(R.string.task_save, null)
+            .show()
+        // Dipasang setelah show() agar dialog tetap terbuka bila judul ditolak.
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+            if (viewModel.renameTodo(todo.id, input.text.toString())) {
+                dialog.dismiss()
+            } else {
+                layout.error = getString(R.string.todo_error_title_invalid)
+            }
+        }
     }
 
     private fun confirmDelete(todo: Todo) {

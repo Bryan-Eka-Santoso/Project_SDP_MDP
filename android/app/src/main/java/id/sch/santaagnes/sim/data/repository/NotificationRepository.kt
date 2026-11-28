@@ -1,7 +1,8 @@
 package id.sch.santaagnes.sim.data.repository
 
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.sync.Mutex
 import id.sch.santaagnes.sim.core.DateTimeWib
-import id.sch.santaagnes.sim.core.Rupiah
 import id.sch.santaagnes.sim.data.local.LocalDao
 import id.sch.santaagnes.sim.data.local.NotificationEntity
 import id.sch.santaagnes.sim.data.local.SessionManager
@@ -36,7 +37,7 @@ interface NotificationRepository {
 
     fun observeUnreadCount(): Flow<Int>
 
-    /** Menyimpan pesan masuk; null bila tidak ada akun yang login atau duplikat referensi. */
+    /** Menyimpan pesan masuk; null bila tidak ada akun yang login atau pesan yang sama dikirim ulang. */
     suspend fun save(payload: PushPayload): AppNotification?
 
     /** Menyinkronkan kejadian terbaru milik akun (pengumuman, jadwal, tugas, izin, peminjaman, pelanggaran, tunggakan) ke Room. */
@@ -62,6 +63,9 @@ class NotificationRepositoryImpl @Inject constructor(
     private val adminBookingApi: PeminjamanApi
 ) : NotificationRepository {
 
+    // Push (thread FCM) dan sinkron bisa berjalan bersamaan: periksa-lalu-tulis harus berurutan.
+    private val writeLock = Mutex()
+
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun observe(): Flow<List<AppNotification>> =
         session.userId.flatMapLatest { accountId ->
@@ -84,11 +88,6 @@ class NotificationRepositoryImpl @Inject constructor(
 
     override suspend fun save(payload: PushPayload): AppNotification? {
         val accountId = session.getUserId() ?: return null
-        if (payload.referenceId != null) {
-            if (dao.hasNotification(accountId, payload.type.name, payload.referenceId)) {
-                return null
-            }
-        }
         val entity = NotificationEntity(
             accountId = accountId,
             title = payload.title,
@@ -97,7 +96,22 @@ class NotificationRepositoryImpl @Inject constructor(
             referenceId = payload.referenceId,
             receivedAt = payload.sentAtMillis ?: System.currentTimeMillis()
         )
-        return entity.copy(id = dao.saveNotification(entity)).toDomain()
+        return write(entity, ::mergePush)?.toDomain()
+    }
+
+    /** Baris yang tersimpan, atau null bila tidak ada yang berubah. */
+    private suspend fun write(
+        entity: NotificationEntity,
+        merge: (List<NotificationEntity>, NotificationEntity) -> NotificationWrite
+    ): NotificationEntity? = writeLock.withLock {
+        val existing = entity.referenceId
+            ?.let { dao.findNotifications(entity.accountId, entity.type, it, entity.title) }
+            .orEmpty()
+        when (val result = merge(existing, entity)) {
+            NotificationWrite.Skip -> null
+            is NotificationWrite.Insert -> result.entity.copy(id = dao.saveNotification(result.entity))
+            is NotificationWrite.Update -> result.entity.also { dao.updateNotification(it) }
+        }
     }
 
     override suspend fun syncAnnouncements() {
@@ -113,7 +127,7 @@ class NotificationRepositoryImpl @Inject constructor(
                 syncBookingHistory(accountId)
                 val studentId = runCatching { authApi.getProfile().data?.student?.id }.getOrNull()
                 if (studentId != null) {
-                    syncOverdueBills(accountId, studentId, childName = null)
+                    syncOverdueBills(accountId, studentId, session.getUserName() ?: "Anda")
                 }
             }
             "GUARDIAN" -> {
@@ -121,7 +135,7 @@ class NotificationRepositoryImpl @Inject constructor(
                     .getOrDefault(emptyList())
                 children.forEach { child ->
                     syncScheduleChanges(accountId, studentId = child.id)
-                    syncOverdueBills(accountId, child.id, childName = child.name)
+                    syncOverdueBills(accountId, child.id, child.name)
                     syncChildViolations(accountId, child.id, child.name)
                     syncChildLeaveDecisions(accountId, child.id)
                 }
@@ -137,10 +151,8 @@ class NotificationRepositoryImpl @Inject constructor(
         }
     }
 
-    private suspend fun saveIfMissing(entity: NotificationEntity) {
-        val refId = entity.referenceId
-        if (refId != null && dao.hasNotification(entity.accountId, entity.type, refId)) return
-        dao.saveNotification(entity)
+    private suspend fun saveSynced(entity: NotificationEntity) {
+        write(entity.copy(isSynced = true), ::mergeSynced)
     }
 
     private suspend fun syncAnnouncementItems(accountId: Int) {
@@ -150,7 +162,7 @@ class NotificationRepositoryImpl @Inject constructor(
 
         items.forEach { dto ->
             val entity = toSyncedAnnouncementEntity(dto, accountId) ?: return@forEach
-            saveIfMissing(entity)
+            saveSynced(entity)
         }
     }
 
@@ -165,7 +177,10 @@ class NotificationRepositoryImpl @Inject constructor(
             ).data.orEmpty()
         }.getOrNull() ?: return
 
-        entries.forEach { entry ->
+        val changed = entries.filter { it.change != null }
+            .groupBy { it.change?.id }
+            .map { (_, same) -> same.firstOrNull { it.change?.movedTo == null } ?: same.first() }
+        changed.forEach { entry ->
             val change = entry.change ?: return@forEach
             val typeLabel = when (change.type) {
                 "CANCEL" -> "dibatalkan"
@@ -178,14 +193,14 @@ class NotificationRepositoryImpl @Inject constructor(
                 append("${entry.subject.name} ${entry.classGroup.name}, $dateLabel: $typeLabel.")
                 if (!change.description.isNullOrBlank()) append(" ${change.description}")
             }
-            saveIfMissing(
+            saveSynced(
                 NotificationEntity(
                     accountId = accountId,
-                    title = "Perubahan Jadwal",
+                    title = "Perubahan jadwal",
                     message = detail,
                     type = NotificationType.SCHEDULE_CHANGE.name,
                     referenceId = change.id.toString(),
-                    receivedAt = parseDateMillis(entry.date)
+                    receivedAt = System.currentTimeMillis()
                 )
             )
         }
@@ -201,59 +216,58 @@ class NotificationRepositoryImpl @Inject constructor(
             val dueText = runCatching { DateTimeWib.formatDate(LocalDate.parse(task.dueDate)) }
                 .getOrDefault(task.dueDate)
             val timeSuffix = task.dueTime?.let { " pukul $it WIB" }.orEmpty()
-            saveIfMissing(
+            saveSynced(
                 NotificationEntity(
                     accountId = accountId,
-                    title = "Tugas Baru: ${task.teachingAssignment.subject.name}",
-                    message = "${task.title} — tenggat $dueText$timeSuffix.",
+                    title = "Tugas baru",
+                    message = "${task.teachingAssignment.subject.name}: ${task.title}. Tenggat $dueText$timeSuffix.",
                     type = NotificationType.TASK.name,
                     referenceId = task.id.toString(),
-                    receivedAt = parseDateMillis(task.dueDate)
+                    receivedAt = parseIsoOrNow(task.createdAt)
                 )
             )
         }
     }
 
-    private suspend fun syncOverdueBills(accountId: Int, studentId: Int, childName: String?) {
-        val bills = runCatching {
+    private suspend fun syncOverdueBills(accountId: Int, studentId: Int, studentName: String) {
+        val response = runCatching {
             billApi.getStudentBills(
                 studentId = studentId,
                 page = 1,
-                limit = SYNC_LIMIT,
+                limit = BILL_LIMIT,
                 status = "UNPAID",
                 overdue = true
-            ).data.orEmpty()
-        }.getOrNull() ?: return
-
-        bills.forEach { bill ->
-            val dueText = runCatching { DateTimeWib.formatDate(LocalDate.parse(bill.dueDate)) }
-                .getOrDefault(bill.dueDate)
-            val prefix = childName?.let { "$it: " }.orEmpty()
-            saveIfMissing(
-                NotificationEntity(
-                    accountId = accountId,
-                    title = "Tagihan Menunggak",
-                    message = "${prefix}Tagihan ${bill.paymentType} (${bill.billCode}) sebesar ${Rupiah.format(bill.amount)} melewati jatuh tempo $dueText.",
-                    type = NotificationType.BILL_OVERDUE.name,
-                    referenceId = bill.id.toString(),
-                    receivedAt = parseDateMillis(bill.dueDate)
-                )
             )
-        }
+        }.getOrNull() ?: return
+        val bills = response.data.orEmpty()
+        if (bills.isEmpty()) return
+
+        saveSynced(
+            NotificationEntity(
+                accountId = accountId,
+                title = "Tunggakan pembayaran",
+                message = overdueSummary(studentName, bills, response.meta?.total ?: bills.size) { date ->
+                    runCatching { DateTimeWib.formatDate(LocalDate.parse(date)) }.getOrDefault(date)
+                },
+                type = NotificationType.BILL_OVERDUE.name,
+                referenceId = studentId.toString(),
+                receivedAt = System.currentTimeMillis()
+            )
+        )
     }
 
     private suspend fun syncChildViolations(accountId: Int, studentId: Int, childName: String) {
         val history = runCatching { violationApi.getRiwayat(studentId).data }.getOrNull() ?: return
         history.violations.take(SYNC_LIMIT).forEach { v ->
             val dateText = runCatching { DateTimeWib.formatDate(LocalDate.parse(v.date)) }.getOrDefault(v.date)
-            saveIfMissing(
+            saveSynced(
                 NotificationEntity(
                     accountId = accountId,
                     title = "Pemberitahuan Pelanggaran Siswa",
                     message = "$childName tercatat melakukan pelanggaran \"${v.name}\" (+${v.points} poin) pada $dateText.",
                     type = NotificationType.VIOLATION.name,
                     referenceId = v.id.toString(),
-                    receivedAt = parseDateMillis(v.date)
+                    receivedAt = System.currentTimeMillis()
                 )
             )
         }
@@ -265,7 +279,7 @@ class NotificationRepositoryImpl @Inject constructor(
             val approved = leave.status == "APPROVED"
             val range = if (leave.startDate == leave.endDate) leave.startDate else "${leave.startDate} s.d. ${leave.endDate}"
             val reasonNote = leave.rejectionReason?.takeIf { it.isNotBlank() }?.let { " Alasan: $it" }.orEmpty()
-            saveIfMissing(
+            saveSynced(
                 NotificationEntity(
                     accountId = accountId,
                     title = if (approved) "Pengajuan Izin Disetujui" else "Pengajuan Izin Ditolak",
@@ -275,8 +289,8 @@ class NotificationRepositoryImpl @Inject constructor(
                         "Pengajuan izin ${leave.studentName} ($range) ditolak.$reasonNote"
                     },
                     type = NotificationType.LEAVE_REQUEST.name,
-                    referenceId = "${leave.id}:${leave.status}",
-                    receivedAt = parseDateMillis(leave.startDate)
+                    referenceId = leave.id.toString(),
+                    receivedAt = System.currentTimeMillis()
                 )
             )
         }
@@ -289,14 +303,14 @@ class NotificationRepositoryImpl @Inject constructor(
 
         pending.forEach { leave ->
             val range = if (leave.startDate == leave.endDate) leave.startDate else "${leave.startDate} s.d. ${leave.endDate}"
-            saveIfMissing(
+            saveSynced(
                 NotificationEntity(
                     accountId = accountId,
-                    title = "Pengajuan Izin Menunggu",
+                    title = "Pengajuan Izin Baru",
                     message = "${leave.studentName} mengajukan izin ($range): ${leave.reason}",
                     type = NotificationType.LEAVE_REQUEST.name,
-                    referenceId = "pending:${leave.id}",
-                    receivedAt = parseIsoOrDateMillis(leave.createdAt, leave.startDate)
+                    referenceId = leave.id.toString(),
+                    receivedAt = parseIsoOrNow(leave.createdAt)
                 )
             )
         }
@@ -316,17 +330,17 @@ class NotificationRepositoryImpl @Inject constructor(
                     "Peminjaman Ditolak" to
                         "Pengajuan peminjaman ${b.facilityName} (${b.bookingDate}) ditolak.$reason"
                 }
-                else -> "Pengembalian Dikonfirmasi" to
+                else -> "Pengembalian Fasilitas Dikonfirmasi" to
                     "Pengembalian fasilitas ${b.facilityName} (${b.bookingDate}) telah dikonfirmasi."
             }
-            saveIfMissing(
+            saveSynced(
                 NotificationEntity(
                     accountId = accountId,
                     title = title,
                     message = body,
                     type = NotificationType.BOOKING.name,
-                    referenceId = "${b.id}:${b.status}",
-                    receivedAt = parseDateMillis(b.bookingDate)
+                    referenceId = b.id.toString(),
+                    receivedAt = parseIsoOrNow(b.updatedAt)
                 )
             )
         }
@@ -338,14 +352,14 @@ class NotificationRepositoryImpl @Inject constructor(
         }.getOrNull() ?: return
 
         bookings.forEach { b ->
-            saveIfMissing(
+            saveSynced(
                 NotificationEntity(
                     accountId = accountId,
                     title = "Pengajuan Peminjaman Baru",
                     message = "${b.requesterName} mengajukan peminjaman ${b.facilityName} (${b.bookingDate}, ${b.startTime}–${b.endTime}).",
                     type = NotificationType.BOOKING.name,
-                    referenceId = "pending:${b.id}",
-                    receivedAt = parseDateMillis(b.bookingDate)
+                    referenceId = b.id.toString(),
+                    receivedAt = parseIsoOrNow(b.createdAt)
                 )
             )
         }
@@ -373,6 +387,7 @@ class NotificationRepositoryImpl @Inject constructor(
 
     private companion object {
         const val SYNC_LIMIT = 20
+        const val BILL_LIMIT = 100
         const val SCHEDULE_WINDOW_DAYS = 14L
     }
 }
@@ -380,6 +395,11 @@ class NotificationRepositoryImpl @Inject constructor(
 private fun parseDateMillis(dateIso: String): Long =
     runCatching { LocalDate.parse(dateIso).atStartOfDay(DateTimeWib.zone).toInstant().toEpochMilli() }
         .getOrElse { System.currentTimeMillis() }
+
+// Tanpa waktu dari server, waktu notifikasi = saat aplikasi mengetahuinya, bukan tanggal kejadiannya.
+private fun parseIsoOrNow(iso: String?): Long =
+    iso?.let { runCatching { Instant.parse(it).toEpochMilli() }.getOrNull() }
+        ?: System.currentTimeMillis()
 
 private fun parseIsoOrDateMillis(iso: String?, fallbackDate: String): Long =
     iso?.let { runCatching { Instant.parse(it).toEpochMilli() }.getOrNull() }
@@ -401,6 +421,7 @@ internal fun toSyncedAnnouncementEntity(dto: AnnouncementDto, accountId: Int): N
         message = dto.content,
         type = NotificationType.ANNOUNCEMENT.name,
         referenceId = dto.id.toString(),
-        receivedAt = receivedAt
+        receivedAt = receivedAt,
+        isSynced = true
     )
 }

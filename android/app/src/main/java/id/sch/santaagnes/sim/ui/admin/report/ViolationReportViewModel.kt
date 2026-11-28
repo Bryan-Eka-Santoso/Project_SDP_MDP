@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.ui.admin.report
 
+import id.sch.santaagnes.sim.core.userMessage
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -144,7 +145,7 @@ class ViolationReportViewModel @Inject constructor(
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     loading = false,
-                    error = e.message ?: "Terjadi kesalahan"
+                    error = e.userMessage("Terjadi kesalahan")
                 )
             }
         }
@@ -194,7 +195,7 @@ class ViolationReportViewModel @Inject constructor(
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     exporting = false,
-                    error = e.message ?: "Gagal ekspor laporan"
+                    error = e.userMessage("Gagal ekspor laporan")
                 )
             }
         }

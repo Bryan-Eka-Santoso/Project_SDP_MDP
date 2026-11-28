@@ -1,5 +1,8 @@
 package id.sch.santaagnes.sim.ui.grades
 
+import androidx.core.view.isVisible
+import androidx.activity.addCallback
+import androidx.activity.OnBackPressedCallback
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -37,6 +40,7 @@ class GradeManageFragment : Fragment() {
     private val scoreInputs = linkedMapOf<Int, EditText>()
     private var lastDataSignature = ""
     private var currentPanel = "list"
+    private var backToList: OnBackPressedCallback? = null
     private val assignmentId by lazy { requireArguments().getInt("assignmentId") }
 
     override fun onCreateView(
@@ -89,6 +93,9 @@ class GradeManageFragment : Fragment() {
             }
             override fun afterTextChanged(s: Editable?) = Unit
         })
+        backToList = requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, false) {
+            showPanel("list")
+        }
         showPanel("list")
         viewModel.load(assignmentId)
         viewLifecycleOwner.lifecycleScope.launch {
@@ -99,7 +106,11 @@ class GradeManageFragment : Fragment() {
                     binding.progressBar.visibility = if (state.isLoading) View.VISIBLE else View.GONE
                     binding.tvError.text = state.errorMessage.orEmpty()
                     binding.tvMessage.text = state.message.orEmpty()
-                    binding.tvWeight.text = "Total bobot: ${state.totalWeight}% / 100%"
+                    binding.tvWeight.text = if (state.totalWeight == 100 || state.isLoading) {
+                        "Total bobot: ${state.totalWeight}% / 100%"
+                    } else {
+                        getString(R.string.grade_weight_warning, state.totalWeight)
+                    }
                     binding.btnSaveScores.isEnabled = !state.isLoading && state.totalWeight == 100
                     binding.btnSaveComponent.isEnabled = !state.isLoading
                     val signature = "${state.students}|${state.components}|${state.scores}|${state.assessments}"
@@ -118,6 +129,7 @@ class GradeManageFragment : Fragment() {
 
     private fun showPanel(panel: String) {
         currentPanel = panel
+        backToList?.isEnabled = panel != "list"
         binding.listPanel.visibility = if (panel == "list") View.VISIBLE else View.GONE
         binding.editPanel.visibility = if (panel == "edit") View.VISIBLE else View.GONE
         binding.componentsPanel.visibility = if (panel == "components") View.VISIBLE else View.GONE
@@ -212,6 +224,9 @@ class GradeManageFragment : Fragment() {
     private fun renderEdit(studentId: Int) {
         val student: GradeStudent = uiState.students.find { it.id == studentId } ?: return
         val values = studentValues(studentId)
+        val weightIsValid = uiState.totalWeight == 100
+        binding.tvEditWeightWarning.isVisible = !weightIsValid
+        binding.tvEditWeightWarning.text = getString(R.string.grade_weight_warning, uiState.totalWeight)
         binding.tvEditStudent.text = "${student.name} (${student.nis.orEmpty()})"
         binding.tvEditSummary.text = uiState.components.mapIndexed { i, component ->
             "${component.name}: ${formatNumber(values[i])}"
@@ -230,6 +245,7 @@ class GradeManageFragment : Fragment() {
             field.findViewById<TextView>(R.id.tvInputLabel).text =
                 "${component.name} (${component.weight}%)"
             val input = field.findViewById<EditText>(R.id.etGradeInput)
+            input.isEnabled = weightIsValid
             val previous = uiState.scores.find {
                 it.studentId == studentId && it.componentId == component.id
             }
@@ -269,6 +285,7 @@ class GradeManageFragment : Fragment() {
                 val line = Button(requireContext()).apply {
                     isAllCaps = false
                     text = "${assessment.title}     ${saved?.let { formatNumber(it) } ?: "Belum diisi"}     • Isi Nilai"
+                    isEnabled = uiState.totalWeight == 100
                     setOnClickListener { showAssessmentScoreDialog(assessment.id, studentId, assessment.title, saved) }
                 }
                 container.addView(line, LinearLayout.LayoutParams(

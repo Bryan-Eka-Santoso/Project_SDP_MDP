@@ -25,6 +25,9 @@ interface CalendarSyncRepository {
 
     suspend fun lastSyncMillis(userId: Int): Long?
 
+    /** Ringkasan sinkron terakhir, termasuk yang berjalan otomatis; null bila belum pernah. */
+    suspend fun lastResult(userId: Int): CalendarSyncResult? = null
+
     suspend fun selectedCalendarId(userId: Int): Long?
 
     suspend fun activeCalendarLabel(userId: Int): String?
@@ -81,6 +84,8 @@ class CalendarSyncRepositoryImpl internal constructor(
     override suspend fun isEnabled(userId: Int): Boolean = store.isEnabled(userId)
 
     override suspend fun lastSyncMillis(userId: Int): Long? = store.lastSyncMillis(userId)
+
+    override suspend fun lastResult(userId: Int): CalendarSyncResult? = store.lastResult(userId)
 
     override suspend fun selectedCalendarId(userId: Int): Long? =
         store.selectedCalendarId(userId) ?: store.calendarId(userId)
@@ -174,6 +179,10 @@ class CalendarSyncRepositoryImpl internal constructor(
             refs = emptyMap()
         }
 
+        // Event yang dihapus pengguna di kalender HP dianggap belum pernah ditulis, sehingga dibuat lagi.
+        val existing = device.existingEventIds(refs.values.map { it.eventId })
+        refs = refs.filterValues { it.eventId in existing }
+
         val plan = CalendarSyncPlanner.plan(desired, refs)
         val newRefs = refs.toMutableMap()
 
@@ -204,15 +213,15 @@ class CalendarSyncRepositoryImpl internal constructor(
 
         store.setSelectedCalendarId(userId, calendarId)
         store.saveSync(userId, calendarId, newRefs, nowMillis(), calendarLabel)
-        return Resource.Success(
-            CalendarSyncResult(
-                added = added,
-                updated = updated,
-                removed = plan.deletes.size,
-                total = newRefs.size,
-                accountLabel = calendarLabel
-            )
+        val result = CalendarSyncResult(
+            added = added,
+            updated = updated,
+            removed = plan.deletes.size,
+            total = newRefs.size,
+            accountLabel = calendarLabel
         )
+        store.saveLastResult(userId, result)
+        return Resource.Success(result)
     }
 
     private companion object {

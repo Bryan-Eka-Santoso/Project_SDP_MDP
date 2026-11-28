@@ -16,7 +16,8 @@ data class PaketPilihanSiswaDto(
     val name: String,
     val capacity: Int,
     val selectionCount: Int,
-    val remainingCapacity: Int,
+    /** Perkiraan jumlah kelas bila peminat dibagi menurut kapasitas per kelas. */
+    val classCount: Int,
     val isSelected: Boolean,
     val subjects: List<MapelDalamPaketDto>
 )

@@ -13,6 +13,9 @@ import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Berkas ditolak sebelum dikirim; pesannya sudah untuk pengguna, bukan masalah koneksi. */
+class UploadRejectedException(override val message: String) : IOException(message)
+
 /** Membaca berkas pilihan pengguna (Storage Access Framework) untuk diunggah sebagai multipart. */
 @Singleton
 class UploadFiles @Inject constructor(
@@ -41,9 +44,9 @@ class UploadFiles @Inject constructor(
      */
     suspend fun attachmentPart(uri: String): MultipartBody.Part {
         val bytes = readBytes(uri)
-        if (bytes.isEmpty()) throw IOException("Berkas lampiran kosong.")
+        if (bytes.isEmpty()) throw UploadRejectedException("Berkas lampiran kosong.")
         if (bytes.size > MAX_ATTACHMENT_BYTES) {
-            throw IOException("Ukuran lampiran melebihi batas 5 MB.")
+            throw UploadRejectedException("Lampiran maksimal 5 MB.")
         }
 
         val parsed = Uri.parse(uri)
@@ -54,7 +57,7 @@ class UploadFiles @Inject constructor(
             rawName.lowercase().endsWith(".png") -> MIME_PNG
             rawName.lowercase().endsWith(".pdf") -> MIME_PDF
             rawName.lowercase().endsWith(".jpg") || rawName.lowercase().endsWith(".jpeg") -> MIME_JPEG
-            else -> throw IOException("Gunakan berkas berformat JPG, PNG, atau PDF.")
+            else -> throw UploadRejectedException("Lampiran harus JPG, PNG, atau PDF yang valid.")
         }
 
         val ext = when (mime) {

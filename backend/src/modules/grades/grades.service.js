@@ -158,11 +158,20 @@ async function saveAssessmentScore(userId, assessmentId, body) {
   });
   if (!assessment) throw forbidden();
   const assignment = await ownedAssignment(userId, assessment.teachingAssignmentId);
-  const membership = await prisma.classMember.findUnique({
-    where: { studentId_classGroupId: { studentId: body.studentId, classGroupId: assignment.classGroupId } },
-    select: { studentId: true },
-  });
+  const [membership, components] = await Promise.all([
+    prisma.classMember.findUnique({
+      where: { studentId_classGroupId: { studentId: body.studentId, classGroupId: assignment.classGroupId } },
+      select: { studentId: true },
+    }),
+    prisma.gradeComponent.findMany({
+      where: { teachingAssignmentId: assignment.id },
+      select: { weight: true },
+    }),
+  ]);
   if (!membership) throw forbidden();
+  if (components.reduce((total, component) => total + component.weight, 0) !== 100) {
+    throw invalidWeights();
+  }
   return prisma.$transaction(async (tx) => {
     const detail = await tx.gradeAssessmentScore.upsert({
       where: { assessmentId_studentId: { assessmentId, studentId: body.studentId } },

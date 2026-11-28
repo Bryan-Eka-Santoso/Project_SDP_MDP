@@ -101,6 +101,14 @@ class StudentTaskViewModel @Inject constructor(
         viewModelScope.launch { local.setCompleted(todoId, completed) }
     }
 
+    /** false: judul kosong atau terlalu panjang, sehingga tidak disimpan. */
+    fun renameTodo(todoId: Long, title: String): Boolean {
+        val trimmed = title.trim()
+        if (trimmed.isEmpty() || trimmed.length > MAX_TODO_TITLE) return false
+        viewModelScope.launch { local.rename(todoId, trimmed) }
+        return true
+    }
+
     fun deleteTodo(todoId: Long) {
         viewModelScope.launch { local.delete(todoId) }
     }
@@ -119,5 +127,6 @@ class StudentTaskViewModel @Inject constructor(
 
     private companion object {
         const val MAX_PAGES = 10
+        const val MAX_TODO_TITLE = 150
     }
 }

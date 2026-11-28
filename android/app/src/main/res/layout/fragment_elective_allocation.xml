@@ -43,11 +43,11 @@
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:layout_marginTop="10dp" style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                        android:hint="Tingkat kelas (misal X, XI, XII)">
+                        android:hint="Tingkat kelas (sesuai Master Kelas)">
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/inputElectiveGrade" android:layout_width="match_parent"
                             android:layout_height="wrap_content" android:maxLength="10" android:singleLine="true"
-                            android:inputType="textCapCharacters" android:text="X" />
+                            android:inputType="textCapCharacters" />
                     </com.google.android.material.textfield.TextInputLayout>
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnElectivePreview" android:layout_width="match_parent"

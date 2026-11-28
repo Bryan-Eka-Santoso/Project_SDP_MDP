@@ -1,5 +1,8 @@
 package id.sch.santaagnes.sim.data.repository
 
+import kotlinx.coroutines.CancellationException
+import id.sch.santaagnes.sim.data.remote.ClassApi
+import id.sch.santaagnes.sim.data.remote.MasterLookupApi
 import id.sch.santaagnes.sim.core.ApiErrorMapper
 import id.sch.santaagnes.sim.core.Resource
 import id.sch.santaagnes.sim.core.TemplateFiles
@@ -39,6 +42,8 @@ interface BillRepository {
 @Singleton
 class BillRepositoryImpl @Inject constructor(
     private val api: BillApi,
+    private val master: MasterLookupApi,
+    private val classes: ClassApi,
     private val session: SessionManager,
     private val errors: ApiErrorMapper,
     private val uploads: UploadFiles,
@@ -51,12 +56,26 @@ class BillRepositoryImpl @Inject constructor(
             "STUDENT" -> listOfNotNull(session.getStudentId()?.let { BillScopeOption(BillScope.Student(it), null) })
             "GUARDIAN" -> session.getChildren().map { BillScopeOption(BillScope.Student(it.id), it.name) }
             "TEACHER" -> session.getHomeroomClassGroups().map { BillScopeOption(BillScope.HomeroomClass(it.id), it.name) }
-            "ADMIN" -> listOf(BillScopeOption(BillScope.All, null))
+            // Admin: semua kelas, atau satu kelas pada tahun ajaran aktif.
+            "ADMIN" -> listOf(BillScopeOption(BillScope.All, null)) + activeClasses()
             else -> emptyList()
         }
         val active = session.getActiveStudentId()
         val initial = options.indexOfFirst { (it.scope as? BillScope.Student)?.studentId == active }
         return BillViewer(role, options, initialIndex = maxOf(initial, 0))
+    }
+
+    // Gagal memuat daftar kelas tidak menutup daftar tagihan; hanya filter kelasnya yang hilang.
+    private suspend fun activeClasses(): List<BillScopeOption> = try {
+        master.getActiveSemester().data?.academicYearId?.let { yearId ->
+            classes.getClasses(page = 1, limit = CLASS_LIMIT, academicYearId = yearId).data.orEmpty()
+                .sortedBy { it.name }
+                .map { BillScopeOption(BillScope.HomeroomClass(it.id), it.name) }
+        }.orEmpty()
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        emptyList()
     }
 
     override suspend fun remember(scope: BillScope) {
@@ -83,7 +102,8 @@ class BillRepositoryImpl @Inject constructor(
             page = page,
             hasMore = page < (response.meta?.totalPages ?: page),
             total = response.meta?.total,
-            studentCount = response.meta?.studentCount
+            studentCount = response.meta?.studentCount,
+            totalAmount = response.meta?.totalAmount
         )
     }
 
@@ -98,5 +118,6 @@ class BillRepositoryImpl @Inject constructor(
 
     private companion object {
         const val PAGE_SIZE = 20
+        const val CLASS_LIMIT = 100
     }
 }

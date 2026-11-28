@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.ui.attendance
 
+import id.sch.santaagnes.sim.data.local.SessionManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,12 +19,15 @@ data class StudentAttendanceSummaryState(
     val month: YearMonth = YearMonth.from(DateTimeWib.today()),
     val loading: Boolean = false,
     val summary: AttendanceSummaryDto? = null,
+    /** Nama anak yang sedang dilihat wali murid; null untuk siswa. */
+    val childName: String? = null,
     val error: String? = null
 )
 
 @HiltViewModel
 class StudentAttendanceSummaryViewModel @Inject constructor(
-    private val repository: AttendanceRepository
+    private val repository: AttendanceRepository,
+    private val session: SessionManager
 ) : ViewModel() {
     private val mutable = MutableStateFlow(StudentAttendanceSummaryState())
     val state = mutable.asStateFlow()
@@ -46,10 +50,18 @@ class StudentAttendanceSummaryViewModel @Inject constructor(
         request = viewModelScope.launch {
             mutable.value = mutable.value.copy(loading = true, summary = null, error = null)
             try {
-                val result = repository.mySummary(
-                    month.atDay(1).toString(),
-                    month.atEndOfMonth().toString()
-                )
+                val startDate = month.atDay(1).toString()
+                val endDate = month.atEndOfMonth().toString()
+                val result = if (session.getRole() == "GUARDIAN") {
+                    val children = session.getChildren()
+                    val active = session.getActiveStudentId()
+                    val child = children.firstOrNull { it.id == active } ?: children.firstOrNull()
+                        ?: error("Belum ada anak yang terhubung ke akun ini.")
+                    mutable.value = mutable.value.copy(childName = child.name)
+                    repository.studentSummary(child.id, startDate, endDate)
+                } else {
+                    repository.mySummary(startDate, endDate)
+                }
                 mutable.value = mutable.value.copy(loading = false, summary = result)
             } catch (e: CancellationException) {
                 throw e

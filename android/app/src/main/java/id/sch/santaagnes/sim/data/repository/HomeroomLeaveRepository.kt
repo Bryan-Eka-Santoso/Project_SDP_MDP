@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.data.repository
 
+import id.sch.santaagnes.sim.core.serverMessage
 import id.sch.santaagnes.sim.data.remote.HomeroomLeaveDto
 import id.sch.santaagnes.sim.data.remote.HomeroomDecisionRequest
 import id.sch.santaagnes.sim.data.remote.LeaveApi
@@ -44,7 +45,7 @@ class HomeroomLeaveRepository @Inject constructor(private val api: LeaveApi) {
     companion object {
         fun friendlyError(error: Throwable): String = when (error) {
             is IOException -> "Tidak dapat terhubung ke server. Periksa koneksi internet Anda."
-            is HttpException -> when (error.code()) {
+            is HttpException -> error.serverMessage() ?: when (error.code()) {
                 401 -> "Sesi login Anda telah berakhir. Silakan login kembali."
                 403 -> "Akses ini hanya tersedia untuk guru wali kelas."
                 400 -> "Permintaan keputusan izin tidak valid. Pastikan alasan penolakan telah diisi."

@@ -10,6 +10,7 @@ import id.sch.santaagnes.sim.domain.model.AnnouncementFeed
 import id.sch.santaagnes.sim.domain.model.NamedId
 import id.sch.santaagnes.sim.domain.model.UploadedAttachment
 import id.sch.santaagnes.sim.ui.calendar.AcademicCalendarViewModel
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -200,6 +201,39 @@ class SchoolInfoViewModelsTest {
         assertFalse(studentVm.uiState.value.isAdmin)
     }
 
+    @Test
+    fun doubleSendCreatesOnlyOneAnnouncementAndFailedUploadKeepsTheForm() = runTest {
+        val repo = FakeAnnouncementRepository(role = "ADMIN")
+        val vm = AnnouncementViewModel(repo)
+        var savedCount = 0
+        fun send() = vm.saveAnnouncement(
+            editingId = null,
+            title = "Pengumuman Baru",
+            content = "Harap dibaca.",
+            scope = "SCHOOL",
+            classGroupId = null,
+            date = "2026-11-28",
+            pickedLocalUri = "content://doc/lampiran.pdf",
+            existingUrl = null,
+            existingPublicId = null,
+            clearAttachment = false,
+            onSaved = { savedCount++ }
+        )
+
+        repo.uploadError = "Lampiran maksimal 5 MB."
+        send()
+        assertEquals(0, savedCount)
+
+        repo.uploadError = null
+        repo.uploadGate = CompletableDeferred()
+        send()
+        send()
+        repo.uploadGate?.complete(Unit)
+
+        assertEquals(1, savedCount)
+        assertEquals(3, repo.items.size)
+    }
+
     private class FakeAnnouncementRepository(
         private val role: String,
         private val homeroom: List<NamedId> = emptyList(),
@@ -211,6 +245,7 @@ class SchoolInfoViewModelsTest {
         )
         val uploadedUris = mutableListOf<String>()
         var uploadError: String? = null
+        var uploadGate: CompletableDeferred<Unit>? = null
         var isFromCache = false
 
         override suspend fun currentRole() = role
@@ -234,6 +269,7 @@ class SchoolInfoViewModelsTest {
 
         override suspend fun uploadAttachment(uri: String): Resource<UploadedAttachment> {
             uploadedUris.add(uri)
+            uploadGate?.await()
             uploadError?.let { return Resource.Error(it) }
             return Resource.Success(
                 UploadedAttachment(

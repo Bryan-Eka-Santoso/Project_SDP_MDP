@@ -1,6 +1,7 @@
 
 package id.sch.santaagnes.sim.data.local
 
+import androidx.room.Update
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -71,10 +72,18 @@ interface LocalDao {
     fun observeUnreadNotificationCount(accountId: Int): Flow<Int>
 
     @Query(
-        "SELECT EXISTS(SELECT 1 FROM notifications " +
-            "WHERE accountId = :accountId AND type = :type AND referenceId = :referenceId)"
+        "SELECT * FROM notifications WHERE accountId = :accountId AND type = :type " +
+            "AND referenceId = :referenceId AND title = :title ORDER BY receivedAt DESC"
     )
-    suspend fun hasNotification(accountId: Int, type: String, referenceId: String): Boolean
+    suspend fun findNotifications(
+        accountId: Int,
+        type: String,
+        referenceId: String,
+        title: String
+    ): List<NotificationEntity>
+
+    @Update
+    suspend fun updateNotification(item: NotificationEntity)
 
 
     // =========================
@@ -90,6 +99,9 @@ interface LocalDao {
 
     @Query("UPDATE todo_items SET isCompleted = :completed WHERE id = :id AND accountId = :accountId")
     suspend fun updateTodo(id: Long, accountId: Int, completed: Boolean)
+
+    @Query("UPDATE todo_items SET title = :title WHERE id = :id AND accountId = :accountId")
+    suspend fun renameTodo(id: Long, accountId: Int, title: String)
 
     @Query("DELETE FROM todo_items WHERE id = :id AND accountId = :accountId")
     suspend fun deleteTodo(id: Long, accountId: Int)

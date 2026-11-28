@@ -92,7 +92,12 @@ async function teacherClassSummary(user, assignmentId, query) {
   });
   if (!teacher) throw notFound();
   const assignment = await prisma.teachingAssignment.findFirst({
-    where: { id: assignmentId, teacherId: teacher.id, semester: { isActive: true } },
+    // Pengajar penugasan itu, atau wali kelas dari kelasnya (docs/PERMISSIONS.md).
+    where: {
+      id: assignmentId,
+      semester: { isActive: true },
+      OR: [{ teacherId: teacher.id }, { classGroup: { homeroomTeacherId: teacher.id } }],
+    },
     select: { id: true, classGroupId: true },
   });
   if (!assignment) throw notFound();

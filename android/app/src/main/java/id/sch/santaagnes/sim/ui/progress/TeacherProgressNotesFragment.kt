@@ -1,5 +1,8 @@
 package id.sch.santaagnes.sim.ui.progress
 
+import id.sch.santaagnes.sim.domain.model.GradeAssignment
+import id.sch.santaagnes.sim.R
+import android.widget.AdapterView
 import android.app.DatePickerDialog
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -34,17 +37,42 @@ class TeacherProgressNotesFragment: Fragment() {
         return binding.root
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        // assignmentId 0 = dibuka wali kelas dari Beranda: pilih mapel kelas binaan.
         val assignmentId = requireArguments().getInt("assignmentId")
+        val homeroomMode = assignmentId == 0
+        if (homeroomMode) {
+            binding.tvNoteTitle.setText(R.string.progress_homeroom_title)
+            binding.tvNoteSubtitle.setText(R.string.progress_homeroom_subtitle)
+        }
+        var shownOptions: List<GradeAssignment>? = null
+        binding.spinnerNoteAssignment.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) = Unit
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                shownOptions?.getOrNull(position)?.let { vm.selectHomeroom(it.id) }
+            }
+        }
         binding.btnNoteBack.setOnClickListener { findNavController().navigateUp() }
         binding.btnNotesRetry.setOnClickListener { vm.refresh() }
         binding.btnNotesMore.setOnClickListener { vm.more() }
         binding.btnNoteAdd.setOnClickListener { showEditor(null) }
-        vm.start(assignmentId)
+        if (homeroomMode) vm.startHomeroom() else vm.start(assignmentId)
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 vm.state.collect { state ->
                     binding.progressNotes.isVisible = state.loading || state.saving
+                    binding.btnNoteAdd.isVisible = !state.readOnly
                     binding.btnNoteAdd.isEnabled = !state.saving && state.students.isNotEmpty()
+                    binding.spinnerNoteAssignment.isVisible = state.homeroomOptions.isNotEmpty()
+                    if (shownOptions != state.homeroomOptions) {
+                        shownOptions = state.homeroomOptions
+                        binding.spinnerNoteAssignment.adapter = ArrayAdapter(
+                            requireContext(), android.R.layout.simple_spinner_dropdown_item,
+                            state.homeroomOptions.map { item ->
+                                if (item.isOwn || item.teacherName == null) item.label
+                                else "${item.label} — ${item.teacherName}"
+                            }
+                        )
+                    }
                     binding.btnNotesRetry.isVisible = state.error != null
                     binding.btnNotesMore.isVisible = state.more
                     binding.tvNotesStatus.text = state.error ?: when {
@@ -53,7 +81,10 @@ class TeacherProgressNotesFragment: Fragment() {
                         else -> "${state.total} catatan perkembangan"
                     }
                     binding.listNotes.removeAllViews()
-                    state.items.forEach { note -> addProgressNoteCard(binding.listNotes, note, true) { showEditor(note) } }
+                    state.items.forEach { note ->
+                        val edit: (() -> Unit)? = if (state.readOnly) null else ({ showEditor(note) })
+                        addProgressNoteCard(binding.listNotes, note, teacher = true, click = edit)
+                    }
                 }
             }
         }

@@ -1,14 +1,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent"
     android:orientation="vertical" android:background="@color/teacher_screen">
-    <FrameLayout android:id="@+id/reportHeader" android:layout_width="match_parent" android:layout_height="150dp"
+    <FrameLayout android:id="@+id/reportHeader" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="150dp"
         android:background="@drawable/bg_teacher_header" android:clipChildren="true">
         <View android:id="@+id/reportHeaderCircle" android:layout_width="128dp" android:layout_height="128dp" android:layout_gravity="top|end"
             android:translationX="38dp" android:translationY="-34dp"
             android:background="@drawable/bg_teacher_header_circle"/>
-        <LinearLayout android:id="@+id/reportHeaderContent" android:layout_width="match_parent" android:layout_height="match_parent"
+        <LinearLayout android:id="@+id/reportHeaderContent" android:layout_width="match_parent" android:layout_height="wrap_content"
             android:padding="18dp" android:orientation="vertical">
-            <TextView android:id="@+id/btnReportBack" android:layout_width="wrap_content" android:layout_height="39dp"
+            <TextView android:id="@+id/btnReportBack" android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:gravity="center_vertical" android:text="@string/back_previous" android:drawableStart="@drawable/ic_arrow_back" android:drawablePadding="8dp" android:minHeight="44dp" android:textStyle="bold" android:textSize="15sp" android:textColor="#FFFFFF"/>
             <TextView android:id="@+id/tvReportTitle" android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:layout_marginTop="13dp" android:text="Rekap Nilai Kelas" android:textColor="#FFFFFF"
@@ -25,13 +25,13 @@
                 android:padding="15dp" android:orientation="vertical" android:background="@drawable/bg_teacher_card">
                 <TextView android:id="@+id/tvReportSelectionLabel" android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:text="Kelas | Mata Pelajaran" android:textColor="@color/teacher_muted" android:textSize="12sp"/>
-                <Spinner android:id="@+id/spReportSelection" android:layout_width="match_parent" android:layout_height="46dp"
+                <Spinner android:id="@+id/spReportSelection" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="48dp"
                     android:layout_marginTop="8dp" android:background="@drawable/bg_teacher_field"/>
                 <TextView android:id="@+id/tvReportClassStats"
                     android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:layout_marginTop="10dp" android:textSize="11sp"
                     android:textColor="@color/teacher_muted" android:visibility="gone" />
-                <Button android:id="@+id/btnReloadReport" android:layout_width="match_parent" android:layout_height="45dp"
+                <Button android:id="@+id/btnReloadReport" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="48dp"
                     android:layout_marginTop="11dp" android:text="Muat ulang nilai" android:textAllCaps="false"
                     android:textColor="#FFFFFF" android:backgroundTint="@color/teacher_blue_light"/>
             </LinearLayout>

@@ -74,7 +74,8 @@ class AdminClassFragment : Fragment() {
             header = binding.header,
             navController = nav,
             titleRes = R.string.title_management_class,
-            showImport = false,
+            // Server belum punya impor kelas: tombol memberi tahu hal itu (tanpa onImport).
+            showImport = true,
             onAdd = { showClassFormSheet(null) }
         )
         setupMasterTabs(binding.tabs, nav, MasterTab.CLASS)

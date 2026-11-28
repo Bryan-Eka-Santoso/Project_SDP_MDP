@@ -1,5 +1,7 @@
 package id.sch.santaagnes.sim.ui.attendance
 
+import id.sch.santaagnes.sim.data.repository.AttendanceRepository
+import id.sch.santaagnes.sim.core.DateTimeWib
 import id.sch.santaagnes.sim.core.setLoading
 import android.app.DatePickerDialog
 import android.os.Bundle
@@ -49,7 +51,12 @@ class AttendanceFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.tvSubtitle.text = arguments?.getString("assignmentLabel") ?: "Kelas yang diajar"
+        binding.tvSubtitle.text = arguments?.getString("assignmentLabel")?.takeIf { it.isNotBlank() }
+            ?: if (assignmentId == AttendanceRepository.SUBSTITUTE_SLOTS) {
+                getString(R.string.attendance_substitute_subtitle)
+            } else {
+                "Kelas yang diajar"
+            }
         binding.btnBack.setOnClickListener { findNavController().navigateUp() }
         binding.btnMarkAllPresent.setOnClickListener {
             statuses.values.forEach { it.setSelection(0) }
@@ -94,10 +101,13 @@ class AttendanceFragment : Fragment() {
                         lastSlotsSignature = signature
                         slots = state.slots
                         binding.spinnerSlots.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item,
-                            slots.map { "${dayIndo(it.dayOfWeek)} • ${it.subjectName} • ${it.className}" })
+                            slots.map {
+                                val label = "${dayIndo(it.dayOfWeek)} • ${it.subjectName} • ${it.className}"
+                                if (it.isSubstitute) getString(R.string.attendance_substitute_slot, label) else label
+                            })
                         if (slots.isNotEmpty()) {
                             selectedSlotId = slots.first().id
-                            date = recentDay(slots.first().dayOfWeek)
+                            date = defaultDate(slots.first())
                             binding.btnDate.text = "Tanggal: $date (pilih)"
                             load(slots.first().id)
                         }
@@ -107,7 +117,7 @@ class AttendanceFragment : Fragment() {
                                 val slot = slots.getOrNull(position) ?: return
                                 if (selectedSlotId != slot.id) {
                                     selectedSlotId = slot.id
-                                    date = recentDay(slot.dayOfWeek)
+                                    date = defaultDate(slot)
                                     binding.btnDate.text = "Tanggal: $date (pilih)"
                                     load(slot.id)
                                 }
@@ -169,6 +179,10 @@ class AttendanceFragment : Fragment() {
         sb.setSpan(android.text.style.ForegroundColorSpan(statusColor), start, sb.length, 0)
         binding.tvCount.text = sb
     }
+
+    private fun defaultDate(slot: AttendanceSlotDto): String =
+        substituteDefaultDate(slot.substituteDates.orEmpty(), DateTimeWib.today().toString())
+            ?: recentDay(slot.dayOfWeek)
 
     private fun recentDay(day: String): String {
         val wanted = when (day) {

@@ -32,7 +32,16 @@ async function authenticate(req, res, next) {
   const user = Number.isInteger(userId)
     ? await prisma.user.findUnique({
         where: { id: userId },
-        select: { id: true, role: true, status: true },
+        select: {
+          id: true,
+          role: true,
+          status: true,
+          refreshTokens: {
+            where: { revokedAt: null, expiresAt: { gt: new Date() } },
+            select: { id: true },
+            take: 1,
+          },
+        },
       })
     : null;
 
@@ -41,6 +50,11 @@ async function authenticate(req, res, next) {
   }
   if (user.status === 'BLOCKED') {
     throw new AppError(403, 'ACCOUNT_BLOCKED', 'Akun Anda diblokir. Hubungi admin sekolah.');
+  }
+  // Tanpa satu pun sesi aktif (reset password oleh admin atau logout), access token lama
+  // tidak boleh dipakai sampai kedaluwarsa.
+  if (user.refreshTokens && user.refreshTokens.length === 0) {
+    throw new AppError(401, 'SESSION_REVOKED', 'Sesi telah berakhir. Silakan login kembali.');
   }
 
   req.user = { id: user.id, role: user.role };

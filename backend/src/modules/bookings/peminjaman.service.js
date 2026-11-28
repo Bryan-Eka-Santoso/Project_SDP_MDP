@@ -49,6 +49,9 @@ function formatData(item) {
     returnDate: item.returnDate
       ? item.returnDate.toISOString().slice(0, 10)
       : null,
+    // Waktu pengajuan dan perubahan terakhir, untuk waktu notifikasi di aplikasi.
+    createdAt: item.createdAt,
+    updatedAt: item.updatedAt,
   };
 }
 

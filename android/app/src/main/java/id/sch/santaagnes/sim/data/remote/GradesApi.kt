@@ -23,7 +23,10 @@ data class GradeAssignmentDto(
     val subjectName: String? = null,
     val className: String? = null,
     val semesterName: String? = null,
-    val schedules: List<GradeScheduleDto> = emptyList()
+    val schedules: List<GradeScheduleDto> = emptyList(),
+    val isOwn: Boolean? = null,
+    val teacherName: String? = null,
+    val isHomeroomClass: Boolean? = null
 )
 
 data class GradeStudentDto(val id: Int, val name: String, val nis: String?)
@@ -44,7 +47,9 @@ data class GradeAssessmentScoreRequest(val studentId: Int, val value: Double)
 
 interface GradesApi {
     @GET("me/grade-teaching-assignments")
-    suspend fun assignments(): ApiResponse<List<GradeAssignmentDto>>
+    suspend fun assignments(
+        @Query("includeHomeroom") includeHomeroom: Boolean? = null
+    ): ApiResponse<List<GradeAssignmentDto>>
 
     @GET("teaching-assignments/{assignmentId}/students")
     suspend fun students(@Path("assignmentId") assignmentId: Int): ApiResponse<List<GradeStudentDto>>

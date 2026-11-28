@@ -1,7 +1,7 @@
 const prisma = require('../../../lib/prisma');
 const AppError = require('../../../utils/AppError');
 const { toPrismaPagination } = require('../../../utils/pagination');
-const { formatDateOnly } = require('../../../utils/date');
+const { formatDateOnly, parseDateOnly, todayLocal } = require('../../../utils/date');
 const { syncHomeroomTeachers } = require('../master.helper');
 
 function mapDates(item) {
@@ -159,6 +159,29 @@ async function updateAcademicYear(id, { name, startDate, endDate }) {
   return mapDates(updated);
 }
 
+// Semester aktif harus milik tahun ajaran aktif (BUSINESS_RULES 1). Urutan pilihan: yang sudah
+// aktif di tahun itu, yang sedang berjalan hari ini, lalu yang paling awal.
+async function switchActiveSemester(tx, academicYearId) {
+  const semesters = await tx.semester.findMany({
+    where: { academicYearId },
+    select: { id: true, startDate: true, endDate: true, isActive: true },
+    orderBy: { startDate: 'asc' },
+  });
+  const today = parseDateOnly(todayLocal());
+  const next =
+    semesters.find((item) => item.isActive) ??
+    semesters.find((item) => item.startDate <= today && today <= item.endDate) ??
+    semesters[0];
+
+  await tx.semester.updateMany({
+    where: { isActive: true, ...(next ? { id: { not: next.id } } : {}) },
+    data: { isActive: false },
+  });
+  if (next && !next.isActive) {
+    await tx.semester.update({ where: { id: next.id }, data: { isActive: true } });
+  }
+}
+
 async function setActiveAcademicYear(id) {
   const target = await prisma.academicYear.findUnique({
     where: { id },
@@ -180,6 +203,8 @@ async function setActiveAcademicYear(id) {
       where: { id },
       data: { isActive: true },
     });
+
+    await switchActiveSemester(tx, id);
 
     // Hitung ulang status wali kelas guru untuk tahun ajaran aktif ini
     await syncHomeroomTeachers(tx, id);

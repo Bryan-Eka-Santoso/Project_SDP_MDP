@@ -181,6 +181,7 @@ class HomeFragment : Fragment() {
                 ),
             )
             "GUARDIAN" -> listOf(
+                HomeShortcut(R.string.home_shortcut_attendance, R.drawable.ic_location, go(R.id.guardianAttendanceSummaryFragment)),
                 HomeShortcut(R.string.home_shortcut_violations, R.drawable.ic_warning, go(R.id.guardianRiwayatPelanggaranFragment)),
                 HomeShortcut(R.string.home_shortcut_grades, R.drawable.ic_grades, go(R.id.guardianGradesFragment)),
                 HomeShortcut(R.string.home_shortcut_leave, R.drawable.ic_check, go(R.id.guardianLeaveFragment)),

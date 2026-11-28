@@ -68,6 +68,12 @@ class TeacherClassesFragment : Fragment() {
                                     )
                                 )
                             },
+                            onRecapClick = {
+                                findNavController().navigate(
+                                    R.id.teacherAttendanceRecapFragment,
+                                    bundleOf("assignmentId" to assignment.id)
+                                )
+                            },
                             onNotesClick = {
                                 findNavController().navigate(
                                     R.id.teacherProgressNotesFragment,

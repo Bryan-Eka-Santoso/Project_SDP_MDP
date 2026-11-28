@@ -60,7 +60,8 @@ internal fun inflateTeacherClassCard(
     showNotes: Boolean = false,
     onAttendanceClick: () -> Unit,
     onGradesClick: () -> Unit,
-    onNotesClick: (() -> Unit)? = null
+    onNotesClick: (() -> Unit)? = null,
+    onRecapClick: (() -> Unit)? = null
 ): View {
     val card = inflater.inflate(R.layout.item_grade_class, parent, false)
     val context = card.context
@@ -139,6 +140,10 @@ internal fun inflateTeacherClassCard(
 
     card.findViewById<Button>(R.id.btnAttendance).setOnClickListener { onAttendanceClick() }
     card.findViewById<Button>(R.id.btnGrades).setOnClickListener { onGradesClick() }
+    card.findViewById<Button>(R.id.btnRecap).apply {
+        isVisible = onRecapClick != null
+        if (onRecapClick != null) setOnClickListener { onRecapClick() }
+    }
     card.findViewById<Button>(R.id.btnNotes).apply {
         isVisible = showNotes && onNotesClick != null
         if (onNotesClick != null) setOnClickListener { onNotesClick() }

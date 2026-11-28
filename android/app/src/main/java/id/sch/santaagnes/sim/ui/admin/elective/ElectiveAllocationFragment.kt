@@ -62,6 +62,9 @@ class ElectiveAllocationFragment : Fragment() {
     }
 
     private fun render(s: ElectiveAllocationState) {
+        if (binding.inputElectiveGrade.text.isNullOrEmpty() && s.gradeLevel.isNotBlank()) {
+            binding.inputElectiveGrade.setText(s.gradeLevel)
+        }
         if (s.options != renderedOptions) {
             renderedOptions = s.options
             val labels = s.options.map { it.label }

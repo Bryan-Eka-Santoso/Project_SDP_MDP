@@ -49,7 +49,7 @@
             android:ellipsize="end"
             android:gravity="center"
             android:lineSpacingMultiplier="1.15"
-            android:maxLines="2"
+            android:maxLines="3"
             android:textColor="@color/agnesian_text"
             android:textSize="12.5sp"
             android:textStyle="bold"

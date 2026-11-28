@@ -86,7 +86,7 @@ class ScheduleAdapter : ListAdapter<ScheduleEntry, ScheduleAdapter.LessonViewHol
                 ?.let { context.getString(R.string.schedule_room, it) }
                 ?: context.getString(R.string.schedule_room_none)
 
-            bindChange(context, entry)
+            bindChange(context, entry, showTeacher)
         }
 
         fun bindAction(entry: ScheduleEntry, enabled: Boolean, onReschedule: ((ScheduleEntry) -> Unit)?) {
@@ -114,7 +114,7 @@ class ScheduleAdapter : ListAdapter<ScheduleEntry, ScheduleAdapter.LessonViewHol
             binding.cardLesson.isFocusable = enabled
         }
 
-        private fun bindChange(context: Context, entry: ScheduleEntry) {
+        private fun bindChange(context: Context, entry: ScheduleEntry, showTeacher: Boolean) {
             val change = entry.change
             if (change == null) {
                 binding.tvChange.isVisible = false
@@ -132,19 +132,23 @@ class ScheduleAdapter : ListAdapter<ScheduleEntry, ScheduleAdapter.LessonViewHol
             binding.tvChange.backgroundTintList =
                 ColorStateList.valueOf(ContextCompat.getColor(context, color))
 
-            val lines = originalLines(context, entry)
+            val lines = originalLines(context, entry, showTeacher)
             binding.tvOriginal.isVisible = lines.isNotEmpty()
             binding.tvOriginal.text = lines.joinToString("\n")
         }
 
         // Nilai semula yang berbeda dari tampilan sekarang, ditambah catatan dari admin bila ada.
-        private fun originalLines(context: Context, entry: ScheduleEntry): List<String> {
+        private fun originalLines(context: Context, entry: ScheduleEntry, showTeacher: Boolean): List<String> {
             val change = entry.change ?: return emptyList()
             val original = entry.original
             val lines = mutableListOf<String>()
 
             change.movedTo?.let { lines += context.getString(R.string.schedule_moved_to, DateTimeWib.formatDate(it)) }
             change.movedFrom?.let { lines += context.getString(R.string.schedule_moved_from, DateTimeWib.formatDate(it)) }
+            // Jadwal mengajar menampilkan kelas, bukan guru, jadi nama pengganti ditulis di sini.
+            if (change.type == ChangeType.SUBSTITUTE && !showTeacher) {
+                lines += context.getString(R.string.schedule_substitute_teacher, entry.teacherName)
+            }
             if (original != null) {
                 when (change.type) {
                     ChangeType.SUBSTITUTE -> original.teacherName?.let {

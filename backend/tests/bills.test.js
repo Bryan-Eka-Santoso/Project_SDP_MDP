@@ -6,7 +6,7 @@ jest.mock('../src/lib/prisma', () => ({
   studentGuardian: { findFirst: jest.fn() },
   classMember: { findFirst: jest.fn() },
   classGroup: { findMany: jest.fn() },
-  bill: { findMany: jest.fn(), count: jest.fn() },
+  bill: { findMany: jest.fn(), count: jest.fn(), aggregate: jest.fn() },
 }));
 
 const jwt = require('jsonwebtoken');
@@ -33,6 +33,7 @@ beforeEach(() => {
   jest.resetAllMocks();
   prisma.bill.findMany.mockResolvedValue(bills);
   prisma.bill.count.mockResolvedValue(3);
+  prisma.bill.aggregate.mockResolvedValue({ _sum: { amount: null } });
 });
 
 describe('GET /api/v1/students/:studentId/bills', () => {
@@ -181,6 +182,16 @@ describe('GET /api/v1/bills', () => {
     expect(res.body.meta).not.toHaveProperty('studentCount');
   });
 
+  it('meta.totalAmount menjumlahkan semua tagihan pada filter, bukan hanya satu halaman', async () => {
+    prisma.bill.findMany.mockResolvedValue([row]);
+    prisma.bill.aggregate.mockResolvedValue({ _sum: { amount: '2550000' } });
+
+    const res = await request(app).get('/api/v1/bills?limit=1').set('Authorization', loginAs('ADMIN'));
+
+    expect(res.body.meta.totalAmount).toBe(2550000);
+    expect(prisma.bill.aggregate).toHaveBeenCalledWith({ where: { AND: [] }, _sum: { amount: true } });
+  });
+
   it('wali kelas: otomatis dibatasi ke kelas binaan tahun ajaran aktif', async () => {
     prisma.classGroup.findMany.mockResolvedValue([{ id: 10 }, { id: 11 }]);
     prisma.bill.findMany.mockResolvedValue([row]);
@@ -223,7 +234,7 @@ describe('GET /api/v1/bills', () => {
 
     const res = await request(app).get('/api/v1/bills?page=2&limit=10').set('Authorization', loginAs('ADMIN'));
 
-    expect(res.body.meta).toEqual({ page: 2, limit: 10, total: 45, totalPages: 5 });
+    expect(res.body.meta).toEqual({ page: 2, limit: 10, total: 45, totalPages: 5, totalAmount: 0 });
     expect(prisma.bill.findMany.mock.calls[0][0]).toMatchObject({ skip: 10, take: 10 });
   });
 });

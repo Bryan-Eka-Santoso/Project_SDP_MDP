@@ -13,7 +13,11 @@ data class GradeAssignment(
     val subjectName: String = "",
     val className: String = "",
     val semesterName: String = "",
-    val schedules: List<GradeSchedule> = emptyList()
+    val schedules: List<GradeSchedule> = emptyList(),
+    /** false: mapel guru lain di kelas binaan; wali kelas hanya boleh membaca. */
+    val isOwn: Boolean = true,
+    val teacherName: String? = null,
+    val isHomeroomClass: Boolean = false
 )
 
 data class GradeStudent(val id: Int, val name: String, val nis: String?)

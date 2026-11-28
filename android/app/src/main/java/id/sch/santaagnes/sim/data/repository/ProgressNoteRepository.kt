@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.data.repository
 
+import id.sch.santaagnes.sim.core.serverMessage
 import id.sch.santaagnes.sim.data.remote.*
 import retrofit2.HttpException
 import java.io.IOException
@@ -21,7 +22,7 @@ class ProgressNoteRepository @Inject constructor(private val api: ProgressNoteAp
     companion object {
         fun message(e: Throwable): String = when(e) {
             is IOException -> "Tidak dapat terhubung ke server. Periksa koneksi internet Anda."
-            is HttpException -> when(e.code()) {
+            is HttpException -> e.serverMessage() ?: when (e.code()) {
                 400 -> "Catatan harus diisi (maksimal 500 karakter), dan tanggal harus valid."
                 401 -> "Sesi login Anda telah berakhir. Silakan masuk kembali."
                 403 -> "Anda tidak memiliki akses ke catatan ini."
