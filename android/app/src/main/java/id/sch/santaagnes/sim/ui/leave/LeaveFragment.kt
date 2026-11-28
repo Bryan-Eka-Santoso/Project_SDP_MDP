@@ -103,6 +103,8 @@ class LeaveFragment : Fragment() {
             val reason = binding.etReason.text.toString().trim()
             if (reason.length < 5) {
                 binding.etReason.error = "Alasan minimal 5 karakter."
+                // Fokus membawa kolom yang salah ke layar dan memunculkan pesannya.
+                binding.etReason.requestFocus()
                 return@setOnClickListener
             }
             if (startDate > endDate) {
@@ -156,8 +158,6 @@ class LeaveFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
                     binding.progressBar.visibility = if (state.loading) View.VISIBLE else View.GONE
-                    binding.btnSubmit.isEnabled = !state.loading && selectedChildId != null
-                    binding.btnSubmit.setLoading(state.saving)
                     binding.tvFeedback.setTextColor(
                         if (state.error != null) 0xFFB3261E.toInt() else 0xFF176A42.toInt()
                     )
@@ -174,6 +174,9 @@ class LeaveFragment : Fragment() {
                             state.children.map { "${it.name} (${it.nis ?: "-"})" })
                         if (ids.isNotEmpty()) selectedChildId = ids.first()
                     }
+                    // Dihitung setelah anak terpilih diisi; kalau tidak, tombol tetap nonaktif saat layar dibuka.
+                    binding.btnSubmit.isEnabled = !state.loading && selectedChildId != null
+                    binding.btnSubmit.setLoading(state.saving)
                     binding.listRequests.removeAllViews()
                     state.requests.forEach { request ->
                         val item = layoutInflater.inflate(R.layout.item_leave_request, binding.listRequests, false)

@@ -1,5 +1,7 @@
 package id.sch.santaagnes.sim.ui.pelanggaran
 
+import id.sch.santaagnes.sim.data.local.SessionManager
+import id.sch.santaagnes.sim.core.userMessage
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,7 +21,8 @@ data class RiwayatPelanggaranUiState(
 
 @HiltViewModel
 class RiwayatPelanggaranViewModel @Inject constructor(
-    private val api: RiwayatPelanggaranApi
+    private val api: RiwayatPelanggaranApi,
+    private val session: SessionManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
@@ -52,9 +55,10 @@ class RiwayatPelanggaranViewModel @Inject constructor(
                     loading = false
                 )
 
-                // Otomatis buka siswa pertama.
+                // Wali murid mengikuti anak aktif dari Beranda; selain itu buka siswa pertama.
                 if (siswa.isNotEmpty()) {
                     val selected = _uiState.value.selectedStudentId
+                        ?: if (session.getRole() == "GUARDIAN") session.getActiveStudentId() else null
                     val id = if (siswa.any { it.id == selected }) {
                         selected!!
                     } else {
@@ -72,7 +76,7 @@ class RiwayatPelanggaranViewModel @Inject constructor(
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     loading = false,
-                    error = e.message ?: "Terjadi kesalahan"
+                    error = e.userMessage("Terjadi kesalahan")
                 )
             }
         }
@@ -80,6 +84,9 @@ class RiwayatPelanggaranViewModel @Inject constructor(
 
     fun pilihSiswa(studentId: Int) {
         if (_uiState.value.siswa.none { it.id == studentId }) return
+        viewModelScope.launch {
+            if (session.getRole() == "GUARDIAN") session.saveActiveStudentId(studentId)
+        }
 
         _uiState.value = _uiState.value.copy(
             selectedStudentId = studentId,
@@ -116,7 +123,7 @@ class RiwayatPelanggaranViewModel @Inject constructor(
 
                 _uiState.value = _uiState.value.copy(
                     loading = false,
-                    error = e.message ?: "Gagal mengambil riwayat"
+                    error = e.userMessage("Gagal mengambil riwayat")
                 )
             }
         }

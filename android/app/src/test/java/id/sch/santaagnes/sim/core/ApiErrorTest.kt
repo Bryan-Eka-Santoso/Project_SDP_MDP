@@ -79,4 +79,22 @@ class ApiErrorTest {
         assertEquals(emptyList<ImportRowError>(), importErrorsOf(parseApiError(validation)))
         assertEquals(emptyList<ImportRowError>(), importErrorsOf(null))
     }
+
+    @Test
+    fun rejectedImportKeepsServerSummaryBecauseRowsAreListedSeparately() {
+        val summary = "Impor dibatalkan: 250 kesalahan di 250 baris. Tidak ada data yang disimpan. " +
+            "Hanya 200 kesalahan pertama yang ditampilkan."
+        val body = """{"success":false,"error":{"code":"IMPORT_INVALID","message":"$summary",
+            "details":[{"row":2,"column":"Kelas","message":"Kelas tidak ditemukan."}]}}"""
+
+        assertEquals(summary, serverErrorMessage(parseApiError(body)))
+    }
+
+    @Test
+    fun validationErrorStillShowsReasonPerField() {
+        val body = """{"success":false,"error":{"code":"VALIDATION_ERROR","message":"Data tidak valid.",
+            "details":[{"field":"body.title","message":"Judul terlalu panjang."}]}}"""
+
+        assertEquals("Judul terlalu panjang.", serverErrorMessage(parseApiError(body)))
+    }
 }

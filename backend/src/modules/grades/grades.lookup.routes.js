@@ -6,6 +6,7 @@ const schemas = require('./grades.validation');
 const controller = require('./grades.lookup.controller');
 
 const router = express.Router();
-router.get('/me/grade-teaching-assignments', authenticate, authorize('TEACHER'), controller.assignments);
+router.get('/me/grade-teaching-assignments', authenticate, authorize('TEACHER'),
+  validate({ query: schemas.lookupQuery }), controller.assignments);
 router.get('/teaching-assignments/:assignmentId/students', authenticate, authorize('TEACHER'), validate({ params: schemas.assignmentParams }), controller.students);
 module.exports = router;

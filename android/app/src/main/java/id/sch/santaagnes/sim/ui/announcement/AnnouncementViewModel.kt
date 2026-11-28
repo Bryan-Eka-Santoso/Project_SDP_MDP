@@ -150,10 +150,12 @@ class AnnouncementViewModel @Inject constructor(
         pickedLocalUri: String?,
         existingUrl: String?,
         existingPublicId: String?,
-        clearAttachment: Boolean
+        clearAttachment: Boolean,
+        onSaved: () -> Unit = {}
     ) {
+        if (_uiState.value.isSubmitting) return
+        _uiState.update { it.copy(isSubmitting = true) }
         viewModelScope.launch {
-            _uiState.update { it.copy(isSubmitting = true) }
 
             var attachmentUrl = if (clearAttachment) null else existingUrl
             var attachmentPublicId = if (clearAttachment) null else existingPublicId
@@ -204,6 +206,7 @@ class AnnouncementViewModel @Inject constructor(
                             "Pengumuman berhasil diperbarui"
                         }
                     )
+                    onSaved()
                     load()
                 }
                 is Resource.Error -> {

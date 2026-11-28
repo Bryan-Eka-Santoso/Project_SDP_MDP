@@ -41,6 +41,7 @@ async function remove(req, res) {
 }
 
 async function listMembers(req, res) {
+  await classesService.assertCanViewMembers(req.user, req.validated.params.id);
   const result = await classesService.listClassMembers(req.validated.params.id);
   sendSuccess(res, result);
 }

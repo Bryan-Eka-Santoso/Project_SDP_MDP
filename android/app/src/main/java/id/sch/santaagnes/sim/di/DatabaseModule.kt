@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.di
 
+import id.sch.santaagnes.sim.data.local.MIGRATION_5_6
 import android.content.Context
 import androidx.room.Room
 import dagger.Module
@@ -25,7 +26,7 @@ object DatabaseModule {
             context,
             AppDatabase::class.java,
             "santa_agnes_local.db"
-        ).addMigrations(MIGRATION_4_5).fallbackToDestructiveMigration(dropAllTables = true).build()
+        ).addMigrations(MIGRATION_4_5, MIGRATION_5_6).fallbackToDestructiveMigration(dropAllTables = true).build()
     }
 
     @Provides

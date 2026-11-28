@@ -31,6 +31,7 @@ data class BillListUiState(
     // dari meta halaman pertama: seluruh tagihan yang cocok, dan murid di kelas binaan (wali kelas)
     val total: Int? = null,
     val studentCount: Int? = null,
+    val totalAmount: Long? = null,
     val errorMessage: String? = null
 ) {
     private val scope: BillScope? get() = options.getOrNull(selectedOption)?.scope
@@ -88,6 +89,7 @@ class BillListViewModel @Inject constructor(
                             hasMore = result.data.hasMore,
                             total = result.data.total,
                             studentCount = result.data.studentCount,
+                            totalAmount = result.data.totalAmount,
                             isLoading = false
                         )
                     }
@@ -126,7 +128,10 @@ class BillListViewModel @Inject constructor(
         val state = _uiState.value
         if (index !in state.options.indices || index == state.selectedOption) return
         _uiState.update {
-            it.copy(selectedOption = index, bills = emptyList(), hasMore = false, total = null, studentCount = null)
+            it.copy(
+                selectedOption = index, bills = emptyList(), hasMore = false,
+                total = null, studentCount = null, totalAmount = null
+            )
         }
         viewModelScope.launch { repository.remember(state.options[index].scope) }
         refresh()

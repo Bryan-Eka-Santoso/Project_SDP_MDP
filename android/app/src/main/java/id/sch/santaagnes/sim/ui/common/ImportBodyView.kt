@@ -82,10 +82,11 @@ class ImportBodyView(
             } else {
                 context.getString(R.string.import_error_summary_no_row, importErrors.size)
             }
-            binding.tvErrorSummary.text = if (importErrors.size >= SERVER_ERROR_LIMIT) {
-                summary + " " + context.getString(R.string.import_error_truncated, SERVER_ERROR_LIMIT)
-            } else {
-                summary
+            // Daftar dari server dipotong; jumlah sebenarnya hanya ada di pesan server.
+            binding.tvErrorSummary.text = when {
+                importErrors.size < SERVER_ERROR_LIMIT -> summary
+                !errorMessage.isNullOrBlank() -> errorMessage
+                else -> summary + " " + context.getString(R.string.import_error_truncated, SERVER_ERROR_LIMIT)
             }
         }
         errorAdapter.submitList(importErrors)

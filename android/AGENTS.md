@@ -63,6 +63,13 @@ Fragment  →  ViewModel  →  Repository  →  Api (Retrofit) / Dao (Room)
 - **Loading di tombol dan Menu Cepat guru**: aksi simpan/kirim/impor/login menampilkan animasi loading di dalam tombolnya lewat `core/ButtonLoading.setLoading` (ikon `IndeterminateDrawable`, klik diabaikan selama loading), bukan spinner terpisah; spinner layar penuh hanya untuk memuat data. Tombol "Kembali" di header memakai ikon panah `ic_arrow_back` + teks 15sp tebal (`@string/back_previous`). Home guru memakai grid Menu Cepat (`HomeShortcutAdapter`, tile Tulis/Baca Buku dan Profil Binaan muncul hanya bila server mengizinkan). Tab Home di `MainActivity.setupBottomNav` memakai `popBackStack` ke tujuan awal supaya tetap berfungsi saat ada layar didorong di atas Home.
 - **Layar awal tiap role**: graph `nav_student`, `nav_guardian`, dan `nav_teacher` memakai tab Home sebagai `startDestination` (sama dengan Figma); Back dari layar turunan kembali ke Home, dan Back dari Home menutup aplikasi.
 
+- **Pesan error**: tampilkan pesan dari server lewat `e.userMessage()` / `serverMessage()` (`core/UserMessage.kt`), bukan `e.message` mentah. Kesalahan simpan di dialog atau bottom sheet ditampilkan di sana dan dialognya tetap terbuka.
+- **Layar dan keyboard**: `MainActivity` menangani sendiri perubahan konfigurasi (`android:configChanges` di manifest) agar isian formulir tidak hilang saat layar diputar, dan menyembunyikan bottom nav selama keyboard tampil.
+- **Notifikasi di Room (v6)**: riwayat diisi dari push dan dari sinkron saat aplikasi dibuka. Judul dan `referenceId` hasil sinkron harus sama dengan push backend. Penggabungan ada di `data/repository/NotificationMerge.kt`: push menggantikan baris hasil sinkron, sinkron tidak menimpa baris push, dan waktunya memakai `createdAt`/`updatedAt` data (bukan tanggal kejadian). `MIGRATION_5_6` menyesuaikan baris versi lama.
+- **Sinkron kalender**: agenda yang dihapus pengguna di kalender HP dibuat lagi pada sinkron berikutnya; hasil sinkron terakhir (termasuk yang otomatis) disimpan untuk ditampilkan di Profil.
+- **Wali kelas dan guru pengganti**: menu binaan (profil, presensi, catatan) muncul bila profil guru `isHomeroomTeacher`; data kelas binaan milik guru lain hanya bisa dibaca (`includeHomeroom`, `isOwn`). "Presensi Pengganti" muncul bila ada slot pengganti. Wali murid punya rekap presensi anak aktif.
+- **Tagihan admin**: bisa difilter per kelas tahun ajaran aktif; ringkasannya memakai `meta.studentCount` dan `meta.totalAmount`.
+
 ## Penamaan
 
 | Jenis | Pola | Contoh |

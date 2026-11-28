@@ -3,7 +3,8 @@ jest.mock('../src/lib/prisma', () => ({
   gradeComponent: { findMany: jest.fn(), aggregate: jest.fn(), create: jest.fn(), findUnique: jest.fn(), update: jest.fn() },
   classMember: { findUnique: jest.fn() },
   score: { upsert: jest.fn(), findMany: jest.fn(), count: jest.fn() },
-  gradeAssessment: { count: jest.fn() },
+  gradeAssessment: { count: jest.fn(), findUnique: jest.fn() },
+  $transaction: jest.fn(),
 }));
 
 const prisma = require('../src/lib/prisma');
@@ -64,4 +65,14 @@ test('menolak komponen baru jika jumlah bobot melebihi 100%', async () => {
   prisma.gradeComponent.aggregate.mockResolvedValue({ _sum: { weight: 90 } });
   await expect(service.createComponent(42, 3, { name: 'UAS', weight: 20 })).rejects.toMatchObject({ statusCode: 409 });
   expect(prisma.gradeComponent.create).not.toHaveBeenCalled();
+});
+
+test('menolak nilai Tugas/Ulangan per penilaian jika total bobot belum tepat 100', async () => {
+  prisma.gradeAssessment.findUnique.mockResolvedValue({ id: 4, gradeComponentId: 9, teachingAssignmentId: 3 });
+  prisma.gradeComponent.findMany.mockResolvedValue([{ id: 9, weight: 60 }, { id: 10, weight: 30 }]);
+
+  await expect(service.saveAssessmentScore(42, 4, { studentId: 8, value: 80 }))
+    .rejects.toMatchObject({ statusCode: 409, code: 'GRADE_WEIGHTS_INVALID' });
+
+  expect(prisma.$transaction).not.toHaveBeenCalled();
 });

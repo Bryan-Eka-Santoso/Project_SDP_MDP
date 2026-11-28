@@ -105,7 +105,8 @@ async function list(userId) {
 
   const surveys = await prisma.electiveSurvey.findMany({
     where: {
-      status: "PUBLISHED",
+      // CLOSED tetap tampil (hanya baca) agar survei tidak hilang tanpa keterangan.
+      status: { in: ["PUBLISHED", "CLOSED"] },
       OR: allowed,
     },
     include: {

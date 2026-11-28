@@ -32,6 +32,20 @@ async function ownedAssignment(userId, assignmentId) {
   return assignment;
 }
 
+// Membaca catatan: pengajar penugasan atau wali kelasnya. Menulis tetap lewat ownedAssignment.
+async function readableAssignment(userId, assignmentId) {
+  const assignment = await prisma.teachingAssignment.findFirst({
+    where: {
+      id: assignmentId,
+      semester: { isActive: true },
+      OR: [{ teacher: { userId } }, { classGroup: { homeroomTeacher: { userId } } }],
+    },
+    select: { id: true, classGroupId: true },
+  });
+  if (!assignment) throw notFound();
+  return assignment;
+}
+
 async function assertMembership(studentId, classGroupId) {
   const member = await prisma.classMember.findUnique({
     where: { studentId_classGroupId: { studentId, classGroupId } },
@@ -72,7 +86,7 @@ async function update(userId, noteId, body) {
 }
 
 async function listByAssignment(userId, assignmentId, query) {
-  const assignment = await ownedAssignment(userId, assignmentId);
+  const assignment = await readableAssignment(userId, assignmentId);
   if (query.studentId) await assertMembership(query.studentId, assignment.classGroupId);
   const where = {
     teachingAssignmentId: assignment.id,

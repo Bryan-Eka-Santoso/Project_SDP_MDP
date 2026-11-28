@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.ui.bill
 
+import id.sch.santaagnes.sim.core.Rupiah
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -120,10 +121,10 @@ class BillListFragment : Fragment() {
         adapter.submitList(state.bills)
     }
 
-    /** Wali kelas: "X-1 · 32 murid". Admin: "Total: 120 tagihan". Siswa dan wali murid: tanpa ringkasan. */
+    /** Satu kelas: "X-1 · 32 siswa" + total tagihan. Semua kelas: jumlah dan total. Siswa/wali: tanpa ringkasan. */
     private fun renderSummary(state: BillListUiState) {
         val option = state.options.getOrNull(state.selectedOption)
-        val text = when {
+        val counted = when {
             state.isLoading && state.total == null -> null
             option?.scope is BillScope.HomeroomClass && state.studentCount != null -> {
                 val students = getString(R.string.bill_summary_students, state.studentCount)
@@ -132,7 +133,9 @@ class BillListFragment : Fragment() {
             option?.scope is BillScope.All && state.total != null -> getString(R.string.bill_summary_total, state.total)
             else -> null
         }
-        binding.tvSummary.isVisible = text != null
+        val amount = state.totalAmount?.let { getString(R.string.bill_summary_amount, Rupiah.format(it)) }
+        val text = listOfNotNull(counted, amount.takeIf { counted != null }).joinToString("\n")
+        binding.tvSummary.isVisible = text.isNotEmpty()
         binding.tvSummary.text = text
     }
 
@@ -144,7 +147,7 @@ class BillListFragment : Fragment() {
             state.options.forEachIndexed { index, option ->
                 val chip = Chip(requireContext()).apply {
                     id = View.generateViewId()
-                    text = option.name
+                    text = option.name ?: getString(R.string.bill_all_classes)
                     isCheckable = true
                     setOnClickListener { viewModel.selectOption(index) }
                 }

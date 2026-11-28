@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.data
 
+import id.sch.santaagnes.sim.domain.model.CalendarSyncResult
 import id.sch.santaagnes.sim.core.CalendarEntry
 import id.sch.santaagnes.sim.core.Resource
 import id.sch.santaagnes.sim.core.SyncedRef
@@ -54,6 +55,12 @@ class CalendarSyncRepositoryTest {
         private val calendarLabels = mutableMapOf<Int, String>()
         private val refMap = mutableMapOf<Int, Map<String, SyncedRef>>()
         private val lastSyncs = mutableMapOf<Int, Long>()
+        private val lastResults = mutableMapOf<Int, CalendarSyncResult>()
+
+        override suspend fun lastResult(userId: Int): CalendarSyncResult? = lastResults[userId]
+        override suspend fun saveLastResult(userId: Int, result: CalendarSyncResult) {
+            lastResults[userId] = result
+        }
 
         override suspend fun isEnabled(userId: Int): Boolean = enabled[userId] ?: false
         override suspend fun setEnabled(userId: Int, enabled: Boolean) {
@@ -88,6 +95,7 @@ class CalendarSyncRepositoryTest {
             calendarLabels.remove(userId)
             refMap.remove(userId)
             lastSyncs.remove(userId)
+            lastResults.remove(userId)
         }
     }
 
@@ -110,6 +118,9 @@ class CalendarSyncRepositoryTest {
             inserted[id] = calendarId to entry
             return id
         }
+
+        override suspend fun existingEventIds(ids: Collection<Long>): Set<Long> =
+            ids.filter { it in inserted }.toSet()
 
         override suspend fun update(eventId: Long, entry: CalendarEntry): Boolean {
             val existing = inserted[eventId] ?: return false
@@ -307,6 +318,41 @@ class CalendarSyncRepositoryTest {
         assertTrue(res is Resource.Error)
         assertEquals(2, device.inserted.size)
         assertTrue(device.deletedIds.isEmpty())
+    }
+
+    @Test
+    fun `agenda yang dihapus pengguna dari kalender HP dibuat lagi saat sinkron berikutnya`() = runTest {
+        val device = FakeDeviceCalendar(calendars = listOf(googlePrimary))
+        val repo = CalendarSyncRepositoryImpl(
+            calendarRepository = FakeCalendarRepository(Resource.Success(listOf(academicEvent()))),
+            loadBookings = { Resource.Success(emptyList()) },
+            store = FakeCalendarSyncStore(),
+            device = device
+        )
+        repo.enable(userId = 1, role = "ADMIN")
+        device.inserted.clear()
+
+        val result = repo.syncNow(userId = 1, role = "ADMIN")
+
+        assertEquals(1, (result as Resource.Success).data.added)
+        assertEquals(1, device.inserted.size)
+    }
+
+    @Test
+    fun `hasil sinkron otomatis tersimpan untuk ditampilkan di Profil`() = runTest {
+        val calendarRepo = FakeCalendarRepository(Resource.Success(listOf(academicEvent(1, "Awal"))))
+        val repo = CalendarSyncRepositoryImpl(
+            calendarRepository = calendarRepo,
+            loadBookings = { Resource.Success(emptyList()) },
+            store = FakeCalendarSyncStore(),
+            device = FakeDeviceCalendar(calendars = listOf(googlePrimary))
+        )
+        repo.enable(userId = 1, role = "ADMIN")
+        calendarRepo.eventsResult = Resource.Success(listOf(academicEvent(1, "Baru")))
+
+        repo.syncIfEnabled(userId = 1, role = "ADMIN", force = true)
+
+        assertEquals(1, repo.lastResult(1)?.updated)
     }
 
     @Test

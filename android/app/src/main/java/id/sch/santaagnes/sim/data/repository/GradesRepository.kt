@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.data.repository
 
+import id.sch.santaagnes.sim.core.serverMessage
 import id.sch.santaagnes.sim.data.remote.GradeAssessmentDto
 import id.sch.santaagnes.sim.data.remote.GradeAssessmentRequest
 import id.sch.santaagnes.sim.data.remote.GradeAssessmentScoreRequest
@@ -16,8 +17,9 @@ import java.io.IOException
 import javax.inject.Inject
 
 class GradesRepository @Inject constructor(private val api: GradesApi) {
-    suspend fun assignments(): List<GradeAssignment> =
-        api.assignments().data.orEmpty().map { dto ->
+    /** [includeHomeroom] menambah semua mapel kelas binaan (untuk layar baca wali kelas). */
+    suspend fun assignments(includeHomeroom: Boolean = false): List<GradeAssignment> =
+        api.assignments(if (includeHomeroom) true else null).data.orEmpty().map { dto ->
             GradeAssignment(
                 id = dto.id,
                 label = dto.label,
@@ -26,7 +28,10 @@ class GradesRepository @Inject constructor(private val api: GradesApi) {
                 semesterName = dto.semesterName ?: "",
                 schedules = dto.schedules.map { slot ->
                     GradeSchedule(slot.id, slot.day, slot.startTime, slot.endTime)
-                }
+                },
+                isOwn = dto.isOwn ?: true,
+                teacherName = dto.teacherName,
+                isHomeroomClass = dto.isHomeroomClass ?: false
             )
         }
 
@@ -63,7 +68,7 @@ class GradesRepository @Inject constructor(private val api: GradesApi) {
     companion object {
         fun friendlyError(error: Throwable): String = when (error) {
             is IOException -> "Tidak dapat terhubung ke server. Periksa koneksi internet Anda."
-            is HttpException -> when (error.code()) {
+            is HttpException -> error.serverMessage() ?: when (error.code()) {
                 400 -> "Data yang diisi tidak valid."
                 401 -> "Sesi login Anda telah berakhir. Silakan masuk kembali."
                 403 -> "Anda tidak memiliki akses ke data ini."

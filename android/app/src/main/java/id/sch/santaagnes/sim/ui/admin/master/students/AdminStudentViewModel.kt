@@ -300,8 +300,9 @@ class AdminStudentViewModel @Inject constructor(
     }
 
     fun linkGuardian(studentId: Int, guardianId: Int, relationship: String) {
+        if (_uiState.value.isGuardianLoading) return
+        _uiState.value = _uiState.value.copy(isGuardianLoading = true)
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isGuardianLoading = true)
             when (val result = repository.linkGuardian(studentId, guardianId, relationship)) {
                 is Resource.Success -> {
                     _studentMessage.emit("Wali murid berhasil dihubungkan")
@@ -323,8 +324,9 @@ class AdminStudentViewModel @Inject constructor(
         phone: String,
         relationship: String
     ) {
+        if (_uiState.value.isGuardianLoading) return
+        _uiState.value = _uiState.value.copy(isGuardianLoading = true)
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isGuardianLoading = true)
             when (val created = guardianRepository.createGuardian(name, email, password, phone)) {
                 is Resource.Success -> {
                     when (val linked = repository.linkGuardian(studentId, created.data.id, relationship)) {

@@ -70,6 +70,8 @@ class MainActivity : AppCompatActivity() {
         R.id.adminNotificationsFragment
     )
     private var inflatedMenu: Int? = null
+    private var destinationHasBottomNav = false
+    private var keyboardVisible = false
     private var notificationPermissionAsked = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -91,11 +93,16 @@ class MainActivity : AppCompatActivity() {
             binding.statusBarScrim.layoutParams = binding.statusBarScrim.layoutParams.apply {
                 height = systemBars.top
             }
+            // Mode edge-to-edge tidak mengecilkan jendela saat keyboard muncul, jadi tinggi keyboard
+            // dipasang sendiri; bottom nav disembunyikan agar tidak memakan ruang isian.
+            val keyboardHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+            keyboardVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
+            updateBottomNavVisibility()
             view.setPadding(
                 systemBars.left,
                 0,
                 systemBars.right,
-                systemBars.bottom
+                maxOf(systemBars.bottom, keyboardHeight)
             )
 
             insets
@@ -202,7 +209,8 @@ class MainActivity : AppCompatActivity() {
         navController.addOnDestinationChangedListener { _, destination, _ ->
             val menu = tabMenus[destination.parent?.id]
             if (menu == null) {
-                binding.bottomNav.isVisible = false
+                destinationHasBottomNav = false
+                updateBottomNavVisibility()
                 return@addOnDestinationChangedListener
             }
             showMenu(menu)
@@ -220,9 +228,14 @@ class MainActivity : AppCompatActivity() {
             }
             // Layar turunan (mis. form tugas) bukan tab: bottom nav disembunyikan.
             val tab = binding.bottomNav.menu.findItem(mappedTabId)
-            binding.bottomNav.isVisible = tab != null
+            destinationHasBottomNav = tab != null
+            updateBottomNavVisibility()
             tab?.isChecked = true
         }
+    }
+
+    private fun updateBottomNavVisibility() {
+        binding.bottomNav.isVisible = destinationHasBottomNav && !keyboardVisible
     }
 
     private fun showMenu(@MenuRes menuRes: Int) {

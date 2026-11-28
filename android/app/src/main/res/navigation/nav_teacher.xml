@@ -72,6 +72,20 @@
     </fragment>
 
     <fragment
+        android:id="@+id/teacherAttendanceRecapFragment"
+        android:name="id.sch.santaagnes.sim.ui.attendance.TeacherAttendanceRecapFragment">
+
+        <argument
+            android:name="assignmentId"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <argument
+            android:name="homeroomOnly"
+            android:defaultValue="false"
+            app:argType="boolean" />
+    </fragment>
+
+    <fragment
         android:id="@+id/attendanceFragment"
         android:name="id.sch.santaagnes.sim.ui.attendance.AttendanceFragment">
 

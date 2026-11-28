@@ -1,5 +1,7 @@
 package id.sch.santaagnes.sim.data.repository
 
+import id.sch.santaagnes.sim.domain.model.AttendanceRecapRow
+import id.sch.santaagnes.sim.core.serverMessage
 import id.sch.santaagnes.sim.data.remote.AttendanceApi
 import id.sch.santaagnes.sim.data.remote.AttendanceInputDto
 import id.sch.santaagnes.sim.data.remote.AttendanceSessionDto
@@ -28,8 +30,25 @@ class AttendanceRepository @Inject constructor(private val api: AttendanceApi) {
         return response.data ?: error("Rekap presensi tidak tersedia.")
     }
 
+    /** [assignmentId] = [SUBSTITUTE_SLOTS] untuk slot yang diajar sebagai guru pengganti. */
     suspend fun slots(assignmentId: Int): List<AttendanceSlotDto> =
-        api.slots().data.orEmpty().filter { it.assignmentId == assignmentId }
+        api.slots().data.orEmpty().filter {
+            if (assignmentId == SUBSTITUTE_SLOTS) it.isSubstitute else it.assignmentId == assignmentId
+        }
+
+    suspend fun classRecap(assignmentId: Int, startDate: String?, endDate: String?): List<AttendanceRecapRow> {
+        val response = api.classAttendanceSummary(assignmentId, startDate, endDate)
+        val data = response.data
+        if (!response.success || data == null) error(response.error?.message ?: "Gagal mengambil rekap presensi.")
+        return data.students
+            .map {
+                AttendanceRecapRow(
+                    it.studentId, it.nis.orEmpty(), it.name,
+                    it.counts.PRESENT, it.counts.SICK, it.counts.EXCUSED, it.counts.ABSENT
+                )
+            }
+            .sortedBy { it.name.lowercase() }
+    }
 
     suspend fun session(slotId: Int, date: String): AttendanceSessionDto =
         api.session(slotId, date).data ?: error("Data sesi tidak tersedia.")
@@ -44,9 +63,11 @@ class AttendanceRepository @Inject constructor(private val api: AttendanceApi) {
     }
 
     companion object {
+        const val SUBSTITUTE_SLOTS = 0
+
         fun errorMessage(e: Throwable): String = when (e) {
             is IOException -> "Tidak dapat terhubung ke server. Periksa koneksi internet Anda."
-            is HttpException -> when (e.code()) {
+            is HttpException -> e.serverMessage() ?: when (e.code()) {
                 400 -> "Tanggal, daftar siswa, atau jurnal tidak valid. Pastikan tanggal sesuai hari jadwal."
                 401 -> "Sesi login Anda telah berakhir. Silakan masuk kembali."
                 403 -> "Anda tidak dapat mengisi sesi ini (jadwal mungkin dibatalkan atau diganti)."

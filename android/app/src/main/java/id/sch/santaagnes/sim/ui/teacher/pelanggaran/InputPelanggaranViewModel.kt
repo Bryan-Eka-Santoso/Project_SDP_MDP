@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.ui.teacher.pelanggaran
 
+import id.sch.santaagnes.sim.core.userMessage
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -57,7 +58,7 @@ class InputPelanggaranViewModel @Inject constructor(
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     loading = false,
-                    error = e.message ?: "Terjadi kesalahan"
+                    error = e.userMessage("Terjadi kesalahan")
                 )
             }
         }
@@ -97,7 +98,7 @@ class InputPelanggaranViewModel @Inject constructor(
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     saving = false,
-                    error = e.message ?: "Gagal menyimpan"
+                    error = e.userMessage("Gagal menyimpan")
                 )
             }
         }

@@ -1,6 +1,7 @@
 
 package id.sch.santaagnes.sim.ui.teacher.bukupenghubung
 
+import id.sch.santaagnes.sim.core.userMessage
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -62,7 +63,7 @@ class BukuPenghubungViewModel @Inject constructor(
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     loading = false,
-                    error = e.message ?: "Terjadi kesalahan"
+                    error = e.userMessage("Terjadi kesalahan")
                 )
             }
         }
@@ -105,7 +106,7 @@ class BukuPenghubungViewModel @Inject constructor(
                 if (_uiState.value.selectedClassId == classId) {
                     _uiState.value = _uiState.value.copy(
                         loading = false,
-                        error = e.message ?: "Gagal mengambil siswa"
+                        error = e.userMessage("Gagal mengambil siswa")
                     )
                 }
             }
@@ -146,8 +147,7 @@ class BukuPenghubungViewModel @Inject constructor(
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     saving = false,
-                    error = e.message
-                        ?: "Gagal menyimpan catatan"
+                    error = e.userMessage("Gagal menyimpan catatan")
                 )
             }
         }

@@ -75,6 +75,7 @@ Gagal:
 | 401 | `UNAUTHENTICATED` | Token tidak ada/tidak valid |
 | 401 | `TOKEN_EXPIRED` | Access token kedaluwarsa (Android lalu memanggil refresh) |
 | 401 | `INVALID_CREDENTIALS` | Email/password salah |
+| 401 | `SESSION_REVOKED` | Tidak ada sesi aktif lagi (password direset admin atau sudah logout) walau access token belum kedaluwarsa |
 | 403 | `ACCOUNT_BLOCKED` | Akun diblokir |
 | 403 | `FORBIDDEN` | Role tidak boleh mengakses fitur |
 | 404 | `NOT_FOUND` | Data tidak ada **atau** di luar cakupan user |
@@ -110,7 +111,12 @@ Menambah kode error baru: tambahkan ke tabel ini.
 - `GET /schedule-rooms` (admin dan guru) → `[{ id, name }]`: fasilitas bertipe `ROOM`, urut nama, tidak berpaginasi (lookup form perubahan jadwal).
 - `GET /me/teaching-assignments` (hanya guru) → `[{ id, subject: { id, code, name }, classGroup: { id, name } }]`: penugasan mengajar milik guru itu pada semester aktif, urut kelas lalu mapel. Tidak berpaginasi (daftar kecil per guru; kosong bila tidak ada semester aktif). `id`-nya dipakai sebagai `teachingAssignmentId` pada `POST /tasks`.
 - `GET /tasks`: daftar tugas (siswa kelasnya, guru yang membuat, wali murid untuk anaknya lewat `studentId` wajib; peran lain yang mengirim `studentId` ditolak `400`). Filter `dueFrom`/`dueTo` (`YYYY-MM-DD`), urut tenggat terdekat. Tiap tugas: `dueDate` (`YYYY-MM-DD`) dan `dueTime` (`HH:mm` WIB; `null` pada tugas lama). `POST /tasks` mewajibkan `dueTime`.
-- `GET /bills` (wali kelas atau admin): bila daftar dibatasi ke kelas (wali kelas, atau admin dengan `classGroupId`), `meta` memuat tambahan `studentCount` = jumlah murid di kelas itu (tidak memengaruhi `total`). Nominal pada teks notifikasi tunggakan memakai awalan `IDR`.
+- `GET /bills` (wali kelas atau admin): bila daftar dibatasi ke kelas (wali kelas, atau admin dengan `classGroupId`), `meta` memuat tambahan `studentCount` = jumlah murid di kelas itu (tidak memengaruhi `total`). `meta.totalAmount` selalu ada: jumlah nominal seluruh tagihan pada filter yang sama. Nominal pada teks notifikasi tunggakan memakai awalan `IDR`.
+
+- `GET /me/grade-teaching-assignments?includeHomeroom=true` (guru): menambahkan penugasan guru lain di kelas binaan (hanya untuk membaca nilai, presensi, dan catatan). Tiap item memuat `isOwn`, `teacherName`, dan `isHomeroomClass`. Hak input tetap hanya untuk penugasan milik sendiri.
+- Daftar slot presensi guru (`GET /me/attendance-schedule-slots`) memuat juga slot yang digantikan: `isSubstitute` dan `substituteDates` (`YYYY-MM-DD`).
+- `GET /student-subject-packages` memuat `classCount`; tidak ada lagi penolakan karena paket penuh.
+- Data peminjaman memuat `createdAt` dan `updatedAt` (dipakai sebagai waktu notifikasi di aplikasi).
 
 ## 7. Upload dan unduh
 

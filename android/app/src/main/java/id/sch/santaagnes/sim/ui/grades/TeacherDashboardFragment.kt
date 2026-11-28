@@ -1,6 +1,7 @@
 
 package id.sch.santaagnes.sim.ui.grades
 
+import id.sch.santaagnes.sim.data.repository.AttendanceRepository
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -26,7 +27,6 @@ import id.sch.santaagnes.sim.ui.home.HomeShortcut
 import id.sch.santaagnes.sim.ui.home.HomeShortcutAdapter
 import id.sch.santaagnes.sim.data.remote.BukuPenghubungApi
 import id.sch.santaagnes.sim.data.remote.BacaBukuPenghubungApi
-import id.sch.santaagnes.sim.data.remote.ProfilSiswaBinaanApi
 
 @AndroidEntryPoint
 class TeacherDashboardFragment : Fragment() {
@@ -39,7 +39,7 @@ class TeacherDashboardFragment : Fragment() {
 
     private val calendarViewModel: AcademicCalendarViewModel by viewModels()
     @Inject
-    lateinit var profilSiswaApi: ProfilSiswaBinaanApi
+    lateinit var attendanceRepository: AttendanceRepository
 
     @Inject
     lateinit var bukuPenghubungApi: BukuPenghubungApi
@@ -78,15 +78,17 @@ class TeacherDashboardFragment : Fragment() {
         binding.rvShortcuts.layoutManager = GridLayoutManager(requireContext(), SHORTCUT_COLUMNS)
         renderShortcuts()
 
-        // Menu buku penghubung dan profil siswa binaan hanya untuk guru yang punya siswa binaan.
+        // Menu buku penghubung hanya untuk guru yang punya siswa terkait.
         viewLifecycleOwner.lifecycleScope.launch {
             val canRead = hasData { bacaBukuApi.getSiswa().let { it.success && !it.data.isNullOrEmpty() } }
             val canWrite = hasData { bukuPenghubungApi.getKelas().let { it.success && !it.data.isNullOrEmpty() } }
-            val canProfile = hasData { profilSiswaApi.getSiswa().let { it.success && !it.data.isNullOrEmpty() } }
+            val canSubstitute = hasData {
+                attendanceRepository.slots(AttendanceRepository.SUBSTITUTE_SLOTS).isNotEmpty()
+            }
             if (_binding == null) return@launch
             showReadLiaison = canRead
             showWriteLiaison = canWrite
-            showHomeroomProfile = canProfile
+            showSubstituteAttendance = canSubstitute
             renderShortcuts()
         }
 
@@ -104,7 +106,8 @@ class TeacherDashboardFragment : Fragment() {
     // Menu bersyarat: dipasang setelah pengecekan ke server selesai.
     private var showWriteLiaison = false
     private var showReadLiaison = false
-    private var showHomeroomProfile = false
+    private var showHomeroomMenus = false
+    private var showSubstituteAttendance = false
 
     private suspend fun hasData(check: suspend () -> Boolean): Boolean =
         try {
@@ -134,8 +137,22 @@ class TeacherDashboardFragment : Fragment() {
         if (showReadLiaison) {
             items += HomeShortcut(R.string.shortcut_liaison_read, R.drawable.ic_book, go(R.id.teacherBacaBukuPenghubungFragment))
         }
-        if (showHomeroomProfile) {
+        if (showHomeroomMenus) {
             items += HomeShortcut(R.string.shortcut_homeroom_profile, R.drawable.ic_person, go(R.id.action_teacherHome_to_profilSiswaBinaan))
+            items += HomeShortcut(R.string.shortcut_homeroom_attendance, R.drawable.ic_location) {
+                nav.navigate(R.id.teacherAttendanceRecapFragment, bundleOf("homeroomOnly" to true))
+            }
+            items += HomeShortcut(R.string.shortcut_homeroom_notes, R.drawable.ic_book) {
+                nav.navigate(R.id.teacherProgressNotesFragment, bundleOf("assignmentId" to 0))
+            }
+        }
+        if (showSubstituteAttendance) {
+            items += HomeShortcut(R.string.shortcut_substitute_attendance, R.drawable.ic_check) {
+                nav.navigate(
+                    R.id.attendanceFragment,
+                    bundleOf("assignmentId" to AttendanceRepository.SUBSTITUTE_SLOTS, "assignmentLabel" to "")
+                )
+            }
         }
         binding.rvShortcuts.adapter = HomeShortcutAdapter(items)
     }
@@ -154,6 +171,11 @@ class TeacherDashboardFragment : Fragment() {
 
                 binding.tvTeacherName.text =
                     user?.name ?: "Guru SMAK Santa Agnes"
+
+                if (user != null && user.isHomeroomTeacher != showHomeroomMenus) {
+                    showHomeroomMenus = user.isHomeroomTeacher
+                    renderShortcuts()
+                }
 
                 // Mengambil daftar kelas yang diajar
                 val assignments = gradesRepository.assignments()

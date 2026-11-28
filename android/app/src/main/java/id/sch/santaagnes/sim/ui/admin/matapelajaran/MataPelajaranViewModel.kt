@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.ui.admin.matapelajaran
 
+import id.sch.santaagnes.sim.core.userMessage
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -62,7 +63,7 @@ class MataPelajaranViewModel @Inject constructor(
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     loading = false,
-                    error = e.message ?: "Terjadi kesalahan"
+                    error = e.userMessage("Terjadi kesalahan")
                 )
             }
         }
@@ -71,16 +72,17 @@ class MataPelajaranViewModel @Inject constructor(
     fun simpan(
         id: Int?,
         request: SimpanMataPelajaranRequest,
-        onSuccess: () -> Unit
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
     ) {
         if (_uiState.value.saving) return
 
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(
-                saving = true,
-                error = null
-            )
+        _uiState.value = _uiState.value.copy(
+            saving = true,
+            error = null
+        )
 
+        viewModelScope.launch {
             try {
                 val response = if (id == null) {
                     api.tambah(request)
@@ -103,10 +105,9 @@ class MataPelajaranViewModel @Inject constructor(
                 getMataPelajaran()
 
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    saving = false,
-                    error = e.message ?: "Gagal menyimpan"
-                )
+                _uiState.value = _uiState.value.copy(saving = false)
+                // Pesan ditampilkan di dalam dialog, bukan di layar di baliknya.
+                onError(e.userMessage("Gagal menyimpan"))
             }
         }
     }
@@ -142,7 +143,7 @@ class MataPelajaranViewModel @Inject constructor(
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     saving = false,
-                    error = e.message ?: "Gagal menghapus"
+                    error = e.userMessage("Gagal menghapus")
                 )
             }
         }

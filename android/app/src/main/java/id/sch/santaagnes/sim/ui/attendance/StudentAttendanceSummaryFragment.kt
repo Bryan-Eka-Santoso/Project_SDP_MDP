@@ -57,6 +57,7 @@ class StudentAttendanceSummaryFragment : Fragment() {
             selectedDate = null
         }
         binding.summaryProgress.isVisible = state.loading
+        state.childName?.let { binding.tvAttendanceSubtitle.text = getString(R.string.attendance_child_subtitle, it) }
         binding.tvAttendanceError.isVisible = state.error != null
         binding.btnAttendanceRetry.isVisible = state.error != null
         binding.tvAttendanceError.text = state.error.orEmpty()

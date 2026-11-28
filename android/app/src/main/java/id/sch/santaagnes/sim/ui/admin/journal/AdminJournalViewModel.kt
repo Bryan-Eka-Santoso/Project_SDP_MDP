@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.ui.admin.journal
 
+import id.sch.santaagnes.sim.core.serverMessage
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -124,7 +125,7 @@ class AdminJournalViewModel @Inject constructor(
             } catch (e: Exception) {
                 val message = when (e) {
                     is IOException -> "Tidak dapat menghubungi server. Periksa koneksi internet Anda."
-                    is HttpException -> when (e.code()) {
+                    is HttpException -> e.serverMessage() ?: when (e.code()) {
                         401 -> "Sesi login Anda telah berakhir. Silakan login kembali."
                         403 -> "Halaman ini hanya dapat diakses oleh Admin."
                         else -> "Gagal memuat jurnal mengajar. Silakan coba lagi."

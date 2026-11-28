@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.ui.admin.survei
 
+import id.sch.santaagnes.sim.core.userMessage
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -52,20 +53,36 @@ class SurveiMinatViewModel @Inject constructor(
         }
     }
 
-    fun create(body: BuatSurveiRequest) = viewModelScope.launch {
-        execute {
-            val response = api.create(body)
+    // Ketukan ganda pada "Simpan Draft" tidak boleh membuat dua survei.
+    private var menyimpan = false
 
-            check(response.success) {
-                response.error?.message ?: "Gagal membuat survei"
+    fun create(
+        body: BuatSurveiRequest,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        if (menyimpan) return
+        menyimpan = true
+        viewModelScope.launch {
+            try {
+                val response = api.create(body)
+
+                check(response.success) {
+                    response.error?.message ?: "Gagal membuat survei"
+                }
+
+                onSuccess()
+                _state.value = _state.value.copy(
+                    message = "Draft survei berhasil dibuat"
+                )
+                refresh()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                onError(e.userMessage("Gagal membuat survei"))
+            } finally {
+                menyimpan = false
             }
-
-            val result = api.list()
-
-            _state.value = _state.value.copy(
-                surveys = result.data.orEmpty(),
-                message = "Draft survei berhasil dibuat"
-            )
         }
     }
 
@@ -149,7 +166,7 @@ class SurveiMinatViewModel @Inject constructor(
             throw e
         } catch (e: Exception) {
             _state.value = _state.value.copy(
-                error = e.message ?: "Terjadi kesalahan"
+                error = e.userMessage("Terjadi kesalahan")
             )
         } finally {
             _state.value = _state.value.copy(

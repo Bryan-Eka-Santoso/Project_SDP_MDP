@@ -296,17 +296,17 @@
 
     <!-- Laporan admin (F-LAP-05, F-LAP-07, F-LAP-09, F-LAP-10, F-LAP-11) -->
     <string name="report_hub_title">Laporan</string>
-    <string name="report_hub_hint">Pilih laporan untuk melihat pratinjau, grafik, dan ekspor Excel.</string>
+    <string name="report_hub_hint">Laporan memakai data semester aktif. Pilih laporan untuk melihat pratinjau, grafik, dan ekspor Excel.</string>
     <string name="report_tile_grades">Nilai Siswa</string>
     <string name="report_tile_attendance">Kehadiran</string>
     <string name="report_tile_violations">Pelanggaran</string>
     <string name="report_tile_bookings">Peminjaman</string>
-    <string name="report_tile_payments">Pembayaran</string>
+    <string name="report_tile_payments">Status Pembayaran</string>
     <string name="report_tile_journals">Jurnal</string>
-    <string name="report_tile_schedule_changes">Ubah Jadwal</string>
+    <string name="report_tile_schedule_changes">Perubahan Jadwal</string>
     <string name="report_tile_surveys">Survei Mapel</string>
-    <string name="report_tile_teaching_load">Beban Guru</string>
-    <string name="report_tile_student_stats">Kesiswaan</string>
+    <string name="report_tile_teaching_load">Beban Mengajar Guru</string>
+    <string name="report_tile_student_stats">Statistik Kesiswaan</string>
     <string name="report_tile_journal_monitor">Pantau Jurnal</string>
     <string name="report_schedule_changes_title">Perubahan Jadwal</string>
     <string name="report_schedule_changes_desc">Penggantian guru, pemindahan jadwal, dan pembatalan, lengkap dengan jam dan ruangan semula.</string>
@@ -667,4 +667,46 @@
     <string name="shortcut_liaison_read">Baca Buku</string>
     <string name="shortcut_homeroom_profile">Profil Binaan</string>
     <string name="home_shortcut_subject_package">Pilih Paket</string>
+    <!-- Validasi form peminjaman -->
+    <string name="booking_error_facility">Pilih fasilitas terlebih dahulu</string>
+    <string name="booking_error_date_empty">Pilih tanggal</string>
+    <string name="booking_error_date_past">Tanggal peminjaman tidak boleh sudah lewat</string>
+    <string name="booking_error_start_empty">Pilih jam mulai</string>
+    <string name="booking_error_start_past">Jam mulai sudah lewat</string>
+    <string name="booking_error_end_empty">Pilih jam selesai</string>
+    <string name="booking_error_end_order">Jam selesai harus setelah jam mulai</string>
+    <string name="booking_error_purpose">Keperluan harus 5 sampai 255 karakter</string>
+    <string name="grade_weight_warning">Total bobot harus 100%% (saat ini %1$d%%). Atur komponen nilai sebelum mengisi nilai.</string>
+    <!-- Paket mata pelajaran pilihan -->
+    <string name="elective_package_applicants">Peminat: %1$d siswa</string>
+    <string name="elective_package_class_size">Maksimal %1$d siswa per kelas · perkiraan %2$d kelas</string>
+    <string name="survey_status_closed">Ditutup</string>
+    <string name="survey_closed">Survei sudah ditutup</string>
+    <!-- Presensi: guru pengganti, rekap wali murid -->
+    <string name="attendance_substitute_subtitle">Mengajar sebagai guru pengganti</string>
+    <string name="attendance_substitute_slot">Pengganti • %1$s</string>
+    <string name="attendance_child_subtitle">Rekap presensi %1$s</string>
+    <!-- Rekap presensi kelas dan menu wali kelas -->
+    <string name="attendance_recap_title">Rekap Presensi</string>
+    <string name="attendance_recap_subtitle">Jumlah kehadiran per siswa pada semester aktif</string>
+    <string name="attendance_recap_start">Dari tanggal</string>
+    <string name="attendance_recap_end">Sampai tanggal</string>
+    <string name="attendance_recap_all_dates">Tampilkan semua tanggal</string>
+    <string name="attendance_recap_no_class">Belum ada kelas pada semester aktif.</string>
+    <string name="attendance_recap_no_student">Belum ada siswa pada kelas ini.</string>
+    <string name="attendance_recap_student">%1$s (%2$s)</string>
+    <string name="attendance_recap_counts">Hadir %1$d · Sakit %2$d · Izin %3$d · Alpa %4$d</string>
+    <string name="attendance_recap_retry">Coba lagi</string>
+    <string name="progress_homeroom_title">Catatan Siswa Binaan</string>
+    <string name="progress_homeroom_subtitle">Catatan semua mata pelajaran kelas perwalian</string>
+    <string name="shortcut_homeroom_attendance">Presensi Binaan</string>
+    <string name="shortcut_homeroom_notes">Catatan Binaan</string>
+    <string name="shortcut_substitute_attendance">Presensi Pengganti</string>
+    <string name="attendance_recap_button">Rekap</string>
+    <string name="schedule_substitute_teacher">Guru pengganti: %1$s</string>
+    <string name="bill_summary_amount">Total tagihan: %1$s</string>
+    <string name="bill_all_classes">Semua kelas</string>
+    <string name="task_status_pending">Belum selesai</string>
+    <string name="todo_edit_title">Ubah judul pengingat</string>
+    <string name="todo_error_title_invalid">Judul wajib diisi, paling panjang 150 karakter.</string>
 </resources>

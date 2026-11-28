@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="@color/agnesian_background">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:background="@drawable/bg_header" android:orientation="vertical"
+        android:paddingStart="24dp" android:paddingEnd="24dp" android:paddingTop="24dp" android:paddingBottom="30dp">
+        <TextView android:id="@+id/btnRecapBack" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:minHeight="44dp" android:gravity="center_vertical" android:clickable="true" android:focusable="true"
+            android:text="@string/back_previous" android:drawableStart="@drawable/ic_arrow_back"
+            android:drawablePadding="8dp" android:textStyle="bold" android:textColor="@color/white" android:textSize="15sp" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="@string/attendance_recap_title" android:textColor="@color/white"
+            android:textSize="23sp" android:textStyle="bold" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="6dp" android:text="@string/attendance_recap_subtitle"
+            android:textColor="@color/white" android:textSize="12sp" />
+    </LinearLayout>
+
+    <ProgressBar android:id="@+id/progressRecap" style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:indeterminate="true" android:visibility="gone" />
+
+    <ScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:padding="16dp">
+            <Spinner android:id="@+id/spinnerRecapAssignment" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:minHeight="48dp" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" android:orientation="horizontal">
+                <Button android:id="@+id/btnRecapStart" android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:layout_marginEnd="4dp" android:textAllCaps="false" />
+                <Button android:id="@+id/btnRecapEnd" android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:layout_marginStart="4dp" android:textAllCaps="false" />
+            </LinearLayout>
+            <Button android:id="@+id/btnRecapAllDates" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="@string/attendance_recap_all_dates" android:textAllCaps="false" android:visibility="gone" />
+            <TextView android:id="@+id/tvRecapStatus" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="12dp" android:textColor="@color/agnesian_muted" android:textSize="13sp"
+                android:visibility="gone" />
+            <LinearLayout android:id="@+id/listRecap" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" android:orientation="vertical" />
+            <Button android:id="@+id/btnRecapRetry" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="@string/attendance_recap_retry" android:textAllCaps="false" android:visibility="gone" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

@@ -1,6 +1,7 @@
 
 package id.sch.santaagnes.sim.ui.peminjaman
 
+import id.sch.santaagnes.sim.core.userMessage
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -94,7 +95,7 @@ class RiwayatPeminjamanViewModel @Inject constructor(
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     loading = false,
-                    error = e.message ?: "Terjadi kesalahan"
+                    error = e.userMessage("Terjadi kesalahan")
                 )
             }
         }

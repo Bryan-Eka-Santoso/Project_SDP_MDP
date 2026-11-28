@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.ui.teacher.profilsiswa
 
+import id.sch.santaagnes.sim.core.userMessage
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -77,8 +78,7 @@ class ProfilSiswaBinaanViewModel @Inject constructor(
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     loading = false,
-                    error = e.message
-                        ?: "Gagal memuat siswa"
+                    error = e.userMessage("Gagal memuat siswa")
                 )
             }
         }
@@ -126,8 +126,7 @@ class ProfilSiswaBinaanViewModel @Inject constructor(
                 if (_uiState.value.selectedStudentId == studentId) {
                     _uiState.value = _uiState.value.copy(
                         loading = false,
-                        error = e.message
-                            ?: "Gagal mengambil profil siswa"
+                        error = e.userMessage("Gagal mengambil profil siswa")
                     )
                 }
             }

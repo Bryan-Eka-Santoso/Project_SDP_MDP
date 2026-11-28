@@ -266,6 +266,32 @@ async function deleteClass(id) {
 // ==========================================
 
 /**
+ * Cakupan data daftar siswa (docs/PERMISSIONS.md): admin semua kelas; guru hanya kelas yang
+ * diajarnya pada semester aktif atau kelas binaannya pada tahun ajaran aktif.
+ */
+async function assertCanViewMembers(user, classGroupId) {
+  if (user.role === 'ADMIN') return;
+  const allowed = await prisma.classGroup.findFirst({
+    where: {
+      id: classGroupId,
+      OR: [
+        { homeroomTeacher: { userId: user.id }, academicYear: { isActive: true } },
+        {
+          teachingAssignments: {
+            some: { teacher: { userId: user.id }, semester: { isActive: true } },
+          },
+        },
+      ],
+    },
+    select: { id: true },
+  });
+  // 404, bukan 403: keberadaan data siswa kelas lain tidak boleh bocor.
+  if (!allowed) {
+    throw new AppError(404, 'NOT_FOUND', 'Kelas tidak ditemukan.');
+  }
+}
+
+/**
  * Mengambil daftar siswa dalam kelas.
  */
 async function listClassMembers(classGroupId) {
@@ -447,6 +473,7 @@ module.exports = {
   updateClass,
   setHomeroomTeacher,
   deleteClass,
+  assertCanViewMembers,
   listClassMembers,
   addClassMembers,
   moveClassMember,

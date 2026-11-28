@@ -69,7 +69,7 @@ Tanda `—` berarti tidak punya akses (backend mengembalikan 403).
 
 ## Aturan tambahan
 
-- Akun `BLOCKED` ditolak saat login dan saat refresh token.
+- Akun `BLOCKED` ditolak saat login, saat refresh token, dan di setiap request ber-token. Setelah password direset admin, access token lama langsung ditolak (`401 SESSION_REVOKED`).
 - Guru pengganti mendapat hak input presensi + jurnal **hanya** untuk sesi pada tanggal penggantian tersebut.
 - Data yang tidak boleh diakses dikembalikan sebagai **404** jika keberadaannya sendiri sensitif (mis. siswa kelas lain), atau **403** untuk fitur yang tidak boleh diakses role tersebut. Lihat `docs/API_CONVENTIONS.md`.
 - Admin tidak menginput nilai, komponen penilaian, presensi, atau pelanggaran. Admin memantau lewat laporan.

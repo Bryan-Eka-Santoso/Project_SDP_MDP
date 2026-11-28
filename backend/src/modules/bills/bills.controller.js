@@ -11,8 +11,8 @@ async function listStudentBills(req, res) {
 
 async function listBills(req, res) {
   const query = req.validated.query;
-  const { items, total, studentCount } = await billsService.listBills(req.user, query);
-  sendPaginated(res, items, { page: query.page, limit: query.limit, total, studentCount });
+  const { items, total, studentCount, totalAmount } = await billsService.listBills(req.user, query);
+  sendPaginated(res, items, { page: query.page, limit: query.limit, total, studentCount, totalAmount });
 }
 
 async function importBills(req, res) {

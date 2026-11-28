@@ -111,7 +111,7 @@ async function listBills(user, { page, limit, classGroupId, q, ...filters }) {
     ? prisma.student.count({ where: { classMemberships: { some: { classGroupId: { in: classIds } } } } })
     : Promise.resolve(undefined);
 
-  const [rows, total, studentCount] = await Promise.all([
+  const [rows, total, studentCount, sum] = await Promise.all([
     prisma.bill.findMany({
       where,
       select: studentBillSelect,
@@ -120,10 +120,12 @@ async function listBills(user, { page, limit, classGroupId, q, ...filters }) {
     }),
     prisma.bill.count({ where }),
     studentCountPromise,
+    // Total seluruh tagihan pada filter ini (bukan hanya halaman yang tampil).
+    prisma.bill.aggregate({ where, _sum: { amount: true } }),
   ]);
 
   const items = rows.map((row) => toStudentBillDto(row, today));
-  return { items, total, studentCount };
+  return { items, total, studentCount, totalAmount: Number(sum._sum.amount ?? 0) };
 }
 
 module.exports = { listStudentBills, listBills, toBillDto, billFilters, studentBillSelect, toStudentBillDto };

@@ -41,6 +41,16 @@
                 tools:text="Latihan Bab 3" />
 
             <TextView
+                android:id="@+id/tvStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textColor="@color/agnesian_muted"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                tools:text="Belum selesai" />
+
+            <TextView
                 android:id="@+id/tvDue"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

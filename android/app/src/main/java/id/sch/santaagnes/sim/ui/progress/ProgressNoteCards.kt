@@ -11,6 +11,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+// teacher = judul kartu memakai nama siswa; hanya kartu dengan click yang bisa diubah.
 internal fun addProgressNoteCard(container: LinearLayout, note: ProgressNoteDto, teacher: Boolean, click: (() -> Unit)? = null) {
     val context = container.context
     val density = context.resources.displayMetrics.density
@@ -40,7 +41,7 @@ internal fun addProgressNoteCard(container: LinearLayout, note: ProgressNoteDto,
     val readable = runCatching { LocalDate.parse(note.date).format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale("id", "ID"))) }.getOrDefault(note.date)
     line(readable, small = true)
     line(note.content)
-    if (teacher) line("Ketuk untuk mengedit", small = true)
+    if (click != null) line("Ketuk untuk mengedit", small = true)
     card.addView(column)
     container.addView(card)
 }

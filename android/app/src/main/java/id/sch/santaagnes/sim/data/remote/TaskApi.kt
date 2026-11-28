@@ -24,7 +24,8 @@ data class TaskDto(
     val dueDate: String,
     // "HH:mm" WIB; null pada tugas lama sebelum jam tenggat ada
     val dueTime: String?,
-    val teachingAssignment: TaskTeachingAssignmentDto
+    val teachingAssignment: TaskTeachingAssignmentDto,
+    val createdAt: String? = null
 )
 
 /** Penugasan mengajar milik guru yang masuk, untuk memilih kelas + mapel saat membuat tugas. */

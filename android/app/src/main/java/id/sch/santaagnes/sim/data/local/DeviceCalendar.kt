@@ -36,6 +36,9 @@ interface DeviceCalendar {
 
     suspend fun insert(calendarId: Long, entry: CalendarEntry): Long?
 
+    /** Id yang event-nya masih ada di kalender; bila pemeriksaan gagal, semua dianggap masih ada. */
+    suspend fun existingEventIds(ids: Collection<Long>): Set<Long>
+
     /** False bila event sudah tidak ada (mis. dihapus pengguna dari aplikasi Kalender). */
     suspend fun update(eventId: Long, entry: CalendarEntry): Boolean
 
@@ -91,6 +94,23 @@ class ContentResolverDeviceCalendar @Inject constructor(
             val values = entry.toValues().apply { put(CalendarContract.Events.CALENDAR_ID, calendarId) }
             resolver.insert(CalendarContract.Events.CONTENT_URI, values)?.let { ContentUris.parseId(it) }
         }.getOrNull()
+    }
+
+    override suspend fun existingEventIds(ids: Collection<Long>): Set<Long> = withContext(Dispatchers.IO) {
+        if (ids.isEmpty()) return@withContext emptySet()
+        runCatching {
+            // Event yang dihapus pengguna dari akun Google masih ada barisnya dengan DELETED = 1 sampai tersinkron.
+            val selection = "${CalendarContract.Events._ID} IN (${ids.joinToString(",")}) AND " +
+                "${CalendarContract.Events.DELETED} = 0"
+            val cursor = resolver.query(
+                CalendarContract.Events.CONTENT_URI,
+                arrayOf(CalendarContract.Events._ID),
+                selection, null, null
+            ) ?: return@runCatching ids.toSet()
+            cursor.use { c ->
+                buildSet { while (c.moveToNext()) add(c.getLong(0)) }
+            }
+        }.getOrDefault(ids.toSet())
     }
 
     override suspend fun update(eventId: Long, entry: CalendarEntry): Boolean = withContext(Dispatchers.IO) {

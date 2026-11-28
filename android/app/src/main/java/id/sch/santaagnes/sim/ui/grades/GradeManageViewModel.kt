@@ -29,12 +29,13 @@ class GradeManageViewModel @Inject constructor(private val repository: GradesRep
 
     fun createAssessment(componentId: Int, title: String) {
         val id = _uiState.value.selectedAssignmentId ?: return
+        if (_uiState.value.isLoading) return
         if (title.isBlank() || title.length > 80) {
             _uiState.value = _uiState.value.copy(errorMessage = "Nama penilaian wajib diisi (maks. 80 karakter).")
             return
         }
+        _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null, message = null)
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null, message = null)
             try {
                 repository.createAssessment(id, componentId, title.trim())
                 val assessments = repository.assessments(id)
@@ -46,13 +47,18 @@ class GradeManageViewModel @Inject constructor(private val repository: GradesRep
 
     fun saveAssessmentScore(assessmentId: Int, studentId: Int, input: String) {
         val id = _uiState.value.selectedAssignmentId ?: return
+        if (_uiState.value.isLoading) return
+        if (_uiState.value.totalWeight != 100) {
+            _uiState.value = _uiState.value.copy(errorMessage = MESSAGE_WEIGHT_NOT_100)
+            return
+        }
         val value = input.replace(',', '.').toDoubleOrNull()
         if (value == null || value !in 0.0..100.0 || kotlin.math.abs(value * 100 - kotlin.math.round(value * 100)) > 0.00001) {
             _uiState.value = _uiState.value.copy(errorMessage = "Nilai harus 0–100 (maksimal dua desimal).")
             return
         }
+        _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null, message = null)
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null, message = null)
             try {
                 repository.saveAssessmentScore(assessmentId, studentId, value)
                 val assessments = repository.assessments(id)
@@ -65,9 +71,10 @@ class GradeManageViewModel @Inject constructor(private val repository: GradesRep
 
     fun saveComponent(componentId: Int?, name: String, weightText: String) {
         val id = _uiState.value.selectedAssignmentId ?: return
+        if (_uiState.value.isLoading) return
         val weight = weightText.toIntOrNull()
         if (name.isBlank() || weight == null || weight !in 1..100) {
-            _uiState.value = _uiState.value.copy(errorMessage = "Nama dan bobot 1â€“100 wajib diisi.")
+            _uiState.value = _uiState.value.copy(errorMessage = "Nama dan bobot 1–100 wajib diisi.")
             return
         }
         val components = _uiState.value.components
@@ -90,8 +97,8 @@ class GradeManageViewModel @Inject constructor(private val repository: GradesRep
             _uiState.value = _uiState.value.copy(errorMessage = "Nama komponen sudah digunakan.")
             return
         }
+        _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null, message = null)
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null, message = null)
             try {
                 repository.saveComponent(id, componentId, cleaned, weight)
                 val components = repository.components(id)
@@ -103,8 +110,9 @@ class GradeManageViewModel @Inject constructor(private val repository: GradesRep
 
     fun saveScores(studentId: Int, values: Map<Int, String>) {
         val id = _uiState.value.selectedAssignmentId ?: return
+        if (_uiState.value.isLoading) return
         if (_uiState.value.totalWeight != 100) {
-            _uiState.value = _uiState.value.copy(errorMessage = "Total bobot harus 100% untuk menyimpan nilai.")
+            _uiState.value = _uiState.value.copy(errorMessage = MESSAGE_WEIGHT_NOT_100)
             return
         }
         // Tugas/Ulangan disimpan via detail penilaian, bukan melalui endpoint score langsung.
@@ -118,13 +126,13 @@ class GradeManageViewModel @Inject constructor(private val repository: GradesRep
         for ((componentId, input) in nonblank) {
             val value = input.replace(',', '.').toDoubleOrNull()
             if (value == null || value !in 0.0..100.0 || kotlin.math.abs(value * 100 - kotlin.math.round(value * 100)) > 0.00001) {
-                _uiState.value = _uiState.value.copy(errorMessage = "Nilai harus 0â€“100, maksimal dua angka desimal.")
+                _uiState.value = _uiState.value.copy(errorMessage = "Nilai harus 0–100, maksimal dua angka desimal.")
                 return
             }
             parsed[componentId] = value
         }
+        _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null, message = null)
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null, message = null)
             try {
                 // Setiap komponen disimpan melalui endpoint upsert yang sama.
                 for ((componentId, value) in parsed) repository.saveScore(id, studentId, componentId, value)
@@ -133,6 +141,10 @@ class GradeManageViewModel @Inject constructor(private val repository: GradesRep
             } catch (e: CancellationException) { throw e }
             catch (e: Exception) { showError(e) }
         }
+    }
+
+    private companion object {
+        const val MESSAGE_WEIGHT_NOT_100 = "Total bobot harus 100% untuk menyimpan nilai."
     }
 
     private fun showError(e: Exception) {

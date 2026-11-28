@@ -52,6 +52,7 @@ fun dueColor(context: Context, date: LocalDate, time: LocalTime?, active: Boolea
 class StudentTaskAdapter(
     private val onTaskDone: (taskId: Int, done: Boolean) -> Unit,
     private val onTodoCompleted: (todoId: Long, completed: Boolean) -> Unit,
+    private val onTodoEdit: (Todo) -> Unit,
     private val onTodoDelete: (Todo) -> Unit
 ) : ListAdapter<StudentTaskItem, RecyclerView.ViewHolder>(DiffCallback) {
 
@@ -74,7 +75,8 @@ class StudentTaskAdapter(
         when (val item = getItem(position)) {
             is StudentTaskItem.SubjectHeader -> (holder as HeaderHolder).bind(item)
             is StudentTaskItem.TeacherTask -> (holder as TaskHolder).bind(item.row, onTaskDone)
-            is StudentTaskItem.Reminder -> (holder as ReminderHolder).bind(item.todo, onTodoCompleted, onTodoDelete)
+            is StudentTaskItem.Reminder ->
+                (holder as ReminderHolder).bind(item.todo, onTodoCompleted, onTodoEdit, onTodoDelete)
         }
     }
 
@@ -90,6 +92,10 @@ class StudentTaskAdapter(
             val task = row.task
             binding.tvTitle.text = task.title
             strike(binding.tvTitle, row.done)
+            binding.tvStatus.setText(if (row.done) R.string.todo_done else R.string.task_status_pending)
+            binding.tvStatus.setTextColor(
+                ContextCompat.getColor(context, if (row.done) R.color.bill_paid else R.color.agnesian_muted)
+            )
             binding.tvDue.text = context.getString(
                 R.string.task_due_with_countdown,
                 dueDateText(context, task.dueDate, task.dueTime),
@@ -106,7 +112,12 @@ class StudentTaskAdapter(
     }
 
     private class ReminderHolder(private val binding: ItemTodoBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(todo: Todo, onCompleted: (Long, Boolean) -> Unit, onDelete: (Todo) -> Unit) {
+        fun bind(
+            todo: Todo,
+            onCompleted: (Long, Boolean) -> Unit,
+            onEdit: (Todo) -> Unit,
+            onDelete: (Todo) -> Unit
+        ) {
             val context = binding.root.context
             binding.tvTitle.text = todo.title
             strike(binding.tvTitle, todo.isCompleted)
@@ -128,6 +139,7 @@ class StudentTaskAdapter(
             binding.cbDone.setOnCheckedChangeListener(null)
             binding.cbDone.isChecked = todo.isCompleted
             binding.cbDone.setOnCheckedChangeListener { _, checked -> onCompleted(todo.id, checked) }
+            binding.btnEdit.setOnClickListener { onEdit(todo) }
             binding.btnDelete.setOnClickListener { onDelete(todo) }
         }
     }

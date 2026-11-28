@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.ui.student.paket
 
+import id.sch.santaagnes.sim.core.userMessage
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -59,7 +60,7 @@ class PilihPaketViewModel @Inject constructor(
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     loading = false,
-                    error = e.message ?: "Terjadi kesalahan."
+                    error = e.userMessage("Terjadi kesalahan.")
                 )
             }
         }
@@ -74,9 +75,7 @@ class PilihPaketViewModel @Inject constructor(
             it.id == packageId
         } ?: return
 
-        if (paket.isSelected || paket.remainingCapacity <= 0) {
-            return
-        }
+        if (paket.isSelected) return
 
         viewModelScope.launch {
             _state.value = _state.value.copy(
@@ -108,7 +107,7 @@ class PilihPaketViewModel @Inject constructor(
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     saving = false,
-                    error = e.message ?: "Gagal menyimpan pilihan."
+                    error = e.userMessage("Gagal menyimpan pilihan.")
                 )
             }
         }

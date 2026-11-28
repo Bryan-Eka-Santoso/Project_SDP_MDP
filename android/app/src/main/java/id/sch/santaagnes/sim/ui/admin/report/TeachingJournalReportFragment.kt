@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.ui.admin.report
 
+import id.sch.santaagnes.sim.core.setLoading
 import android.os.Bundle
 import android.app.DatePickerDialog
 import android.view.LayoutInflater
@@ -56,7 +57,7 @@ class TeachingJournalReportFragment : Fragment() {
         binding.btnLoadMore.setOnClickListener { vm.loadMore() }
         binding.btnExport.setOnClickListener {
             val state = vm.state.value
-            val fileName = "laporan-jurnal-mengajar-${DateTimeWib.today()}.xlsx"
+            val fileName = "laporan-teaching-journals-${DateTimeWib.today()}.xlsx"
             val filters = buildList {
                 state.classGroupId?.let { id ->
                     state.classOptions.firstOrNull { it.id == id }?.name?.let { add("Kelas: $it") }
@@ -109,8 +110,8 @@ class TeachingJournalReportFragment : Fragment() {
     }
 
     private fun render(state: TeachingJournalReportState) {
-        binding.progress.isVisible = state.loading || state.exporting
-        binding.btnExport.isEnabled = !state.exporting
+        binding.progress.isVisible = state.loading
+        binding.btnExport.setLoading(state.exporting)
         binding.btnRefresh.isEnabled = !state.loading
         val from = state.dateFrom
         val to = state.dateTo

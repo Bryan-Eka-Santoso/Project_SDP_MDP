@@ -19,14 +19,23 @@ function clock(value) {
   return value.toISOString().slice(11, 16).replace(':', '.');
 }
 
-async function assignments(userId) {
+// Cakupan baca (docs/PERMISSIONS.md): penugasan sendiri, plus semua mapel kelas binaan.
+const readableBy = (userId) => ({
+  OR: [{ teacher: { userId } }, { classGroup: { homeroomTeacher: { userId } } }],
+});
+
+async function assignments(userId, { includeHomeroom = false } = {}) {
   const rows = await prisma.teachingAssignment.findMany({
-    where: { teacher: { userId }, semester: { isActive: true } },
+    where: {
+      semester: { isActive: true },
+      ...(includeHomeroom ? readableBy(userId) : { teacher: { userId } }),
+    },
     select: {
       id: true,
+      teacher: { select: { userId: true, user: { select: { name: true } } } },
       classGroupId: true,
       subject: { select: { name: true } },
-      classGroup: { select: { name: true } },
+      classGroup: { select: { name: true, homeroomTeacher: { select: { userId: true } } } },
       semester: { select: { type: true } },
       scheduleSlots: {
         select: { id: true, dayOfWeek: true, startTime: true, endTime: true },
@@ -52,6 +61,9 @@ async function assignments(userId) {
     return {
       id: row.id,
       classGroupId: row.classGroupId,
+      isOwn: row.teacher ? row.teacher.userId === userId : true,
+      teacherName: row.teacher?.user.name ?? null,
+      isHomeroomClass: row.classGroup.homeroomTeacher?.userId === userId,
       subjectName: row.subject.name,
       className: row.classGroup.name,
       semesterName,
@@ -64,7 +76,7 @@ async function assignments(userId) {
 
 async function students(userId, assignmentId) {
   const assignment = await prisma.teachingAssignment.findFirst({
-    where: { id: assignmentId, teacher: { userId }, semester: { isActive: true } },
+    where: { id: assignmentId, semester: { isActive: true }, ...readableBy(userId) },
     select: { classGroupId: true },
   });
   if (!assignment) throw new AppError(404, 'NOT_FOUND', 'Penugasan tidak ditemukan.');

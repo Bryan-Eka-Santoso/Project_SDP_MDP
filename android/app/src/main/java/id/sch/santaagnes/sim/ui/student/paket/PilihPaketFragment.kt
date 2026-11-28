@@ -167,19 +167,11 @@ class PilihPaketFragment : Fragment() {
             )
 
             content.addView(
-                makeText(
-                    "Terisi: ${paket.selectionCount}/${paket.capacity}",
-                    13f,
-                    true
-                )
+                makeText(getString(R.string.elective_package_applicants, paket.selectionCount), 13f, true)
             )
 
             content.addView(
-                makeText(
-                    "Sisa kapasitas: ${paket.remainingCapacity}",
-                    13f,
-                    true
-                )
+                makeText(getString(R.string.elective_package_class_size, paket.capacity, paket.classCount), 13f)
             )
 
             content.addView(
@@ -197,7 +189,6 @@ class PilihPaketFragment : Fragment() {
             val button = MaterialButton(requireContext()).apply {
                 text = when {
                     paket.isSelected -> "✓ Paket Dipilih"
-                    paket.remainingCapacity <= 0 -> "Paket Penuh"
                     else -> "Pilih Paket"
                 }
 
@@ -210,7 +201,7 @@ class PilihPaketFragment : Fragment() {
                     isEnabled = true
                     isClickable = false
                 } else {
-                    isEnabled = !busy && paket.remainingCapacity > 0
+                    isEnabled = !busy
                     setOnClickListener {
                         konfirmasiPaket(paket)
                     }

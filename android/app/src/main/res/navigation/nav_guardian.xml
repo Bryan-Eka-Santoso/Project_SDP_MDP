@@ -46,6 +46,10 @@
         android:name="id.sch.santaagnes.sim.ui.profile.ProfileFragment" />
 
     <fragment
+        android:id="@+id/guardianAttendanceSummaryFragment"
+        android:name="id.sch.santaagnes.sim.ui.attendance.StudentAttendanceSummaryFragment" />
+
+    <fragment
         android:id="@+id/guardianBacaBukuPenghubungFragment"
         android:name="id.sch.santaagnes.sim.ui.bukupenghubung.BacaBukuPenghubungFragment"
         android:label="Buku Penghubung Anak" />

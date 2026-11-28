@@ -12,7 +12,9 @@ data class PageResult<T>(
     // jumlah seluruh data di server (meta.total), untuk baris "Total: N"; null bila tidak diketahui
     val total: Int? = null,
     // jumlah murid di kelas (hanya daftar tagihan wali kelas)
-    val studentCount: Int? = null
+    val studentCount: Int? = null,
+    // jumlah nominal seluruh tagihan yang cocok (daftar tagihan lintas siswa)
+    val totalAmount: Long? = null
 )
 
 /** Slot jadwal mingguan pada master jadwal. */

@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.ui.admin.report
 
+import id.sch.santaagnes.sim.core.setLoading
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -54,7 +55,7 @@ class GradesAdminReportFragment : Fragment() {
         binding.btnLoadMore.setOnClickListener { vm.loadMore() }
         binding.btnExport.setOnClickListener {
             val state = vm.state.value
-            val fileName = "laporan-nilai-${DateTimeWib.today()}.xlsx"
+            val fileName = "laporan-grades-${DateTimeWib.today()}.xlsx"
             val className = state.classGroupId?.let { id ->
                 state.classOptions.firstOrNull { it.id == id }?.name
             }
@@ -92,8 +93,8 @@ class GradesAdminReportFragment : Fragment() {
     }
 
     private fun render(state: GradesAdminReportState) {
-        binding.progress.isVisible = state.loading || state.exporting
-        binding.btnExport.isEnabled = !state.exporting
+        binding.progress.isVisible = state.loading
+        binding.btnExport.setLoading(state.exporting)
         binding.btnRefresh.isEnabled = !state.loading
         binding.btnLoadMore.isVisible = state.hasMore && !state.loading
         binding.tvError.isVisible = state.error != null

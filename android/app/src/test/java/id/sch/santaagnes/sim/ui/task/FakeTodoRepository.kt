@@ -25,6 +25,10 @@ class FakeTodoRepository : TodoRepository {
         todos.value = todos.value.map { if (it.id == todoId) it.copy(isCompleted = completed) else it }
     }
 
+    override suspend fun rename(todoId: Long, title: String) {
+        todos.value = todos.value.map { if (it.id == todoId) it.copy(title = title) else it }
+    }
+
     override suspend fun delete(todoId: Long) {
         todos.value = todos.value.filterNot { it.id == todoId }
     }

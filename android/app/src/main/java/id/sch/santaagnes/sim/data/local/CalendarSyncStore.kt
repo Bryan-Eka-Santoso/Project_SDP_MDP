@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.data.local
 
+import id.sch.santaagnes.sim.domain.model.CalendarSyncResult
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
@@ -26,6 +27,8 @@ interface CalendarSyncStore {
     suspend fun calendarLabel(userId: Int): String?
     suspend fun refs(userId: Int): Map<String, SyncedRef>
     suspend fun lastSyncMillis(userId: Int): Long?
+    suspend fun lastResult(userId: Int): CalendarSyncResult?
+    suspend fun saveLastResult(userId: Int, result: CalendarSyncResult)
     suspend fun saveSync(
         userId: Int,
         calendarId: Long,
@@ -50,6 +53,7 @@ class DataStoreCalendarSyncStore @Inject constructor(
     private fun calendarLabelKey(userId: Int) = stringPreferencesKey("calendar_label_$userId")
     private fun refsKey(userId: Int) = stringPreferencesKey("refs_$userId")
     private fun lastSyncKey(userId: Int) = longPreferencesKey("last_sync_$userId")
+    private fun lastResultKey(userId: Int) = stringPreferencesKey("last_result_$userId")
 
     private suspend fun snapshot() = context.calendarSyncDataStore.data.first()
 
@@ -79,6 +83,15 @@ class DataStoreCalendarSyncStore @Inject constructor(
 
     override suspend fun lastSyncMillis(userId: Int): Long? = snapshot()[lastSyncKey(userId)]
 
+    override suspend fun lastResult(userId: Int): CalendarSyncResult? {
+        val json = snapshot()[lastResultKey(userId)] ?: return null
+        return runCatching { gson.fromJson(json, CalendarSyncResult::class.java) }.getOrNull()
+    }
+
+    override suspend fun saveLastResult(userId: Int, result: CalendarSyncResult) {
+        context.calendarSyncDataStore.edit { it[lastResultKey(userId)] = gson.toJson(result) }
+    }
+
     override suspend fun saveSync(
         userId: Int,
         calendarId: Long,
@@ -102,6 +115,7 @@ class DataStoreCalendarSyncStore @Inject constructor(
             it.remove(calendarLabelKey(userId))
             it.remove(refsKey(userId))
             it.remove(lastSyncKey(userId))
+            it.remove(lastResultKey(userId))
         }
     }
 }

@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.ui.admin.peminjaman
 
+import id.sch.santaagnes.sim.core.userMessage
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -88,7 +89,7 @@ class PeminjamanViewModel @Inject constructor(
 
                 _uiState.value = _uiState.value.copy(
                     loading = false,
-                    error = e.message ?: "Terjadi kesalahan"
+                    error = e.userMessage("Terjadi kesalahan")
                 )
             }
         }
@@ -145,7 +146,7 @@ class PeminjamanViewModel @Inject constructor(
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     processing = false,
-                    error = e.message ?: "Gagal memproses pengajuan."
+                    error = e.userMessage("Gagal memproses pengajuan.")
                 )
             }
         }
@@ -200,7 +201,7 @@ class PeminjamanViewModel @Inject constructor(
 
                 _uiState.value = _uiState.value.copy(
                     processing = false,
-                    error = e.message ?: "Gagal mengonfirmasi pengembalian"
+                    error = e.userMessage("Gagal mengonfirmasi pengembalian")
                 )
             }
         }

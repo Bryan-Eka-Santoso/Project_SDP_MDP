@@ -358,6 +358,20 @@ class SurveiMinatFragment : Fragment() {
             }
         }
 
+        // Kolom tanggal tidak bisa difokus, jadi pesan kesalahannya ditulis di bawah formulir.
+        val tvDialogError = TextView(requireContext()).apply {
+            setTextColor(
+                resources.getColor(R.color.change_cancel, requireContext().theme)
+            )
+            isVisible = false
+        }
+        container.addView(tvDialogError)
+
+        fun showDialogError(message: String) {
+            tvDialogError.text = message
+            tvDialogError.isVisible = true
+        }
+
         val dialog = MaterialAlertDialogBuilder(
             requireContext()
         )
@@ -377,6 +391,7 @@ class SurveiMinatFragment : Fragment() {
                 val grade = etGrade.text.toString().trim()
                 val openDate = etOpen.text.toString()
                 val closeDate = etClose.text.toString()
+                tvDialogError.isVisible = false
 
                 when {
                     title.length !in 5..100 -> {
@@ -388,16 +403,15 @@ class SurveiMinatFragment : Fragment() {
                     }
 
                     openDate.isBlank() -> {
-                        etOpen.error = "Pilih tanggal buka"
+                        showDialogError("Pilih tanggal buka")
                     }
 
                     closeDate.isBlank() -> {
-                        etClose.error = "Pilih tanggal tutup"
+                        showDialogError("Pilih tanggal tutup")
                     }
 
                     closeDate < openDate -> {
-                        etClose.error =
-                            "Tanggal tutup harus setelah tanggal buka"
+                        showDialogError("Tanggal tutup tidak boleh sebelum tanggal buka.")
                     }
 
                     else -> {
@@ -411,10 +425,10 @@ class SurveiMinatFragment : Fragment() {
                                 title = title,
                                 openDate = openDate,
                                 closeDate = closeDate
-                            )
+                            ),
+                            onSuccess = { dialog.dismiss() },
+                            onError = ::showDialogError
                         )
-
-                        dialog.dismiss()
                     }
                 }
             }

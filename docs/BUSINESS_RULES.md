@@ -5,6 +5,7 @@ Aturan di dokumen ini wajib diikuti dan diuji. Contoh angka di setiap bagian dip
 ## 1. Periode akademik
 
 - Hanya ada **satu** `AcademicYear` aktif dan **satu** `Semester` aktif pada satu waktu. Mengaktifkan yang baru menonaktifkan yang lama dalam satu transaksi.
+- Mengaktifkan tahun ajaran juga memindahkan semester aktif ke tahun itu dalam transaksi yang sama: semester tahun itu yang sudah aktif, lalu yang rentang tanggalnya mencakup hari ini, lalu yang paling awal. Bila tahun ajaran itu belum punya semester, tidak ada semester aktif sampai admin membuatnya.
 - Kelas (`ClassGroup`), anggota kelas, wali kelas, dan paket mapel terikat tahun ajaran. Jadwal, penugasan mengajar, komponen nilai, nilai, sesi, dan presensi terikat semester.
 - Data periode lama tidak dihapus; hanya bisa dibaca (kecuali oleh admin untuk koreksi).
 - `Teacher.isHomeroomTeacher` = guru tersebut menjadi `homeroomTeacherId` di sebuah `ClassGroup` pada tahun ajaran aktif. Dihitung ulang dalam transaksi yang sama setiap kali wali kelas diatur/diubah, kelas dihapus, atau tahun ajaran aktif diganti. Tidak bisa diubah manual lewat API.
@@ -89,7 +90,7 @@ Contoh: slot A Senin 07.00–08.30, slot B Senin 08.00–09.30, guru sama → `0
 ## 3. Nilai
 
 - `GradeComponent` dibuat oleh guru pengajar untuk satu `TeachingAssignment` (guru × mapel × kelas × semester), dengan `weight` dalam persen (bilangan bulat). Guru lain yang mengajar mapel sama di kelas lain mengatur komponennya sendiri (ADR-018).
-- Total bobot komponen satu penugasan **harus tepat 100**. Guru tidak bisa menginput nilai sebelum total bobot = 100 (`409 GRADE_WEIGHTS_INVALID`).
+- Total bobot komponen satu penugasan **harus tepat 100**. Guru tidak bisa menginput nilai sebelum total bobot = 100 (`409 GRADE_WEIGHTS_INVALID`); berlaku untuk input per komponen maupun input massal.
 - `Score.gradeComponentId` wajib milik `Score.teachingAssignmentId` yang sama.
 - Nilai (`Score.value`) berada di rentang **0–100**, maksimal 2 angka desimal. Satu siswa memiliki maksimal satu nilai per komponen (input ulang = edit).
 - **Nilai akhir dihitung**, tidak disimpan:
@@ -152,9 +153,9 @@ Contoh: 40 sesi, 36 hadir, 2 sakit, 1 izin, 1 alpa → 36/40 × 100 = **90%**.
 
 ## 8. Mata pelajaran pilihan
 
-1. Admin membuat `ElectiveSurvey` untuk tahun ajaran dan tingkat kelas tertentu → `PUBLISHED` → `CLOSED`. Siswa hanya bisa mengisi saat `PUBLISHED`, satu jawaban per siswa per survei (boleh diubah selama masih `PUBLISHED`).
+1. Admin membuat `ElectiveSurvey` untuk tahun ajaran dan tingkat kelas tertentu → `PUBLISHED` → `CLOSED`. Siswa hanya bisa mengisi saat `PUBLISHED`, satu jawaban per siswa per survei (boleh diubah selama masih `PUBLISHED`). Survei `CLOSED` tetap tampil bagi siswa sebagai hanya-baca.
 2. Admin menyusun `SubjectPackage` (F-MPP-03: kumpulan mapel + kapasitas kelas 1–100, nama unik per tahun ajaran) melalui `GET/POST/PATCH/DELETE /subject-packages`; paket yang sudah dipilih siswa tidak dapat dihapus (`409 INVALID_STATE`).
-3. Siswa memilih **satu** paket per tahun ajaran selama periode pemilihan dibuka.
+3. Siswa memilih **satu** paket per tahun ajaran selama periode pemilihan dibuka. Jumlah peminat paket tidak dibatasi (hasil wawancara, BAB II): kapasitas berlaku **per kelas**, dan daftar paket menampilkan perkiraan jumlah kelas (`classCount = ⌈peminat / kapasitas⌉`).
 4. Pembagian kelas (F-MPP-05) per paket:
    - jumlah kelas `k = ⌈n / kapasitas⌉`;
    - siswa dibagi serata mungkin: setiap kelas berisi `⌊n / k⌋` siswa, dan `n mod k` kelas pertama mendapat 1 siswa tambahan.
@@ -184,7 +185,7 @@ Contoh: 40 sesi, 36 hadir, 2 sakit, 1 izin, 1 alpa → 36/40 × 100 = **90%**.
 - Setelah impor, siswa dan wali murid yang memiliki tagihan menunggak menerima notifikasi `BILL_OVERDUE`. Penerima = siswa yang **ada di file impor** dan punya tagihan `UNPAID` yang sudah lewat jatuh tempo (tanggal WIB; jatuh tempo hari ini belum menunggak), beserta semua wali muridnya. Satu notifikasi per siswa (isinya merangkum tagihan menunggak siswa itu). Impor yang tidak mengubah data apa pun (tidak ada tagihan baru atau berubah) tidak mengirim notifikasi, agar mengunggah file yang sama dua kali tidak mengulang notifikasi ke orang tua.
 - Melihat tagihan: `GET /students/:studentId/bills` (siswa sendiri, wali murid untuk anaknya, wali kelas untuk siswa kelas binaannya pada tahun ajaran aktif, admin untuk semua; di luar cakupan → `404`) dan `GET /bills` (admin untuk semua; wali kelas otomatis dibatasi ke kelas binaannya, guru yang bukan wali kelas `403`). Setiap tagihan membawa `status` (`PAID`/`UNPAID`) dan `isOverdue` (status tampil "Menunggak" = `UNPAID` dan `isOverdue`).
 - Nominal selalu ditampilkan sebagai `IDR 850.000` (daftar tagihan di aplikasi dan isi notifikasi tunggakan), bukan `Rp`. Notifikasi `BILL_OVERDUE` untuk lebih dari satu tagihan menyebut total dan merinci maksimal 3 tagihan tertua (jenis, nominal, jatuh tempo), sisanya sebagai "dan N lainnya".
-- `GET /bills` memuat `meta.studentCount` (jumlah murid di kelas yang dicakup: kelas binaan wali kelas, atau kelas yang difilter admin) agar wali kelas tahu jumlah murid kelasnya; tanpa batas kelas, field itu tidak ada.
+- `GET /bills` memuat `meta.studentCount` (jumlah murid di kelas yang dicakup: kelas binaan wali kelas, atau kelas yang difilter admin) agar wali kelas tahu jumlah murid kelasnya; tanpa batas kelas, field itu tidak ada. `meta.totalAmount` = jumlah nominal seluruh tagihan pada filter yang sama (bukan hanya halaman yang tampil).
 - Tidak ada pembayaran di dalam aplikasi.
 
 ## 11. Akun
@@ -195,11 +196,13 @@ Contoh: 40 sesi, 36 hadir, 2 sakit, 1 izin, 1 alpa → 36/40 × 100 = **90%**.
 - Mengganti password sendiri mencabut sesi di perangkat lain; perangkat yang dipakai menerima token baru.
 - Pembatasan percobaan (dalam memori, jendela 15 menit; lewat batas → `429 TOO_MANY_REQUESTS` + header `Retry-After`): login yang gagal dibatasi 8 kali per kombinasi IP + email (login berhasil mengosongkannya) dan 100 kali per IP (longgar karena jaringan sekolah dipakai bersama); `POST /auth/refresh` 300 request per IP; `PATCH /me/password` 10 kali gagal per akun. Hanya percobaan gagal yang dihitung, jadi pengguna sah tidak terkunci oleh orang lain dari IP lain. Di belakang reverse proxy, isi `TRUST_PROXY` agar IP klien terbaca benar.
 - Admin tidak bisa memblokir atau menghapus akunnya sendiri.
+- Reset password oleh admin dan pemblokiran berlaku pada request berikutnya, tanpa menunggu access token kedaluwarsa: akun tanpa sesi aktif ditolak `401 SESSION_REVOKED`, akun diblokir `403 ACCOUNT_BLOCKED`. Aplikasi lalu kembali ke layar login.
 - Menghapus user yang sudah memiliki data akademik tidak diperbolehkan; gunakan blokir.
 
 ## 12. Laporan (F-LAP-*)
 - Hanya Admin. `GET /reports/:type` (tampilan berpaginasi) dan `GET /reports/:type/export` (F-LAP-11, berkas `.xlsx` berisi data dan filter yang sama dengan tampilan, tanpa paginasi). `:type` tidak dikenal → `404`. Ekspor lebih dari 20000 baris → `422 EXPORT_TOO_LARGE` (persempit filter). Nama berkas `laporan-<type>-<tanggal WIB>.xlsx`.
 - Tanpa `semesterId` laporan memakai semester aktif.
+- **`attendance` (F-LAP-02):** bila tidak ada satu pun catatan presensi pada filter, hasilnya daftar kosong (bukan deretan siswa bernilai nol). Bila ada, siswa tanpa catatan tetap tampil dengan angka nol.
 - **`schedule-changes` (F-LAP-07), kolom usulan:** tanggal, hari, kelas, mata pelajaran, guru asli, jenis (Ganti guru / Pindah jadwal / Dibatalkan), guru pengganti, jam asli, jam baru, ruangan asli, ruangan baru, keterangan. Filter: `semesterId`, `classGroupId`, `teacherId` (guru asli atau pengganti), `type`, `dateFrom`, `dateTo`. Urut tanggal.
 - **`teaching-load` (F-LAP-09), kolom usulan:** per guru: nama, NIP, jumlah pertemuan per minggu, total jam per minggu (menit dibagi 60, dua desimal), jumlah kelas, mata pelajaran, dan jam per hari Senin sampai Sabtu. Filter: `semesterId`, `teacherId`. Dihitung dari jadwal master semester (slot mingguan); pengganti dan pembatalan per tanggal tidak mengubah angka. Semua guru tampil, termasuk yang belum punya jadwal (0 jam). Tanpa insentif atau tarif.
 - **`payment-status` (F-LAP-05), disetujui (PO-10):** rincian per tagihan siswa: NIS, nama siswa, kelas (tahun ajaran aktif), kode tagihan, jenis pembayaran, nominal (`IDR` pada tampilan aplikasi, angka bulat `Nominal (IDR)` pada Excel), tanggal jatuh tempo, status (`Lunas` / `Belum dibayar` / `Menunggak`, dengan `Menunggak` = `UNPAID` dan `dueDate < hari ini WIB`), tanggal bayar. Filter: `classGroupId`, `status` (`PAID` / `UNPAID` / `OVERDUE`), `dueFrom`, `dueTo`. Urut jatuh tempo terbaru lalu `id` terbaru.

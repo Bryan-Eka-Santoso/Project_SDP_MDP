@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.ui.admin.elective
 
+import id.sch.santaagnes.sim.core.serverMessage
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -7,6 +8,9 @@ import id.sch.santaagnes.sim.data.remote.ElectiveAppliedDto
 import id.sch.santaagnes.sim.data.remote.ElectivePackageYearDto
 import id.sch.santaagnes.sim.data.remote.ElectivePreviewDto
 import id.sch.santaagnes.sim.data.repository.ElectiveAllocationRepository
+import id.sch.santaagnes.sim.data.repository.ClassRepository
+import id.sch.santaagnes.sim.core.Resource
+import id.sch.santaagnes.sim.domain.model.MasterClassGroup
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,7 +26,7 @@ data class ElectiveOption(val packageName: String, val yearName: String, val pac
 data class ElectiveAllocationState(
     val options: List<ElectiveOption> = emptyList(),
     val selected: ElectiveOption? = null,
-    val gradeLevel: String = "X",
+    val gradeLevel: String = "",
     val preview: ElectivePreviewDto? = null,
     val applied: ElectiveAppliedDto? = null,
     val loading: Boolean = false,
@@ -31,9 +35,22 @@ data class ElectiveAllocationState(
     val message: String? = null
 )
 
+// Kelas hasil alokasi (server menamainya "MPP-...") menyalin tingkat yang diketik saat alokasi,
+// jadi penulisan tingkat diambil dari kelas reguler lebih dulu.
+internal fun defaultGradeLevel(classes: List<MasterClassGroup>): String? {
+    val active = classes.filter { it.isAcademicYearActive }
+    val regular = active.filterNot { it.name.startsWith("MPP-") }
+    return regular.ifEmpty { active }
+        .map { it.gradeLevel }
+        .distinct()
+        .sortedWith(compareBy({ it.length }, { it }))
+        .firstOrNull()
+}
+
 @HiltViewModel
 class ElectiveAllocationViewModel @Inject constructor(
-    private val repository: ElectiveAllocationRepository
+    private val repository: ElectiveAllocationRepository,
+    private val classRepository: ClassRepository
 ) : ViewModel() {
     private val mutable = MutableStateFlow(ElectiveAllocationState())
     val state = mutable.asStateFlow()
@@ -52,12 +69,22 @@ class ElectiveAllocationViewModel @Inject constructor(
                     }
                 }.sortedWith(compareBy<ElectiveOption> { it.packageName }.thenByDescending { it.yearName })
                 mutable.value = mutable.value.copy(options = options, selected = options.firstOrNull(), loading = false)
+                loadDefaultGrade()
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 mutable.value = mutable.value.copy(loading = false, error = friendly(e))
             }
         }
+    }
+
+    // Tingkat bawaan diambil dari data kelas karena penulisannya berbeda tiap sekolah ("X" atau "10").
+    private suspend fun loadDefaultGrade() {
+        if (mutable.value.gradeLevel.isNotBlank()) return
+        val result = classRepository.getClasses()
+        if (result !is Resource.Success) return
+        val grade = defaultGradeLevel(result.data.first) ?: return
+        if (mutable.value.gradeLevel.isBlank()) mutable.value = mutable.value.copy(gradeLevel = grade)
     }
 
     fun selectPackage(index: Int) {
@@ -127,7 +154,7 @@ class ElectiveAllocationViewModel @Inject constructor(
 
     private fun friendly(e: Exception): String = when (e) {
         is IOException -> "Tidak dapat terhubung ke server. Periksa koneksi internet Anda."
-        is HttpException -> when (e.code()) {
+        is HttpException -> e.serverMessage() ?: when (e.code()) {
             401 -> "Sesi login Anda telah berakhir. Silakan masuk kembali."
             403 -> "Fitur alokasi hanya dapat digunakan oleh Admin."
             404 -> "Paket mata pelajaran tidak ditemukan."

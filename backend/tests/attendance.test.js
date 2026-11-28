@@ -9,7 +9,7 @@ jest.mock("../src/lib/prisma", () => {
     user: { findUnique: fn() },
     teacher: { findUnique: fn() },
     scheduleSlot: { findUnique: fn(), findMany: fn() },
-    scheduleChange: { findUnique: fn() },
+    scheduleChange: { findUnique: fn(), findMany: fn() },
     classMember: { findMany: fn() },
     lessonSession: { findUnique: fn(), upsert: fn() },
     attendance: { upsert: fn() },
@@ -74,10 +74,42 @@ beforeEach(() => {
   prisma.teacher.findUnique.mockResolvedValue({ id: 2 });
   prisma.scheduleSlot.findUnique.mockResolvedValue(slot);
   prisma.scheduleChange.findUnique.mockResolvedValue(null);
+  prisma.scheduleChange.findMany.mockResolvedValue([]);
+  prisma.scheduleSlot.findMany.mockResolvedValue([]);
   prisma.classMember.findMany.mockResolvedValue(members);
   prisma.leaveRequest.findMany.mockResolvedValue([]);
   prisma.lessonSession.upsert.mockResolvedValue({ id: 8 });
   prisma.attendance.upsert.mockResolvedValue({});
+});
+
+describe("daftar slot presensi", () => {
+  const timed = (base) => ({
+    ...base,
+    startTime: new Date("1970-01-01T07:00:00.000Z"),
+    endTime: new Date("1970-01-01T08:30:00.000Z"),
+  });
+
+  it("guru pengganti melihat slot yang ia gantikan beserta tanggalnya", async () => {
+    const substituted = timed({ ...slot, id: 9 });
+    prisma.scheduleSlot.findMany.mockResolvedValue([timed(slot)]);
+    prisma.scheduleChange.findMany.mockResolvedValue([
+      { date: new Date("2026-11-09T00:00:00.000Z"), scheduleSlot: substituted },
+      { date: new Date("2026-11-16T00:00:00.000Z"), scheduleSlot: substituted },
+    ]);
+
+    const result = await service.listSlots(4);
+
+    expect(
+      result.map((item) => [item.id, item.isSubstitute, item.substituteDates]),
+    ).toEqual([
+      [1, false, []],
+      [9, true, ["2026-11-09", "2026-11-16"]],
+    ]);
+    expect(prisma.scheduleChange.findMany.mock.calls[0][0].where).toMatchObject({
+      type: "SUBSTITUTE",
+      substituteTeacherId: 2,
+    });
+  });
 });
 
 describe("ABS-01 / ABS-05 / ABS-02 API", () => {

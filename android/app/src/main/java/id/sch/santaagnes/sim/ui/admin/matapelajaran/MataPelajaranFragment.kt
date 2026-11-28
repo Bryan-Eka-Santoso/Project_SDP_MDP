@@ -198,9 +198,16 @@ class MataPelajaranFragment : Fragment() {
                     type = type
                 )
 
-                viewModel.simpan(item?.id, request) {
-                    dialog.dismiss()
-                }
+                form.tvDialogError.isVisible = false
+                viewModel.simpan(
+                    item?.id,
+                    request,
+                    onSuccess = { dialog.dismiss() },
+                    onError = { pesan ->
+                        form.tvDialogError.text = pesan
+                        form.tvDialogError.isVisible = true
+                    }
+                )
             }
         }
 

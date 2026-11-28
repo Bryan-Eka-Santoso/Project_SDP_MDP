@@ -346,6 +346,31 @@ describe('GET /api/v1/me', () => {
     expect(res.body.error.code).toBe('ACCOUNT_BLOCKED');
   });
 
+  it('401 SESSION_REVOKED jika semua sesi dicabut (reset password oleh admin)', async () => {
+    prisma.user.findUnique.mockResolvedValue({
+      id: 5,
+      role: 'STUDENT',
+      status: 'ACTIVE',
+      refreshTokens: [],
+    });
+
+    const res = await me(accessTokenFor(5));
+
+    expect(res.status).toBe(401);
+    expect(res.body.error.code).toBe('SESSION_REVOKED');
+    expect(prisma.user.findUnique.mock.calls[0][0].select.refreshTokens.where.revokedAt).toBeNull();
+  });
+
+  it('sukses selama masih ada sesi yang belum dicabut', async () => {
+    prisma.user.findUnique
+      .mockResolvedValueOnce({ id: 5, role: 'STUDENT', status: 'ACTIVE', refreshTokens: [{ id: 1 }] })
+      .mockResolvedValueOnce(studentRow());
+
+    const res = await me(accessTokenFor(5));
+
+    expect(res.status).toBe(200);
+  });
+
   it('401 jika user sudah dihapus', async () => {
     prisma.user.findUnique.mockResolvedValue(null);
     const res = await me(accessTokenFor(99));

@@ -1,5 +1,6 @@
 package id.sch.santaagnes.sim.data.repository
 
+import id.sch.santaagnes.sim.core.serverMessage
 import id.sch.santaagnes.sim.data.remote.CreateLeaveDto
 import id.sch.santaagnes.sim.data.remote.LeaveApi
 import id.sch.santaagnes.sim.data.remote.LeaveChildDto
@@ -27,7 +28,7 @@ class LeaveRepository @Inject constructor(private val api: LeaveApi) {
     companion object {
         fun message(error: Throwable): String = when (error) {
             is IOException -> "Tidak dapat terhubung ke server. Periksa koneksi internet Anda."
-            is HttpException -> when (error.code()) {
+            is HttpException -> error.serverMessage() ?: when (error.code()) {
                 400 -> "Data izin tidak valid. Periksa tanggal, alasan, dan lampiran."
                 413 -> "Ukuran lampiran maksimal 5 MB."
                 415 -> "Lampiran harus berupa JPG, PNG, atau PDF."

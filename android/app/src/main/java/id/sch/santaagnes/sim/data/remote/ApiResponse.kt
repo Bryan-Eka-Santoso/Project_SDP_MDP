@@ -15,7 +15,9 @@ data class PageMetaDto(
     val total: Int,
     val totalPages: Int,
     // hanya GET /bills yang dibatasi ke kelas (wali kelas): jumlah murid di kelas itu
-    val studentCount: Int? = null
+    val studentCount: Int? = null,
+    // hanya GET /bills: jumlah nominal seluruh tagihan yang cocok dengan filter
+    val totalAmount: Long? = null
 )
 
 data class ApiErrorBody(

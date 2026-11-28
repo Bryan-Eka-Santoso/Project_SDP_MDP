@@ -51,7 +51,12 @@ router.patch(
 );
 
 // F-MST-09: Atur siswa dalam kelas (tempatkan, pindahkan, hapus)
-router.get('/:id/members', validate({ params: idParams }), controller.listMembers);
+router.get(
+  '/:id/members',
+  authorize('ADMIN', 'TEACHER'),
+  validate({ params: idParams }),
+  controller.listMembers,
+);
 router.post(
   '/:id/members',
   authorize('ADMIN'),

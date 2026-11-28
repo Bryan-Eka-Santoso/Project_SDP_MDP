@@ -58,6 +58,8 @@ async function load({ semesterId, classGroupId, studentId, dateFrom, dateTo }, {
     select: { studentId: true, status: true,
       session: { select: { scheduleSlot: { select: { teachingAssignment: { select: { classGroupId: true } } } } } } },
   }) : [];
+  // Filter tanpa satu pun catatan: daftar kosong, bukan deretan siswa bernilai nol.
+  if (attendances.length === 0) return { items: [], total: 0 };
   const grouped = new Map();
   for (const attendance of attendances) {
     const key = `${attendance.studentId}:${attendance.session.scheduleSlot.teachingAssignment.classGroupId}`;

@@ -171,6 +171,7 @@ describe('F-MST-06: Master Tahun Ajaran & Semester', () => {
     });
     prisma.classGroup.findMany.mockResolvedValue([{ homeroomTeacherId: 5 }]);
     prisma.teacher.updateMany.mockResolvedValue({ count: 1 });
+    prisma.semester.findMany.mockResolvedValue([]);
 
     const res = await request(app)
       .patch('/api/v1/academic-years/2/active')
@@ -185,6 +186,59 @@ describe('F-MST-06: Master Tahun Ajaran & Semester', () => {
       where: { id: { in: [5] } },
       data: { isHomeroomTeacher: true },
     });
+  });
+
+  const activateYear = (semesters) => {
+    prisma.academicYear.findUnique.mockResolvedValue({ id: 2 });
+    prisma.academicYear.update.mockResolvedValue({
+      id: 2,
+      name: '2027/2028',
+      startDate: new Date('2027-07-01'),
+      endDate: new Date('2028-06-30'),
+      isActive: true,
+    });
+    prisma.classGroup.findMany.mockResolvedValue([]);
+    prisma.semester.findMany.mockResolvedValue(semesters);
+    return request(app)
+      .patch('/api/v1/academic-years/2/active')
+      .set('Authorization', `Bearer ${adminToken}`);
+  };
+
+  it('mengaktifkan tahun ajaran memindahkan semester aktif ke semester tahun tersebut', async () => {
+    const res = await activateYear([
+      { id: 21, startDate: new Date('2027-07-01'), endDate: new Date('2027-12-31'), isActive: false },
+      { id: 22, startDate: new Date('2028-01-01'), endDate: new Date('2028-06-30'), isActive: false },
+    ]);
+
+    expect(res.status).toBe(200);
+    expect(prisma.semester.updateMany).toHaveBeenCalledWith({
+      where: { isActive: true, id: { not: 21 } },
+      data: { isActive: false },
+    });
+    expect(prisma.semester.update).toHaveBeenCalledWith({ where: { id: 21 }, data: { isActive: true } });
+  });
+
+  it('semester yang sudah aktif pada tahun tersebut tidak diganti', async () => {
+    await activateYear([
+      { id: 21, startDate: new Date('2027-07-01'), endDate: new Date('2027-12-31'), isActive: false },
+      { id: 22, startDate: new Date('2028-01-01'), endDate: new Date('2028-06-30'), isActive: true },
+    ]);
+
+    expect(prisma.semester.updateMany).toHaveBeenCalledWith({
+      where: { isActive: true, id: { not: 22 } },
+      data: { isActive: false },
+    });
+    expect(prisma.semester.update).not.toHaveBeenCalled();
+  });
+
+  it('tahun ajaran tanpa semester tidak menyisakan semester tahun lama sebagai aktif', async () => {
+    await activateYear([]);
+
+    expect(prisma.semester.updateMany).toHaveBeenCalledWith({
+      where: { isActive: true },
+      data: { isActive: false },
+    });
+    expect(prisma.semester.update).not.toHaveBeenCalled();
   });
 
   it('berhasil membuat semester baru (201)', async () => {
@@ -445,6 +499,112 @@ describe('F-MST-09: Atur Siswa dalam Kelas', () => {
 
     expect(res.status).toBe(409);
     expect(res.body.error.code).toBe('DUPLICATE');
+  });
+});
+
+describe('F-ABS-05: Hak akses daftar siswa kelas', () => {
+  const USER_ID = 50;
+
+  // `authenticate` membaca role dari database, jadi role diatur lewat mock user.
+  function loginAs(role) {
+    prisma.user.findUnique.mockResolvedValue({ id: USER_ID, role, status: 'ACTIVE' });
+    return jwt.sign({ role }, process.env.JWT_ACCESS_SECRET, {
+      algorithm: 'HS256',
+      subject: String(USER_ID),
+      expiresIn: 900,
+    });
+  }
+
+  function mockRoster() {
+    prisma.classGroup.findUnique.mockResolvedValue({ id: 1, name: 'X-1', capacity: 36 });
+    prisma.classMember.findMany.mockResolvedValue([
+      {
+        createdAt: new Date('2026-07-01T00:00:00.000Z'),
+        student: {
+          id: 10,
+          nis: '26010',
+          birthDate: new Date('2010-01-02T00:00:00.000Z'),
+          phone: '0800000000',
+          user: { id: 99, name: 'Siswa Contoh', email: 'contoh@example.test', status: 'ACTIVE' },
+        },
+      },
+    ]);
+  }
+
+  const getMembers = (token) =>
+    request(app).get('/api/v1/classes/1/members').set('Authorization', `Bearer ${token}`);
+
+  it('menolak tanpa token (401)', async () => {
+    const res = await request(app).get('/api/v1/classes/1/members');
+
+    expect(res.status).toBe(401);
+    expect(prisma.classMember.findMany).not.toHaveBeenCalled();
+  });
+
+  it.each(['STUDENT', 'GUARDIAN'])('menolak role %s (403)', async (role) => {
+    const token = loginAs(role);
+    mockRoster();
+
+    const res = await getMembers(token);
+
+    expect(res.status).toBe(403);
+    expect(res.body.error.code).toBe('FORBIDDEN');
+    expect(prisma.classMember.findMany).not.toHaveBeenCalled();
+  });
+
+  it('menyembunyikan kelas dari guru yang tidak mengajar dan bukan wali kelasnya (404)', async () => {
+    const token = loginAs('TEACHER');
+    mockRoster();
+    prisma.classGroup.findFirst.mockResolvedValue(null);
+
+    const res = await getMembers(token);
+
+    expect(res.status).toBe(404);
+    expect(res.body.error.code).toBe('NOT_FOUND');
+    expect(prisma.classMember.findMany).not.toHaveBeenCalled();
+  });
+
+  it('mengizinkan guru pengajar semester aktif atau wali kelas tahun ajaran aktif (200)', async () => {
+    const token = loginAs('TEACHER');
+    mockRoster();
+    prisma.classGroup.findFirst.mockResolvedValue({ id: 1 });
+
+    const res = await getMembers(token);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.total).toBe(1);
+    expect(prisma.classGroup.findFirst).toHaveBeenCalledWith({
+      where: {
+        id: 1,
+        OR: [
+          { homeroomTeacher: { userId: USER_ID }, academicYear: { isActive: true } },
+          {
+            teachingAssignments: {
+              some: { teacher: { userId: USER_ID }, semester: { isActive: true } },
+            },
+          },
+        ],
+      },
+      select: { id: true },
+    });
+  });
+
+  it('mengizinkan admin melihat kelas mana pun tanpa pemeriksaan cakupan (200)', async () => {
+    mockRoster();
+
+    const res = await getMembers(adminToken);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.members[0].studentId).toBe(10);
+    expect(prisma.classGroup.findFirst).not.toHaveBeenCalled();
+  });
+
+  it('menolak id kelas yang bukan angka (400)', async () => {
+    const res = await request(app)
+      .get('/api/v1/classes/abc/members')
+      .set('Authorization', `Bearer ${adminToken}`);
+
+    expect(res.status).toBe(400);
   });
 });
 

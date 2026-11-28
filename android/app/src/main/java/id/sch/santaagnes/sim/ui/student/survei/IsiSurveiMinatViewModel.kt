@@ -1,5 +1,7 @@
 package id.sch.santaagnes.sim.ui.student.survei
 
+import retrofit2.HttpException
+import id.sch.santaagnes.sim.core.userMessage
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -58,7 +60,7 @@ class IsiSurveiMinatViewModel @Inject constructor(
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     loading = false,
-                    error = e.message ?: "Terjadi kesalahan"
+                    error = e.userMessage("Terjadi kesalahan")
                 )
             }
         }
@@ -95,7 +97,7 @@ class IsiSurveiMinatViewModel @Inject constructor(
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     loading = false,
-                    error = e.message ?: "Terjadi kesalahan"
+                    error = e.userMessage("Terjadi kesalahan")
                 )
             }
         }
@@ -160,9 +162,26 @@ class IsiSurveiMinatViewModel @Inject constructor(
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     saving = false,
-                    error = e.message ?: "Pengisian survei gagal"
+                    error = e.userMessage("Pengisian survei gagal")
                 )
+                if (e is HttpException && e.code() == 409) muatUlangStatus(survey.id)
             }
+        }
+    }
+
+    // Survei ditutup saat halaman sudah terbuka: tampilan jadi hanya baca, pesan tetap terlihat.
+    private suspend fun muatUlangStatus(id: Int) {
+        try {
+            val detail = api.getDetail(id).data
+            val surveys = api.getSurveys().data
+            _state.value = _state.value.copy(
+                detail = detail ?: _state.value.detail,
+                surveys = surveys ?: _state.value.surveys
+            )
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            // Pesan kegagalan simpan sudah tampil; status diperbarui saat daftar dimuat lagi.
         }
     }
 
